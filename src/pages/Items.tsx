@@ -1,4 +1,3 @@
-import { SmartInputBar } from '@/components/items/SmartInputBar';
 import { ItemTracker } from '@/components/items/ItemTracker';
 
 export default function Items() {
@@ -8,9 +7,7 @@ export default function Items() {
                 <h1 className="text-2xl font-bold tracking-tight">Inventory</h1>
             </div>
 
-            <SmartInputBar />
-
-            <div className="flex-1 overflow-auto -mx-4 px-4 mt-2">
+            <div className="flex-1 overflow-auto -mx-4 px-4">
                 <ItemTracker />
             </div>
         </div>

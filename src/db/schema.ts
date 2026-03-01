@@ -3,7 +3,7 @@ import Dexie, { type EntityTable } from 'dexie';
 export interface Expense {
     id?: number;
     parentId: number | null;      // null = top-level; set = sub-expense
-    title: string;
+    title?: string;
     amount: number;
     category: string;
     date: string;                 // ISO 8601
@@ -65,7 +65,7 @@ const db = new Dexie('KhorocaPatiDB') as Dexie & {
 };
 
 // Schema declaration
-db.version(2).stores({
+db.version(3).stores({
     expenses: '++id, parentId, date, category, isRecurring',
     items: '++id, expenseId, name, date',
     budgets: '++id, category, month',

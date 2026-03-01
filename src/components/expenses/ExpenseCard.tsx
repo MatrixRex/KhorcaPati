@@ -17,7 +17,9 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
             <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex flex-col flex-1 overflow-hidden pr-2">
                     <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-base truncate">{expense.title}</h3>
+                        <h3 className="font-semibold text-base truncate">
+                            {expense.note || ""}
+                        </h3>
                         {expense.isRecurring && (
                             <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4">
                                 ↺ {expense.recurringInterval}

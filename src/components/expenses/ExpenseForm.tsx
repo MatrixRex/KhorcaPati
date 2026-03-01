@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useExpenseStore } from '@/stores/expenseStore';
+import { useItemStore } from '@/stores/itemStore';
+import { parseItemInput } from '@/parsers/itemParser';
 import { format } from 'date-fns';
-import { type Expense } from '@/db/schema';
+import { db, type Expense } from '@/db/schema';
 
 const expenseSchema = z.object({
-    title: z.string().min(1, 'Title is required'),
     amount: z.number().min(0.01, 'Amount must be greater than 0'),
     category: z.string().min(1, 'Category is required'),
     date: z.string(),
@@ -29,11 +30,11 @@ interface ExpenseFormProps {
 export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormProps) {
     const addExpense = useExpenseStore((state) => state.addExpense);
     const updateExpense = useExpenseStore((state) => state.updateExpense);
+    const addItem = useItemStore((state) => state.addItem);
 
     const form = useForm<ExpenseFormValues>({
         resolver: zodResolver(expenseSchema),
         defaultValues: {
-            title: initialData?.title || '',
             amount: initialData?.amount || 0,
             category: initialData?.category || 'General',
             date: initialData?.date || format(new Date(), 'yyyy-MM-dd'),
@@ -42,6 +43,27 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
             recurringInterval: initialData?.recurringInterval || null,
         },
     });
+
+    const processItems = async (expenseId: number, note: string, date: string) => {
+        if (!note) return;
+
+        const itemLines = note.split(/[,\n]/).filter(s => s.trim());
+        for (const line of itemLines) {
+            const parsed = parseItemInput(line.trim());
+            if (parsed.name) {
+                await addItem({
+                    expenseId,
+                    name: parsed.name,
+                    rawInput: line.trim(),
+                    qty: parsed.qty,
+                    unit: parsed.unit,
+                    date: date,
+                    note: '',
+                    createdAt: new Date().toISOString()
+                });
+            }
+        }
+    };
 
     const onSubmit = async (data: ExpenseFormValues) => {
         try {
@@ -57,8 +79,12 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
 
             if (initialData?.id) {
                 await updateExpense(initialData.id, payload);
+                // Clear and re-sync items for this expense
+                await db.items.where('expenseId').equals(initialData.id).delete();
+                await processItems(initialData.id, data.note || '', data.date);
             } else {
-                await addExpense(payload);
+                const newId = await addExpense(payload);
+                await processItems(newId, data.note || '', data.date);
             }
             onSuccess?.();
         } catch (err) {
@@ -68,14 +94,6 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input id="title" placeholder="e.g. Grocery" {...form.register('title')} />
-                {form.formState.errors.title && (
-                    <p className="text-destructive text-sm">{form.formState.errors.title.message}</p>
-                )}
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="amount">Amount</Label>
@@ -98,11 +116,15 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
             <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Input id="category" placeholder="e.g. Food" {...form.register('category')} />
+                {form.formState.errors.category && (
+                    <p className="text-destructive text-sm">{form.formState.errors.category.message}</p>
+                )}
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="note">Note (Optional)</Label>
-                <Input id="note" placeholder="Add a note" {...form.register('note')} />
+                <Label htmlFor="note">Note / Items (Optional)</Label>
+                <Input id="note" placeholder="Grocery: Oil 1L, Rice 2kg" {...form.register('note')} />
+                <p className="text-[10px] text-muted-foreground">Items separated by commas or new lines will be auto-tracked.</p>
             </div>
 
             <div className="flex gap-2 pt-4">

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,6 +10,16 @@ import { useItemStore } from '@/stores/itemStore';
 import { parseItemInput } from '@/parsers/itemParser';
 import { format } from 'date-fns';
 import { db, type Expense } from '@/db/schema';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const expenseSchema = z.object({
     amount: z.number().min(0.01, 'Amount must be greater than 0'),
@@ -28,8 +39,10 @@ interface ExpenseFormProps {
 }
 
 export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormProps) {
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const addExpense = useExpenseStore((state) => state.addExpense);
     const updateExpense = useExpenseStore((state) => state.updateExpense);
+    const deleteExpense = useExpenseStore((state) => state.deleteExpense);
     const addItem = useItemStore((state) => state.addItem);
 
     const form = useForm<ExpenseFormValues>({
@@ -43,6 +56,17 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
             recurringInterval: initialData?.recurringInterval || null,
         },
     });
+
+    const handleDelete = async () => {
+        if (!initialData?.id) return;
+        try {
+            await deleteExpense(initialData.id);
+            setShowDeleteDialog(false);
+            onSuccess?.();
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
     const processItems = async (expenseId: number, note: string, date: string) => {
         if (!note) return;
@@ -79,7 +103,6 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
 
             if (initialData?.id) {
                 await updateExpense(initialData.id, payload);
-                // Clear and re-sync items for this expense
                 await db.items.where('expenseId').equals(initialData.id).delete();
                 await processItems(initialData.id, data.note || '', data.date);
             } else {
@@ -93,50 +116,81 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
     };
 
     return (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+        <>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="amount">Amount</Label>
+                        <Input
+                            id="amount"
+                            type="number"
+                            step="0.01"
+                            {...form.register('amount', { valueAsNumber: true })}
+                        />
+                        {form.formState.errors.amount && (
+                            <p className="text-destructive text-sm">{form.formState.errors.amount.message}</p>
+                        )}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="date">Date</Label>
+                        <Input id="date" type="date" {...form.register('date')} />
+                    </div>
+                </div>
+
                 <div className="space-y-2">
-                    <Label htmlFor="amount">Amount</Label>
-                    <Input
-                        id="amount"
-                        type="number"
-                        step="0.01"
-                        {...form.register('amount', { valueAsNumber: true })}
-                    />
-                    {form.formState.errors.amount && (
-                        <p className="text-destructive text-sm">{form.formState.errors.amount.message}</p>
+                    <Label htmlFor="category">Category</Label>
+                    <Input id="category" placeholder="e.g. Food" {...form.register('category')} />
+                    {form.formState.errors.category && (
+                        <p className="text-destructive text-sm">{form.formState.errors.category.message}</p>
                     )}
                 </div>
+
                 <div className="space-y-2">
-                    <Label htmlFor="date">Date</Label>
-                    <Input id="date" type="date" {...form.register('date')} />
+                    <Label htmlFor="note">Note / Items (Optional)</Label>
+                    <Input id="note" placeholder="Grocery: Oil 1L, Rice 2kg" {...form.register('note')} />
+                    <p className="text-[10px] text-muted-foreground">Items separated by commas or new lines will be auto-tracked.</p>
                 </div>
-            </div>
 
-            <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Input id="category" placeholder="e.g. Food" {...form.register('category')} />
-                {form.formState.errors.category && (
-                    <p className="text-destructive text-sm">{form.formState.errors.category.message}</p>
-                )}
-            </div>
+                <div className="flex flex-col gap-2 pt-4">
+                    <div className="flex gap-2">
+                        <Button type="submit" className="flex-1">
+                            {initialData ? 'Update Expense' : 'Add Expense'}
+                        </Button>
+                        {onCancel && (
+                            <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+                                Cancel
+                            </Button>
+                        )}
+                    </div>
+                    {initialData && (
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={() => setShowDeleteDialog(true)}
+                            className="w-full mt-2"
+                        >
+                            Delete Expense
+                        </Button>
+                    )}
+                </div>
+            </form>
 
-            <div className="space-y-2">
-                <Label htmlFor="note">Note / Items (Optional)</Label>
-                <Input id="note" placeholder="Grocery: Oil 1L, Rice 2kg" {...form.register('note')} />
-                <p className="text-[10px] text-muted-foreground">Items separated by commas or new lines will be auto-tracked.</p>
-            </div>
-
-            <div className="flex gap-2 pt-4">
-                <Button type="submit" className="flex-1">
-                    {initialData ? 'Update Expense' : 'Add Expense'}
-                </Button>
-                {onCancel && (
-                    <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-                        Cancel
-                    </Button>
-                )}
-            </div>
-        </form>
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent className="w-[90%] rounded-xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently delete this expense and its linked inventory items.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex-row gap-2 mt-4">
+                        <AlertDialogCancel className="flex-1 mt-0">Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     );
 }

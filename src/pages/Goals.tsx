@@ -13,11 +13,16 @@ export default function Goals() {
 
     return (
         <div className="p-4 h-full flex flex-col pt-10 pb-20">
-            <div className="flex items-center mb-6">
-                <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="mr-2">
-                    <ArrowLeft className="w-5 h-5" />
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                    <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="mr-2">
+                        <ArrowLeft className="w-5 h-5" />
+                    </Button>
+                    <h1 className="text-2xl font-bold tracking-tight">Goals</h1>
+                </div>
+                <Button size="sm" onClick={() => setIsOpen(true)}>
+                    <Plus className="w-4 h-4 mr-1" /> Add
                 </Button>
-                <h1 className="text-2xl font-bold tracking-tight">Saving Goals</h1>
             </div>
 
             <div className="flex-1 overflow-auto -mx-4 px-4">
@@ -25,14 +30,8 @@ export default function Goals() {
             </div>
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                <Button
-                    className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg"
-                    onClick={() => setIsOpen(true)}
-                >
-                    <Plus className="w-6 h-6" />
-                </Button>
                 <SheetContent side="bottom" className="h-[90vh] sm:h-auto rounded-t-xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto">
-                    <div className="p-4 sm:p-6 mb-8">
+                    <div className="p-4 sm:p-6 mb-8 text-foreground">
                         <SheetHeader className="mb-4 text-left">
                             <SheetTitle>Add Saving Goal</SheetTitle>
                         </SheetHeader>

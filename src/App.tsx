@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { BottomNav } from '@/components/shared/BottomNav';
+import { GlobalUI } from '@/components/shared/GlobalUI';
 
 // We will create these pages next
 import Dashboard from '@/pages/Dashboard';
@@ -28,6 +29,7 @@ function App() {
           </Routes>
         </main>
 
+        <GlobalUI />
         <BottomNav />
       </div>
     </BrowserRouter>

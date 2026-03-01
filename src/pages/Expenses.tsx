@@ -4,9 +4,21 @@ import { ExpenseForm } from '@/components/expenses/ExpenseForm';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { type Expense } from '@/db/schema';
 
 export default function Expenses() {
     const [isOpen, setIsOpen] = useState(false);
+    const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>(undefined);
+
+    const handleEdit = (expense: Expense) => {
+        setSelectedExpense(expense);
+        setIsOpen(true);
+    };
+
+    const handleClose = () => {
+        setIsOpen(false);
+        setSelectedExpense(undefined);
+    };
 
     return (
         <div className="p-4 h-full flex flex-col pt-10 pb-20">
@@ -15,22 +27,29 @@ export default function Expenses() {
             </div>
 
             <div className="flex-1 overflow-auto -mx-4 px-4">
-                <ExpenseList />
+                <ExpenseList onEdit={handleEdit} />
             </div>
 
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
                 <Button
                     className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg"
-                    onClick={() => setIsOpen(true)}
+                    onClick={() => {
+                        setSelectedExpense(undefined);
+                        setIsOpen(true);
+                    }}
                 >
                     <Plus className="w-6 h-6" />
                 </Button>
                 <SheetContent side="bottom" className="h-[90vh] sm:h-auto rounded-t-xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto">
                     <div className="p-4 sm:p-6 mb-8">
                         <SheetHeader className="mb-4 text-left">
-                            <SheetTitle>Add Expense</SheetTitle>
+                            <SheetTitle>{selectedExpense ? 'Edit Expense' : 'Add Expense'}</SheetTitle>
                         </SheetHeader>
-                        <ExpenseForm onSuccess={() => setIsOpen(false)} onCancel={() => setIsOpen(false)} />
+                        <ExpenseForm
+                            initialData={selectedExpense}
+                            onSuccess={handleClose}
+                            onCancel={handleClose}
+                        />
                     </div>
                 </SheetContent>
             </Sheet>

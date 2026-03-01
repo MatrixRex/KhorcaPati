@@ -1,8 +1,12 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/db/schema';
+import { db, type Expense } from '@/db/schema';
 import { ExpenseCard } from './ExpenseCard';
 
-export function ExpenseList() {
+interface ExpenseListProps {
+    onEdit?: (expense: Expense) => void;
+}
+
+export function ExpenseList({ onEdit }: ExpenseListProps) {
     const expenses = useLiveQuery(
         () => db.expenses.orderBy('date').reverse().toArray()
     );
@@ -27,7 +31,7 @@ export function ExpenseList() {
                 <ExpenseCard
                     key={expense.id}
                     expense={expense}
-                    onClick={() => console.log('Edit', expense.id)}
+                    onClick={() => onEdit?.(expense)}
                 />
             ))}
         </div>

@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/db/schema';
+import { db, type Expense } from '@/db/schema';
 import { format } from 'date-fns';
 import { ExpenseCard } from '@/components/expenses/ExpenseCard';
 import { GoalCard } from '@/components/goals/GoalCard';
@@ -7,9 +8,23 @@ import { BudgetCard } from '@/components/budgets/BudgetCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { Plus } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { ExpenseForm } from '@/components/expenses/ExpenseForm';
 
 export default function Dashboard() {
     const currentMonth = format(new Date(), 'yyyy-MM');
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedExpense, setSelectedExpense] = useState<Expense | undefined>(undefined);
+
+    const handleEdit = (expense: Expense) => {
+        setSelectedExpense(expense);
+        setIsOpen(true);
+    };
+
+    const handleClose = () => {
+        setIsOpen(false);
+        setSelectedExpense(undefined);
+    };
 
     const expensesThisMonth = useLiveQuery(async () => {
         const all = await db.expenses.toArray();
@@ -60,7 +75,7 @@ export default function Dashboard() {
                 ) : (
                     <div className="space-y-2">
                         {recentExpenses.map(exp => (
-                            <ExpenseCard key={exp.id} expense={exp} />
+                            <ExpenseCard key={exp.id} expense={exp} onClick={() => handleEdit(exp)} />
                         ))}
                     </div>
                 )}
@@ -99,6 +114,22 @@ export default function Dashboard() {
                     </div>
                 )}
             </div>
+
+            {/* Sheet for Editing */}
+            <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+                <SheetContent side="bottom" className="h-[90vh] sm:h-auto rounded-t-xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto">
+                    <div className="p-4 sm:p-6 mb-8">
+                        <SheetHeader className="mb-4 text-left">
+                            <SheetTitle>Edit Expense</SheetTitle>
+                        </SheetHeader>
+                        <ExpenseForm
+                            initialData={selectedExpense}
+                            onSuccess={handleClose}
+                            onCancel={handleClose}
+                        />
+                    </div>
+                </SheetContent>
+            </Sheet>
 
             {/* Floating Add Expense Button */}
             <Link

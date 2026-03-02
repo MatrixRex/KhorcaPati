@@ -43,11 +43,14 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
         const trimmedName = name.trim();
         if (!trimmedName) return 0;
 
-        const existing = await db.categories.where('name').equalsIgnoreCase(trimmedName).first();
+        // Auto-capitalize first letter
+        const capitalizedName = trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1);
+
+        const existing = await db.categories.where('name').equalsIgnoreCase(capitalizedName).first();
         if (existing) return existing.id!;
 
         const id = await db.categories.add({
-            name: trimmedName,
+            name: capitalizedName,
             color,
             icon,
             isDefault: false

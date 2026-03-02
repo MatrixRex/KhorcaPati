@@ -11,6 +11,7 @@ import { parseItemInput } from '@/parsers/itemParser';
 import { format } from 'date-fns';
 import { db, type Expense } from '@/db/schema';
 import { CategoryComboBox } from './CategoryComboBox';
+import { useCategoryStore } from '@/stores/categoryStore';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -40,11 +41,15 @@ interface ExpenseFormProps {
 }
 
 export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormProps) {
+    const [currentId, setCurrentId] = useState<number | undefined>(initialData?.id);
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
     const addExpense = useExpenseStore((state) => state.addExpense);
     const updateExpense = useExpenseStore((state) => state.updateExpense);
     const deleteExpense = useExpenseStore((state) => state.deleteExpense);
     const addItem = useItemStore((state) => state.addItem);
+    const categories = useCategoryStore((state) => state.categories);
 
     const form = useForm<ExpenseFormValues>({
         resolver: zodResolver(expenseSchema),
@@ -59,9 +64,10 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
     });
 
     const handleDelete = async () => {
-        if (!initialData?.id) return;
+        const idToDelete = currentId || initialData?.id;
+        if (!idToDelete) return;
         try {
-            await deleteExpense(initialData.id);
+            await deleteExpense(idToDelete);
             setShowDeleteDialog(false);
             onSuccess?.();
         } catch (err) {
@@ -90,10 +96,20 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
         }
     };
 
-    const onSubmit = async (data: ExpenseFormValues) => {
+    const performSave = async (data: ExpenseFormValues) => {
+        if (data.amount <= 0) return;
+
+        setSaveStatus('saving');
         try {
+            // Query DB directly to avoid stale React state (e.g. when a new category was just created)
+            const categoryInDb = await db.categories
+                .filter(c => c.name.toLowerCase() === data.category.trim().toLowerCase())
+                .first();
+            const validCategory = categoryInDb?.name || 'Unsorted';
+
             const payload: Omit<Expense, 'id'> = {
                 ...data,
+                category: validCategory,
                 note: data.note || '',
                 parentId: initialData?.parentId || null,
                 recurringNextDue: null,
@@ -102,23 +118,40 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
                 updatedAt: new Date().toISOString(),
             };
 
-            if (initialData?.id) {
-                await updateExpense(initialData.id, payload);
-                await db.items.where('expenseId').equals(initialData.id).delete();
-                await processItems(initialData.id, data.note || '', data.date);
+            if (currentId) {
+                await updateExpense(currentId, payload);
+                await db.items.where('expenseId').equals(currentId).delete();
+                await processItems(currentId, data.note || '', data.date);
             } else {
                 const newId = await addExpense(payload);
+                setCurrentId(newId);
                 await processItems(newId, data.note || '', data.date);
             }
-            onSuccess?.();
+            setSaveStatus('saved');
+            // We don't call onSuccess() here because we want to keep the sheet open for further edits
         } catch (err) {
             console.error(err);
+            setSaveStatus('error');
+        }
+    };
+
+    const handleBlur = () => {
+        if (form.formState.isDirty) {
+            form.handleSubmit(performSave)();
         }
     };
 
     return (
         <>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form className="space-y-4">
+                <div className="flex justify-between items-center mb-2">
+                    <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                        {saveStatus === 'saving' && 'Saving...'}
+                        {saveStatus === 'saved' && 'All changes saved'}
+                        {saveStatus === 'error' && <span className="text-destructive">Error saving</span>}
+                    </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="amount">Amount</Label>
@@ -126,7 +159,10 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
                             id="amount"
                             type="number"
                             step="0.01"
-                            {...form.register('amount', { valueAsNumber: true })}
+                            {...form.register('amount', {
+                                valueAsNumber: true,
+                                onBlur: handleBlur
+                            })}
                         />
                         {form.formState.errors.amount && (
                             <p className="text-destructive text-sm">{form.formState.errors.amount.message}</p>
@@ -134,7 +170,13 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="date">Date</Label>
-                        <Input id="date" type="date" {...form.register('date')} />
+                        <Input
+                            id="date"
+                            type="date"
+                            {...form.register('date', {
+                                onBlur: handleBlur
+                            })}
+                        />
                     </div>
                 </div>
 
@@ -143,7 +185,10 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
                     <div className="w-full">
                         <CategoryComboBox
                             value={form.watch('category')}
-                            onChange={(val) => form.setValue('category', val)}
+                            onChange={(val: string) => {
+                                form.setValue('category', val, { shouldDirty: true });
+                            }}
+                            onBlur={() => form.handleSubmit(performSave)()}
                         />
                     </div>
                     {form.formState.errors.category && (
@@ -153,27 +198,40 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
 
                 <div className="space-y-2">
                     <Label htmlFor="note">Note / Items (Optional)</Label>
-                    <Input id="note" placeholder="Grocery: Oil 1L, Rice 2kg" {...form.register('note')} />
+                    <Input
+                        id="note"
+                        placeholder="Grocery: Oil 1L, Rice 2kg"
+                        {...form.register('note', {
+                            onBlur: handleBlur
+                        })}
+                    />
                     <p className="text-[10px] text-muted-foreground">Items separated by commas or new lines will be auto-tracked.</p>
                 </div>
 
-                <div className="flex flex-col gap-2 pt-4">
-                    <div className="flex gap-2">
-                        <Button type="submit" className="flex-1">
-                            {initialData ? 'Update Expense' : 'Add Expense'}
+                <div className="pt-4 space-y-2">
+                    {onCancel && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                const currentVal = form.getValues('category');
+                                const match = categories.find(c => c.name.toLowerCase() === currentVal.trim().toLowerCase());
+                                if (!match) {
+                                    form.setValue('category', 'Unsorted');
+                                }
+                                onCancel();
+                            }}
+                            className="w-full"
+                        >
+                            Done
                         </Button>
-                        {onCancel && (
-                            <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-                                Cancel
-                            </Button>
-                        )}
-                    </div>
-                    {initialData && (
+                    )}
+                    {(currentId || initialData) && (
                         <Button
                             type="button"
                             variant="destructive"
                             onClick={() => setShowDeleteDialog(true)}
-                            className="w-full mt-2"
+                            className="w-full"
                         >
                             Delete Expense
                         </Button>

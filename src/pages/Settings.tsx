@@ -1,12 +1,12 @@
 import { CategoryManager } from '@/components/shared/CategoryManager';
+import { PageContainer } from '@/components/shared/PageContainer';
 
 export default function Settings() {
     return (
-        <div className="p-4 space-y-4">
-            <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-            <div className="pt-4">
+        <PageContainer title="Settings">
+            <div className="pt-2">
                 <CategoryManager />
             </div>
-        </div>
+        </PageContainer>
     );
 }

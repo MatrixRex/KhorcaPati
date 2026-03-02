@@ -4,6 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { formatRelativeDate } from '@/utils/date';
 import { calcSpent, getBudgetWindow } from '@/utils/budgetWindow';
+import { cn } from '@/lib/utils';
 
 interface BudgetCardProps {
     budget: Budget;
@@ -45,27 +46,35 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
 
     return (
         <Card
-            className={`cursor-pointer active:bg-muted/50 transition-colors shadow-none ${isOverBudget ? 'border-destructive/50' : ''}`}
+            className={cn(
+                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group",
+                isOverBudget && "border-destructive/30 bg-destructive/5"
+            )}
             onClick={onClick}
         >
-            <CardContent className="px-4 py-3 space-y-2.5">
+            <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="font-semibold text-sm leading-tight">{budget.category}</h3>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{timelineLabel(budget)}</p>
+                        <h3 className="font-bold text-sm tracking-tight truncate capitalize">{budget.category}</h3>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{timelineLabel(budget)}</p>
                     </div>
-                    <span className="text-xs text-muted-foreground font-medium text-right shrink-0 ml-2">
-                        ৳{spent.toFixed(0)} / ৳{budget.limitAmount.toFixed(0)}
+                    <span className="text-[10px] text-muted-foreground font-black uppercase text-right shrink-0 ml-2 bg-muted px-1.5 py-0.5 rounded-md">
+                        ৳{spent.toFixed(0)} <span className="opacity-40">/</span> ৳{budget.limitAmount.toFixed(0)}
                     </span>
                 </div>
 
-                <Progress value={percentage} className="h-1.5" indicatorClassName={progressColor} />
+                <Progress value={percentage} className="h-2 bg-muted/50" indicatorClassName={cn("transition-all duration-500", progressColor)} />
 
-                {isOverBudget && (
-                    <p className="text-[10px] text-destructive font-semibold">
-                        Over by ৳{(spent - budget.limitAmount).toFixed(2)}!
-                    </p>
-                )}
+                <div className="flex items-center justify-between mt-1">
+                    <span className={cn("text-[9px] font-black uppercase tracking-widest", percentage >= 100 ? "text-destructive" : "text-muted-foreground/60")}>
+                        {percentage.toFixed(0)}% Utilized
+                    </span>
+                    {isOverBudget && (
+                        <p className="text-[10px] text-destructive font-black uppercase tracking-tighter animate-pulse">
+                            -৳{(spent - budget.limitAmount).toFixed(0)}
+                        </p>
+                    )}
+                </div>
             </CardContent>
         </Card>
     );

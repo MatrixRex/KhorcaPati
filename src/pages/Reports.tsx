@@ -5,7 +5,7 @@ import { format, isWithinInterval } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { useFilterStore } from '@/stores/filterStore';
-import { DateRangeFilter } from '@/components/shared/DateRangeFilter';
+import { PageContainer } from '@/components/shared/PageContainer';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a28CFE', '#f28C1E', '#32da1E'];
 
@@ -52,37 +52,32 @@ export default function Reports() {
     const totalSpent = chartData.category.reduce((sum, item) => sum + item.value, 0);
 
     return (
-        <div className="p-4 h-full flex flex-col pt-4 pb-20 overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-                <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
-                <DateRangeFilter />
-            </div>
-
-            <div className="mb-4 text-center">
-                <p className="text-muted-foreground text-sm">Total Spent</p>
-                <h2 className="text-3xl font-bold text-primary">৳{totalSpent.toFixed(2)}</h2>
+        <PageContainer title="Reports" showDateFilter>
+            <div className="mb-4 text-center pb-2">
+                <p className="text-muted-foreground text-[11px] font-semibold uppercase tracking-wider">Total Spent</p>
+                <h2 className="text-3xl font-black text-primary">৳{totalSpent.toFixed(2)}</h2>
             </div>
 
             {chartData.daily.length === 0 ? (
-                <div className="text-center p-8 text-muted-foreground border border-dashed rounded-lg">
+                <div className="text-center p-8 text-muted-foreground border border-dashed rounded-lg bg-muted/20">
                     No data available for this period.
                 </div>
             ) : (
                 <div className="space-y-6">
-                    <Card>
+                    <Card className="border-none shadow-sm bg-muted/30">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium">Daily Spending</CardTitle>
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Daily Spending</CardTitle>
                         </CardHeader>
                         <CardContent className="h-[250px] pt-4">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={chartData.daily}>
-                                    <XAxis dataKey="date" fontSize={11} tickLine={false} axisLine={false} />
-                                    <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `৳${value}`} />
-                                    <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]}>
+                                    <XAxis dataKey="date" fontSize={10} tickLine={false} axisLine={false} />
+                                    <YAxis fontSize={10} tickLine={false} axisLine={false} tickFormatter={(value) => `৳${value}`} />
+                                    <Bar dataKey="amount" fill="var(--primary)" radius={[4, 4, 0, 0]}>
                                         <LabelList
                                             dataKey="amount"
                                             position="top"
-                                            fontSize={10}
+                                            fontSize={9}
                                             fontWeight={600}
                                             formatter={(value: unknown) => `৳${Number(value).toFixed(0)}`}
                                         />
@@ -92,9 +87,9 @@ export default function Reports() {
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="border-none shadow-sm bg-muted/30">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium">Spending by Category</CardTitle>
+                            <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Budget Distribution</CardTitle>
                         </CardHeader>
                         <CardContent
                             className="pt-4"
@@ -111,7 +106,7 @@ export default function Reports() {
                                         type="category"
                                         dataKey="name"
                                         width={90}
-                                        fontSize={13}
+                                        fontSize={12}
                                         tickLine={false}
                                         axisLine={false}
                                         tick={{ fill: 'currentColor' }}
@@ -123,7 +118,7 @@ export default function Reports() {
                                         <LabelList
                                             dataKey="value"
                                             position="right"
-                                            fontSize={12}
+                                            fontSize={11}
                                             fontWeight={600}
                                             formatter={(value: unknown) => `৳${Number(value).toFixed(0)}`}
                                         />
@@ -134,6 +129,6 @@ export default function Reports() {
                     </Card>
                 </div>
             )}
-        </div>
+        </PageContainer>
     );
 }

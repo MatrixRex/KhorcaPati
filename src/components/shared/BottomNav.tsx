@@ -1,29 +1,46 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Receipt, PackageSearch, PieChart, Settings } from 'lucide-react';
+import { Home, Receipt, PackageSearch, PieChart, SquareMenu } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const navItems = [
-    { path: '/', label: 'Dash', icon: <Home className="w-6 h-6" /> },
-    { path: '/expenses', label: 'Expenses', icon: <Receipt className="w-6 h-6" /> },
-    { path: '/items', label: 'Items', icon: <PackageSearch className="w-6 h-6" /> },
-    { path: '/reports', label: 'Reports', icon: <PieChart className="w-6 h-6" /> },
-    { path: '/settings', label: 'Settings', icon: <Settings className="w-6 h-6" /> },
+    { path: '/', label: 'Dash', icon: Home },
+    { path: '/expenses', label: 'Expenses', icon: Receipt },
+    { path: '/items', label: 'Items', icon: PackageSearch },
+    { path: '/reports', label: 'Reports', icon: PieChart },
+    { path: '/settings', label: 'Settings', icon: SquareMenu },
 ];
 
 export function BottomNav() {
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border mt-auto h-16 pointer-events-auto">
-            <ul className="flex items-center justify-around h-full">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-t border-border/40 h-[var(--bottom-nav-height)] pointer-events-auto shadow-[0_-4px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
+            <ul className="flex items-center justify-around h-full max-w-md mx-auto">
                 {navItems.map((item) => (
-                    <li key={item.path} className="w-full">
+                    <li key={item.path} className="flex-1">
                         <NavLink
                             to={item.path}
                             className={({ isActive }) =>
-                                `flex flex-col items-center justify-center w-full h-full gap-1 transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                                }`
+                                cn(
+                                    "flex flex-col items-center justify-center w-full h-full gap-1 transition-all duration-300 relative group",
+                                    isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                                )
                             }
                         >
-                            {item.icon}
-                            <span className="text-[10px] font-medium">{item.label}</span>
+                            {({ isActive }) => (
+                                <>
+                                    <div className={cn(
+                                        "p-1.5 rounded-xl transition-all duration-300",
+                                        isActive ? "bg-primary/10 scale-110" : "group-hover:bg-accent/50"
+                                    )}>
+                                        <item.icon className={cn("w-5 h-5", isActive ? "stroke-[2.5px]" : "stroke-[2px]")} />
+                                    </div>
+                                    <span className={cn(
+                                        "text-[10px] font-bold tracking-tight transition-all duration-300",
+                                        isActive ? "opacity-100 translate-y-0" : "opacity-70 group-hover:opacity-100"
+                                    )}>
+                                        {item.label}
+                                    </span>
+                                </>
+                            )}
                         </NavLink>
                     </li>
                 ))}

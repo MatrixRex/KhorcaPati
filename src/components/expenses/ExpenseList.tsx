@@ -34,7 +34,7 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
     }
 
     return (
-        <div className="space-y-1 pb-20">
+        <div className="flex flex-col gap-[var(--item-gap)] pb-20">
             {expenses.map((expense) => (
                 <ExpenseCard
                     key={expense.id}

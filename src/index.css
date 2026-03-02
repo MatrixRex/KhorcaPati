@@ -31,6 +31,10 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.625rem;
+  --container-padding: 1.25rem;
+  --header-height: 4rem;
+  --bottom-nav-height: 4.5rem;
+  --item-gap: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);

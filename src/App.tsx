@@ -31,7 +31,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="flex flex-col min-h-screen pb-16 bg-background text-foreground">
+      <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
         <main className="flex-1 w-full max-w-md mx-auto relative overflow-hidden">
           <Routes>
             <Route path="/" element={<Dashboard />} />

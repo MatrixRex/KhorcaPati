@@ -24,7 +24,7 @@ export function BudgetList({ onEdit }: BudgetListProps) {
     }
 
     return (
-        <div className="space-y-1 pb-20">
+        <div className="flex flex-col gap-[var(--item-gap)] pb-20">
             {budgets.map((budget) => (
                 <BudgetCard
                     key={budget.id}

@@ -22,7 +22,7 @@ export function GoalList() {
     }
 
     return (
-        <div className="space-y-1 pb-20">
+        <div className="flex flex-col gap-[var(--item-gap)] pb-20">
             {goals.map((goal) => (
                 <GoalCard
                     key={goal.id}

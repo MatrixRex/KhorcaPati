@@ -3,14 +3,13 @@ import { BudgetList } from '@/components/budgets/BudgetList';
 import { BudgetForm } from '@/components/budgets/BudgetForm';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Plus, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import { type Budget } from '@/db/schema';
+import { PageContainer } from '@/components/shared/PageContainer';
 
 export default function Budgets() {
     const [isOpen, setIsOpen] = useState(false);
     const [editingBudget, setEditingBudget] = useState<Budget | undefined>(undefined);
-    const navigate = useNavigate();
 
     const openAdd = () => {
         setEditingBudget(undefined);
@@ -28,28 +27,24 @@ export default function Budgets() {
     };
 
     return (
-        <div className="p-4 h-full flex flex-col pt-4 pb-20">
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                    <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="mr-2">
-                        <ArrowLeft className="w-5 h-5" />
-                    </Button>
-                    <h1 className="text-2xl font-bold tracking-tight">Budgets</h1>
-                </div>
-                <Button size="sm" onClick={openAdd}>
+        <PageContainer
+            title="Budgets"
+            showBackButton
+            headerAction={
+                <Button size="sm" onClick={openAdd} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md">
                     <Plus className="w-4 h-4 mr-1" /> Add
                 </Button>
-            </div>
-
-            <div className="flex-1 overflow-auto -mx-4 px-4">
+            }
+        >
+            <div className="flex-1">
                 <BudgetList onEdit={openEdit} />
             </div>
 
             <Sheet open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
-                <SheetContent side="bottom" className="h-[90vh] sm:h-auto rounded-t-xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto">
-                    <div className="p-4 sm:p-6 mb-8 text-foreground">
-                        <SheetHeader className="mb-4 text-left">
-                            <SheetTitle>{editingBudget ? 'Edit Budget' : 'Add Budget Limit'}</SheetTitle>
+                <SheetContent side="bottom" className="h-[90vh] sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
+                    <div className="p-6 mb-8 text-foreground">
+                        <SheetHeader className="mb-6 text-left border-b pb-4">
+                            <SheetTitle className="text-xl font-black">{editingBudget ? 'Edit Budget' : 'New Budget Limit'}</SheetTitle>
                         </SheetHeader>
                         <BudgetForm
                             key={editingBudget?.id ?? 'new'}
@@ -60,6 +55,6 @@ export default function Budgets() {
                     </div>
                 </SheetContent>
             </Sheet>
-        </div>
+        </PageContainer>
     );
 }

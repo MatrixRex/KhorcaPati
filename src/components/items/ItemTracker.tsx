@@ -108,27 +108,27 @@ export function ItemTracker() {
                                 <Package size={28} />
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <h3 className="text-2xl font-black truncate capitalize leading-tight">
+                                <h3 className="text-xl font-bold truncate capitalize leading-tight">
                                     {group.name}
                                 </h3>
-                                <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                                    <History size={14} />
+                                <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                                    <History size={12} />
                                     {group.records.length} historical records
                                 </p>
                             </div>
                         </div>
-                        <div className="flex flex-col items-end shrink-0 bg-secondary/30 p-3 rounded-2xl border border-border/50">
-                            <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">Total Stock</div>
+                        <div className="flex flex-col items-end shrink-0 bg-secondary/30 p-2.5 rounded-xl border border-border/50">
+                            <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Total Stock</div>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-3xl font-black text-primary leading-none">{group.totalQty}</span>
-                                <span className="text-sm font-bold text-muted-foreground">{group.unit}</span>
+                                <span className="text-2xl font-black text-primary leading-none">{group.totalQty}</span>
+                                <span className="text-xs font-bold text-muted-foreground">{group.unit}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Entry History List */}
-                <div className="flex-1 overflow-auto p-4 space-y-4 pb-10">
+                <div className="flex-1 overflow-auto p-4 flex flex-col gap-[var(--item-gap)] pb-10">
                     <div className="flex items-center justify-between px-1">
                         <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Transaction History</h4>
                         <div className="h-px bg-border flex-1 ml-4" />
@@ -143,23 +143,23 @@ export function ItemTracker() {
                             <Card className="overflow-hidden border-none bg-muted/30 group-hover:bg-muted/50 transition-colors">
                                 <CardContent className="p-4 flex items-center justify-between">
                                     <div className="flex items-center gap-4 min-w-0 flex-1">
-                                        <div className="w-12 h-12 rounded-xl bg-background border flex flex-col items-center justify-center shrink-0 shadow-sm">
-                                            <span className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-0.5">
+                                        <div className="w-10 h-10 rounded-lg bg-background border flex flex-col items-center justify-center shrink-0 shadow-sm">
+                                            <span className="text-[9px] font-bold text-muted-foreground uppercase leading-none mb-0.5">
                                                 {format(new Date(record.date), 'MMM')}
                                             </span>
-                                            <span className="text-lg font-black leading-none">
+                                            <span className="text-base font-bold leading-none">
                                                 {format(new Date(record.date), 'dd')}
                                             </span>
                                         </div>
 
                                         <div className="flex flex-col min-w-0">
                                             <div className="flex items-baseline gap-1.5">
-                                                <span className="text-lg font-bold">+{record.qty}</span>
-                                                <span className="text-xs font-semibold text-muted-foreground">{record.unit}</span>
+                                                <span className="text-base font-bold">+{record.qty}</span>
+                                                <span className="text-[10px] font-semibold text-muted-foreground">{record.unit}</span>
                                             </div>
 
                                             {record.rawInput && record.rawInput.toLowerCase() !== record.name.toLowerCase() && (
-                                                <p className="text-xs text-muted-foreground italic truncate">
+                                                <p className="text-[10px] text-muted-foreground italic truncate">
                                                     "{record.rawInput}"
                                                 </p>
                                             )}
@@ -186,7 +186,7 @@ export function ItemTracker() {
     }
 
     return (
-        <div className="space-y-3 pb-24">
+        <div className="flex flex-col gap-[var(--item-gap)] pb-24">
             {groupedList.map((group) => (
                 <Card
                     key={group.name}
@@ -199,10 +199,10 @@ export function ItemTracker() {
                                 <Package size={24} />
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <h3 className="font-bold text-lg truncate capitalize leading-tight">
+                                <h3 className="font-semibold text-sm truncate capitalize leading-tight">
                                     {group.name}
                                 </h3>
-                                <p className="text-xs text-muted-foreground font-medium">
+                                <p className="text-[11px] text-muted-foreground font-medium">
                                     {group.records.length} {group.records.length === 1 ? 'record' : 'records'}
                                 </p>
                             </div>
@@ -211,11 +211,11 @@ export function ItemTracker() {
                         <div className="flex items-center gap-4">
                             <div className="flex flex-col items-end">
                                 <div className="flex items-baseline gap-1">
-                                    <span className="font-black text-2xl text-primary leading-none">{group.totalQty}</span>
-                                    <span className="text-xs font-bold text-muted-foreground uppercase">{group.unit}</span>
+                                    <span className="font-bold text-base text-primary leading-none">{group.totalQty}</span>
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase">{group.unit}</span>
                                 </div>
                             </div>
-                            <ChevronRight className="text-muted-foreground opacity-30" size={20} />
+                            <ChevronRight className="text-muted-foreground opacity-30" size={16} />
                         </div>
                     </CardContent>
                 </Card>

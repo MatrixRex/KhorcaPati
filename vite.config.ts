@@ -6,22 +6,43 @@ import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/KhorcaPati/',
   plugins: [
     react(),
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
       manifest: {
-        name: 'Expense Tracker',
-        short_name: 'Expenses',
+        name: 'KhorcaPati | Expense Tracker',
+        short_name: 'KhorcaPati',
+        description: 'A modern, privacy-first personal expense and budget tracker.',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',
         orientation: 'portrait',
-        icons: []
+        icons: [
+          {
+            src: 'icon-192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'icon-512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: 'icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
+          }
+        ]
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        cleanupOutdatedCaches: true,
         runtimeCaching: [] // All data is local, no API caching needed
       }
     })

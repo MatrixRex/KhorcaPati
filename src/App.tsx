@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { BottomNav } from '@/components/shared/BottomNav';
 import { GlobalUI } from '@/components/shared/GlobalUI';
 import { useBudgetNotifications } from '@/hooks/useBudgetNotifications';
@@ -30,7 +30,7 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
         <main className="flex-1 w-full max-w-md mx-auto relative overflow-hidden">
           <Routes>
@@ -49,7 +49,7 @@ function App() {
         <GlobalUI />
         <BottomNav />
       </div>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

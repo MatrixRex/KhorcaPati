@@ -6,11 +6,27 @@ import { useState } from 'react';
 import { ChevronRight, Package, StickyNote, ArrowLeft, ExternalLink, History } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useNavigate } from 'react-router-dom';
+import { useCloseWatcher } from '@/hooks/use-close-watcher';
 
 export function ItemTracker() {
-    const [selectedGroupName, setSelectedGroupName] = useState<string | null>(null);
-    const { openEditExpense } = useUIStore();
+    const { selectedInventoryItem, setSelectedInventoryItem, openEditExpense } = useUIStore();
+    const [touchStartX, setTouchStartX] = useState(0);
     const navigate = useNavigate();
+
+    // Close on back button / Esc
+    useCloseWatcher(!!selectedInventoryItem, () => setSelectedInventoryItem(null));
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setTouchStartX(e.touches[0].clientX);
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        const touchEndX = e.changedTouches[0].clientX;
+        // If swiped from left edge (>50px swipe, starting from leftmost 40px)
+        if (touchStartX < 40 && touchEndX - touchStartX > 70) {
+            setSelectedInventoryItem(null);
+        }
+    };
 
     const items = useLiveQuery(
         () => db.items.orderBy('date').reverse().toArray()
@@ -52,21 +68,25 @@ export function ItemTracker() {
         if (expenseId) {
             const expense = await db.expenses.get(expenseId);
             if (expense) {
-                openEditExpense(expense);
+                openEditExpense(expense, '/items');
                 navigate('/expenses');
             }
         }
     };
 
-    if (selectedGroupName && groupedItems[selectedGroupName.toLowerCase().trim()]) {
-        const group = groupedItems[selectedGroupName.toLowerCase().trim()];
+    if (selectedInventoryItem && groupedItems[selectedInventoryItem.toLowerCase().trim()]) {
+        const group = groupedItems[selectedInventoryItem.toLowerCase().trim()];
         return (
-            <div className="fixed inset-0 z-[100] bg-background flex flex-col animate-in slide-in-from-right duration-300 pointer-events-auto">
+            <div
+                className="fixed top-0 left-0 right-0 bottom-16 z-40 bg-background flex flex-col animate-in slide-in-from-right duration-300 pointer-events-auto"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+            >
                 {/* Full-screen Detail Header */}
                 <div className="safe-top bg-card border-b shadow-sm pt-10 px-4 pb-4">
                     <div className="flex items-center gap-4 mb-6">
                         <button
-                            onClick={() => setSelectedGroupName(null)}
+                            onClick={() => setSelectedInventoryItem(null)}
                             className="p-2 -ml-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-all active:scale-95"
                         >
                             <ArrowLeft size={24} />
@@ -163,7 +183,7 @@ export function ItemTracker() {
                 <Card
                     key={group.name}
                     className="overflow-hidden hover:bg-muted/30 active:scale-[0.98] transition-all cursor-pointer border-none bg-card shadow-sm"
-                    onClick={() => setSelectedGroupName(group.name)}
+                    onClick={() => setSelectedInventoryItem(group.name)}
                 >
                     <CardContent className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1 min-w-0">

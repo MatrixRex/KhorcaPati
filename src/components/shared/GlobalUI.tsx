@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Plus } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ExpenseForm } from '@/components/expenses/ExpenseForm';
@@ -9,8 +9,17 @@ import { useCategoryStore } from '@/stores/categoryStore';
 
 export function GlobalUI() {
     const location = useLocation();
-    const { isExpenseSheetOpen, editingExpense, openAddExpense, closeExpenseSheet } = useUIStore();
+    const navigate = useNavigate();
+    const { isExpenseSheetOpen, editingExpense, returnPath, openAddExpense, closeExpenseSheet } = useUIStore();
     const { ensureDefaultCategory, loadCategories } = useCategoryStore();
+
+    const handleClose = () => {
+        const path = returnPath;
+        closeExpenseSheet();
+        if (path) {
+            navigate(path);
+        }
+    };
 
     useEffect(() => {
         ensureDefaultCategory();
@@ -31,7 +40,7 @@ export function GlobalUI() {
                 </Button>
             )}
 
-            <Sheet open={isExpenseSheetOpen} onOpenChange={(open) => !open && closeExpenseSheet()}>
+            <Sheet open={isExpenseSheetOpen} onOpenChange={(open) => !open && handleClose()}>
                 <SheetContent
                     side="bottom"
                     className="h-[90vh] sm:h-auto rounded-t-xl p-0 overflow-y-auto w-full max-w-md mx-auto z-50 pointer-events-auto"
@@ -42,8 +51,8 @@ export function GlobalUI() {
                         </SheetHeader>
                         <ExpenseForm
                             initialData={editingExpense}
-                            onSuccess={closeExpenseSheet}
-                            onCancel={closeExpenseSheet}
+                            onSuccess={handleClose}
+                            onCancel={handleClose}
                         />
                     </div>
                 </SheetContent>

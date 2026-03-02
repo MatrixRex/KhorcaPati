@@ -39,7 +39,7 @@ export default function Dashboard() {
     return (
         <div className="p-4 h-full flex flex-col pt-10 pb-20 overflow-y-auto w-full text-foreground bg-background">
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold tracking-tight">KhorocaPati</h1>
+                <h1 className="text-2xl font-bold tracking-tight">খরচা পাতি</h1>
             </div>
 
             {/* At A Glance */}

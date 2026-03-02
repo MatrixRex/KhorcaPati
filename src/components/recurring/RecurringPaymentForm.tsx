@@ -96,6 +96,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                 recurringInterval: null,
                 recurringNextDue: null,
                 parentId: null,
+                isNested: false,
                 tags: [],
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),

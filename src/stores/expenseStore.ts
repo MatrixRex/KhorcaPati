@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { db, type Expense } from '@/db/schema';
-import { liveQuery } from 'dexie';
 
 interface ExpenseState {
     expenses: Expense[];

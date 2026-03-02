@@ -1,4 +1,5 @@
 import nlp from 'compromise';
+// @ts-expect-error - compromise-numbers doesn't export types correctly in some environments
 import nlpNumbers from 'compromise-numbers';
 
 // Extend compromise with numbers plugin

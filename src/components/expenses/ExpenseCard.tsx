@@ -18,8 +18,8 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
             <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex flex-col flex-1 overflow-hidden pr-2">
                     <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-bold text-sm tracking-tight truncate group-hover:text-primary transition-colors">
-                            {expense.note || "Untitled Expense"}
+                        <h3 className="font-bold text-sm tracking-tight truncate group-hover:text-primary transition-colors capitalize">
+                            {expense.note || expense.type}
                         </h3>
                         {expense.isRecurring && (
                             <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 font-bold uppercase tracking-wider">

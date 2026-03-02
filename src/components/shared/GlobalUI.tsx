@@ -56,7 +56,7 @@ export function GlobalUI() {
                 >
                     <div className="p-4 sm:p-6 mb-8">
                         <SheetHeader className="mb-4 text-left">
-                            <SheetTitle>{editingExpense ? 'Edit Expense' : 'Add Expense'}</SheetTitle>
+                            <SheetTitle>{editingExpense ? 'Edit Record' : 'Add Record'}</SheetTitle>
                         </SheetHeader>
                         <ExpenseForm
                             initialData={editingExpense}

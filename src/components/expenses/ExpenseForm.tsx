@@ -141,7 +141,8 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
     };
 
     const handleBlur = () => {
-        if (form.formState.isDirty) {
+        const values = form.getValues();
+        if (values.amount > 0) {
             form.handleSubmit(performSave)();
         }
     };

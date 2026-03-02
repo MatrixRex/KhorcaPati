@@ -1,7 +1,7 @@
 import { type Goal } from '@/db/schema';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { format } from 'date-fns';
+import { formatRelativeDate } from '@/utils/date';
 
 interface GoalCardProps {
     goal: Goal;
@@ -36,7 +36,7 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
                 <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
                     <span>{percentage.toFixed(0)}%</span>
                     {goal.deadline && (
-                        <span>Due: {format(new Date(goal.deadline), 'MMM d, yyyy')}</span>
+                        <span>Due: {formatRelativeDate(goal.deadline, true)}</span>
                     )}
                 </div>
             </CardContent>

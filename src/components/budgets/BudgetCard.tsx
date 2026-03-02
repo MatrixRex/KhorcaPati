@@ -2,7 +2,7 @@ import { type Budget, db } from '@/db/schema';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { format, parseISO } from 'date-fns';
+import { formatRelativeDate } from '@/utils/date';
 import { calcSpent, getBudgetWindow } from '@/utils/budgetWindow';
 
 interface BudgetCardProps {
@@ -18,7 +18,7 @@ function timelineLabel(budget: Budget): string {
         return labels[budget.recurringInterval ?? 'monthly'] ?? 'This month';
     }
     if (budget.startDate && budget.endDate) {
-        return `${format(parseISO(budget.startDate), 'MMM d')} – ${format(parseISO(budget.endDate), 'MMM d, yyyy')}`;
+        return `${formatRelativeDate(budget.startDate)} – ${formatRelativeDate(budget.endDate, true)}`;
     }
     return '';
 }

@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { format } from 'date-fns';
+import { formatRelativeDate } from '@/utils/date';
 import { ExpenseCard } from '@/components/expenses/ExpenseCard';
 import { RecurringPaymentCard } from '@/components/recurring/RecurringPaymentCard';
 import { GoalCard } from '@/components/goals/GoalCard';
@@ -51,7 +52,7 @@ export default function Dashboard() {
             {/* At A Glance */}
             <Card className="mb-6 bg-primary text-primary-foreground border-none shadow-md">
                 <CardContent className="p-6">
-                    <p className="text-primary-foreground/80 text-sm font-medium mb-1">Spent this month ({format(new Date(), 'MMM dd, yyyy')})</p>
+                    <p className="text-primary-foreground/80 text-sm font-medium mb-1">Spent this month ({formatRelativeDate(new Date(), true)})</p>
                     <h2 className="text-4xl font-bold mb-2">৳{totalSpent.toFixed(0)}</h2>
                     {totalBudgetLimit > 0 && (
                         <p className="text-sm font-medium">Budget Limit: ৳{totalBudgetLimit.toFixed(0)}</p>

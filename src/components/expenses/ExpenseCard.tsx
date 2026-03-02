@@ -1,7 +1,7 @@
 import { type Expense } from '@/db/schema';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+import { formatRelativeDate } from '@/utils/date';
 
 interface ExpenseCardProps {
     expense: Expense;
@@ -27,7 +27,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                         )}
                     </div>
                     <div className="flex items-center text-xs text-muted-foreground gap-2">
-                        <span>{format(new Date(expense.date), 'MMM d, yyyy')}</span>
+                        <span>{formatRelativeDate(expense.date, true)}</span>
                         <span>•</span>
                         <span className="truncate">{expense.category}</span>
                     </div>

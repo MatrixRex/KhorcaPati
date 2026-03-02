@@ -87,7 +87,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                 amount: initialData.amount,
                 category: initialData.category,
                 date: format(new Date(), 'yyyy-MM-dd'), // Confirming now
-                note: `[Recurring] ${initialData.title}${initialData.note ? ': ' + initialData.note : ''}`,
+                note: initialData.note || '',
                 isRecurring: false, // This specific entry isn't recurring
                 recurringInterval: null,
                 recurringNextDue: null,
@@ -323,14 +323,14 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                             </Button>
                         </div>
                     )}
-                    {onCancel && (
+                    {onCancel && !initialData && (
                         <Button
                             type="button"
                             variant="outline"
                             onClick={onCancel}
                             className="w-full"
                         >
-                            {initialData ? 'Back' : 'Cancel'}
+                            Cancel
                         </Button>
                     )}
                     {(currentId || initialData) && (

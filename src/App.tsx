@@ -1,8 +1,9 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { BottomNav } from '@/components/shared/BottomNav';
 import { GlobalUI } from '@/components/shared/GlobalUI';
+import { useBudgetNotifications } from '@/hooks/useBudgetNotifications';
 
-// We will create these pages next
 import Dashboard from '@/pages/Dashboard';
 import Expenses from '@/pages/Expenses';
 import Items from '@/pages/Items';
@@ -11,7 +12,21 @@ import Goals from '@/pages/Goals';
 import Reports from '@/pages/Reports';
 import Settings from '@/pages/Settings';
 
+/** Requests notification permission once on app start, then runs budget alert checks. */
+function NotificationManager() {
+  useBudgetNotifications();
+  return null;
+}
+
 function App() {
+  // Ask for permission on first interaction — browsers require a user gesture
+  // We request eagerly here; if already granted/denied nothing changes.
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <div className="flex flex-col min-h-screen pb-16 bg-background text-foreground">
@@ -24,11 +39,11 @@ function App() {
             <Route path="/goals" element={<Goals />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
-            {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
 
+        <NotificationManager />
         <GlobalUI />
         <BottomNav />
       </div>

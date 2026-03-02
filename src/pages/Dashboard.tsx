@@ -22,7 +22,7 @@ export default function Dashboard() {
     );
 
     const budgets = useLiveQuery(
-        () => db.budgets.where('month').equals(currentMonth).toArray()
+        () => db.budgets.toArray()
     );
 
     const activeGoals = useLiveQuery(async () => {
@@ -31,7 +31,10 @@ export default function Dashboard() {
     });
 
     const totalSpent = expensesThisMonth?.reduce((sum, e) => sum + e.amount, 0) || 0;
-    const totalBudgetLimit = budgets?.reduce((sum, b) => sum + b.limitAmount, 0) || 0;
+    // Sum limit of recurring-monthly budgets for the "this month" overview
+    const totalBudgetLimit = budgets
+        ?.filter(b => b.timelineType === 'recurring' && b.recurringInterval === 'monthly')
+        .reduce((sum, b) => sum + b.limitAmount, 0) || 0;
 
     return (
         <div className="p-4 h-full flex flex-col pt-10 pb-20 overflow-y-auto w-full text-foreground bg-background">

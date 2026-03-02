@@ -7,9 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useBudgetStore } from '@/stores/budgetStore';
 import { format } from 'date-fns';
-import { type Budget } from '@/db/schema';
+import { type Budget, type BudgetRecurringInterval, db } from '@/db/schema';
 import { CategoryComboBox } from '@/components/expenses/CategoryComboBox';
-import { MonthPicker } from './MonthPicker';
+import { cn } from '@/lib/utils';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -21,11 +21,32 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+const INTERVALS: { value: BudgetRecurringInterval; label: string }[] = [
+    { value: 'daily', label: 'Daily' },
+    { value: 'weekly', label: 'Weekly' },
+    { value: 'monthly', label: 'Monthly' },
+    { value: 'yearly', label: 'Yearly' },
+];
+
 const budgetSchema = z.object({
     category: z.string().min(1, 'Category is required'),
     limitAmount: z.number().min(1, 'Limit must be greater than 0'),
     alertThreshold: z.number().min(0.1).max(1),
-    month: z.string().min(1),
+    timelineType: z.enum(['recurring', 'range']),
+    recurringInterval: z.enum(['daily', 'weekly', 'monthly', 'yearly']).nullable(),
+    startDate: z.string().nullable(),
+    endDate: z.string().nullable(),
+}).superRefine((data, ctx) => {
+    if (data.timelineType === 'recurring' && !data.recurringInterval) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Select an interval', path: ['recurringInterval'] });
+    }
+    if (data.timelineType === 'range') {
+        if (!data.startDate) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Start date required', path: ['startDate'] });
+        if (!data.endDate) ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'End date required', path: ['endDate'] });
+        if (data.startDate && data.endDate && data.startDate > data.endDate) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'End date must be after start date', path: ['endDate'] });
+        }
+    }
 });
 
 type BudgetFormValues = z.infer<typeof budgetSchema>;
@@ -42,23 +63,50 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
     const deleteBudget = useBudgetStore((state) => state.deleteBudget);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
+    const today = format(new Date(), 'yyyy-MM-dd');
+
     const form = useForm<BudgetFormValues>({
         resolver: zodResolver(budgetSchema),
         defaultValues: {
-            category: initialData?.category || '',
-            limitAmount: initialData?.limitAmount || 1000,
-            alertThreshold: initialData?.alertThreshold || 0.8,
-            month: initialData?.month || format(new Date(), 'yyyy-MM'),
+            category: initialData?.category ?? '',
+            limitAmount: initialData?.limitAmount ?? 1000,
+            alertThreshold: initialData?.alertThreshold ?? 0.8,
+            timelineType: initialData?.timelineType ?? 'recurring',
+            recurringInterval: initialData?.recurringInterval ?? 'monthly',
+            startDate: initialData?.startDate ?? today,
+            endDate: initialData?.endDate ?? today,
         },
     });
 
+    const timelineType = form.watch('timelineType');
+    const interval = form.watch('recurringInterval');
+
     const onSubmit = async (data: BudgetFormValues) => {
+        // Validate category against DB — must exist and must not be "Unsorted"
+        const trimmed = data.category.trim();
+        if (!trimmed || trimmed.toLowerCase() === 'unsorted') {
+            form.setError('category', { message: 'Please select a valid category (not Unsorted)' });
+            return;
+        }
+        const categoryInDb = await db.categories
+            .filter((c) => c.name.toLowerCase() === trimmed.toLowerCase())
+            .first();
+        if (!categoryInDb) {
+            form.setError('category', { message: 'Category not found — create it in the expense form first' });
+            return;
+        }
+
         try {
             const payload: Omit<Budget, 'id'> = {
-                ...data,
-                createdAt: initialData?.createdAt || new Date().toISOString(),
+                category: categoryInDb.name,   // use exact DB casing
+                limitAmount: data.limitAmount,
+                alertThreshold: data.alertThreshold,
+                timelineType: data.timelineType,
+                recurringInterval: data.timelineType === 'recurring' ? data.recurringInterval : null,
+                startDate: data.timelineType === 'range' ? data.startDate : null,
+                endDate: data.timelineType === 'range' ? data.endDate : null,
+                createdAt: initialData?.createdAt ?? new Date().toISOString(),
             };
-
             if (initialData?.id) {
                 await updateBudget(initialData.id, payload);
             } else {
@@ -83,22 +131,26 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
 
     return (
         <>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+
                 {/* Category */}
                 <div className="space-y-2">
                     <Label>Category</Label>
                     <CategoryComboBox
                         value={form.watch('category')}
-                        onChange={(val) => form.setValue('category', val, { shouldDirty: true })}
+                        onChange={(val) => {
+                            form.setValue('category', val, { shouldDirty: true });
+                            form.clearErrors('category');
+                        }}
                     />
                     {form.formState.errors.category && (
                         <p className="text-destructive text-sm">{form.formState.errors.category.message}</p>
                     )}
                 </div>
 
-                {/* Monthly Limit */}
+                {/* Limit amount */}
                 <div className="space-y-2">
-                    <Label htmlFor="limitAmount">Monthly Limit (৳)</Label>
+                    <Label htmlFor="limitAmount">Budget Limit (৳)</Label>
                     <Input
                         id="limitAmount"
                         type="number"
@@ -111,13 +163,86 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                     )}
                 </div>
 
-                {/* Month picker */}
-                <div className="space-y-2">
-                    <Label>Month</Label>
-                    <MonthPicker
-                        value={form.watch('month')}
-                        onChange={(val) => form.setValue('month', val, { shouldDirty: true })}
-                    />
+                {/* ── Timeline mode toggle ───────────────────────────── */}
+                <div className="space-y-3">
+                    <Label>Timeline</Label>
+
+                    {/* Segmented control */}
+                    <div className="grid grid-cols-2 gap-1 p-1 rounded-lg bg-muted">
+                        {(['recurring', 'range'] as const).map((mode) => (
+                            <button
+                                key={mode}
+                                type="button"
+                                onClick={() => form.setValue('timelineType', mode, { shouldDirty: true })}
+                                className={cn(
+                                    'py-2 rounded-md text-sm font-medium transition-all',
+                                    timelineType === mode
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                )}
+                            >
+                                {mode === 'recurring' ? '↺ Recurring' : '📅 Date Range'}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Recurring: interval chips */}
+                    {timelineType === 'recurring' && (
+                        <div className="space-y-2">
+                            <p className="text-xs text-muted-foreground">Resets every period automatically</p>
+                            <div className="grid grid-cols-4 gap-2">
+                                {INTERVALS.map(({ value, label }) => (
+                                    <button
+                                        key={value}
+                                        type="button"
+                                        onClick={() => form.setValue('recurringInterval', value, { shouldDirty: true })}
+                                        className={cn(
+                                            'py-2 rounded-lg text-sm font-medium border transition-all',
+                                            interval === value
+                                                ? 'bg-primary text-primary-foreground border-primary shadow'
+                                                : 'bg-background border-border text-muted-foreground hover:bg-muted'
+                                        )}
+                                    >
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                            {form.formState.errors.recurringInterval && (
+                                <p className="text-destructive text-sm">{form.formState.errors.recurringInterval.message}</p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Range: from / to date pickers */}
+                    {timelineType === 'range' && (
+                        <div className="space-y-3">
+                            <p className="text-xs text-muted-foreground">Track spending within a fixed window</p>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="startDate" className="text-xs">From</Label>
+                                    <Input
+                                        id="startDate"
+                                        type="date"
+                                        {...form.register('startDate')}
+                                    />
+                                    {form.formState.errors.startDate && (
+                                        <p className="text-destructive text-xs">{form.formState.errors.startDate.message}</p>
+                                    )}
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="endDate" className="text-xs">To</Label>
+                                    <Input
+                                        id="endDate"
+                                        type="date"
+                                        {...form.register('endDate')}
+                                    />
+                                    {form.formState.errors.endDate && (
+                                        <p className="text-destructive text-xs">{form.formState.errors.endDate.message}</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Alert threshold */}
@@ -140,7 +265,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-4">
+                <div className="flex gap-2 pt-2">
                     <Button type="submit" className="flex-1">
                         {initialData ? 'Update Budget' : 'Add Budget'}
                     </Button>

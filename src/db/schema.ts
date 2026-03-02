@@ -28,13 +28,22 @@ export interface Item {
     createdAt: string;
 }
 
+export type BudgetTimelineType = 'recurring' | 'range';
+export type BudgetRecurringInterval = 'daily' | 'weekly' | 'monthly' | 'yearly';
+
 export interface Budget {
     id?: number;
     category: string;
-    month: string;                // "YYYY-MM"
     limitAmount: number;
     alertThreshold: number;       // e.g. 0.8 = alert at 80%
     createdAt: string;
+    // Timeline mode
+    timelineType: BudgetTimelineType;
+    // Recurring mode
+    recurringInterval: BudgetRecurringInterval | null; // daily | weekly | monthly | yearly
+    // Range mode
+    startDate: string | null;    // "YYYY-MM-DD"
+    endDate: string | null;      // "YYYY-MM-DD"
 }
 
 export interface Goal {
@@ -71,6 +80,23 @@ db.version(3).stores({
     budgets: '++id, category, month',
     goals: '++id, createdAt',
     categories: '++id, name, isDefault'
+});
+
+db.version(4).stores({
+    expenses: '++id, parentId, date, category, isRecurring',
+    items: '++id, expenseId, name, date',
+    budgets: '++id, category, timelineType, recurringInterval',
+    goals: '++id, createdAt',
+    categories: '++id, name, isDefault'
+}).upgrade((tx) => {
+    return tx.table('budgets').toCollection().modify((budget: Budget & { month?: string }) => {
+        if (!budget.timelineType) {
+            budget.timelineType = 'recurring';
+            budget.recurringInterval = 'monthly';
+            budget.startDate = null;
+            budget.endDate = null;
+        }
+    });
 });
 
 export { db };

@@ -1,19 +1,13 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Budget } from '@/db/schema';
 import { BudgetCard } from './BudgetCard';
-import { format } from 'date-fns';
 
 interface BudgetListProps {
     onEdit?: (budget: Budget) => void;
 }
 
 export function BudgetList({ onEdit }: BudgetListProps) {
-    const currentMonth = format(new Date(), 'yyyy-MM');
-
-    const budgets = useLiveQuery(
-        () => db.budgets.where('month').equals(currentMonth).toArray(),
-        [currentMonth]
-    );
+    const budgets = useLiveQuery(() => db.budgets.toArray());
 
     if (!budgets) {
         return <div className="p-4 text-center text-muted-foreground">Loading budgets...</div>;

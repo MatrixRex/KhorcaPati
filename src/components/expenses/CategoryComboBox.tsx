@@ -80,7 +80,8 @@ export function CategoryComboBox({ value, onChange, onBlur }: CategoryComboBoxPr
                             setShowError(false);
                             if (!open) setOpen(true);
                         }}
-                        onFocus={() => {
+                        onFocus={(e) => {
+                            e.target.select();
                             setIsModified(false);
                             setShowError(false);
                             setOpen(true);

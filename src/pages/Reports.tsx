@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { format, subDays, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList } from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a28CFE', '#f28C1E', '#32da1E'];
 
@@ -85,13 +85,17 @@ export default function Reports() {
                         <CardContent className="h-[250px] pt-4">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={chartData.daily}>
-                                    <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
+                                    <XAxis dataKey="date" fontSize={11} tickLine={false} axisLine={false} />
                                     <YAxis fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `৳${value}`} />
-                                    <Tooltip
-                                        cursor={{ fill: 'rgba(0,0,0,0.05)' }}
-                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                                    />
-                                    <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="amount" fill="#3b82f6" radius={[4, 4, 0, 0]}>
+                                        <LabelList
+                                            dataKey="amount"
+                                            position="top"
+                                            fontSize={10}
+                                            fontWeight={600}
+                                            formatter={(value: unknown) => `৳${Number(value).toFixed(0)}`}
+                                        />
+                                    </Bar>
                                 </BarChart>
                             </ResponsiveContainer>
                         </CardContent>
@@ -101,28 +105,39 @@ export default function Reports() {
                         <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-medium">Spending by Category</CardTitle>
                         </CardHeader>
-                        <CardContent className="h-[300px] pt-4 flex justify-center">
+                        <CardContent
+                            className="pt-4"
+                            style={{ height: `${Math.max(chartData.category.length * 56 + 16, 120)}px` }}
+                        >
                             <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={chartData.category}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={90}
-                                        paddingAngle={2}
-                                        dataKey="value"
-                                    >
-                                        {chartData.category.map((entry, index) => (
+                                <BarChart
+                                    data={chartData.category}
+                                    layout="vertical"
+                                    margin={{ top: 0, right: 72, left: 4, bottom: 0 }}
+                                >
+                                    <XAxis type="number" hide />
+                                    <YAxis
+                                        type="category"
+                                        dataKey="name"
+                                        width={90}
+                                        fontSize={13}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tick={{ fill: 'currentColor' }}
+                                    />
+                                    <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={28}>
+                                        {chartData.category.map((_entry, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
-                                    </Pie>
-                                    <Tooltip
-                                        formatter={(value: number) => `৳${value.toFixed(2)}`}
-                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                                    />
-                                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                                </PieChart>
+                                        <LabelList
+                                            dataKey="value"
+                                            position="right"
+                                            fontSize={12}
+                                            fontWeight={600}
+                                            formatter={(value: unknown) => `৳${Number(value).toFixed(0)}`}
+                                        />
+                                    </Bar>
+                                </BarChart>
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>

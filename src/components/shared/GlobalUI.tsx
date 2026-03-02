@@ -13,9 +13,33 @@ export function GlobalUI() {
     const navigate = useNavigate();
     const {
         isExpenseSheetOpen, editingExpense, returnPath, openAddExpense, closeExpenseSheet,
-        isRecurringPaymentSheetOpen, editingRecurringPayment, closeRecurringPaymentSheet
+        isRecurringPaymentSheetOpen, editingRecurringPayment, closeRecurringPaymentSheet,
+        theme,
     } = useUIStore();
     const { ensureDefaultCategory, loadCategories } = useCategoryStore();
+
+    useEffect(() => {
+        const root = window.document.documentElement;
+
+        const applyTheme = () => {
+            root.classList.remove('light', 'dark');
+            if (theme === 'system') {
+                const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                root.classList.add(systemTheme);
+            } else {
+                root.classList.add(theme);
+            }
+        };
+
+        applyTheme();
+
+        if (theme === 'system') {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const handleChange = () => applyTheme();
+            mediaQuery.addEventListener('change', handleChange);
+            return () => mediaQuery.removeEventListener('change', handleChange);
+        }
+    }, [theme]);
 
     const handleCloseExpense = () => {
         const path = returnPath;

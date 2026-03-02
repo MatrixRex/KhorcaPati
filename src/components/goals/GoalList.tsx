@@ -22,7 +22,7 @@ export function GoalList() {
     }
 
     return (
-        <div className="space-y-2 pb-20">
+        <div className="space-y-1 pb-20">
             {goals.map((goal) => (
                 <GoalCard
                     key={goal.id}

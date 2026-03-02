@@ -1,14 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
-import { format, subDays, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { format, isWithinInterval } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList } from 'recharts';
+import { useFilterStore } from '@/stores/filterStore';
+import { DateRangeFilter } from '@/components/shared/DateRangeFilter';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a28CFE', '#f28C1E', '#32da1E'];
 
 export default function Reports() {
-    const [timeframe, setTimeframe] = useState<'month' | 'week'>('month');
+    const { startDate, endDate } = useFilterStore();
 
     const expenses = useLiveQuery(async () => {
         return await db.expenses.toArray();
@@ -16,10 +18,6 @@ export default function Reports() {
 
     const chartData = useMemo(() => {
         if (!expenses) return { daily: [], category: [] };
-
-        const now = new Date();
-        const startDate = timeframe === 'month' ? startOfMonth(now) : subDays(now, 7);
-        const endDate = timeframe === 'month' ? endOfMonth(now) : now;
 
         const filtered = expenses.filter(exp => {
             const date = new Date(exp.date);
@@ -49,25 +47,18 @@ export default function Reports() {
             .sort((a, b) => b.value - a.value);
 
         return { daily, category };
-    }, [expenses, timeframe]);
+    }, [expenses, startDate, endDate]);
 
     const totalSpent = chartData.category.reduce((sum, item) => sum + item.value, 0);
 
     return (
-        <div className="p-4 h-full flex flex-col pt-10 pb-20 overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
+        <div className="p-4 h-full flex flex-col pt-4 pb-20 overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
                 <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
-                <select
-                    className="bg-transparent text-sm border-b focus:outline-none"
-                    value={timeframe}
-                    onChange={(e) => setTimeframe(e.target.value as 'month' | 'week')}
-                >
-                    <option value="month">This Month</option>
-                    <option value="week">Past 7 Days</option>
-                </select>
+                <DateRangeFilter />
             </div>
 
-            <div className="mb-6 text-center">
+            <div className="mb-4 text-center">
                 <p className="text-muted-foreground text-sm">Total Spent</p>
                 <h2 className="text-3xl font-bold text-primary">৳{totalSpent.toFixed(2)}</h2>
             </div>

@@ -1,15 +1,23 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Expense } from '@/db/schema';
 import { ExpenseCard } from './ExpenseCard';
+import { useFilterStore } from '@/stores/filterStore';
+import { isWithinInterval } from 'date-fns';
 
 interface ExpenseListProps {
     onEdit?: (expense: Expense) => void;
 }
 
 export function ExpenseList({ onEdit }: ExpenseListProps) {
-    const expenses = useLiveQuery(
-        () => db.expenses.orderBy('date').reverse().toArray()
-    );
+    const { startDate, endDate } = useFilterStore();
+
+    const expenses = useLiveQuery(async () => {
+        const all = await db.expenses.orderBy('date').reverse().toArray();
+        return all.filter(exp => {
+            const date = new Date(exp.date);
+            return isWithinInterval(date, { start: startDate, end: endDate });
+        });
+    }, [startDate, endDate]);
 
     if (!expenses) {
         return <div className="p-4 text-center text-muted-foreground">Loading...</div>;
@@ -26,7 +34,7 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
     }
 
     return (
-        <div className="space-y-2 pb-20">
+        <div className="space-y-1 pb-20">
             {expenses.map((expense) => (
                 <ExpenseCard
                     key={expense.id}

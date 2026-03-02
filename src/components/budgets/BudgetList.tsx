@@ -24,7 +24,7 @@ export function BudgetList({ onEdit }: BudgetListProps) {
     }
 
     return (
-        <div className="space-y-2 pb-20">
+        <div className="space-y-1 pb-20">
             {budgets.map((budget) => (
                 <BudgetCard
                     key={budget.id}

@@ -28,8 +28,8 @@ export default function Budgets() {
     };
 
     return (
-        <div className="p-4 h-full flex flex-col pt-10 pb-20">
-            <div className="flex items-center justify-between mb-6">
+        <div className="p-4 h-full flex flex-col pt-4 pb-20">
+            <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                     <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="mr-2">
                         <ArrowLeft className="w-5 h-5" />

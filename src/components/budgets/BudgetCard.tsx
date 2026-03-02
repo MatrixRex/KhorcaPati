@@ -45,24 +45,24 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
 
     return (
         <Card
-            className={`mb-3 cursor-pointer active:bg-muted/50 transition-colors ${isOverBudget ? 'border-destructive/50' : ''}`}
+            className={`cursor-pointer active:bg-muted/50 transition-colors shadow-none ${isOverBudget ? 'border-destructive/50' : ''}`}
             onClick={onClick}
         >
-            <CardContent className="p-4 space-y-3">
+            <CardContent className="px-4 py-3 space-y-2.5">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="font-semibold text-base leading-tight">{budget.category}</h3>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{timelineLabel(budget)}</p>
+                        <h3 className="font-semibold text-sm leading-tight">{budget.category}</h3>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{timelineLabel(budget)}</p>
                     </div>
-                    <span className="text-sm text-muted-foreground font-medium text-right shrink-0 ml-2">
+                    <span className="text-xs text-muted-foreground font-medium text-right shrink-0 ml-2">
                         ৳{spent.toFixed(0)} / ৳{budget.limitAmount.toFixed(0)}
                     </span>
                 </div>
 
-                <Progress value={percentage} className="h-2" indicatorClassName={progressColor} />
+                <Progress value={percentage} className="h-1.5" indicatorClassName={progressColor} />
 
                 {isOverBudget && (
-                    <p className="text-xs text-destructive font-semibold">
+                    <p className="text-[10px] text-destructive font-semibold">
                         Over by ৳{(spent - budget.limitAmount).toFixed(2)}!
                     </p>
                 )}

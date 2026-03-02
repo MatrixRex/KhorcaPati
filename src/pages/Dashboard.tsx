@@ -44,32 +44,38 @@ export default function Dashboard() {
         .reduce((sum, b) => sum + b.limitAmount, 0) || 0;
 
     return (
-        <div className="p-4 h-full flex flex-col pt-10 pb-20 overflow-y-auto w-full text-foreground bg-background">
-            <div className="flex items-center justify-between mb-6">
+        <div className="p-4 h-full flex flex-col pt-4 pb-20 overflow-y-auto w-full text-foreground bg-background">
+            <div className="flex items-center justify-between mb-4">
                 <h1 className="text-2xl font-bold tracking-tight">খরচা পাতি</h1>
             </div>
 
             {/* At A Glance */}
-            <Card className="mb-6 bg-primary text-primary-foreground border-none shadow-md">
-                <CardContent className="p-6">
-                    <p className="text-primary-foreground/80 text-sm font-medium mb-1">Spent this month ({formatRelativeDate(new Date(), true)})</p>
-                    <h2 className="text-4xl font-bold mb-2">৳{totalSpent.toFixed(0)}</h2>
+            <Card className="mb-4 bg-primary text-primary-foreground border-none shadow-lg">
+                <CardContent className="p-5">
+                    <p className="text-primary-foreground/70 text-xs font-semibold uppercase tracking-wider mb-1">Spent this month</p>
+                    <div className="flex items-baseline gap-1 mb-2">
+                        <span className="text-xl font-bold opacity-90">৳</span>
+                        <h2 className="text-3xl font-bold tracking-tight">{totalSpent.toFixed(0)}</h2>
+                    </div>
                     {totalBudgetLimit > 0 && (
-                        <p className="text-sm font-medium">Budget Limit: ৳{totalBudgetLimit.toFixed(0)}</p>
+                        <div className="flex items-center justify-between text-[11px] font-medium opacity-80 border-t border-primary-foreground/10 pt-2">
+                            <span>Budget Limit</span>
+                            <span>৳{totalBudgetLimit.toFixed(0)}</span>
+                        </div>
                     )}
                 </CardContent>
             </Card>
 
             {/* Recent Expenses */}
-            <div className="mb-6">
-                <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-bold">Recent Expenses</h2>
-                    <Link to="/expenses" className="text-sm text-primary font-medium hover:underline">View All</Link>
+            <div className="mb-5">
+                <div className="flex items-center justify-between mb-2 px-1">
+                    <h2 className="text-base font-bold text-foreground/90">Recent Expenses</h2>
+                    <Link to="/expenses" className="text-xs text-primary font-semibold hover:underline">View All</Link>
                 </div>
                 {!recentExpenses || recentExpenses.length === 0 ? (
                     <p className="text-sm text-muted-foreground p-4 text-center border rounded-lg border-dashed text-foreground/60">No expenses yet.</p>
                 ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                         {recentExpenses.map(exp => (
                             <ExpenseCard key={exp.id} expense={exp} onClick={() => openEditExpense(exp)} />
                         ))}
@@ -78,13 +84,13 @@ export default function Dashboard() {
             </div>
 
             {/* Recurring Payments */}
-            <div className="mb-6">
-                <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-bold">Recurring Payments</h2>
+            <div className="mb-5">
+                <div className="flex items-center justify-between mb-2 px-1">
+                    <h2 className="text-base font-bold text-foreground/90">Recurring Payments</h2>
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="text-primary font-medium"
+                        className="h-auto py-1 px-2 text-xs text-primary font-semibold"
                         onClick={openAddRecurringPayment}
                     >
                         + Add New
@@ -93,7 +99,7 @@ export default function Dashboard() {
                 {!recurringPayments || recurringPayments.length === 0 ? (
                     <p className="text-sm text-muted-foreground p-4 text-center border rounded-lg border-dashed text-foreground/60">No recurring payments scheduled.</p>
                 ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                         {recurringPayments.map(payment => (
                             <RecurringPaymentCard
                                 key={payment.id}
@@ -106,15 +112,15 @@ export default function Dashboard() {
             </div>
 
             {/* Budget Overview */}
-            <div className="mb-6">
-                <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-bold">Budgets</h2>
-                    <Link to="/budgets" className="text-sm text-primary font-medium hover:underline">Manage</Link>
+            <div className="mb-5">
+                <div className="flex items-center justify-between mb-2 px-1">
+                    <h2 className="text-base font-bold text-foreground/90">Budgets</h2>
+                    <Link to="/budgets" className="text-xs text-primary font-semibold hover:underline">Manage</Link>
                 </div>
                 {!budgets || budgets.length === 0 ? (
                     <p className="text-sm text-muted-foreground p-4 text-center border rounded-lg border-dashed text-foreground/60">No budgets set.</p>
                 ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                         {budgets.map(budget => (
                             <BudgetCard key={budget.id} budget={budget} />
                         ))}
@@ -123,15 +129,15 @@ export default function Dashboard() {
             </div>
 
             {/* Active Goals */}
-            <div className="mb-6">
-                <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-lg font-bold">Active Goals</h2>
-                    <Link to="/goals" className="text-sm text-primary font-medium hover:underline">Manage</Link>
+            <div className="mb-5">
+                <div className="flex items-center justify-between mb-2 px-1">
+                    <h2 className="text-base font-bold text-foreground/90">Active Goals</h2>
+                    <Link to="/goals" className="text-xs text-primary font-semibold hover:underline">Manage</Link>
                 </div>
                 {!activeGoals || activeGoals.length === 0 ? (
                     <p className="text-sm text-muted-foreground p-4 text-center border rounded-lg border-dashed text-foreground/60">No active goals.</p>
                 ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                         {activeGoals.map(goal => (
                             <GoalCard key={goal.id} goal={goal} />
                         ))}

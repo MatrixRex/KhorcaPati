@@ -8,7 +8,11 @@ import { useUIStore } from '@/stores/uiStore';
 import { useNavigate } from 'react-router-dom';
 import { useCloseWatcher } from '@/hooks/use-close-watcher';
 
+import { useFilterStore } from '@/stores/filterStore';
+import { isWithinInterval } from 'date-fns';
+
 export function ItemTracker() {
+    const { startDate, endDate } = useFilterStore();
     const { selectedInventoryItem, setSelectedInventoryItem, openEditExpense } = useUIStore();
     const [touchStartX, setTouchStartX] = useState(0);
     const navigate = useNavigate();
@@ -28,9 +32,13 @@ export function ItemTracker() {
         }
     };
 
-    const items = useLiveQuery(
-        () => db.items.orderBy('date').reverse().toArray()
-    );
+    const items = useLiveQuery(async () => {
+        const all = await db.items.orderBy('date').reverse().toArray();
+        return all.filter(item => {
+            const date = new Date(item.date);
+            return isWithinInterval(date, { start: startDate, end: endDate });
+        });
+    }, [startDate, endDate]);
 
     if (!items) {
         return <div className="p-4 text-center text-muted-foreground">Loading items...</div>;

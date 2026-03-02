@@ -1,13 +1,21 @@
+import { useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ExpenseForm } from '@/components/expenses/ExpenseForm';
 import { useUIStore } from '@/stores/uiStore';
+import { useCategoryStore } from '@/stores/categoryStore';
 
 export function GlobalUI() {
     const location = useLocation();
     const { isExpenseSheetOpen, editingExpense, openAddExpense, closeExpenseSheet } = useUIStore();
+    const { ensureDefaultCategory, loadCategories } = useCategoryStore();
+
+    useEffect(() => {
+        ensureDefaultCategory();
+        loadCategories();
+    }, [ensureDefaultCategory, loadCategories]);
 
     // Hide FAB on settings page
     const showFAB = location.pathname !== '/settings';

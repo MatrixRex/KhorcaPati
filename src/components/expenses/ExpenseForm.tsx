@@ -10,6 +10,7 @@ import { useItemStore } from '@/stores/itemStore';
 import { parseItemInput } from '@/parsers/itemParser';
 import { format } from 'date-fns';
 import { db, type Expense } from '@/db/schema';
+import { CategoryComboBox } from './CategoryComboBox';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -49,7 +50,7 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
         resolver: zodResolver(expenseSchema),
         defaultValues: {
             amount: initialData?.amount || 0,
-            category: initialData?.category || 'General',
+            category: initialData?.category || 'Unsorted',
             date: initialData?.date || format(new Date(), 'yyyy-MM-dd'),
             note: initialData?.note || '',
             isRecurring: initialData?.isRecurring || false,
@@ -139,7 +140,12 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
 
                 <div className="space-y-2">
                     <Label htmlFor="category">Category</Label>
-                    <Input id="category" placeholder="e.g. Food" {...form.register('category')} />
+                    <div className="w-full">
+                        <CategoryComboBox
+                            value={form.watch('category')}
+                            onChange={(val) => form.setValue('category', val)}
+                        />
+                    </div>
                     {form.formState.errors.category && (
                         <p className="text-destructive text-sm">{form.formState.errors.category.message}</p>
                     )}

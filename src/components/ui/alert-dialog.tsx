@@ -3,11 +3,29 @@ import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useCloseWatcher } from "@/hooks/use-close-watcher"
+
+const AlertDialogContext = React.createContext<{ onClose?: () => void }>({})
 
 function AlertDialog({
+  open,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
-  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
+  const onClose = React.useCallback(() => {
+    onOpenChange?.(false)
+  }, [onOpenChange])
+
+  return (
+    <AlertDialogContext.Provider value={{ onClose }}>
+      <AlertDialogPrimitive.Root
+        data-slot="alert-dialog"
+        open={open}
+        onOpenChange={onOpenChange}
+        {...props}
+      />
+    </AlertDialogContext.Provider>
+  )
 }
 
 function AlertDialogTrigger({
@@ -49,6 +67,12 @@ function AlertDialogContent({
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
   size?: "default" | "sm"
 }) {
+  const { onClose } = React.useContext(AlertDialogContext)
+
+  useCloseWatcher(true, () => {
+    onClose?.()
+  })
+
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />

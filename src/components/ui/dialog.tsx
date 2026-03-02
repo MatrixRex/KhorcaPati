@@ -6,11 +6,29 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useCloseWatcher } from "@/hooks/use-close-watcher"
+
+const DialogContext = React.createContext<{ onClose?: () => void }>({})
 
 function Dialog({
+  open,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+  const onClose = React.useCallback(() => {
+    onOpenChange?.(false)
+  }, [onOpenChange])
+
+  return (
+    <DialogContext.Provider value={{ onClose }}>
+      <DialogPrimitive.Root
+        data-slot="dialog"
+        open={open}
+        onOpenChange={onOpenChange}
+        {...props}
+      />
+    </DialogContext.Provider>
+  )
 }
 
 function DialogTrigger({
@@ -55,6 +73,12 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  const { onClose } = React.useContext(DialogContext)
+
+  useCloseWatcher(true, () => {
+    onClose?.()
+  })
+
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />

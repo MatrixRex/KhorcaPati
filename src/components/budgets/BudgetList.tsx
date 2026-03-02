@@ -1,9 +1,13 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/db/schema';
+import { db, type Budget } from '@/db/schema';
 import { BudgetCard } from './BudgetCard';
 import { format } from 'date-fns';
 
-export function BudgetList() {
+interface BudgetListProps {
+    onEdit?: (budget: Budget) => void;
+}
+
+export function BudgetList({ onEdit }: BudgetListProps) {
     const currentMonth = format(new Date(), 'yyyy-MM');
 
     const budgets = useLiveQuery(
@@ -31,7 +35,7 @@ export function BudgetList() {
                 <BudgetCard
                     key={budget.id}
                     budget={budget}
-                    onClick={() => console.log('Edit budget', budget.id)}
+                    onClick={() => onEdit?.(budget)}
                 />
             ))}
         </div>

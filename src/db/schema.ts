@@ -5,6 +5,7 @@ export interface Expense {
     parentId: number | null;      // null = top-level; set = sub-expense
     title?: string;
     amount: number;
+    type: 'expense' | 'income';
     category: string;
     date: string;                 // ISO 8601
     note: string;
@@ -69,6 +70,7 @@ export interface RecurringPayment {
     id?: number;
     title: string;
     amount: number;
+    type: 'expense' | 'income';
     category: string;
     startDate: string;                 // ISO 8601
     interval: 'one-time' | 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -120,6 +122,22 @@ db.version(5).stores({
     goals: '++id, createdAt',
     categories: '++id, name, isDefault',
     recurringPayments: '++id, title, nextDueDate, category'
+});
+
+db.version(6).stores({
+    expenses: '++id, parentId, date, category, isRecurring, type',
+    items: '++id, expenseId, name, date',
+    budgets: '++id, category, timelineType, recurringInterval',
+    goals: '++id, createdAt',
+    categories: '++id, name, isDefault',
+    recurringPayments: '++id, title, nextDueDate, category, type'
+}).upgrade((tx) => {
+    tx.table('expenses').toCollection().modify((expense: Expense) => {
+        if (!expense.type) expense.type = 'expense';
+    });
+    tx.table('recurringPayments').toCollection().modify((payment: RecurringPayment) => {
+        if (!payment.type) payment.type = 'expense';
+    });
 });
 
 export { db };

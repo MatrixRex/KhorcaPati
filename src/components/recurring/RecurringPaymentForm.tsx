@@ -6,6 +6,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 import { useRecurringPaymentStore } from '@/stores/recurringPaymentStore';
 import { useExpenseStore } from '@/stores/expenseStore';
 import { format, addDays, addWeeks, addMonths, addYears, parseISO } from 'date-fns';
@@ -32,6 +33,7 @@ import {
 const recurringSchema = z.object({
     title: z.string().min(1, 'Title is required'),
     amount: z.number().min(0.01, 'Amount must be greater than 0'),
+    type: z.enum(['expense', 'income']),
     category: z.string().min(1, 'Category is required'),
     startDate: z.string(),
     interval: z.enum(['one-time', 'daily', 'weekly', 'monthly', 'yearly']),
@@ -61,6 +63,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
         defaultValues: {
             title: initialData?.title || '',
             amount: initialData?.amount || 0,
+            type: initialData?.type || 'expense',
             category: initialData?.category || 'Unsorted',
             startDate: initialData?.startDate || format(new Date(), 'yyyy-MM-dd'),
             interval: initialData?.interval || 'monthly',
@@ -85,6 +88,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
             // 1. Create Expense
             await addExpense({
                 amount: initialData.amount,
+                type: initialData.type,
                 category: initialData.category,
                 date: format(new Date(), 'yyyy-MM-dd'), // Confirming now
                 note: initialData.note || '',
@@ -161,6 +165,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
 
             const payload: Omit<RecurringPayment, 'id'> = {
                 ...data,
+                type: data.type,
                 category: validCategory,
                 note: data.note || '',
                 nextDueDate: nextDueDate,
@@ -191,6 +196,40 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
         <>
             <form className="space-y-4">
                 <div className="flex justify-between items-center mb-2">
+                    <div className="flex bg-muted p-1 rounded-xl w-full">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                form.setValue('type', 'expense', { shouldDirty: true });
+                                form.handleSubmit(performSave)();
+                            }}
+                            className={cn(
+                                "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
+                                form.watch('type') === 'expense'
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            Expense
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                form.setValue('type', 'income', { shouldDirty: true });
+                                form.handleSubmit(performSave)();
+                            }}
+                            className={cn(
+                                "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
+                                form.watch('type') === 'income'
+                                    ? "bg-green-600 text-white shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            Income
+                        </button>
+                    </div>
+                </div>
+                <div className="flex items-center">
                     <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                         {saveStatus === 'saving' && 'Saving...'}
                         {saveStatus === 'saved' && 'All changes saved'}

@@ -10,11 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
 import { PageContainer } from '@/components/shared/PageContainer';
-import { Plus } from 'lucide-react';
 
 export default function Dashboard() {
     const currentMonth = format(new Date(), 'yyyy-MM');
-    const { openEditExpense, openAddRecurringPayment, openEditRecurringPayment, openAddExpense } = useUIStore();
+    const { openEditExpense, openAddRecurringPayment, openEditRecurringPayment } = useUIStore();
 
     const expensesThisMonth = useLiveQuery(async () => {
         const all = await db.expenses.toArray();
@@ -38,19 +37,13 @@ export default function Dashboard() {
         return all.filter(g => g.currentAmount < g.targetAmount).slice(0, 2);
     });
 
-    const totalSpent = expensesThisMonth?.reduce((sum, e) => sum + e.amount, 0) || 0;
-    const totalBudgetLimit = budgets
-        ?.filter(b => b.timelineType === 'recurring' && b.recurringInterval === 'monthly')
-        .reduce((sum, b) => sum + b.limitAmount, 0) || 0;
+    const totalSpent = expensesThisMonth?.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0) || 0;
+    const totalIncome = expensesThisMonth?.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0) || 0;
+    const totalBalance = totalIncome - totalSpent;
 
     return (
         <PageContainer
             title="খরচা পাতি"
-            headerAction={
-                <Button size="icon" variant="ghost" className="h-9 w-9" onClick={openAddExpense}>
-                    <Plus className="h-5 w-5" />
-                </Button>
-            }
         >
             {/* At A Glance */}
             <Card className="mb-6 bg-primary text-primary-foreground border-none shadow-xl rounded-3xl overflow-hidden group">
@@ -58,17 +51,23 @@ export default function Dashboard() {
                     <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
                         <div className="text-8xl font-black italic select-none">৳</div>
                     </div>
-                    <p className="text-primary-foreground/70 text-[10px] font-bold uppercase tracking-[0.2em] mb-1 relative z-10">Spent this month</p>
+                    <p className="text-primary-foreground/70 text-[10px] font-bold uppercase tracking-[0.2em] mb-1 relative z-10">Current Balance</p>
                     <div className="flex items-baseline gap-1 mb-4 relative z-10">
                         <span className="text-xl font-bold opacity-80 decoration-primary-foreground/30 underline decoration-2 underline-offset-4">৳</span>
-                        <h2 className="text-4xl font-black tracking-tight">{totalSpent.toFixed(0)}</h2>
+                        <h2 className="text-4xl font-black tracking-tight">{totalBalance.toFixed(0)}</h2>
                     </div>
-                    {totalBudgetLimit > 0 && (
-                        <div className="flex items-center justify-between text-[11px] font-bold opacity-80 bg-black/10 -mx-6 -mb-6 px-6 py-3 relative z-10">
-                            <span className="uppercase tracking-widest">Budget Limit</span>
-                            <span className="text-sm">৳{totalBudgetLimit.toFixed(0)}</span>
+
+                    <div className="flex items-center gap-4 relative z-10 mt-2 border-t border-primary-foreground/10 pt-3">
+                        <div className="flex flex-col">
+                            <span className="text-[8px] font-bold uppercase opacity-60 tracking-wider">Income</span>
+                            <span className="text-sm font-black text-green-300">৳{totalIncome.toFixed(0)}</span>
                         </div>
-                    )}
+                        <div className="w-px h-6 bg-primary-foreground/10" />
+                        <div className="flex flex-col">
+                            <span className="text-[8px] font-bold uppercase opacity-60 tracking-wider">Expenses</span>
+                            <span className="text-sm font-black text-red-300">৳{totalSpent.toFixed(0)}</span>
+                        </div>
+                    </div>
                 </CardContent>
             </Card>
 

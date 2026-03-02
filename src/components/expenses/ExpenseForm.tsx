@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -26,6 +27,7 @@ import {
 
 const expenseSchema = z.object({
     amount: z.number().min(0.01, 'Amount must be greater than 0'),
+    type: z.enum(['expense', 'income']),
     category: z.string().min(1, 'Category is required'),
     date: z.string(),
     note: z.string().optional(),
@@ -56,6 +58,7 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
         resolver: zodResolver(expenseSchema),
         defaultValues: {
             amount: initialData?.amount || 0,
+            type: initialData?.type || 'expense',
             category: initialData?.category || 'Unsorted',
             date: initialData?.date || format(new Date(), 'yyyy-MM-dd'),
             note: initialData?.note || '',
@@ -110,6 +113,7 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
 
             const payload: Omit<Expense, 'id'> = {
                 ...data,
+                type: data.type,
                 category: validCategory,
                 note: data.note || '',
                 parentId: initialData?.parentId || null,
@@ -146,6 +150,40 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
         <>
             <form className="space-y-4">
                 <div className="flex justify-between items-center mb-2">
+                    <div className="flex bg-muted p-1 rounded-xl w-full">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                form.setValue('type', 'expense', { shouldDirty: true });
+                                form.handleSubmit(performSave)();
+                            }}
+                            className={cn(
+                                "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
+                                form.watch('type') === 'expense'
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            Expense
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                form.setValue('type', 'income', { shouldDirty: true });
+                                form.handleSubmit(performSave)();
+                            }}
+                            className={cn(
+                                "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
+                                form.watch('type') === 'income'
+                                    ? "bg-green-600 text-white shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            Income
+                        </button>
+                    </div>
+                </div>
+                <div className="flex items-center">
                     <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                         {saveStatus === 'saving' && 'Saving...'}
                         {saveStatus === 'saved' && 'All changes saved'}

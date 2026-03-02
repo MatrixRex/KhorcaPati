@@ -67,9 +67,9 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
                 <div className="flex flex-col items-end shrink-0">
                     <span className={cn(
                         "font-black text-base transition-colors",
-                        isOverdue ? "text-destructive" : "text-primary group-hover:text-primary"
+                        isOverdue ? "text-destructive" : payment.type === 'income' ? "text-green-600" : "text-primary group-hover:text-primary"
                     )}>
-                        ৳{payment.amount.toFixed(0)}
+                        {payment.type === 'income' ? '+' : ''}৳{payment.amount.toFixed(0)}
                     </span>
                     {payment.note && (
                         <span className="text-[9px] text-muted-foreground/60 truncate max-w-[80px] font-medium italic mt-0.5">

@@ -1,6 +1,7 @@
 import { type Expense } from '@/db/schema';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { formatRelativeDate } from '@/utils/date';
 
 interface ExpenseCardProps {
@@ -34,8 +35,11 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                 </div>
 
                 <div className="flex flex-col items-end shrink-0">
-                    <span className="font-black text-base text-primary">
-                        ৳{expense.amount.toFixed(0)}
+                    <span className={cn(
+                        "font-black text-base",
+                        expense.type === 'income' ? "text-green-600" : "text-primary"
+                    )}>
+                        {expense.type === 'income' ? '+' : ''}৳{expense.amount.toFixed(0)}
                     </span>
                     {expense.parentId && (
                         <Badge variant="outline" className="text-[8px] font-black uppercase border-primary/20 text-primary px-1 h-3.5 mt-0.5">

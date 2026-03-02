@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { BottomNav } from '@/components/shared/BottomNav';
 import { GlobalUI } from '@/components/shared/GlobalUI';
 import { useBudgetNotifications } from '@/hooks/useBudgetNotifications';
+import { useRecurringNotifications } from '@/hooks/useRecurringNotifications';
 
 import Dashboard from '@/pages/Dashboard';
 import Expenses from '@/pages/Expenses';
@@ -15,6 +16,7 @@ import Settings from '@/pages/Settings';
 /** Requests notification permission once on app start, then runs budget alert checks. */
 function NotificationManager() {
   useBudgetNotifications();
+  useRecurringNotifications();
   return null;
 }
 

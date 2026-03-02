@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useBudgetStore } from '@/stores/budgetStore';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { type Budget, type BudgetRecurringInterval, db } from '@/db/schema';
 import { CategoryComboBox } from '@/components/expenses/CategoryComboBox';
 import { cn } from '@/lib/utils';
@@ -156,7 +157,15 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                         type="number"
                         step="0.01"
                         inputMode="decimal"
-                        {...form.register('limitAmount', { valueAsNumber: true })}
+                        onKeyDown={(e) => {
+                            if (['e', 'E', '+', '-'].includes(e.key)) {
+                                e.preventDefault();
+                            }
+                        }}
+                        {...form.register('limitAmount', {
+                            valueAsNumber: true,
+                            setValueAs: (v) => v === "" ? 0 : Number(v)
+                        })}
                     />
                     {form.formState.errors.limitAmount && (
                         <p className="text-destructive text-sm">{form.formState.errors.limitAmount.message}</p>
@@ -220,10 +229,16 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1.5">
                                     <Label htmlFor="startDate" className="text-xs">From</Label>
-                                    <Input
-                                        id="startDate"
-                                        type="date"
-                                        {...form.register('startDate')}
+                                    <Controller
+                                        control={form.control}
+                                        name="startDate"
+                                        render={({ field }) => (
+                                            <DatePicker
+                                                date={field.value ? parseISO(field.value) : undefined}
+                                                setDate={(date) => field.onChange(date ? format(date, 'yyyy-MM-dd') : '')}
+                                                className="h-9 text-xs"
+                                            />
+                                        )}
                                     />
                                     {form.formState.errors.startDate && (
                                         <p className="text-destructive text-xs">{form.formState.errors.startDate.message}</p>
@@ -231,10 +246,16 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label htmlFor="endDate" className="text-xs">To</Label>
-                                    <Input
-                                        id="endDate"
-                                        type="date"
-                                        {...form.register('endDate')}
+                                    <Controller
+                                        control={form.control}
+                                        name="endDate"
+                                        render={({ field }) => (
+                                            <DatePicker
+                                                date={field.value ? parseISO(field.value) : undefined}
+                                                setDate={(date) => field.onChange(date ? format(date, 'yyyy-MM-dd') : '')}
+                                                className="h-9 text-xs"
+                                            />
+                                        )}
                                     />
                                     {form.formState.errors.endDate && (
                                         <p className="text-destructive text-xs">{form.formState.errors.endDate.message}</p>

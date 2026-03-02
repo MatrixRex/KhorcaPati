@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useExpenseStore } from '@/stores/expenseStore';
 import { useItemStore } from '@/stores/itemStore';
 import { parseItemInput } from '@/parsers/itemParser';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { db, type Expense } from '@/db/schema';
 import { CategoryComboBox } from './CategoryComboBox';
 import { useCategoryStore } from '@/stores/categoryStore';
@@ -159,8 +160,15 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
                             id="amount"
                             type="number"
                             step="0.01"
+                            inputMode="decimal"
+                            onKeyDown={(e) => {
+                                if (['e', 'E', '+', '-'].includes(e.key)) {
+                                    e.preventDefault();
+                                }
+                            }}
                             {...form.register('amount', {
                                 valueAsNumber: true,
+                                setValueAs: (v) => v === "" ? 0 : Number(v),
                                 onBlur: handleBlur
                             })}
                         />
@@ -170,12 +178,21 @@ export function ExpenseForm({ initialData, onSuccess, onCancel }: ExpenseFormPro
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="date">Date</Label>
-                        <Input
-                            id="date"
-                            type="date"
-                            {...form.register('date', {
-                                onBlur: handleBlur
-                            })}
+                        <Controller
+                            control={form.control}
+                            name="date"
+                            render={({ field }) => (
+                                <DatePicker
+                                    date={field.value ? parseISO(field.value) : undefined}
+                                    setDate={(date) => {
+                                        const newDate = date ? format(date, 'yyyy-MM-dd') : '';
+                                        field.onChange(newDate);
+                                        if (newDate) {
+                                            form.handleSubmit(performSave)();
+                                        }
+                                    }}
+                                />
+                            )}
                         />
                     </div>
                 </div>

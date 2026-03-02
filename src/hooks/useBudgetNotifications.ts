@@ -2,39 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { calcSpent, budgetPeriodKey } from '@/utils/budgetWindow';
-
-const STORAGE_KEY = 'kp_budget_notified';
-
-/** Retrieve the set of already-fired notification keys from localStorage. */
-function getNotified(): Set<string> {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return new Set(raw ? JSON.parse(raw) : []);
-    } catch {
-        return new Set();
-    }
-}
-
-function markNotified(key: string) {
-    const set = getNotified();
-    set.add(key);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
-}
-
-function fire(title: string, body: string) {
-    if (Notification.permission !== 'granted') return;
-    try {
-        new Notification(title, {
-            body,
-            icon: '/pwa-192x192.png',
-            badge: '/pwa-192x192.png',
-            tag: title,          // collapse duplicate titles
-            renotify: false,
-        });
-    } catch (err) {
-        console.warn('Notification failed:', err);
-    }
-}
+import { getNotified, markNotified, fireNotification } from '@/utils/notifications';
 
 /**
  * Runs in the background and fires a local Web Notification when:
@@ -65,7 +33,7 @@ export function useBudgetNotifications() {
 
             // --- Over-budget alert (highest priority) ---
             if (ratio >= 1 && !notified.has(overKey)) {
-                fire(
+                fireNotification(
                     `🚨 Over Budget: ${budget.category}`,
                     `You've spent ৳${spent.toFixed(0)} — that's ৳${(spent - budget.limitAmount).toFixed(0)} over your ৳${budget.limitAmount.toFixed(0)} limit.`
                 );
@@ -77,7 +45,7 @@ export function useBudgetNotifications() {
             // --- Alert-threshold notification ---
             else if (ratio >= budget.alertThreshold && ratio < 1 && !notified.has(thresholdKey)) {
                 const pct = Math.round(ratio * 100);
-                fire(
+                fireNotification(
                     `⚠️ Budget Alert: ${budget.category}`,
                     `You've used ${pct}% of your ৳${budget.limitAmount.toFixed(0)} budget. ৳${(budget.limitAmount - spent).toFixed(0)} remaining.`
                 );

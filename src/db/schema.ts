@@ -65,12 +65,26 @@ export interface Category {
     isDefault: boolean;
 }
 
+export interface RecurringPayment {
+    id?: number;
+    title: string;
+    amount: number;
+    category: string;
+    startDate: string;                 // ISO 8601
+    interval: 'one-time' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+    nextDueDate: string;               // ISO 8601
+    note: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 const db = new Dexie('KhorocaPatiDB') as Dexie & {
     expenses: EntityTable<Expense, 'id'>;
     items: EntityTable<Item, 'id'>;
     budgets: EntityTable<Budget, 'id'>;
     goals: EntityTable<Goal, 'id'>;
     categories: EntityTable<Category, 'id'>;
+    recurringPayments: EntityTable<RecurringPayment, 'id'>;
 };
 
 // Schema declaration
@@ -97,6 +111,15 @@ db.version(4).stores({
             budget.endDate = null;
         }
     });
+});
+
+db.version(5).stores({
+    expenses: '++id, parentId, date, category, isRecurring',
+    items: '++id, expenseId, name, date',
+    budgets: '++id, category, timelineType, recurringInterval',
+    goals: '++id, createdAt',
+    categories: '++id, name, isDefault',
+    recurringPayments: '++id, title, nextDueDate, category'
 });
 
 export { db };

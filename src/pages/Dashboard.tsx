@@ -2,15 +2,17 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { format } from 'date-fns';
 import { ExpenseCard } from '@/components/expenses/ExpenseCard';
+import { RecurringPaymentCard } from '@/components/recurring/RecurringPaymentCard';
 import { GoalCard } from '@/components/goals/GoalCard';
 import { BudgetCard } from '@/components/budgets/BudgetCard';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
 
 export default function Dashboard() {
     const currentMonth = format(new Date(), 'yyyy-MM');
-    const { openEditExpense } = useUIStore();
+    const { openEditExpense, openAddRecurringPayment, openEditRecurringPayment } = useUIStore();
 
     const expensesThisMonth = useLiveQuery(async () => {
         const all = await db.expenses.toArray();
@@ -19,6 +21,10 @@ export default function Dashboard() {
 
     const recentExpenses = useLiveQuery(
         () => db.expenses.orderBy('date').reverse().limit(3).toArray()
+    );
+
+    const recurringPayments = useLiveQuery(
+        () => db.recurringPayments.orderBy('nextDueDate').toArray()
     );
 
     const budgets = useLiveQuery(
@@ -65,6 +71,34 @@ export default function Dashboard() {
                     <div className="space-y-2">
                         {recentExpenses.map(exp => (
                             <ExpenseCard key={exp.id} expense={exp} onClick={() => openEditExpense(exp)} />
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Recurring Payments */}
+            <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-lg font-bold">Recurring Payments</h2>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary font-medium"
+                        onClick={openAddRecurringPayment}
+                    >
+                        + Add New
+                    </Button>
+                </div>
+                {!recurringPayments || recurringPayments.length === 0 ? (
+                    <p className="text-sm text-muted-foreground p-4 text-center border rounded-lg border-dashed text-foreground/60">No recurring payments scheduled.</p>
+                ) : (
+                    <div className="space-y-2">
+                        {recurringPayments.map(payment => (
+                            <RecurringPaymentCard
+                                key={payment.id}
+                                payment={payment}
+                                onClick={() => openEditRecurringPayment(payment)}
+                            />
                         ))}
                     </div>
                 )}

@@ -16,13 +16,23 @@ export default function Dashboard() {
     const { openEditExpense, openAddRecurringPayment, openEditRecurringPayment } = useUIStore();
 
     const expensesThisMonth = useLiveQuery(async () => {
-        const all = await db.expenses.toArray();
+        const all = await db.expenses.filter(e => !e.parentId).toArray();
         return all.filter(e => e.date.startsWith(currentMonth));
     }, [currentMonth]);
 
-    const recentExpenses = useLiveQuery(
-        () => db.expenses.orderBy('date').reverse().limit(3).toArray()
-    );
+    const recentExpenses = useLiveQuery(async () => {
+        const topLevel = await db.expenses.filter(e => !e.parentId).toArray();
+        topLevel.sort((a, b) => {
+            const dateA = new Date(a.date).getTime();
+            const dateB = new Date(b.date).getTime();
+            if (dateA !== dateB) return dateB - dateA;
+            return (b.id || 0) - (a.id || 0);
+        });
+        return topLevel.slice(0, 3);
+    });
+
+
+
 
     const recurringPayments = useLiveQuery(
         () => db.recurringPayments.orderBy('nextDueDate').toArray()

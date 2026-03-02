@@ -13,8 +13,10 @@ export default function Reports() {
     const { startDate, endDate } = useFilterStore();
 
     const expenses = useLiveQuery(async () => {
-        return await db.expenses.toArray();
+        return await db.expenses.filter(e => !e.parentId).toArray();
     });
+
+
 
     const chartData = useMemo(() => {
         if (!expenses) return { daily: [], category: [] };

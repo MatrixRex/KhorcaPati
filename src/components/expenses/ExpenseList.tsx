@@ -12,12 +12,26 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
     const { startDate, endDate } = useFilterStore();
 
     const expenses = useLiveQuery(async () => {
-        const all = await db.expenses.orderBy('date').reverse().toArray();
+        // Only fetch top-level records
+        const all = await db.expenses
+            .filter(e => !e.parentId)
+            .toArray();
+
+        // Sort by date descending, then by ID descending
+        all.sort((a, b) => {
+            const dateA = new Date(a.date).getTime();
+            const dateB = new Date(b.date).getTime();
+            if (dateA !== dateB) return dateB - dateA;
+            return (b.id || 0) - (a.id || 0); // Tie-breaker: Newer ID first
+        });
+
+
         return all.filter(exp => {
             const date = new Date(exp.date);
             return isWithinInterval(date, { start: startDate, end: endDate });
         });
     }, [startDate, endDate]);
+
 
     if (!expenses) {
         return <div className="p-4 text-center text-muted-foreground">Loading...</div>;

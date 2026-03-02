@@ -7,14 +7,20 @@ export type Theme = 'light' | 'dark' | 'system';
 interface UIState {
     isExpenseSheetOpen: boolean;
     editingExpense?: Expense;
+    initialParentId?: number | null;
+    isSubRecordSheetOpen: boolean;
+    editingSubRecord?: Expense;
     isRecurringPaymentSheetOpen: boolean;
     editingRecurringPayment?: RecurringPayment;
     selectedInventoryItem: string | null;
     returnPath: string | null;
     theme: Theme;
-    openAddExpense: () => void;
+    openAddExpense: (parentId?: number | null) => void;
     openEditExpense: (expense: Expense, returnPath?: string) => void;
     closeExpenseSheet: () => void;
+    openAddSubRecord: (parentId: number) => void;
+    openEditSubRecord: (expense: Expense) => void;
+    closeSubRecordSheet: () => void;
     openAddRecurringPayment: () => void;
     openEditRecurringPayment: (payment: RecurringPayment) => void;
     closeRecurringPaymentSheet: () => void;
@@ -28,28 +34,54 @@ export const useUIStore = create<UIState>()(
         (set) => ({
             isExpenseSheetOpen: false,
             editingExpense: undefined,
+            initialParentId: null,
+            isSubRecordSheetOpen: false,
+            editingSubRecord: undefined,
             isRecurringPaymentSheetOpen: false,
             editingRecurringPayment: undefined,
             selectedInventoryItem: null,
             returnPath: null,
             theme: 'system',
 
-            openAddExpense: () => set({
+            openAddExpense: (parentId) => set({
                 isExpenseSheetOpen: true,
-                editingExpense: undefined
+                editingExpense: undefined,
+                initialParentId: parentId ?? null
             }),
 
             openEditExpense: (expense, returnPath) => set({
                 isExpenseSheetOpen: true,
                 editingExpense: expense,
+                initialParentId: null,
                 returnPath: returnPath ?? null
             }),
 
             closeExpenseSheet: () => set({
                 isExpenseSheetOpen: false,
                 editingExpense: undefined,
+                initialParentId: null,
                 returnPath: null
             }),
+
+            openAddSubRecord: (parentId) => set({
+                isSubRecordSheetOpen: true,
+                editingSubRecord: undefined,
+                initialParentId: parentId
+            }),
+
+            openEditSubRecord: (expense) => set({
+                isSubRecordSheetOpen: true,
+                editingSubRecord: expense,
+                initialParentId: expense.parentId
+            }),
+
+            closeSubRecordSheet: () => set({
+                isSubRecordSheetOpen: false,
+                editingSubRecord: undefined,
+                initialParentId: null
+            }),
+
+
 
             openAddRecurringPayment: () => set({
                 isRecurringPaymentSheetOpen: true,

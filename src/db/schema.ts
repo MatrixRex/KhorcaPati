@@ -3,6 +3,7 @@ import Dexie, { type EntityTable } from 'dexie';
 export interface Expense {
     id?: number;
     parentId: number | null;      // null = top-level; set = sub-expense
+    isNested: boolean;            // true = parent record with sub-records
     title?: string;
     amount: number;
     type: 'expense' | 'income';
@@ -140,4 +141,18 @@ db.version(6).stores({
     });
 });
 
+db.version(7).stores({
+    expenses: '++id, parentId, isNested, date, category, isRecurring, type',
+    items: '++id, expenseId, name, date',
+    budgets: '++id, category, timelineType, recurringInterval',
+    goals: '++id, createdAt',
+    categories: '++id, name, isDefault',
+    recurringPayments: '++id, title, nextDueDate, category, type'
+}).upgrade((tx) => {
+    tx.table('expenses').toCollection().modify((expense: Expense) => {
+        if (expense.isNested === undefined) expense.isNested = false;
+    });
+});
+
 export { db };
+

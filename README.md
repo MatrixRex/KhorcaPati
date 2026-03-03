@@ -1,73 +1,113 @@
-# React + TypeScript + Vite
+# `<img src="public/icon-512.png" width="48" height="48" alt="KhorcaPati Logo" vertical-align="middle">` KhorcaPati
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
-Currently, two official plugins are available:
+**KhorcaPati** (খরচাপাতি) is a premium, local-first personal finance manager designed for speed, beauty, and offline-ready accessibility. It empowers you to track expenses, manage recurring bills, and reach your savings goals with a stunning user interface.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+[**Explore the Live Site**](https://matrixrex.github.io/KhorcaPati/)
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Features
 
-## Expanding the ESLint configuration
+- **💎 Premium Aesthetics**: Dynamic mesh gradients, glassmorphism, and smooth micro-animations for a state-of-the-art feel.
+- **⚡ Smart Input**: Effortlessly track items within a single note. Type "Grocery: Rice 2kg, Oil 1L" and let the app auto-parse quantities for you.
+- **📅 Recurring Payments**: Never miss a bill. Manage electricity, rent, or subscriptions with automatic next-due date calculations.
+- **🎯 Savings Goals**: Visualize your financial journey with dedicated progress trackers for your big purchases.
+- **📦 Collection Mode**: Organize related expenses into nested "Collections" for projects, trips, or events.
+- **📱 PWA Ready**: Install it on your home screen. It works offline and syncs your data locally using IndexedDB.
+- **📊 Insightful Reports**: Clean visualizations of your spending habits across categories.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📖 User Guide
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 📲 Installing the PWA
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+KhorcaPati is a Progressive Web App (PWA), meaning you can install it on your device for an app-like experience and offline access.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+#### **On Mobile (iOS & Android)**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Open [KhorcaPati](https://matrixrex.github.io/KhorcaPati/) in your browser (Safari on iOS, Chrome on Android).
+2. **iOS**: Tap the **Share** button (square with arrow) and select **"Add to Home Screen"**.
+3. **Android**: Tap the **Three Dots** (menu) and select **"Install App"** or **"Add to Home Screen"**.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+#### **On Desktop (Chrome & Edge)**
+
+1. Navigate to the site.
+2. Click the **Install Icon** at the right end of the address bar.
+3. Confirm by clicking **"Install"**.
+
+### 💡 How to Use
+
+- **Quick Entry**: Use the smart input bar at the top to quickly add items without needing an expense record first.
+- **Smart Parsing**: Type something like `Rice 2kg, Oil 1L` in the note field of an expense. The app automatically extracts these for item-level tracking.
+- **Collections**: Toggle **"Collection"** when adding a record to create a parent entry for nested expenses (useful for trips or project budgeting).
+- **Recurring Bills**: Set an interval (Daily, Monthly, etc.) in the Recurring form to track fixed costs and get reminders for upcoming dues.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Core**: React 19 + TypeScript
+- **Styling**: Tailwind CSS + Shadcn UI
+- **Database**: IndexedDB via [Dexie.js](https://dexie.org/)
+- **Animations**: Lucide React + Tailwind Animate
+- **State Management**: Zustand
+- **Build Tool**: Vite
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (Latest LTS)
+- [pnpm](https://pnpm.io/) (Recommended)
+
+### Local Development
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/MatrixRex/KhorcaPati.git
+   cd KhorcaPati
+   ```
+2. **Install dependencies:**
+
+   ```bash
+   pnpm install
+   ```
+3. **Start the development server:**
+
+   ```bash
+   pnpm dev
+   ```
+4. **Build for production:**
+
+   ```bash
+   pnpm build
+   ```
+
+---
+
+## 📂 Project Structure
+
+- `src/components`: Reusable UI components and feature-specific forms.
+- `src/pages`: Main application views (Dashboard, Goals, Reports, etc.).
+- `src/stores`: State management using Zustand.
+- `src/db`: Database schema and Dexie configuration.
+- `src/parsers`: Natural language parsing for smart inputs.
+
+---
+
+## 📜 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+Built with ❤️ by [MatrixRex](https://github.com/MatrixRex)

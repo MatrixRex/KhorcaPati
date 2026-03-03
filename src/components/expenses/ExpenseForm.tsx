@@ -327,6 +327,9 @@ export function ExpenseForm({ initialData, onSuccess, onCancel, hideCollectionTo
                     <Input
                         id="note"
                         placeholder={isNested ? "Trip to Cox's Bazar" : "Grocery: Oil 1L, Rice 2kg"}
+                        autoCorrect="off"
+                        autoCapitalize="none"
+                        spellCheck={true}
                         {...form.register('note', {
                             onBlur: handleBlur
                         })}

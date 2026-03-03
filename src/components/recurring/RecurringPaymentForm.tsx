@@ -337,6 +337,9 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                     <Input
                         id="note"
                         placeholder="Any additional details"
+                        autoCorrect="off"
+                        autoCapitalize="none"
+                        spellCheck={true}
                         {...form.register('note', {
                             onBlur: handleBlur
                         })}

@@ -98,7 +98,14 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
 
             <div className="space-y-2">
                 <Label htmlFor="note">Note (Optional)</Label>
-                <Input id="note" placeholder="Personal goal..." {...form.register('note')} />
+                <Input
+                    id="note"
+                    placeholder="Personal goal..."
+                    autoCorrect="off"
+                    autoCapitalize="none"
+                    spellCheck={true}
+                    {...form.register('note')}
+                />
             </div>
 
             <div className="flex gap-2 pt-4">

@@ -40,6 +40,9 @@ export function SmartInputBar() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type here... e.g. 'oil 1L'"
                 className="flex-1"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={true}
             />
             <Button type="submit" size="icon" disabled={!input.trim()}>
                 <Plus className="w-5 h-5" />

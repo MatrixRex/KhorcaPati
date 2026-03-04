@@ -61,7 +61,7 @@ export default function Dashboard() {
                     <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
                         <div className="text-8xl font-black italic select-none">৳</div>
                     </div>
-                    <p className="text-primary-foreground/70 text-[10px] font-bold uppercase tracking-[0.2em] mb-1 relative z-10">Current Balance</p>
+                    <p className="text-primary-foreground/70 text-xs font-bold uppercase tracking-[0.2em] mb-1 relative z-10">Current Balance</p>
                     <div className="flex items-baseline gap-1 mb-4 relative z-10">
                         <span className="text-xl font-bold opacity-80 decoration-primary-foreground/30 underline decoration-2 underline-offset-4">৳</span>
                         <h2 className="text-4xl font-black tracking-tight">{totalBalance.toFixed(0)}</h2>
@@ -69,12 +69,12 @@ export default function Dashboard() {
 
                     <div className="flex items-center gap-4 relative z-10 mt-2 border-t border-primary-foreground/10 pt-3">
                         <div className="flex flex-col">
-                            <span className="text-[8px] font-bold uppercase opacity-60 tracking-wider">Income</span>
+                            <span className="text-[10px] font-bold uppercase opacity-60 tracking-wider">Income</span>
                             <span className="text-sm font-black text-green-300">৳{totalIncome.toFixed(0)}</span>
                         </div>
                         <div className="w-px h-6 bg-primary-foreground/10" />
                         <div className="flex flex-col">
-                            <span className="text-[8px] font-bold uppercase opacity-60 tracking-wider">Expenses</span>
+                            <span className="text-[10px] font-bold uppercase opacity-60 tracking-wider">Expenses</span>
                             <span className="text-sm font-black text-red-300">৳{totalSpent.toFixed(0)}</span>
                         </div>
                     </div>
@@ -85,7 +85,7 @@ export default function Dashboard() {
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
                     <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">Recent Expenses</h2>
-                    <Link to="/expenses" className="text-[11px] text-primary font-bold hover:underline uppercase">View All</Link>
+                    <Link to="/expenses" className="text-xs text-primary font-bold hover:underline uppercase">View All</Link>
                 </div>
                 {!recentExpenses || recentExpenses.length === 0 ? (
                     <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">No expenses yet.</p>
@@ -105,7 +105,7 @@ export default function Dashboard() {
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="h-auto py-1 px-2 text-[11px] text-primary font-bold uppercase"
+                        className="h-auto py-1 px-2 text-xs text-primary font-bold uppercase"
                         onClick={openAddRecurringPayment}
                     >
                         + Add New
@@ -130,7 +130,7 @@ export default function Dashboard() {
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
                     <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">Budgets</h2>
-                    <Link to="/budgets" className="text-[11px] text-primary font-bold hover:underline uppercase">Manage</Link>
+                    <Link to="/budgets" className="text-xs text-primary font-bold hover:underline uppercase">Manage</Link>
                 </div>
                 {!budgets || budgets.length === 0 ? (
                     <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">No budgets set.</p>
@@ -147,7 +147,7 @@ export default function Dashboard() {
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
                     <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">Active Goals</h2>
-                    <Link to="/goals" className="text-[11px] text-primary font-bold hover:underline uppercase">Manage</Link>
+                    <Link to="/goals" className="text-xs text-primary font-bold hover:underline uppercase">Manage</Link>
                 </div>
                 {!activeGoals || activeGoals.length === 0 ? (
                     <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">No active goals.</p>

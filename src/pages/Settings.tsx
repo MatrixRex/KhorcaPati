@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 export default function Settings() {
-    const { theme, setTheme } = useUIStore();
+    const { theme, setTheme, fontScale, setFontScale } = useUIStore();
 
     const themes: { id: Theme; label: string; icon: any }[] = [
         { id: 'light', label: 'Light', icon: Sun },
@@ -45,6 +45,45 @@ export default function Settings() {
                                 </Button>
                             );
                         })}
+                    </div>
+                </section>
+
+                <section>
+                    <div className="flex items-center justify-between mb-3 px-1">
+                        <h2 className="text-sm font-medium text-muted-foreground">Text Size</h2>
+                        <button
+                            onClick={() => setFontScale(1.1)}
+                            className="text-[10px] font-bold uppercase tracking-widest text-primary/60 hover:text-primary transition-colors"
+                        >
+                            Reset
+                        </button>
+                    </div>
+                    <div className="bg-muted/30 p-6 rounded-3xl border border-muted/50">
+                        <div className="flex items-center justify-between mb-6">
+                            <span className="text-xs font-bold uppercase tracking-wider opacity-60">Scale Multiplier</span>
+                            <span className="text-lg font-black text-primary">{(fontScale * 100).toFixed(0)}%</span>
+                        </div>
+
+                        <div className="px-2">
+                            <input
+                                type="range"
+                                min="90"
+                                max="120"
+                                step="5"
+                                value={Math.round(fontScale * 100)}
+                                onChange={(e) => setFontScale(parseInt(e.target.value) / 100)}
+                                className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary transition-all active:scale-[1.01]"
+                            />
+                            <div className="flex justify-between mt-4 px-1">
+                                <span className="text-[10px] font-bold text-muted-foreground/40">90%</span>
+                                <span className="text-[10px] font-bold text-muted-foreground/40">105%</span>
+                                <span className="text-[10px] font-bold text-muted-foreground/40">120%</span>
+                            </div>
+                        </div>
+
+                        <p className="text-[10px] text-muted-foreground mt-6 text-center font-medium italic opacity-60">
+                            Drag the slider to find your perfect reading size.
+                        </p>
                     </div>
                 </section>
 

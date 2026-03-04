@@ -42,7 +42,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                                 {expense.note || expense.type}
                             </h3>
                             {expense.isRecurring && (
-                                <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 font-bold uppercase tracking-wider">
+                                <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4 font-bold uppercase tracking-wider">
                                     ↺ {expense.recurringInterval}
                                 </Badge>
                             )}
@@ -52,7 +52,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                                 </div>
                             )}
                         </div>
-                        <div className="flex items-center text-[11px] font-medium text-muted-foreground/70 gap-2">
+                        <div className="flex items-center text-xs font-medium text-muted-foreground/70 gap-2">
                             <span>{formatRelativeDate(expense.date, true)}</span>
                             <span className="opacity-30">•</span>
                             <span className="truncate uppercase tracking-tighter">{expense.category}</span>
@@ -68,7 +68,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                                 {expense.type === 'income' ? '+' : ''}৳{expense.amount.toFixed(0)}
                             </span>
                             {expense.parentId && (
-                                <Badge variant="outline" className="text-[8px] font-black uppercase border-primary/20 text-primary px-1 h-3.5 mt-0.5">
+                                <Badge variant="outline" className="text-[10px] font-black uppercase border-primary/20 text-primary px-1 h-3.5 mt-0.5">
                                     Sub
                                 </Badge>
                             )}
@@ -106,7 +106,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                                     <span className="text-xs font-bold truncate capitalize group-hover/sub:text-primary transition-colors">
                                         {sub.note || sub.type}
                                     </span>
-                                    <span className="text-[9px] text-muted-foreground uppercase">{sub.category}</span>
+                                    <span className="text-[10px] text-muted-foreground uppercase">{sub.category}</span>
                                 </div>
                             </div>
                             <span className={cn(

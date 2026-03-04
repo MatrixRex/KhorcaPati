@@ -8,6 +8,7 @@ import {
     Tooltip, Sankey, Layer, AreaChart, Area, CartesianGrid
 } from 'recharts';
 import { useFilterStore } from '@/stores/filterStore';
+import { useUIStore } from '@/stores/uiStore';
 import { PageContainer } from '@/components/shared/PageContainer';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a28CFE', '#f28C1E', '#32da1E'];
@@ -30,7 +31,7 @@ const SankeyNode = ({ x, y, width, height, index, payload, containerWidth }: any
                 x={isOut ? x - 6 : x + width + 6}
                 y={y + height / 2}
                 textAnchor={isOut ? 'end' : 'start'}
-                fontSize="10"
+                fontSize={Math.round(11 * (payload.fontScale || 1))}
                 fontWeight="700"
                 fill="currentColor"
                 className="fill-foreground/80 uppercase tracking-tighter"
@@ -43,6 +44,7 @@ const SankeyNode = ({ x, y, width, height, index, payload, containerWidth }: any
 
 export default function Reports() {
     const { startDate, endDate } = useFilterStore();
+    const { fontScale } = useUIStore();
 
     const expenses = useLiveQuery(async () => {
         return await db.expenses.filter(e => !e.parentId).toArray();
@@ -78,7 +80,6 @@ export default function Reports() {
 
         // 1. Sankey Data (Flow)
         const categories = Array.from(categoryMap.entries()).sort((a, b) => b[1] - a[1]);
-        const netBalance = totalIncome - totalExpense;
 
         const nodes = [
             { name: 'Income', fill: '#10b981' }
@@ -90,18 +91,6 @@ export default function Reports() {
             nodes.push({ name, fill: COLORS[idx % COLORS.length] });
             links.push({ source: 0, target: nodes.length - 1, value });
         });
-
-        // Add Balance node if positive
-        if (netBalance > 0) {
-            nodes.push({ name: 'Balance', fill: '#0ea5e9' });
-            links.push({ source: 0, target: nodes.length - 1, value: netBalance });
-        } else if (netBalance < 0) {
-            // If negative, add a "Deficit" source node
-            nodes.push({ name: 'Deficit', fill: '#ef4444' });
-            // Link deficit to categories (proportional or just total overflow)
-            // But usually Sankey needs to balance. Let's redirect deficit to show it covered expenses.
-            // For simplicity, let's just show Incomes -> Categories and accept the Sankey might show the gap.
-        }
 
         const sankeyData = { nodes, links };
 
@@ -145,10 +134,13 @@ export default function Reports() {
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
                                 <Sankey
-                                    data={sankeyData}
+                                    data={{
+                                        ...sankeyData,
+                                        nodes: sankeyData.nodes.map(n => ({ ...n, fontScale }))
+                                    }}
                                     node={<SankeyNode containerWidth={300} />}
                                     link={{ stroke: '#8884d844' }}
-                                    margin={{ top: 10, left: 10, right: 80, bottom: 10 }}
+                                    margin={{ top: 10, left: 40, right: 40, bottom: 10 }}
                                     nodePadding={10}
                                 >
                                     <Tooltip
@@ -195,10 +187,10 @@ export default function Reports() {
                                     <YAxis
                                         dataKey="name"
                                         type="category"
-                                        fontSize={10}
+                                        fontSize={Math.round(11 * fontScale)}
                                         tickLine={false}
                                         axisLine={false}
-                                        width={80}
+                                        width={Math.round(80 * fontScale)}
                                         className="font-bold text-muted-foreground uppercase tracking-tighter"
                                     />
                                     <Tooltip
@@ -245,19 +237,19 @@ export default function Reports() {
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.1} />
                                     <XAxis
                                         dataKey="date"
-                                        fontSize={10}
+                                        fontSize={Math.round(10 * fontScale)}
                                         tickLine={false}
                                         axisLine={false}
                                         className="font-bold text-muted-foreground italic"
                                         dy={10}
                                     />
                                     <YAxis
-                                        fontSize={9}
+                                        fontSize={Math.round(10 * fontScale)}
                                         tickLine={false}
                                         axisLine={false}
                                         tickFormatter={(v) => `৳${v}`}
                                         className="font-bold opacity-60"
-                                        width={60}
+                                        width={Math.round(65 * fontScale)}
                                     />
                                     <Tooltip
                                         content={({ active, payload, label }: any) => {

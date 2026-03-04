@@ -4,6 +4,7 @@ import { BottomNav } from '@/components/shared/BottomNav';
 import { GlobalUI } from '@/components/shared/GlobalUI';
 import { useBudgetNotifications } from '@/hooks/useBudgetNotifications';
 import { useRecurringNotifications } from '@/hooks/useRecurringNotifications';
+import { useUIStore } from '@/stores/uiStore';
 
 import Dashboard from '@/pages/Dashboard';
 import Expenses from '@/pages/Expenses';
@@ -21,8 +22,25 @@ function NotificationManager() {
 }
 
 function App() {
-  // Ask for permission on first interaction — browsers require a user gesture
-  // We request eagerly here; if already granted/denied nothing changes.
+  const { theme, fontScale } = useUIStore();
+
+  useEffect(() => {
+    // 1. Theme Logic
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(theme);
+    }
+
+    // 2. Font Scale Logic
+    root.style.setProperty('--font-scale', fontScale.toString());
+
+  }, [theme, fontScale]);
+
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();

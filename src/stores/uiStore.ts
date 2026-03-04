@@ -15,6 +15,7 @@ interface UIState {
     selectedInventoryItem: string | null;
     returnPath: string | null;
     theme: Theme;
+    fontScale: number;
     openAddExpense: (parentId?: number | null) => void;
     openEditExpense: (expense: Expense, returnPath?: string) => void;
     closeExpenseSheet: () => void;
@@ -27,6 +28,7 @@ interface UIState {
     setSelectedInventoryItem: (name: string | null) => void;
     setReturnPath: (path: string | null) => void;
     setTheme: (theme: Theme) => void;
+    setFontScale: (scale: number) => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -42,6 +44,7 @@ export const useUIStore = create<UIState>()(
             selectedInventoryItem: null,
             returnPath: null,
             theme: 'system',
+            fontScale: 1.1,
 
             openAddExpense: (parentId) => set({
                 isExpenseSheetOpen: true,
@@ -107,10 +110,11 @@ export const useUIStore = create<UIState>()(
             }),
 
             setTheme: (theme) => set({ theme }),
+            setFontScale: (fontScale) => set({ fontScale }),
         }),
         {
             name: 'khorchapati-ui-store',
-            partialize: (state) => ({ theme: state.theme }), // Only persist theme
+            partialize: (state) => ({ theme: state.theme, fontScale: state.fontScale }), // Persist theme and fontScale
         }
     )
 );

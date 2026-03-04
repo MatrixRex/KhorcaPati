@@ -132,7 +132,7 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
                         <h3 className="font-bold text-sm tracking-tight truncate capitalize">{budget.category}</h3>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{timelineLabel(budget)}</p>
                     </div>
-                    <span className="text-[10px] text-muted-foreground font-black uppercase text-right shrink-0 ml-2 bg-muted px-1.5 py-0.5 rounded-md">
+                    <span className="text-xs text-muted-foreground font-black uppercase text-right shrink-0 ml-2 bg-muted px-1.5 py-0.5 rounded-md">
                         ৳{spent.toFixed(0)} <span className="opacity-40">/</span> ৳{budget.limitAmount.toFixed(0)}
                     </span>
                 </div>
@@ -141,17 +141,17 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
 
                 <div className="flex items-center justify-between mt-1">
                     <div className="flex items-center gap-1.5 overflow-hidden">
-                        <span className={cn("text-[9px] font-black uppercase tracking-widest shrink-0", percentage >= 100 ? "text-destructive" : "text-muted-foreground/60")}>
+                        <span className={cn("text-[10px] font-black uppercase tracking-widest shrink-0", percentage >= 100 ? "text-destructive" : "text-muted-foreground/60")}>
                             {percentage.toFixed(0)}% Utilized
                         </span>
                         {isOverBudget && overspentInfo && (
-                            <span className="text-[9px] font-black text-destructive/50 whitespace-nowrap overflow-hidden text-ellipsis">
+                            <span className="text-[10px] font-black text-destructive/50 whitespace-nowrap overflow-hidden text-ellipsis">
                                 • {overspentInfo.daysAgo === 0 ? 'Today' : `${overspentInfo.daysAgo}d ago`}
                             </span>
                         )}
                     </div>
                     {isOverBudget && (
-                        <p className="text-[10px] text-destructive font-black uppercase tracking-tighter shrink-0 ml-2 animate-pulse">
+                        <p className="text-xs text-destructive font-black uppercase tracking-tighter shrink-0 ml-2 animate-pulse">
                             -৳{(spent - budget.limitAmount).toFixed(0)}
                         </p>
                     )}

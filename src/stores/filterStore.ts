@@ -7,8 +7,10 @@ interface FilterState {
     timeframe: Timeframe;
     startDate: Date;
     endDate: Date;
+    selectedCategory: string | null;
     setTimeframe: (timeframe: Timeframe) => void;
     setDateRange: (start: Date, end: Date) => void;
+    setCategory: (category: string | null) => void;
 }
 
 const getInitialDates = (timeframe: Timeframe) => {
@@ -27,6 +29,7 @@ const getInitialDates = (timeframe: Timeframe) => {
 export const useFilterStore = create<FilterState>((set) => ({
     timeframe: 'this-month',
     ...getInitialDates('this-month'),
+    selectedCategory: null,
 
     setTimeframe: (timeframe) => {
         if (timeframe === 'custom') {
@@ -41,4 +44,6 @@ export const useFilterStore = create<FilterState>((set) => ({
         endDate: end,
         timeframe: 'custom'
     }),
+
+    setCategory: (category) => set({ selectedCategory: category }),
 }));

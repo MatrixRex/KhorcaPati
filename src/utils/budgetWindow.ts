@@ -52,6 +52,7 @@ export function calcSpent(budget: Budget, expenses: Expense[]): number {
 
     return expenses
         .filter(exp => {
+            if (exp.type !== 'expense') return false;
             if (exp.category.toLowerCase() !== budget.category.toLowerCase()) return false;
             try {
                 return isWithinInterval(parseISO(exp.date), {

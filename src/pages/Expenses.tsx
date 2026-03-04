@@ -1,12 +1,17 @@
 import { ExpenseList } from '@/components/expenses/ExpenseList';
 import { useUIStore } from '@/stores/uiStore';
 import { PageContainer } from '@/components/shared/PageContainer';
+import { CategoryFilter } from '@/components/shared/CategoryFilter';
 
 export default function Expenses() {
     const { openEditExpense } = useUIStore();
 
     return (
-        <PageContainer title="Records" showDateFilter>
+        <PageContainer
+            title="Records"
+            showDateFilter
+            headerAction={<CategoryFilter />}
+        >
             <div className="flex-1">
                 <ExpenseList onEdit={openEditExpense} />
             </div>

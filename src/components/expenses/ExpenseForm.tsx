@@ -84,10 +84,13 @@ export function ExpenseForm({ initialData, onSuccess, onCancel, hideCollectionTo
     // Auto-update amount and date for nested record based on sub-records
     useEffect(() => {
         if (isNested && subExpenses && subExpenses.length > 0) {
-            const totalAmount = subExpenses.reduce((sum, e) => sum + e.amount, 0);
+            const parentType = form.getValues('type');
+            const totalAmount = subExpenses.reduce((sum, e) => {
+                return e.type === parentType ? sum + e.amount : sum - e.amount;
+            }, 0);
             const latestDate = subExpenses.reduce((latest, e) => (e.date > latest ? e.date : latest), subExpenses[0].date);
 
-            form.setValue('amount', totalAmount);
+            form.setValue('amount', Math.max(0, totalAmount));
             form.setValue('date', latestDate);
 
             // Auto-save the parent after updating from sub-records

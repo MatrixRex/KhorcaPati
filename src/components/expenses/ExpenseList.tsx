@@ -9,11 +9,19 @@ interface ExpenseListProps {
 }
 
 export function ExpenseList({ onEdit }: ExpenseListProps) {
-    const { startDate, endDate } = useFilterStore();
+    const { startDate, endDate, selectedCategory } = useFilterStore();
 
     const expenses = useLiveQuery(async () => {
         // Only fetch top-level records
-        const all = await db.expenses
+        let collection;
+
+        if (selectedCategory) {
+            collection = db.expenses.where('category').equals(selectedCategory);
+        } else {
+            collection = db.expenses.toCollection();
+        }
+
+        const all = await collection
             .filter(e => !e.parentId)
             .toArray();
 
@@ -30,7 +38,7 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
             const date = new Date(exp.date);
             return isWithinInterval(date, { start: startDate, end: endDate });
         });
-    }, [startDate, endDate]);
+    }, [startDate, endDate, selectedCategory]);
 
 
     if (!expenses) {

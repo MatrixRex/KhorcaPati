@@ -1,10 +1,13 @@
-import { type Budget, db } from '@/db/schema';
+import { type Budget, db, type Expense } from '@/db/schema';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { formatRelativeDate } from '@/utils/date';
-import { calcSpent, getBudgetWindow } from '@/utils/budgetWindow';
+import { getBudgetWindow } from '@/utils/budgetWindow';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { useFilterStore } from '@/stores/filterStore';
+import { differenceInDays, parseISO, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 
 interface BudgetCardProps {
     budget: Budget;
@@ -12,7 +15,19 @@ interface BudgetCardProps {
 }
 
 function timelineLabel(budget: Budget): string {
+    const now = startOfDay(new Date());
+
     if (budget.timelineType === 'recurring') {
+        const window = getBudgetWindow(budget);
+        if (window) {
+            const endDate = endOfDay(parseISO(window.end));
+            const daysLeft = differenceInDays(endDate, now);
+
+            if (daysLeft === 0) return 'Ends today';
+            if (daysLeft === 1) return '1 day remaining';
+            return `${daysLeft} days remaining`;
+        }
+
         const labels: Record<string, string> = {
             daily: 'Today', weekly: 'This week', monthly: 'This month', yearly: 'This year',
         };
@@ -24,14 +39,64 @@ function timelineLabel(budget: Budget): string {
     return '';
 }
 
+function findOverspentInfo(budget: Budget, expenses: Expense[]) {
+    const window = getBudgetWindow(budget);
+    if (!window) return null;
+
+    const filtered = expenses
+        .filter(exp => {
+            if (exp.type !== 'expense') return false;
+            try {
+                return isWithinInterval(parseISO(exp.date), {
+                    start: parseISO(window.start),
+                    end: parseISO(window.end),
+                });
+            } catch {
+                return false;
+            }
+        })
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    let runningTotal = 0;
+    for (const exp of filtered) {
+        runningTotal += exp.amount;
+        if (runningTotal > budget.limitAmount) {
+            const overspentDate = startOfDay(parseISO(exp.date));
+            const daysAgo = differenceInDays(startOfDay(new Date()), overspentDate);
+            return { daysAgo, total: runningTotal };
+        }
+    }
+    return null;
+}
+
 export function BudgetCard({ budget, onClick }: BudgetCardProps) {
+    const navigate = useNavigate();
+    const { setCategory } = useFilterStore();
+
     const expenses = useLiveQuery(
         () => db.expenses.where('category').equals(budget.category).toArray(),
         [budget.category]
     );
 
     const window = getBudgetWindow(budget);
-    const spent = expenses && window ? calcSpent(budget, expenses) : 0;
+    const budgetExpenses = expenses || [];
+
+    // Calculate total spent in window
+    const spent = budgetExpenses.reduce((sum, exp) => {
+        if (exp.type !== 'expense') return sum;
+        if (!window) return sum;
+        try {
+            const isMatch = isWithinInterval(parseISO(exp.date), {
+                start: parseISO(window.start),
+                end: parseISO(window.end),
+            });
+            return isMatch ? sum + exp.amount : sum;
+        } catch {
+            return sum;
+        }
+    }, 0);
+
+    const overspentInfo = findOverspentInfo(budget, budgetExpenses);
 
     const percentage = Math.min((spent / budget.limitAmount) * 100, 100);
     const isAlertThresholdReached = (spent / budget.limitAmount) >= budget.alertThreshold;
@@ -44,13 +109,22 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
         progressColor = 'bg-orange-500';
     }
 
+    const handleClick = () => {
+        if (onClick) {
+            onClick();
+        } else {
+            setCategory(budget.category);
+            navigate('/expenses');
+        }
+    };
+
     return (
         <Card
             className={cn(
-                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group",
+                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group/card",
                 isOverBudget && "border-destructive/30 bg-destructive/5"
             )}
-            onClick={onClick}
+            onClick={handleClick}
         >
             <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
@@ -66,11 +140,18 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
                 <Progress value={percentage} className="h-2 bg-muted/50" indicatorClassName={cn("transition-all duration-500", progressColor)} />
 
                 <div className="flex items-center justify-between mt-1">
-                    <span className={cn("text-[9px] font-black uppercase tracking-widest", percentage >= 100 ? "text-destructive" : "text-muted-foreground/60")}>
-                        {percentage.toFixed(0)}% Utilized
-                    </span>
+                    <div className="flex items-center gap-1.5 overflow-hidden">
+                        <span className={cn("text-[9px] font-black uppercase tracking-widest shrink-0", percentage >= 100 ? "text-destructive" : "text-muted-foreground/60")}>
+                            {percentage.toFixed(0)}% Utilized
+                        </span>
+                        {isOverBudget && overspentInfo && (
+                            <span className="text-[9px] font-black text-destructive/50 whitespace-nowrap overflow-hidden text-ellipsis">
+                                • {overspentInfo.daysAgo === 0 ? 'Today' : `${overspentInfo.daysAgo}d ago`}
+                            </span>
+                        )}
+                    </div>
                     {isOverBudget && (
-                        <p className="text-[10px] text-destructive font-black uppercase tracking-tighter animate-pulse">
+                        <p className="text-[10px] text-destructive font-black uppercase tracking-tighter shrink-0 ml-2 animate-pulse">
                             -৳{(spent - budget.limitAmount).toFixed(0)}
                         </p>
                     )}

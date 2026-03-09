@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
-import { format } from 'date-fns';
+import { format, parseISO, differenceInCalendarDays } from 'date-fns';
 import { ExpenseCard } from '@/components/expenses/ExpenseCard';
 import { RecurringPaymentCard } from '@/components/recurring/RecurringPaymentCard';
 import { GoalCard } from '@/components/goals/GoalCard';
@@ -34,9 +34,16 @@ export default function Dashboard() {
 
 
 
-    const recurringPayments = useLiveQuery(
-        () => db.recurringPayments.orderBy('nextDueDate').toArray()
-    );
+    const recurringPayments = useLiveQuery(async () => {
+        const all = await db.recurringPayments.orderBy('nextDueDate').toArray();
+        const now = new Date();
+        return all.filter(payment => {
+            const nextDate = parseISO(payment.nextDueDate);
+            const diffInDays = differenceInCalendarDays(nextDate, now);
+            // Show overdue (any) or coming soon (within 7 days)
+            return diffInDays <= 7;
+        });
+    });
 
     const budgets = useLiveQuery(
         () => db.budgets.toArray()
@@ -112,7 +119,7 @@ export default function Dashboard() {
                     </Button>
                 </div>
                 {!recurringPayments || recurringPayments.length === 0 ? (
-                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">No recurring payments scheduled.</p>
+                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">No overdue or upcoming payments.</p>
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {recurringPayments.map(payment => (

@@ -7,6 +7,11 @@ import path from 'path';
 // https://vite.dev/config/
 export default defineConfig({
   base: '/KhorcaPati/',
+  server: {
+    host: true,
+    cors: true,
+    allowedHosts: true,
+  },
   plugins: [
     react(),
     tailwindcss(),

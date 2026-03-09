@@ -49,8 +49,8 @@ export function PageContainer({
                     <h1 className="text-xl font-bold tracking-tight text-foreground/90 truncate">{title}</h1>
                 </div>
                 <div className="flex items-center gap-2">
-                    {showDateFilter && <DateRangeFilter />}
                     {headerAction}
+                    {showDateFilter && <DateRangeFilter />}
                 </div>
             </header>
 

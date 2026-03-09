@@ -12,7 +12,7 @@ import { useFilterStore } from '@/stores/filterStore';
 import { isWithinInterval } from 'date-fns';
 
 export function ItemTracker() {
-    const { startDate, endDate } = useFilterStore();
+    const { startDate, endDate, inventorySortBy } = useFilterStore();
     const { selectedInventoryItem, setSelectedInventoryItem, openEditExpense } = useUIStore();
     const [touchStartX, setTouchStartX] = useState(0);
     const navigate = useNavigate();
@@ -70,7 +70,13 @@ export function ItemTracker() {
         return acc;
     }, {} as Record<string, { name: string; totalQty: number; unit: string; records: Item[] }>);
 
-    const groupedList = Object.values(groupedItems).sort((a, b) => a.name.localeCompare(b.name));
+    const groupedList = Object.values(groupedItems).sort((a, b) => {
+        if (inventorySortBy === 'alphabet') {
+            return a.name.localeCompare(b.name);
+        } else {
+            return b.totalQty - a.totalQty; // Sort DESC by count
+        }
+    });
 
     const handleEntryClick = async (expenseId: number | null) => {
         if (expenseId) {

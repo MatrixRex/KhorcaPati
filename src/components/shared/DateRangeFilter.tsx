@@ -24,8 +24,11 @@ export function DateRangeFilter() {
     }, [isOpen, timeframe]);
 
     const label = React.useMemo(() => {
-        if (timeframe === 'this-month') return 'This Month';
-        if (timeframe === 'this-week') return 'This Week';
+        if (timeframe === 'this-month') return format(new Date(), 'MMMM');
+        if (timeframe === 'this-week') {
+            const weekNum = Math.ceil(new Date().getDate() / 7);
+            return `${format(new Date(), 'MMM')} W${weekNum}`;
+        }
         return `${format(startDate, 'MMM dd')} - ${format(endDate, 'MMM dd')}`;
     }, [timeframe, startDate, endDate]);
 
@@ -53,7 +56,7 @@ export function DateRangeFilter() {
                             setIsOpen(false);
                         }}
                     >
-                        This Month
+                        {format(new Date(), 'MMMM')}
                     </Button>
                     <Button
                         variant={timeframe === 'this-week' ? 'secondary' : 'ghost'}
@@ -64,7 +67,7 @@ export function DateRangeFilter() {
                             setIsOpen(false);
                         }}
                     >
-                        This Week
+                        {`${format(new Date(), 'MMM')} W${Math.ceil(new Date().getDate() / 7)}`}
                     </Button>
                     <Button
                         variant={(timeframe === 'custom' || showCustom) ? 'secondary' : 'ghost'}

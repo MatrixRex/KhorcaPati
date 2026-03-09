@@ -3,14 +3,18 @@ import { startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 
 export type Timeframe = 'this-month' | 'this-week' | 'custom';
 
+export type InventorySortBy = 'alphabet' | 'count';
+
 interface FilterState {
     timeframe: Timeframe;
     startDate: Date;
     endDate: Date;
     selectedCategory: string | null;
+    inventorySortBy: InventorySortBy;
     setTimeframe: (timeframe: Timeframe) => void;
     setDateRange: (start: Date, end: Date) => void;
     setCategory: (category: string | null) => void;
+    setInventorySortBy: (sort: InventorySortBy) => void;
 }
 
 const getInitialDates = (timeframe: Timeframe) => {
@@ -30,6 +34,7 @@ export const useFilterStore = create<FilterState>((set) => ({
     timeframe: 'this-month',
     ...getInitialDates('this-month'),
     selectedCategory: null,
+    inventorySortBy: 'alphabet',
 
     setTimeframe: (timeframe) => {
         if (timeframe === 'custom') {
@@ -46,4 +51,5 @@ export const useFilterStore = create<FilterState>((set) => ({
     }),
 
     setCategory: (category) => set({ selectedCategory: category }),
+    setInventorySortBy: (sort) => set({ inventorySortBy: sort }),
 }));

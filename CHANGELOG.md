@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Inventory sorting options (Alphabetical and Total Count).
+- "Danger Zone" section in Settings for complete app data reset with custom AlertDialog confirmation.
+- Automated `/git-commit` workflow for streamlined version control.
+
+### Changed
+- Refined header layout: Date filter is now positioned to the rightmost for consistency.
+- More concise date filter labels (e.g., "March", "Mar W2") and shortened dropdown options.
+- Default category renamed to "Unlisted" and logic updated to Allow renaming while maintaining default status.
+- UI improvements: Removed redundant category headings on Settings page.
+
+### Fixed
+- Fixed category duplication bug: Implemented Version 8 database migration with unique constraint on category names.
+- Robust initialization: Added race condition protection and fail-safe loading for default categories.
+- Fixed React global reference and unused variable warnings in CategoryManager.
+
 ## [0.1.0] - 2026-03-03
 
 ### Added

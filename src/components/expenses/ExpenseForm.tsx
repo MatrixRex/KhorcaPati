@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const expenseSchema = z.object({
-    amount: z.number().min(0, 'Amount cannot be negative'),
+    amount: z.number().min(0.01, 'Please enter a valid amount'),
     type: z.enum(['expense', 'income']),
     category: z.string().min(1, 'Category is required'),
     date: z.string(),
@@ -64,6 +64,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showUngroupDialog, setShowUngroupDialog] = useState(false);
     const [showNumberPad, setShowNumberPad] = useState(false);
+    const [wasAmountEdited, setWasAmountEdited] = useState(false);
     const categoryRef = useRef<HTMLInputElement>(null);
     const noteRef = useRef<HTMLInputElement>(null);
 
@@ -186,7 +187,11 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
     const performSave = async (data: ExpenseFormValues): Promise<number | undefined> => {
         // Nested records can have 0 amount if no sub-records yet
-        if (!data.isNested && data.amount <= 0) return;
+        if (!data.isNested && data.amount <= 0) {
+            form.setError('amount', { message: 'Please enter a valid amount' });
+            setWasAmountEdited(true); // Show error outline immediately
+            return;
+        }
         if (saveStatus === 'saving') return currentId || initialData?.id;
 
         setSaveStatus('saving');
@@ -331,8 +336,9 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                 value={form.watch('amount') ? `৳${form.watch('amount').toFixed(0)}` : '৳0'}
                                 onClick={() => !isNested && setShowNumberPad(true)}
                                 className={cn(
-                                    "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl",
-                                    isNested ? "bg-muted border-dashed opacity-70" : "border-primary/20 shadow-sm focus:border-primary"
+                                    "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl transition-all",
+                                    isNested ? "bg-muted border-dashed opacity-70" : "border-primary/20 shadow-sm focus:border-primary",
+                                    !isNested && wasAmountEdited && form.getValues('amount') <= 0 && "border-destructive ring-2 ring-destructive/20"
                                 )}
                                 placeholder="৳0"
                             />
@@ -349,12 +355,10 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     const num = parseFloat(val);
                                     if (!isNaN(num)) {
                                         form.setValue('amount', num);
+                                        setWasAmountEdited(true);
                                     }
                                 }}
-                                onDone={() => {
-                                    setShowNumberPad(false);
-                                    handleBlur();
-                                }}
+                                onDone={handleAmountDone}
                                 onClose={() => setShowNumberPad(false)}
                             />
                         )}
@@ -386,11 +390,13 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                     <Label htmlFor="category" className="text-[11px] font-bold uppercase">Category</Label>
                     <div className="w-full">
                         <CategoryComboBox
+                            ref={categoryRef}
                             value={form.watch('category')}
                             onChange={(val: string) => {
                                 form.setValue('category', val, { shouldDirty: true });
                             }}
                             onBlur={() => form.handleSubmit(performSave)()}
+                            onEnter={handleCategoryEnter}
                         />
                     </div>
                     {form.formState.errors.category && (
@@ -405,17 +411,18 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                         name="note"
                         render={({ field }) => (
                             <ItemSuggestions
+                                ref={noteRef}
                                 id="note"
                                 placeholder={isNested ? "Trip to Cox's Bazar" : "Grocery: Oil 1L, Rice 2kg"}
                                 value={field.value || ''}
                                 onChange={(val: string) => {
                                     field.onChange(val);
-                                    // Don't auto-save while typing suggestions unless it's a selection
                                 }}
                                 onBlur={() => {
                                     field.onBlur();
                                     handleBlur();
                                 }}
+                                onEnter={handleNoteEnter}
                                 className="h-12 rounded-xl"
                             />
                         )}
@@ -519,7 +526,16 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={() => {
+                            onClick={async () => {
+                                // If it's a new record and amount is 0, show error and don't close
+                                const values = form.getValues();
+                                if (!values.isNested && values.amount <= 0) {
+                                    form.setError('amount', { message: 'Amount is required' });
+                                    setWasAmountEdited(true);
+                                    setShowNumberPad(true);
+                                    return;
+                                }
+
                                 const currentVal = form.getValues('category');
                                 const match = categories.find(c => c.name.toLowerCase() === currentVal.trim().toLowerCase());
                                 if (!match) {

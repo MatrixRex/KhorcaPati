@@ -14,6 +14,8 @@ import Goals from '@/pages/Goals';
 import Reports from '@/pages/Reports';
 import Settings from '@/pages/Settings';
 
+import { ReloadPrompt } from '@/components/shared/ReloadPrompt';
+
 /** Requests notification permission once on app start, then runs budget alert checks. */
 function NotificationManager() {
   useBudgetNotifications();
@@ -65,6 +67,7 @@ function App() {
 
         <NotificationManager />
         <GlobalUI />
+        <ReloadPrompt />
         <BottomNav />
       </div>
     </HashRouter>

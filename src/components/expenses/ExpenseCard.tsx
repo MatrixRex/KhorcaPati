@@ -30,11 +30,15 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
         <div className="flex flex-col gap-1">
             <Card
                 className={cn(
-                    "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group",
-                    isExpanded && "bg-muted/10 border-primary/10"
+                    "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group relative",
+                    isExpanded && "bg-muted/10 border-primary/20",
+                    expense.isNested && !isExpanded && "bg-primary/5 border-primary/10"
                 )}
                 onClick={onClick}
             >
+                {expense.isNested && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/40" />
+                )}
                 <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex flex-col flex-1 overflow-hidden pr-2">
                         <div className="flex items-center gap-2 mb-1">

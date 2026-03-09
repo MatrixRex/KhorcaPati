@@ -44,14 +44,20 @@ type ExpenseFormValues = z.infer<typeof expenseSchema>;
 
 interface ExpenseFormProps {
     initialData?: Expense;
+    parentId?: number | null;
     onSuccess?: () => void;
     onCancel?: () => void;
     hideCollectionToggle?: boolean;
 }
 
-export function ExpenseForm({ initialData, onSuccess, onCancel, hideCollectionToggle }: ExpenseFormProps) {
+export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, onCancel, hideCollectionToggle }: ExpenseFormProps) {
 
-    const { initialParentId } = useUIStore();
+    // Store initial parentId locally on mount to prevent it from changing if the global store changes
+    const [fixedParentId] = useState<number | null>(() => {
+        if (initialData) return initialData.parentId;
+        if (propParentId !== undefined) return propParentId;
+        return null;
+    });
     const [currentId, setCurrentId] = useState<number | undefined>(initialData?.id);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -145,12 +151,18 @@ export function ExpenseForm({ initialData, onSuccess, onCancel, hideCollectionTo
                 .first();
             const validCategory = categoryInDb?.name || 'Unsorted';
 
+            // Prevent self-parenting
+            let finalParentId = fixedParentId;
+            if (currentId && finalParentId === currentId) {
+                finalParentId = null;
+            }
+
             const payload: Omit<Expense, 'id'> = {
                 ...data,
                 type: data.type,
                 category: validCategory,
                 note: data.note || '',
-                parentId: initialData?.parentId || initialParentId || null,
+                parentId: finalParentId,
                 isNested: data.isNested,
                 recurringNextDue: null,
                 tags: initialData?.tags || [],
@@ -224,69 +236,61 @@ export function ExpenseForm({ initialData, onSuccess, onCancel, hideCollectionTo
                 </div>
 
                 {!hideCollectionToggle && (
-                    <div className="flex items-center justify-between">
-                        <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                            {saveStatus === 'saving' && 'Saving...'}
-                            {saveStatus === 'saved' && 'All changes saved'}
-                            {saveStatus === 'error' && <span className="text-destructive">Error saving</span>}
-                            {saveStatus === 'idle' && 'No changes yet'}
+                    <div className={cn(
+                        "flex items-center justify-between p-3 rounded-2xl border transition-all duration-300",
+                        isNested ? "bg-primary/5 border-primary/20" : "bg-muted/30 border-border/20"
+                    )}>
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2">
+                                <Layers className={cn("w-4 h-4", isNested ? "text-primary" : "text-muted-foreground")} />
+                                <span className="text-xs font-black uppercase tracking-tight">Collection Mode</span>
+                            </div>
+                            <span className="text-[9px] text-muted-foreground font-medium">Group multiple records into this folder</span>
                         </div>
 
-                        <div className="flex items-center gap-2 bg-muted/50 px-3 py-1.5 rounded-full border border-border/50">
-                            <Layers className={cn("w-3.5 h-3.5", isNested ? "text-primary" : "text-muted-foreground")} />
-                            <span className="text-[10px] font-bold uppercase tracking-tight">Collection</span>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    const newVal = !isNested;
-                                    form.setValue('isNested', newVal, { shouldDirty: true });
-                                    form.handleSubmit(performSave)();
-                                }}
-                                className={cn(
-                                    "w-8 h-4 rounded-full transition-colors relative",
-                                    isNested ? "bg-primary" : "bg-muted-foreground/30"
-                                )}
-                            >
-                                <div className={cn(
-                                    "absolute top-0.5 w-3 h-3 bg-white rounded-full transition-transform",
-                                    isNested ? "left-4.5" : "left-0.5"
-                                )} />
-                            </button>
-                        </div>
-                    </div>
-                )}
-                {hideCollectionToggle && (
-                    <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                        {saveStatus === 'saving' && 'Saving...'}
-                        {saveStatus === 'saved' && 'All changes saved'}
-                        {saveStatus === 'error' && <span className="text-destructive">Error saving</span>}
-                        {saveStatus === 'idle' && 'No changes yet'}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const newVal = !isNested;
+                                form.setValue('isNested', newVal, { shouldDirty: true });
+                                form.handleSubmit(performSave)();
+                            }}
+                            className={cn(
+                                "w-10 h-5 rounded-full transition-colors relative",
+                                isNested ? "bg-primary" : "bg-muted-foreground/30"
+                            )}
+                        >
+                            <div className={cn(
+                                "absolute top-1 w-3 h-3 bg-white rounded-full transition-all duration-300",
+                                isNested ? "left-6" : "left-1"
+                            )} />
+                        </button>
                     </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2 relative">
-                        <Label htmlFor="amount" className={cn(isNested && "opacity-50")}>Amount</Label>
+                        <Label htmlFor="amount" className={cn("text-[11px] font-bold uppercase", isNested && "opacity-50")}>
+                            {isNested ? 'Total Amount' : 'Amount'}
+                        </Label>
                         <div className="relative">
                             <Input
                                 id="amount"
                                 type="text"
                                 readOnly
                                 disabled={isNested}
-                                value={form.watch('amount') || ''}
+                                value={form.watch('amount') ? `৳${form.watch('amount').toFixed(0)}` : '৳0'}
                                 onClick={() => !isNested && setShowNumberPad(true)}
                                 className={cn(
-                                    "pr-10 cursor-pointer caret-transparent",
-                                    isNested && "bg-muted border-dashed"
+                                    "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl",
+                                    isNested ? "bg-muted border-dashed opacity-70" : "border-primary/20 shadow-sm focus:border-primary"
                                 )}
-                                placeholder="0"
+                                placeholder="৳0"
                             />
-                            <Calculator
-                                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"
-                            />
+                            {!isNested && <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />}
                         </div>
                         {form.formState.errors.amount && (
-                            <p className="text-destructive text-sm">{form.formState.errors.amount.message}</p>
+                            <p className="text-destructive text-[10px] font-bold">{form.formState.errors.amount.message}</p>
                         )}
 
                         {showNumberPad && (
@@ -307,7 +311,7 @@ export function ExpenseForm({ initialData, onSuccess, onCancel, hideCollectionTo
                         )}
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="date" className={cn(isNested && "opacity-50")}>Date</Label>
+                        <Label htmlFor="date" className={cn("text-[11px] font-bold uppercase", isNested && "opacity-50")}>Date</Label>
                         <Controller
                             control={form.control}
                             name="date"
@@ -322,6 +326,7 @@ export function ExpenseForm({ initialData, onSuccess, onCancel, hideCollectionTo
                                             form.handleSubmit(performSave)();
                                         }
                                     }}
+                                    className="h-12 rounded-xl font-medium"
                                 />
                             )}
                         />
@@ -329,7 +334,7 @@ export function ExpenseForm({ initialData, onSuccess, onCancel, hideCollectionTo
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="category" className="text-[11px] font-bold uppercase">Category</Label>
                     <div className="w-full">
                         <CategoryComboBox
                             value={form.watch('category')}
@@ -340,73 +345,111 @@ export function ExpenseForm({ initialData, onSuccess, onCancel, hideCollectionTo
                         />
                     </div>
                     {form.formState.errors.category && (
-                        <p className="text-destructive text-sm">{form.formState.errors.category.message}</p>
+                        <p className="text-destructive text-[10px] font-bold">{form.formState.errors.category.message}</p>
                     )}
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="note">Note {!isNested && '/ Items'} (Optional)</Label>
+                    <Label htmlFor="note" className="text-[11px] font-bold uppercase">{isNested ? 'Collection Title' : 'Note / Items'}</Label>
                     <Input
                         id="note"
                         placeholder={isNested ? "Trip to Cox's Bazar" : "Grocery: Oil 1L, Rice 2kg"}
                         autoCorrect="off"
                         autoCapitalize="none"
                         spellCheck={true}
+                        className="h-12 rounded-xl"
                         {...form.register('note', {
                             onBlur: handleBlur
                         })}
                     />
-                    {!isNested && <p className="text-[10px] text-muted-foreground">Items separated by commas or new lines will be auto-tracked.</p>}
+                    {!isNested && <p className="text-[9px] text-muted-foreground font-medium italic">Items separated by commas or new lines will be auto-tracked.</p>}
                 </div>
 
                 {isNested && (
-                    <div className="space-y-3 pt-2">
+                    <div className="space-y-3 pt-4 border-t border-dashed border-border mt-2">
                         <div className="flex items-center justify-between">
-                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Sub Records</Label>
+                            <div className="flex flex-col">
+                                <Label className="text-[11px] font-black uppercase tracking-widest text-primary">Sub Records</Label>
+                                <span className="text-[9px] text-muted-foreground">Individual expenses in this collection</span>
+                            </div>
                             <Button
                                 type="button"
                                 size="sm"
                                 variant="outline"
-                                className="h-7 text-[10px] gap-1 rounded-full px-3 border-primary/20 hover:bg-primary/5 hover:text-primary"
+                                className="h-8 text-[11px] gap-1.5 rounded-full px-4 border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 shadow-sm"
                                 onClick={async () => {
-                                    let parentId = currentId || initialData?.id;
-                                    if (!parentId) {
-                                        parentId = await performSave(form.getValues());
+                                    // Ensure isNested is explicitly true when adding a sub-record
+                                    if (!isNested) {
+                                        form.setValue('isNested', true);
                                     }
+
+                                    let parentId = currentId || initialData?.id;
+                                    // Always save to ensure we have an ID and isNested state is persisted
+                                    parentId = await performSave({ ...form.getValues(), isNested: true });
+
                                     if (parentId) {
                                         useUIStore.getState().openAddSubRecord(parentId);
                                     }
                                 }}
 
                             >
-                                <Plus className="w-3 h-3" />
-                                Add Record
+                                <Plus className="w-3.5 h-3.5" />
+                                Add Sub-Record
                             </Button>
                         </div>
 
-                        <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                        <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
                             {subExpenses && subExpenses.length > 0 ? (
-                                subExpenses.map(sub => (
-                                    <div
-                                        key={sub.id}
-                                        className="flex items-center justify-between p-2 rounded-xl bg-muted/30 border border-border/40 group hover:border-primary/20 transition-all cursor-pointer"
-                                        onClick={() => useUIStore.getState().openEditSubRecord(sub)}
-                                    >
-                                        <div className="flex flex-col gap-0.5 overflow-hidden">
-                                            <span className="text-[11px] font-bold truncate capitalize">{sub.note || sub.type}</span>
-                                            <span className="text-[9px] text-muted-foreground">{sub.category} • {format(parseISO(sub.date), 'dd MMM')}</span>
+                                <div className="grid gap-2">
+                                    {subExpenses.map(sub => (
+                                        <div
+                                            key={sub.id}
+                                            className="flex items-center justify-between p-3 rounded-2xl bg-muted/20 border border-border/30 group hover:border-primary/30 hover:bg-muted/40 transition-all cursor-pointer"
+                                            onClick={() => useUIStore.getState().openEditSubRecord(sub)}
+                                        >
+                                            <div className="flex items-center gap-3 overflow-hidden">
+                                                <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center border border-border/40 shrink-0">
+                                                    <span className="text-xs">📄</span>
+                                                </div>
+                                                <div className="flex flex-col gap-0.5 overflow-hidden">
+                                                    <span className="text-xs font-bold truncate capitalize group-hover:text-primary transition-colors">
+                                                        {sub.note || sub.type}
+                                                    </span>
+                                                    <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-medium uppercase tracking-tighter">
+                                                        <span>{sub.category}</span>
+                                                        <span>•</span>
+                                                        <span>{format(parseISO(sub.date), 'dd MMM')}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3 ml-2">
+                                                <span className={cn(
+                                                    "text-sm font-black",
+                                                    sub.type === 'income' ? "text-green-600" : "text-primary"
+                                                )}>
+                                                    ৳{sub.amount.toFixed(0)}
+                                                </span>
+                                                <ChevronRight className="w-4 h-4 text-muted-foreground opacity-30 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className={cn("text-xs font-black", sub.type === 'income' ? "text-green-600" : "text-primary")}>
-                                                ৳{sub.amount.toFixed(0)}
-                                            </span>
-                                            <ChevronRight className="w-3 h-3 text-muted-foreground opacity-30 group-hover:opacity-100 transition-opacity" />
-                                        </div>
-                                    </div>
-                                ))
+                                    ))}
+                                </div>
                             ) : (
-                                <div className="text-[10px] text-muted-foreground italic text-center py-4 border border-dashed rounded-xl">
-                                    No sub-records added yet.
+                                <div className="text-[11px] text-muted-foreground italic text-center py-8 border-2 border-dashed rounded-3xl border-muted flex flex-col items-center gap-2 bg-muted/5">
+                                    <div className="w-10 h-10 rounded-full bg-muted/20 flex items-center justify-center mb-1">
+                                        <Layers className="w-5 h-5 opacity-20" />
+                                    </div>
+                                    This collection is empty.
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            form.setValue('isNested', true);
+                                            form.handleSubmit(performSave)();
+                                        }}
+                                        className="text-primary font-black uppercase tracking-tighter not-italic hover:underline mt-1"
+                                    >
+                                        Add first record
+                                    </button>
                                 </div>
                             )}
                         </div>

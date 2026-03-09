@@ -16,6 +16,8 @@ interface UIState {
     returnPath: string | null;
     theme: Theme;
     fontScale: number;
+    expenseSessionId: string;
+    subSessionId: string;
     openAddExpense: (parentId?: number | null) => void;
     openEditExpense: (expense: Expense, returnPath?: string) => void;
     closeExpenseSheet: () => void;
@@ -45,11 +47,14 @@ export const useUIStore = create<UIState>()(
             returnPath: null,
             theme: 'system',
             fontScale: 1.1,
+            expenseSessionId: '',
+            subSessionId: '',
 
             openAddExpense: (parentId) => set({
                 isExpenseSheetOpen: true,
                 editingExpense: undefined,
-                initialParentId: parentId ?? null
+                initialParentId: parentId ?? null,
+                expenseSessionId: Math.random().toString(36).substring(7)
             }),
 
             openEditExpense: (expense, returnPath) => set({
@@ -69,7 +74,8 @@ export const useUIStore = create<UIState>()(
             openAddSubRecord: (parentId) => set({
                 isSubRecordSheetOpen: true,
                 editingSubRecord: undefined,
-                initialParentId: parentId
+                initialParentId: parentId,
+                subSessionId: Math.random().toString(36).substring(7)
             }),
 
             openEditSubRecord: (expense) => set({

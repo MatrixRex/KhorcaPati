@@ -15,7 +15,7 @@ export function GlobalUI() {
         isExpenseSheetOpen, editingExpense, initialParentId, returnPath, openAddExpense, closeExpenseSheet,
         isSubRecordSheetOpen, editingSubRecord, closeSubRecordSheet,
         isRecurringPaymentSheetOpen, editingRecurringPayment, closeRecurringPaymentSheet,
-        theme,
+        theme, expenseSessionId, subSessionId
     } = useUIStore();
     const { ensureDefaultCategory, loadCategories } = useCategoryStore();
 
@@ -89,8 +89,9 @@ export function GlobalUI() {
                             <SheetTitle>{editingExpense ? 'Edit Record' : 'Add Record'}</SheetTitle>
                         </SheetHeader>
                         <ExpenseForm
-                            key={editingExpense?.id || (initialParentId && !isSubRecordSheetOpen ? `parent-${initialParentId}` : 'new-parent')}
+                            key={editingExpense?.id || `new-parent-${expenseSessionId}`}
                             initialData={editingExpense}
+                            parentId={editingExpense ? undefined : (isSubRecordSheetOpen ? null : initialParentId)}
                             onSuccess={handleCloseExpense}
                             onCancel={handleCloseExpense}
                         />
@@ -107,8 +108,9 @@ export function GlobalUI() {
                             <SheetTitle>{editingSubRecord ? 'Edit Sub-Record' : 'Add Sub-Record'}</SheetTitle>
                         </SheetHeader>
                         <ExpenseForm
-                            key={editingSubRecord?.id || (initialParentId ? `sub-${initialParentId}` : 'new-sub')}
+                            key={editingSubRecord?.id || `new-sub-${subSessionId}`}
                             initialData={editingSubRecord}
+                            parentId={editingSubRecord ? undefined : initialParentId}
                             hideCollectionToggle
                             onSuccess={handleCloseSubRecord}
                             onCancel={handleCloseSubRecord}

@@ -1,12 +1,32 @@
 import { CategoryManager } from '@/components/shared/CategoryManager';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { useUIStore, type Theme } from '@/stores/uiStore';
-import { Moon, Sun, Monitor, Check } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function Settings() {
     const { theme, setTheme, fontScale, setFontScale } = useUIStore();
+    const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+
+    const handleReset = async () => {
+        const { db } = await import('@/db/schema');
+        await db.delete();
+        localStorage.clear();
+        window.location.reload();
+    };
 
     const themes: { id: Theme; label: string; icon: any }[] = [
         { id: 'light', label: 'Light', icon: Sun },
@@ -90,6 +110,53 @@ export default function Settings() {
                 <section>
                     <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">Categories</h2>
                     <CategoryManager />
+                </section>
+
+                <section className="pt-6 border-t">
+                    <h2 className="text-sm font-medium text-destructive mb-3 px-1">Danger Zone</h2>
+                    <div className="bg-destructive/5 p-6 rounded-3xl border border-destructive/20 space-y-4">
+                        <div className="flex flex-col gap-1">
+                            <h3 className="text-sm font-bold text-destructive">Reset App</h3>
+                            <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">
+                                This will permanently delete all your expenses, goals, budgets, and categories.
+                                This action cannot be undone.
+                            </p>
+                        </div>
+
+                        <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+                            <AlertDialogTrigger asChild>
+                                <Button
+                                    variant="destructive"
+                                    className="w-full h-11 rounded-xl font-bold shadow-sm active:scale-95 transition-all"
+                                >
+                                    Delete All Data
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="w-[90%] rounded-[32px] p-8 border-none bg-background shadow-2xl">
+                                <AlertDialogHeader className="space-y-4">
+                                    <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center text-destructive mx-auto mb-2">
+                                        <Trash2 size={32} />
+                                    </div>
+                                    <AlertDialogTitle className="text-xl font-black text-center">Delete Everything?</AlertDialogTitle>
+                                    <AlertDialogDescription className="text-center text-xs font-medium text-muted-foreground leading-relaxed">
+                                        This will permanently wipe your local database.
+                                        Your transactions, budgets, and settings will be gone forever.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter className="flex-col gap-3 mt-8">
+                                    <AlertDialogAction
+                                        onClick={handleReset}
+                                        className="h-12 rounded-2xl bg-destructive text-destructive-foreground font-bold text-sm shadow-lg shadow-destructive/20 active:scale-95 transition-all w-full"
+                                    >
+                                        Yes, Delete Everything
+                                    </AlertDialogAction>
+                                    <AlertDialogCancel className="h-12 rounded-2xl border-none bg-secondary/50 font-bold text-sm active:scale-95 transition-all w-full mt-0">
+                                        Wait, Go Back
+                                    </AlertDialogCancel>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
                 </section>
             </div>
         </PageContainer>

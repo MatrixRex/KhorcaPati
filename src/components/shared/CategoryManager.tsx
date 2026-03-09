@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +23,14 @@ import {
 import type { Category } from '@/db/schema';
 
 export function CategoryManager() {
-    const { categories, updateCategory, deleteCategory } = useCategoryStore();
+    const { categories, updateCategory, deleteCategory, ensureDefaultCategory } = useCategoryStore();
+
+    useEffect(() => {
+        if (categories.length === 0) {
+            ensureDefaultCategory();
+        }
+    }, [categories.length, ensureDefaultCategory]);
+
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editName, setEditName] = useState('');
     const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
@@ -52,7 +59,6 @@ export function CategoryManager() {
 
     return (
         <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Categories</h2>
             <div className="space-y-2">
                 {categories.map((cat) => (
                     <div key={cat.id} className="flex items-center justify-between p-3 border rounded-lg bg-card">

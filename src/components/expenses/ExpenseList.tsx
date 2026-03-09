@@ -9,7 +9,7 @@ interface ExpenseListProps {
 }
 
 export function ExpenseList({ onEdit }: ExpenseListProps) {
-    const { startDate, endDate, selectedCategory } = useFilterStore();
+    const { startDate, endDate, selectedCategory, expenseSortBy } = useFilterStore();
 
     const expenses = useLiveQuery(async () => {
         // Only fetch top-level records
@@ -25,20 +25,33 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
             .filter(e => !e.parentId)
             .toArray();
 
-        // Sort by date descending, then by ID descending
-        all.sort((a, b) => {
-            const dateA = new Date(a.date).getTime();
-            const dateB = new Date(b.date).getTime();
-            if (dateA !== dateB) return dateB - dateA;
-            return (b.id || 0) - (a.id || 0); // Tie-breaker: Newer ID first
-        });
-
-
-        return all.filter(exp => {
+        // Apply visual filtering first
+        const filtered = all.filter(exp => {
             const date = new Date(exp.date);
             return isWithinInterval(date, { start: startDate, end: endDate });
         });
-    }, [startDate, endDate, selectedCategory]);
+
+        // Apply selected sort
+        filtered.sort((a, b) => {
+            if (expenseSortBy === 'latest' || expenseSortBy === 'oldest') {
+                const dateA = new Date(a.date).getTime();
+                const dateB = new Date(b.date).getTime();
+                if (dateA !== dateB) {
+                    return expenseSortBy === 'latest' ? dateB - dateA : dateA - dateB;
+                }
+                return (b.id || 0) - (a.id || 0);
+            }
+            if (expenseSortBy === 'amount-high' || expenseSortBy === 'amount-low') {
+                if (a.amount !== b.amount) {
+                    return expenseSortBy === 'amount-high' ? b.amount - a.amount : a.amount - b.amount;
+                }
+                return new Date(b.date).getTime() - new Date(a.date).getTime();
+            }
+            return 0;
+        });
+
+        return filtered;
+    }, [startDate, endDate, selectedCategory, expenseSortBy]);
 
 
     if (!expenses) {

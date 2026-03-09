@@ -4,6 +4,7 @@ import { startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 export type Timeframe = 'this-month' | 'this-week' | 'custom';
 
 export type InventorySortBy = 'alphabet' | 'count';
+export type ExpenseSortBy = 'latest' | 'oldest' | 'amount-high' | 'amount-low';
 
 interface FilterState {
     timeframe: Timeframe;
@@ -11,10 +12,12 @@ interface FilterState {
     endDate: Date;
     selectedCategory: string | null;
     inventorySortBy: InventorySortBy;
+    expenseSortBy: ExpenseSortBy;
     setTimeframe: (timeframe: Timeframe) => void;
     setDateRange: (start: Date, end: Date) => void;
     setCategory: (category: string | null) => void;
     setInventorySortBy: (sort: InventorySortBy) => void;
+    setExpenseSortBy: (sort: ExpenseSortBy) => void;
 }
 
 const getInitialDates = (timeframe: Timeframe) => {
@@ -35,6 +38,7 @@ export const useFilterStore = create<FilterState>((set) => ({
     ...getInitialDates('this-month'),
     selectedCategory: null,
     inventorySortBy: 'alphabet',
+    expenseSortBy: 'latest',
 
     setTimeframe: (timeframe) => {
         if (timeframe === 'custom') {
@@ -52,4 +56,5 @@ export const useFilterStore = create<FilterState>((set) => ({
 
     setCategory: (category) => set({ selectedCategory: category }),
     setInventorySortBy: (sort) => set({ inventorySortBy: sort }),
+    setExpenseSortBy: (sort) => set({ expenseSortBy: sort }),
 }));

@@ -43,7 +43,7 @@ export function CategoryFilter() {
                         )}
                     >
                         <Tag className={cn("h-3.5 w-3.5 opacity-60", selectedCategory && "opacity-100")} />
-                        <span className="truncate max-w-[80px]">
+                        <span className="truncate max-w-[80px] hidden sm:inline">
                             {selectedCategory || 'Category'}
                         </span>
                         {!selectedCategory ? (

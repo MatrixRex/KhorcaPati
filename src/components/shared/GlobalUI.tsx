@@ -59,8 +59,11 @@ export function GlobalUI() {
     };
 
     useEffect(() => {
-        ensureDefaultCategory();
-        loadCategories();
+        const init = async () => {
+            await ensureDefaultCategory();
+            await loadCategories();
+        };
+        init();
     }, [ensureDefaultCategory, loadCategories]);
 
     // Hide FAB on settings page

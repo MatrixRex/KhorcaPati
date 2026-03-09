@@ -11,6 +11,8 @@ interface CategoryState {
     ensureDefaultCategory: () => Promise<void>;
 }
 
+let isEnsuringDefault = false;
+
 export const useCategoryStore = create<CategoryState>((set, get) => ({
     categories: [],
     isLoading: false,
@@ -19,7 +21,10 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
         set({ isLoading: true });
         try {
             const data = await db.categories.toArray();
-            set({ categories: data, isLoading: false });
+            console.log('Loaded categories from DB:', data.length);
+            // De-duplicate in memory just in case of weird sync issues
+            const unique = Array.from(new Map(data.map(c => [c.name.toLowerCase().trim(), c])).values());
+            set({ categories: unique, isLoading: false });
         } catch (e) {
             console.error(e);
             set({ isLoading: false });
@@ -27,15 +32,32 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     },
 
     ensureDefaultCategory: async () => {
-        const unsorted = await db.categories.where('name').equalsIgnoreCase('Unsorted').first();
-        if (!unsorted) {
-            await db.categories.add({
-                name: 'Unsorted',
-                color: '#6b7280',
-                icon: 'Tag',
-                isDefault: true
-            });
+        if (isEnsuringDefault) return;
+        isEnsuringDefault = true;
+
+        try {
+            console.log('Checking for default category...');
+            // Find any category with isDefault property set to true (handles both true and 1)
+            const allCats = await db.categories.toArray();
+            const defaultCat = allCats.find(c => c.isDefault === true || (c.isDefault as any) === 1);
+
+            if (!defaultCat) {
+                console.log('No default found, creating "Unlisted"...');
+                // If no default exists, create 'Unlisted' as the new default
+                await db.categories.add({
+                    name: 'Unlisted',
+                    color: '#6b7280',
+                    icon: 'Tag',
+                    isDefault: true
+                });
+            } else {
+                console.log('Default category exists:', defaultCat.name);
+            }
+        } catch (e) {
+            console.warn('Category initialization conflict or error:', e);
+        } finally {
             await get().loadCategories();
+            isEnsuringDefault = false;
         }
     },
 
@@ -95,16 +117,16 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
         if (category.isDefault) return;
 
         await db.transaction('rw', [db.categories, db.expenses, db.budgets], async () => {
-            let targetName = 'Unsorted';
+            let targetName = 'Unlisted';
             if (migrateToId) {
                 const targetCategory = await db.categories.get(migrateToId);
                 if (targetCategory) {
                     targetName = targetCategory.name;
                 }
             } else {
-                const unsorted = await db.categories.where('isDefault').equals(1).first();
-                if (unsorted) {
-                    targetName = unsorted.name;
+                const defaultCat = await db.categories.where('isDefault').equals(1).first();
+                if (defaultCat) {
+                    targetName = defaultCat.name;
                 }
             }
 

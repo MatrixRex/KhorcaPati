@@ -154,5 +154,30 @@ db.version(7).stores({
     });
 });
 
+db.version(8).stores({
+    expenses: '++id, parentId, isNested, date, category, isRecurring, type',
+    items: '++id, expenseId, name, date',
+    budgets: '++id, category, timelineType, recurringInterval',
+    goals: '++id, createdAt',
+    categories: '++id, &name, isDefault',
+    recurringPayments: '++id, title, nextDueDate, category, type'
+}).upgrade(async (tx) => {
+    // Clean up duplicate categories before applying unique index
+    const cats = await tx.table('categories').toArray();
+    const seen = new Set();
+    const toDelete: number[] = [];
+    for (const cat of cats) {
+        const normalized = cat.name.toLowerCase().trim();
+        if (seen.has(normalized)) {
+            if (cat.id) toDelete.push(cat.id);
+        } else {
+            seen.add(normalized);
+        }
+    }
+    if (toDelete.length > 0) {
+        await tx.table('categories').bulkDelete(toDelete);
+    }
+});
+
 export { db };
 

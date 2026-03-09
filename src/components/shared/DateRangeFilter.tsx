@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { format } from 'date-fns';
+import type { DateRange } from 'react-day-picker';
 import { Calendar as CalendarIcon, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -15,13 +16,17 @@ export function DateRangeFilter() {
     const { timeframe, startDate, endDate, setTimeframe, setDateRange } = useFilterStore();
     const [isOpen, setIsOpen] = React.useState(false);
     const [showCustom, setShowCustom] = React.useState(timeframe === 'custom');
+    const [range, setRange] = React.useState<DateRange | undefined>(
+        timeframe === 'custom' ? { from: startDate, to: endDate } : undefined
+    );
 
-    // Sync showCustom with timeframe when popover opens
+    // Sync showCustom and range with timeframe when popover opens
     React.useEffect(() => {
         if (isOpen) {
             setShowCustom(timeframe === 'custom');
+            setRange(timeframe === 'custom' ? { from: startDate, to: endDate } : undefined);
         }
-    }, [isOpen, timeframe]);
+    }, [isOpen, timeframe, startDate, endDate]);
 
     const label = React.useMemo(() => {
         if (timeframe === 'this-month') return format(new Date(), 'MMMM');
@@ -73,7 +78,12 @@ export function DateRangeFilter() {
                         variant={(timeframe === 'custom' || showCustom) ? 'secondary' : 'ghost'}
                         size="sm"
                         className="justify-start font-normal"
-                        onClick={() => setShowCustom(true)}
+                        onClick={() => {
+                            setShowCustom(true);
+                            if (timeframe !== 'custom') {
+                                setRange(undefined);
+                            }
+                        }}
                     >
                         Custom Range
                     </Button>
@@ -90,20 +100,24 @@ export function DateRangeFilter() {
                                     </span>
                                 )}
                             </div>
-                            <div className="relative"> {/* Container for absolute navigation fix */}
+                            <div className="relative">
                                 <Calendar
                                     initialFocus
                                     mode="range"
-                                    defaultMonth={startDate}
-                                    selected={{
-                                        from: startDate,
-                                        to: endDate,
-                                    }}
-                                    onSelect={(range) => {
-                                        if (range?.from && range?.to) {
-                                            setDateRange(range.from, range.to);
-                                        } else if (range?.from) {
-                                            useFilterStore.setState({ startDate: range.from, endDate: range.from, timeframe: 'custom' });
+                                    defaultMonth={range?.from || startDate}
+                                    selected={range}
+                                    onSelect={(newRange) => {
+                                        if (!range || (range.from && range.to)) {
+                                            // Start new selection if no range or if range was already complete
+                                            setRange({ from: newRange?.from, to: undefined });
+                                        } else {
+                                            // Complete the selection
+                                            setRange(newRange);
+                                            if (newRange?.from && newRange?.to) {
+                                                setDateRange(newRange.from, newRange.to);
+                                                // Small delay to let the user see the selection before closing
+                                                setTimeout(() => setIsOpen(false), 300);
+                                            }
                                         }
                                     }}
                                     numberOfMonths={1}
@@ -111,17 +125,10 @@ export function DateRangeFilter() {
                                 />
                             </div>
                             {timeframe === 'custom' && (
-                                <div className="flex items-center justify-between gap-2 border-t pt-2 mt-2 pb-1 px-1">
+                                <div className="flex items-center justify-center border-t pt-2 mt-2 pb-1 px-1">
                                     <div className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded">
                                         {format(startDate, 'MMM dd')} - {format(endDate, 'MMM dd, yyyy')}
                                     </div>
-                                    <Button
-                                        size="sm"
-                                        className="h-7 px-3 text-[11px] font-bold shadow-sm"
-                                        onClick={() => setIsOpen(false)}
-                                    >
-                                        Apply
-                                    </Button>
                                 </div>
                             )}
                         </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,6 +18,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useUIStore } from '@/stores/uiStore';
 import { ChevronRight, Plus, Layers, Trash2, Calculator } from 'lucide-react';
 import { NumberPad } from '@/components/shared/NumberPad';
+import { ItemSuggestions } from './ItemSuggestions';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -63,6 +64,15 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showUngroupDialog, setShowUngroupDialog] = useState(false);
     const [showNumberPad, setShowNumberPad] = useState(false);
+    const categoryRef = useRef<HTMLInputElement>(null);
+    const noteRef = useRef<HTMLInputElement>(null);
+
+    // Focus Amount (NumberPad) on mount if it's a new record
+    useEffect(() => {
+        if (!initialData && !propParentId && !hideCollectionToggle) {
+            setShowNumberPad(true);
+        }
+    }, []);
 
     const addExpense = useExpenseStore((state) => state.addExpense);
     const updateExpense = useExpenseStore((state) => state.updateExpense);
@@ -106,6 +116,19 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             performSave(form.getValues());
         }
     }, [isNested, subExpenses]);
+
+    const handleAmountDone = () => {
+        setShowNumberPad(false);
+        setTimeout(() => categoryRef.current?.focus(), 150);
+    };
+
+    const handleCategoryEnter = () => {
+        setTimeout(() => noteRef.current?.focus(), 150);
+    };
+
+    const handleNoteEnter = () => {
+        form.handleSubmit(performSave)();
+    };
 
     const handleUngroup = async () => {
         if (!currentId || !subExpenses) return;
@@ -377,16 +400,25 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
                 <div className="space-y-2">
                     <Label htmlFor="note" className="text-[11px] font-bold uppercase">{isNested ? 'Collection Title' : 'Note / Items'}</Label>
-                    <Input
-                        id="note"
-                        placeholder={isNested ? "Trip to Cox's Bazar" : "Grocery: Oil 1L, Rice 2kg"}
-                        autoCorrect="off"
-                        autoCapitalize="none"
-                        spellCheck={true}
-                        className="h-12 rounded-xl"
-                        {...form.register('note', {
-                            onBlur: handleBlur
-                        })}
+                    <Controller
+                        control={form.control}
+                        name="note"
+                        render={({ field }) => (
+                            <ItemSuggestions
+                                id="note"
+                                placeholder={isNested ? "Trip to Cox's Bazar" : "Grocery: Oil 1L, Rice 2kg"}
+                                value={field.value || ''}
+                                onChange={(val: string) => {
+                                    field.onChange(val);
+                                    // Don't auto-save while typing suggestions unless it's a selection
+                                }}
+                                onBlur={() => {
+                                    field.onBlur();
+                                    handleBlur();
+                                }}
+                                className="h-12 rounded-xl"
+                            />
+                        )}
                     />
                     {!isNested && <p className="text-[9px] text-muted-foreground font-medium italic">Items separated by commas or new lines will be auto-tracked.</p>}
                 </div>
@@ -427,7 +459,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                         <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
                             {subExpenses && subExpenses.length > 0 ? (
                                 <div className="grid gap-2">
-                                    {subExpenses.map(sub => (
+                                    {subExpenses.map((sub: any) => (
                                         <div
                                             key={sub.id}
                                             className="flex items-center justify-between p-3 rounded-2xl bg-muted/20 border border-border/30 group hover:border-primary/30 hover:bg-muted/40 transition-all cursor-pointer"

@@ -16,7 +16,8 @@ import { CategoryComboBox } from './CategoryComboBox';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useUIStore } from '@/stores/uiStore';
-import { ChevronRight, Plus, Layers, Trash2 } from 'lucide-react';
+import { ChevronRight, Plus, Layers, Trash2, Calculator } from 'lucide-react';
+import { NumberPad } from '@/components/shared/NumberPad';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -54,6 +55,7 @@ export function ExpenseForm({ initialData, onSuccess, onCancel, hideCollectionTo
     const [currentId, setCurrentId] = useState<number | undefined>(initialData?.id);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showNumberPad, setShowNumberPad] = useState(false);
 
     const addExpense = useExpenseStore((state) => state.addExpense);
     const updateExpense = useExpenseStore((state) => state.updateExpense);
@@ -263,28 +265,45 @@ export function ExpenseForm({ initialData, onSuccess, onCancel, hideCollectionTo
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                    <div className="space-y-2 relative">
                         <Label htmlFor="amount" className={cn(isNested && "opacity-50")}>Amount</Label>
-                        <Input
-                            id="amount"
-                            type="number"
-                            step="0.01"
-                            disabled={isNested}
-                            inputMode="decimal"
-                            onKeyDown={(e) => {
-                                if (['e', 'E', '+', '-'].includes(e.key)) {
-                                    e.preventDefault();
-                                }
-                            }}
-                            {...form.register('amount', {
-                                valueAsNumber: true,
-                                setValueAs: (v) => v === "" ? 0 : Number(v),
-                                onBlur: handleBlur
-                            })}
-                            className={cn(isNested && "bg-muted border-dashed")}
-                        />
+                        <div className="relative">
+                            <Input
+                                id="amount"
+                                type="text"
+                                readOnly
+                                disabled={isNested}
+                                value={form.watch('amount') || ''}
+                                onClick={() => !isNested && setShowNumberPad(true)}
+                                className={cn(
+                                    "pr-10 cursor-pointer caret-transparent",
+                                    isNested && "bg-muted border-dashed"
+                                )}
+                                placeholder="0"
+                            />
+                            <Calculator
+                                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none"
+                            />
+                        </div>
                         {form.formState.errors.amount && (
                             <p className="text-destructive text-sm">{form.formState.errors.amount.message}</p>
+                        )}
+
+                        {showNumberPad && (
+                            <NumberPad
+                                value={String(form.getValues('amount'))}
+                                onChange={(val) => {
+                                    const num = parseFloat(val);
+                                    if (!isNaN(num)) {
+                                        form.setValue('amount', num);
+                                    }
+                                }}
+                                onDone={() => {
+                                    setShowNumberPad(false);
+                                    handleBlur();
+                                }}
+                                onClose={() => setShowNumberPad(false)}
+                            />
                         )}
                     </div>
                     <div className="space-y-2">

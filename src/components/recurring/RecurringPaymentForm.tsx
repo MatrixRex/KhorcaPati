@@ -12,6 +12,8 @@ import { useExpenseStore } from '@/stores/expenseStore';
 import { format, addDays, addWeeks, addMonths, addYears, parseISO } from 'date-fns';
 import { db, type RecurringPayment } from '@/db/schema';
 import { CategoryComboBox } from '../expenses/CategoryComboBox';
+import { NumberPad } from '@/components/shared/NumberPad';
+import { Calculator } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -52,6 +54,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
     const [currentId, setCurrentId] = useState<number | undefined>(initialData?.id);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showNumberPad, setShowNumberPad] = useState(false);
 
     const addExpense = useExpenseStore((state) => state.addExpense);
     const addRecurringPayment = useRecurringPaymentStore((state) => state.addRecurringPayment);
@@ -254,27 +257,39 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                    <div className="space-y-2 relative">
                         <Label htmlFor="amount">Amount</Label>
-                        <Input
-                            id="amount"
-                            type="number"
-                            step="0.01"
-                            inputMode="decimal"
-                            onKeyDown={(e) => {
-                                // Prevent e, E, +, -
-                                if (['e', 'E', '+', '-'].includes(e.key)) {
-                                    e.preventDefault();
-                                }
-                            }}
-                            {...form.register('amount', {
-                                valueAsNumber: true,
-                                setValueAs: (v) => v === "" ? 0 : Number(v),
-                                onBlur: handleBlur
-                            })}
-                        />
+                        <div className="relative">
+                            <Input
+                                id="amount"
+                                type="text"
+                                readOnly
+                                value={form.watch('amount') || ''}
+                                onClick={() => setShowNumberPad(true)}
+                                className="pr-10 cursor-pointer caret-transparent"
+                                placeholder="0"
+                            />
+                            <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                        </div>
                         {form.formState.errors.amount && (
                             <p className="text-destructive text-sm">{form.formState.errors.amount.message}</p>
+                        )}
+
+                        {showNumberPad && (
+                            <NumberPad
+                                value={String(form.getValues('amount'))}
+                                onChange={(val) => {
+                                    const num = parseFloat(val);
+                                    if (!isNaN(num)) {
+                                        form.setValue('amount', num);
+                                    }
+                                }}
+                                onDone={() => {
+                                    setShowNumberPad(false);
+                                    handleBlur();
+                                }}
+                                onClose={() => setShowNumberPad(false)}
+                            />
                         )}
                     </div>
                     <div className="space-y-2">

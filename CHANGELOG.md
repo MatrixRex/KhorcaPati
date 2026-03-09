@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Custom premium **NumberPad** with built-in calculator functionality (+, -, *, /) for all amount inputs.
 - Inventory sorting options (Alphabetical and Total Count).
 - "Danger Zone" section in Settings for complete app data reset with custom AlertDialog confirmation.
 - Automated `/git-commit` workflow for streamlined version control.

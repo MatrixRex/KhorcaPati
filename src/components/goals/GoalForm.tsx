@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -6,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useGoalStore } from '@/stores/goalStore';
 import { type Goal } from '@/db/schema';
+import { NumberPad } from '@/components/shared/NumberPad';
+import { Calculator } from 'lucide-react';
 
 const goalSchema = z.object({
     title: z.string().min(1, 'Title is required'),
@@ -26,6 +29,7 @@ interface GoalFormProps {
 export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
     const addGoal = useGoalStore((state) => state.addGoal);
     const updateGoal = useGoalStore((state) => state.updateGoal);
+    const [activeField, setActiveField] = useState<'target' | 'current' | null>(null);
 
     const form = useForm<GoalFormValues>({
         resolver: zodResolver(goalSchema),
@@ -70,25 +74,49 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="space-y-2 relative">
                     <Label htmlFor="targetAmount">Target (৳)</Label>
-                    <Input
-                        id="targetAmount"
-                        type="number"
-                        step="0.01"
-                        {...form.register('targetAmount', { valueAsNumber: true })}
-                    />
+                    <div className="relative">
+                        <Input
+                            id="targetAmount"
+                            type="text"
+                            readOnly
+                            value={form.watch('targetAmount')}
+                            onClick={() => setActiveField('target')}
+                            className="pr-10 cursor-pointer caret-transparent"
+                        />
+                        <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                    </div>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 relative">
                     <Label htmlFor="currentAmount">Saved (৳)</Label>
-                    <Input
-                        id="currentAmount"
-                        type="number"
-                        step="0.01"
-                        {...form.register('currentAmount', { valueAsNumber: true })}
-                    />
+                    <div className="relative">
+                        <Input
+                            id="currentAmount"
+                            type="text"
+                            readOnly
+                            value={form.watch('currentAmount')}
+                            onClick={() => setActiveField('current')}
+                            className="pr-10 cursor-pointer caret-transparent"
+                        />
+                        <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                    </div>
                 </div>
+
+                {activeField && (
+                    <NumberPad
+                        value={String(form.getValues(activeField === 'target' ? 'targetAmount' : 'currentAmount'))}
+                        onChange={(val) => {
+                            const num = parseFloat(val);
+                            if (!isNaN(num)) {
+                                form.setValue(activeField === 'target' ? 'targetAmount' : 'currentAmount', num);
+                            }
+                        }}
+                        onDone={() => setActiveField(null)}
+                        onClose={() => setActiveField(null)}
+                    />
+                )}
             </div>
 
             <div className="space-y-2">

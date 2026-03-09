@@ -61,6 +61,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
     const [currentId, setCurrentId] = useState<number | undefined>(initialData?.id);
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showUngroupDialog, setShowUngroupDialog] = useState(false);
     const [showNumberPad, setShowNumberPad] = useState(false);
 
     const addExpense = useExpenseStore((state) => state.addExpense);
@@ -105,6 +106,27 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             performSave(form.getValues());
         }
     }, [isNested, subExpenses]);
+
+    const handleUngroup = async () => {
+        if (!currentId || !subExpenses) return;
+        try {
+            setSaveStatus('saving');
+            await db.transaction('rw', db.expenses, async () => {
+                const subIds = subExpenses.map(s => s.id!).filter(id => id !== undefined);
+                if (subIds.length > 0) {
+                    // Convert all sub-records to normal top-level records
+                    await db.expenses.where('id').anyOf(subIds as number[]).modify({ parentId: null });
+                }
+                // Permanently delete the parent collection record
+                await db.expenses.delete(currentId);
+            });
+            setShowUngroupDialog(false);
+            onSuccess?.();
+        } catch (err) {
+            console.error("Ungrouping failed:", err);
+            setSaveStatus('error');
+        }
+    };
 
     const handleDelete = async () => {
         const idToDelete = currentId || initialData?.id;
@@ -252,8 +274,12 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             type="button"
                             onClick={() => {
                                 const newVal = !isNested;
-                                form.setValue('isNested', newVal, { shouldDirty: true });
-                                form.handleSubmit(performSave)();
+                                if (!newVal && subExpenses && subExpenses.length > 0) {
+                                    setShowUngroupDialog(true);
+                                } else {
+                                    form.setValue('isNested', newVal, { shouldDirty: true });
+                                    form.handleSubmit(performSave)();
+                                }
                             }}
                             className={cn(
                                 "w-10 h-5 rounded-full transition-colors relative",
@@ -500,6 +526,22 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                         <AlertDialogCancel className="flex-1 mt-0 rounded-xl">Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={handleDelete} className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
                             Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog open={showUngroupDialog} onOpenChange={setShowUngroupDialog}>
+                <AlertDialogContent className="w-[90%] rounded-2xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Ungroup Collection?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will delete this collection folder and convert all <span className="font-bold text-foreground">{subExpenses?.length} sub-records</span> into individual normal records.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex-row gap-2 mt-4">
+                        <AlertDialogCancel className="flex-1 mt-0 rounded-xl">Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleUngroup} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl">
+                            Ungroup
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

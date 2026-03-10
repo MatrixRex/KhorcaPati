@@ -211,7 +211,7 @@ export default function Settings() {
 
                             <button
                                 type="button"
-                                onPointerUp={(e) => {
+                                onPointerUp={() => {
                                     console.log('Test button PointerUp');
                                     handleTestNotification();
                                 }}

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -11,10 +12,12 @@ export default defineConfig({
     host: true,
     cors: true,
     allowedHosts: true,
+    https: {},
   },
   plugins: [
     react(),
     tailwindcss(),
+    basicSsl(),
     VitePWA({
       registerType: 'prompt',
       injectRegister: 'auto',
@@ -28,7 +31,7 @@ export default defineConfig({
         orientation: 'portrait',
         icons: [
           {
-            src: 'icon-192.png',
+            src: 'icon-512.png',
             sizes: '192x192',
             type: 'image/png'
           },
@@ -49,6 +52,10 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         cleanupOutdatedCaches: true,
         runtimeCaching: [] // All data is local, no API caching needed
+      },
+      devOptions: {
+        enabled: true,
+        type: 'classic',
       }
     })
   ],

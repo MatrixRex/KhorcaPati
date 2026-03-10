@@ -28,38 +28,53 @@ export async function requestNotificationPermission() {
     return false;
 }
 
-export function fireNotification(title: string, body: string) {
+const LAST_NOTIF_KEY = 'kp_last_notification_time';
+
+export async function fireNotification(title: string, body: string) {
     if (typeof window === 'undefined' || !('Notification' in window)) return;
     if (Notification.permission !== 'granted') return;
 
-    // Use current location to determine base path for icons
-    const iconPath = '/KhorcaPati/icon-512.png';
+    // --- DEBOUNCE LOGIC (Prevents double-firing from multiple tabs/hooks) ---
+    const now = Date.now();
+    const lastTime = parseInt(localStorage.getItem(LAST_NOTIF_KEY) || '0');
+    const lastTitle = localStorage.getItem('kp_last_notification_title');
+
+    // If same notification sent in the last 2 seconds, skip it
+    if (now - lastTime < 2000 && lastTitle === title) {
+        console.log('Debounced duplicate notification:', title);
+        return;
+    }
+    localStorage.setItem(LAST_NOTIF_KEY, now.toString());
+    localStorage.setItem('kp_last_notification_title', title);
+    // ------------------------------------------------------------------------
+
+    const baseUrl = (import.meta as any).env.BASE_URL || '/';
+    const cleanBase = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
+    const iconPath = `${window.location.origin}${cleanBase}icon-512.png`;
+
+    const options = {
+        body,
+        icon: iconPath,
+        badge: iconPath,
+        tag: 'khorcapati-alert',
+        renotify: true,
+        vibrate: [200, 100, 200],
+        requireInteraction: true,
+        data: { url: window.location.href }
+    };
 
     try {
-        // Preference 1: Service Worker (Required for mobile/background)
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.ready.then(registration => {
-                registration.showNotification(title, {
-                    body,
-                    icon: iconPath,
-                    badge: iconPath,
-                    tag: 'khorcapati-alert',
-                    renotify: true,
-                    vibrate: [200, 100, 200],
-                    requireInteraction: true,
-                    data: { url: window.location.href }
-                } as any);
-            });
-            return;
+            const registration = await navigator.serviceWorker.ready;
+            if (registration) {
+                console.log('Fired SW notification:', title);
+                await registration.showNotification(title, options as any);
+                return;
+            }
         }
 
-        // Preference 2: Legacy Notification (Fallback for Desktop)
-        new Notification(title, {
-            body,
-            icon: iconPath,
-            tag: 'khorcapati-alert',
-            renotify: true,
-        } as any);
+        console.log('Fired Legacy notification:', title);
+        new Notification(title, options as any);
     } catch (err) {
         console.warn('Notification failed:', err);
     }

@@ -1,9 +1,7 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { db } from '@/db/schema';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverAnchor } from '@/components/ui/popover';
-import { Command, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
 
 interface ItemSuggestionsProps {
     value: string;
@@ -17,7 +15,6 @@ interface ItemSuggestionsProps {
 
 export const ItemSuggestions = React.forwardRef<HTMLInputElement, ItemSuggestionsProps>(
     ({ value, onChange, onBlur, onEnter, id, placeholder, className }, ref) => {
-        const [isOpen, setIsOpen] = useState(false);
         const [cursorPos, setCursorPos] = useState(0);
         const internalRef = useRef<HTMLInputElement>(null);
         const inputRef = (ref as React.RefObject<HTMLInputElement>) || internalRef;
@@ -37,27 +34,6 @@ export const ItemSuggestions = React.forwardRef<HTMLInputElement, ItemSuggestion
                 .map(([name]) => name);
         }, []);
 
-        // Find the current part being typed (separated by commas or newlines)
-        const currentPart = useMemo(() => {
-            const parts = value.slice(0, cursorPos).split(/[,\n]/);
-            return parts[parts.length - 1].trim();
-        }, [value, cursorPos]);
-
-        const filteredSuggestions = useMemo(() => {
-            if (!currentPart || currentPart.length < 1) return [];
-            return suggestions?.filter(s =>
-                s.toLowerCase().includes(currentPart.toLowerCase()) &&
-                s.toLowerCase() !== currentPart.toLowerCase()
-            ).slice(0, 5) || [];
-        }, [currentPart, suggestions]);
-
-        useEffect(() => {
-            if (filteredSuggestions.length > 0) {
-                setIsOpen(true);
-            } else {
-                setIsOpen(false);
-            }
-        }, [filteredSuggestions]);
 
         const handleSelect = (suggestion: string) => {
             const before = value.slice(0, cursorPos);
@@ -77,7 +53,6 @@ export const ItemSuggestions = React.forwardRef<HTMLInputElement, ItemSuggestion
             const newCursorPos = start + newPart.length;
 
             onChange(newValue);
-            setIsOpen(false);
 
             // Restore focus and set selection
             setTimeout(() => {
@@ -90,73 +65,57 @@ export const ItemSuggestions = React.forwardRef<HTMLInputElement, ItemSuggestion
 
         return (
             <div className="relative w-full">
-                <Popover open={isOpen} onOpenChange={setIsOpen}>
-                    <PopoverAnchor asChild>
-                        <Input
-                            ref={inputRef}
-                            id={id}
-                            value={value}
-                            autoComplete="off"
-                            placeholder={placeholder}
-                            className={className}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                setCursorPos(e.target.selectionStart || 0);
-                                onChange(e.target.value);
-                            }}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Escape') setIsOpen(false);
-                                if (e.key === 'Enter' && !isOpen) {
-                                    onEnter?.();
-                                }
-                            }}
-                            onFocus={() => {
-                                // Ensure input is visible when keyboard pops up
-                                setTimeout(() => {
-                                    inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                }, 300);
-                            }}
-                            onBlur={() => {
-                                setTimeout(() => {
-                                    setIsOpen(false);
-                                    onBlur?.();
-                                }, 200);
-                            }}
-                            onClick={(e) => {
-                                setCursorPos((e.target as HTMLInputElement).selectionStart || 0);
-                                inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }}
-                        />
-                    </PopoverAnchor>
-                    <PopoverContent
-                        className="p-0 w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-xl border-primary/20 shadow-xl z-[100]"
-                        align="start"
-                        side="top"
-                        sideOffset={8}
-                        avoidCollisions={true}
-                        onOpenAutoFocus={(e) => e.preventDefault()}
-                    >
-                        <Command className="bg-background">
-                            <CommandList>
-                                <CommandGroup heading="Inventory Suggestions" className="p-1">
-                                    {filteredSuggestions.map((suggestion: string) => (
-                                        <CommandItem
-                                            key={suggestion}
-                                            value={suggestion}
-                                            onSelect={() => handleSelect(suggestion)}
-                                            className="rounded-lg py-2 cursor-pointer capitalize font-medium flex items-center gap-2 group"
-                                        >
-                                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] group-aria-selected:bg-primary group-aria-selected:text-white transition-colors">
-                                                📦
-                                            </div>
-                                            {suggestion}
-                                        </CommandItem>
-                                    ))}
-                                </CommandGroup>
-                            </CommandList>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
+                <Input
+                    ref={inputRef}
+                    id={id}
+                    list={id + "-suggestions"}
+                    value={value}
+                    autoComplete="on"
+                    placeholder={placeholder}
+                    className={className}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const newValue = e.target.value;
+                        const newCursorPos = e.target.selectionStart || 0;
+
+                        // Detect if the entire value was replaced by a suggestion (native selection)
+                        // or if it matches exactly one of our suggestions and is significantly different from previous value
+                        const isMatch = suggestions?.some(s => s.toLowerCase() === newValue.toLowerCase());
+
+                        if (isMatch && newValue.length < value.length && !newValue.includes(',')) {
+                            // Find the exact casing from suggestions
+                            const suggestion = suggestions?.find(s => s.toLowerCase() === newValue.toLowerCase()) || newValue;
+                            handleSelect(suggestion);
+                        } else {
+                            setCursorPos(newCursorPos);
+                            onChange(newValue);
+                        }
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            onEnter?.();
+                        }
+                    }}
+                    onFocus={() => {
+                        // Ensure input is visible when keyboard pops up
+                        setTimeout(() => {
+                            inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 300);
+                    }}
+                    onBlur={() => {
+                        onBlur?.();
+                    }}
+                    onClick={(e) => {
+                        setCursorPos((e.target as HTMLInputElement).selectionStart || 0);
+                        inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}
+                />
+                <datalist id={id + "-suggestions"}>
+                    {suggestions?.slice(0, 10).map((suggestion: string) => (
+                        <option key={suggestion} value={suggestion} />
+                    ))}
+                </datalist>
             </div>
         );
     }
 );
+

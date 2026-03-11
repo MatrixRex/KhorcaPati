@@ -75,7 +75,7 @@ export function NumberPad({ value, onChange, onDone, onClose }: NumberPadProps) 
                             {display}
                         </span>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full h-10 w-10">
+                    <Button type="button" variant="ghost" size="icon" onClick={onClose} className="rounded-full h-10 w-10">
                         <X className="w-5 h-5" />
                     </Button>
                 </div>
@@ -83,6 +83,7 @@ export function NumberPad({ value, onChange, onDone, onClose }: NumberPadProps) 
                 <div className="grid grid-cols-4 gap-3">
                     {/* AC and Delete Row */}
                     <Button
+                        type="button"
                         variant="secondary"
                         className="col-span-2 h-14 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-orange-500/10 text-orange-600 hover:bg-orange-500/20"
                         onClick={() => handlePress('AC')}
@@ -90,6 +91,7 @@ export function NumberPad({ value, onChange, onDone, onClose }: NumberPadProps) 
                         Clear
                     </Button>
                     <Button
+                        type="button"
                         variant="secondary"
                         className="col-span-2 h-14 rounded-2xl bg-muted/50 hover:bg-muted"
                         onClick={() => handlePress('DEL')}
@@ -102,6 +104,7 @@ export function NumberPad({ value, onChange, onDone, onClose }: NumberPadProps) 
                         const isOperator = ['/', '*', '-', '+', '='].includes(key);
                         return (
                             <Button
+                                type="button"
                                 key={key}
                                 variant={isOperator ? "default" : "outline"}
                                 className={cn(
@@ -119,6 +122,7 @@ export function NumberPad({ value, onChange, onDone, onClose }: NumberPadProps) 
 
                     {/* Done Button */}
                     <Button
+                        type="button"
                         className="col-span-4 h-16 rounded-2xl mt-2 bg-primary text-primary-foreground font-black text-sm uppercase tracking-[0.2em] shadow-lg shadow-primary/20 active:scale-[0.98] transition-all"
                         onClick={handleDone}
                     >

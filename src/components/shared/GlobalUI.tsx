@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ExpenseForm } from '@/components/expenses/ExpenseForm';
 import { RecurringPaymentForm } from '@/components/recurring/RecurringPaymentForm';
+import { RecurringPaymentsListDrawer } from '@/components/recurring/RecurringPaymentsListDrawer';
 import { BudgetForm } from '@/components/budgets/BudgetForm';
 import { GoalForm } from '@/components/goals/GoalForm';
 import { useUIStore } from '@/stores/uiStore';
@@ -19,6 +20,7 @@ export function GlobalUI() {
         isRecurringPaymentSheetOpen, editingRecurringPayment, closeRecurringPaymentSheet,
         isBudgetSheetOpen, editingBudget, closeBudgetSheet,
         isGoalSheetOpen, editingGoal, closeGoalSheet,
+        isRecurringPaymentsListOpen,
         theme, expenseSessionId, subSessionId
     } = useUIStore();
     const { ensureDefaultCategory, loadCategories } = useCategoryStore();
@@ -62,7 +64,7 @@ export function GlobalUI() {
     // Add beforeunload listener to prevent accidental reload/close when editing
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen) {
+            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen || isRecurringPaymentsListOpen) {
                 e.preventDefault();
                 e.returnValue = ''; // Required for some browsers
                 return '';
@@ -94,6 +96,8 @@ export function GlobalUI() {
                     <Plus className="w-6 h-6" />
                 </Button>
             )}
+
+            <RecurringPaymentsListDrawer />
 
             {/* Main Expense Sheet */}
             <Sheet open={isExpenseSheetOpen} onOpenChange={(open) => !open && handleCloseExpense()}>

@@ -386,10 +386,25 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                         <Button
                             type="button"
                             variant="outline"
-                            onClick={onCancel}
-                            className="w-full"
+                            onClick={async () => {
+                                const values = form.getValues();
+                                if (values.amount <= 0) {
+                                    form.setError('amount', { message: 'Amount is required' });
+                                    setShowNumberPad(true);
+                                    return;
+                                }
+                                if (!values.title.trim()) {
+                                    form.setError('title', { message: 'Title is required' });
+                                    return;
+                                }
+
+                                // Final save just in case
+                                await form.handleSubmit(performSave)();
+                                onCancel();
+                            }}
+                            className="w-full h-11 rounded-xl font-bold"
                         >
-                            Cancel
+                            Done
                         </Button>
                     )}
                     {(currentId || initialData) && (

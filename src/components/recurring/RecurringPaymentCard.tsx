@@ -16,13 +16,13 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
     const now = new Date();
     const diffInDays = differenceInCalendarDays(nextDate, now);
     const isOverdue = diffInDays < 0;
-    const isWithin5Days = diffInDays >= 0 && diffInDays <= 5;
+    const isUpcoming = diffInDays >= 0 && diffInDays <= 7;
 
     return (
         <Card
             className={cn(
                 "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group border-l-4",
-                isOverdue ? "border-l-destructive bg-destructive/5" : isWithin5Days ? "border-l-amber-500 bg-amber-500/5" : "border-l-primary"
+                isOverdue ? "border-l-destructive bg-destructive/5" : isUpcoming ? "border-l-amber-500 bg-amber-500/5" : "border-l-green-500 bg-green-500/5 shadow-none opacity-80"
             )}
             onClick={onClick}
         >
@@ -35,7 +35,7 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
                         <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 font-bold uppercase tracking-wider flex items-center">
                             <Clock className="w-2 h-2 mr-1" /> {payment.interval}
                         </Badge>
-                        {isWithin5Days && !isOverdue && (
+                        {isUpcoming && !isOverdue && (
                             <span className="text-[9px] font-black uppercase text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
                                 In {diffInDays} {diffInDays === 1 ? 'day' : 'days'}
                             </span>
@@ -43,6 +43,11 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
                         {isOverdue && (
                             <Badge variant="destructive" className="text-[9px] px-1.5 py-0 h-4 uppercase font-black tracking-widest animate-pulse">
                                 Overdue
+                            </Badge>
+                        )}
+                        {!isOverdue && !isUpcoming && (
+                            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 uppercase font-bold tracking-tight bg-green-100 text-green-700 hover:bg-green-100">
+                                Paid / Scheduled
                             </Badge>
                         )}
                     </div>
@@ -54,7 +59,7 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
                         ) : (
                             <span className={cn(
                                 "flex items-center",
-                                isWithin5Days ? "text-amber-600 font-bold uppercase tracking-tighter" : "text-muted-foreground/70 font-medium"
+                                isUpcoming ? "text-amber-600 font-bold uppercase tracking-tighter" : "text-muted-foreground/70 font-medium"
                             )}>
                                 <Calendar className="w-3 h-3 mr-1" /> {formatRelativeDate(nextDate, true)}
                             </span>

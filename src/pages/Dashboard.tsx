@@ -8,12 +8,13 @@ import { BudgetCard } from '@/components/budgets/BudgetCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { PageContainer } from '@/components/shared/PageContainer';
 
 export default function Dashboard() {
     const currentMonth = format(new Date(), 'yyyy-MM');
-    const { openEditExpense, openAddRecurringPayment, openEditRecurringPayment } = useUIStore();
+    const { openEditExpense, openAddRecurringPayment, openEditRecurringPayment, openRecurringPaymentsList } = useUIStore();
 
     const expensesThisMonth = useLiveQuery(async () => {
         const all = await db.expenses.filter(e => !e.parentId).toArray();
@@ -108,7 +109,14 @@ export default function Dashboard() {
             {/* Recurring Payments */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">Recurring</h2>
+                    <h2 
+                        className="text-sm font-bold text-foreground/90 uppercase tracking-widest cursor-pointer hover:text-primary transition-colors flex items-center gap-1 group"
+                        onClick={openRecurringPaymentsList}
+                    >
+                        Recurring
+                        <ChevronRight className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 transition-all group-hover:translate-x-0.5" />
+                        <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ml-1">Show All</span>
+                    </h2>
                     <Button
                         variant="ghost"
                         size="sm"

@@ -16,6 +16,7 @@ interface UIState {
     editingBudget?: Budget;
     isGoalSheetOpen: boolean;
     editingGoal?: Goal;
+    isRecurringPaymentsListOpen: boolean;
     selectedInventoryItem: string | null;
     returnPath: string | null;
     theme: Theme;
@@ -31,12 +32,14 @@ interface UIState {
     openAddRecurringPayment: () => void;
     openEditRecurringPayment: (payment: RecurringPayment) => void;
     closeRecurringPaymentSheet: () => void;
-    openAddBudget: () => void;
-    openEditBudget: (budget: Budget) => void;
-    closeBudgetSheet: () => void;
     openAddGoal: () => void;
     openEditGoal: (goal: Goal) => void;
     closeGoalSheet: () => void;
+    openRecurringPaymentsList: () => void;
+    closeRecurringPaymentsList: () => void;
+    openAddBudget: () => void;
+    openEditBudget: (budget: Budget) => void;
+    closeBudgetSheet: () => void;
     setSelectedInventoryItem: (name: string | null) => void;
     setReturnPath: (path: string | null) => void;
     setTheme: (theme: Theme) => void;
@@ -58,6 +61,7 @@ export const useUIStore = create<UIState>()(
             editingBudget: undefined,
             isGoalSheetOpen: false,
             editingGoal: undefined,
+            isRecurringPaymentsListOpen: false,
             selectedInventoryItem: null,
             returnPath: null,
             theme: 'system',
@@ -71,7 +75,8 @@ export const useUIStore = create<UIState>()(
                        state.isSubRecordSheetOpen || 
                        state.isRecurringPaymentSheetOpen ||
                        state.isBudgetSheetOpen ||
-                       state.isGoalSheetOpen;
+                       state.isGoalSheetOpen ||
+                       state.isRecurringPaymentsListOpen;
             },
 
             openAddExpense: (parentId) => set({
@@ -159,6 +164,14 @@ export const useUIStore = create<UIState>()(
             closeGoalSheet: () => set({
                 isGoalSheetOpen: false,
                 editingGoal: undefined
+            }),
+
+            openRecurringPaymentsList: () => set({
+                isRecurringPaymentsListOpen: true
+            }),
+
+            closeRecurringPaymentsList: () => set({
+                isRecurringPaymentsListOpen: false
             }),
 
             setSelectedInventoryItem: (name) => set({

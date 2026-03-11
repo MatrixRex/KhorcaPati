@@ -278,6 +278,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                         {showNumberPad && (
                             <NumberPad
                                 value={String(form.getValues('amount'))}
+                                label={form.watch('type') === 'expense' ? 'Recurring Expense' : 'Recurring Income'}
                                 onChange={(val) => {
                                     const num = parseFloat(val);
                                     if (!isNaN(num)) {

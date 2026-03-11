@@ -351,6 +351,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                         {showNumberPad && (
                             <NumberPad
                                 value={String(form.getValues('amount'))}
+                                label={form.watch('type') === 'expense' ? 'Expense Amount' : 'Income Amount'}
                                 onChange={(val) => {
                                     const num = parseFloat(val);
                                     if (!isNaN(num)) {

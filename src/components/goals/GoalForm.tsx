@@ -107,6 +107,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                 {activeField && (
                     <NumberPad
                         value={String(form.getValues(activeField === 'target' ? 'targetAmount' : 'currentAmount'))}
+                        label={activeField === 'target' ? 'Target Savings Goal' : 'Already Saved Amount'}
                         onChange={(val) => {
                             const num = parseFloat(val);
                             if (!isNaN(num)) {

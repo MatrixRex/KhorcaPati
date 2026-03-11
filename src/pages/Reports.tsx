@@ -11,7 +11,9 @@ import { useFilterStore } from '@/stores/filterStore';
 import { useUIStore } from '@/stores/uiStore';
 import { PageContainer } from '@/components/shared/PageContainer';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#a28CFE', '#f28C1E', '#32da1E'];
+import { useCategoryStore } from '@/stores/categoryStore';
+
+// Removed hardcoded COLORS array
 
 // Custom node for Sankey to make it look premium
 const SankeyNode = ({ x, y, width, height, index, payload, containerWidth }: any) => {
@@ -45,6 +47,7 @@ const SankeyNode = ({ x, y, width, height, index, payload, containerWidth }: any
 export default function Reports() {
     const { startDate, endDate } = useFilterStore();
     const { fontScale } = useUIStore();
+    const { categories: categoryList } = useCategoryStore();
 
     const expenses = useLiveQuery(async () => {
         return await db.expenses.filter(e => !e.parentId).toArray();
@@ -78,6 +81,12 @@ export default function Reports() {
             dailyAggs.set(day, currentDay);
         });
 
+        // Helper to get category color
+        const getCategoryColor = (catName: string) => {
+            const found = categoryList.find(c => c.name.toLowerCase() === catName.toLowerCase());
+            return found?.color || '#3b82f6';
+        };
+
         // 1. Sankey Data (Flow)
         const categories = Array.from(categoryMap.entries()).sort((a, b) => b[1] - a[1]);
 
@@ -87,15 +96,19 @@ export default function Reports() {
         const links: any[] = [];
 
         // Add categories as nodes and create links from Income
-        categories.forEach(([name, value], idx) => {
-            nodes.push({ name, fill: COLORS[idx % COLORS.length] });
+        categories.forEach(([name, value]) => {
+            nodes.push({ name, fill: getCategoryColor(name) });
             links.push({ source: 0, target: nodes.length - 1, value });
         });
 
         const sankeyData = { nodes, links };
 
         // 2. Category Horizontal Bars Data
-        const categoryData = categories.map(([name, value]) => ({ name, value }));
+        const categoryData = categories.map(([name, value]) => ({ 
+            name, 
+            value,
+            fill: getCategoryColor(name)
+        }));
 
         // 3. Line Chart Timeline Data
         let runningBalance = 0;
@@ -199,8 +212,8 @@ export default function Reports() {
                                         formatter={(value) => `৳${Number(value).toFixed(0)}`}
                                     />
                                     <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={20}>
-                                        {categoryData.map((_entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        {categoryData.map((entry: any, index: number) => (
+                                            <Cell key={`cell-${index}`} fill={entry.fill} />
                                         ))}
                                         <LabelList
                                             dataKey="value"

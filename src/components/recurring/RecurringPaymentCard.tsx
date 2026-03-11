@@ -5,6 +5,7 @@ import { parseISO, differenceInCalendarDays } from 'date-fns';
 import { Calendar, AlertCircle, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatRelativeDate } from '@/utils/date';
+import { useCategoryStore } from '@/stores/categoryStore';
 
 interface RecurringPaymentCardProps {
     payment: RecurringPayment;
@@ -18,14 +19,26 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
     const isOverdue = diffInDays < 0;
     const isUpcoming = diffInDays >= 0 && diffInDays <= 7;
 
+    const { categories } = useCategoryStore();
+    const catInfo = categories.find(c => c.name.toLowerCase() === payment.category.toLowerCase());
+    const catColor = catInfo?.color || '#3b82f6';
+
     return (
         <Card
             className={cn(
-                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group border-l-4",
+                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group border-l-4 relative",
                 isOverdue ? "border-l-destructive bg-destructive/5" : isUpcoming ? "border-l-amber-500 bg-amber-500/5" : "border-l-green-500 bg-green-500/5 shadow-none opacity-80"
             )}
+            style={{ 
+                background: `linear-gradient(to right, ${catColor}15, transparent)`
+            }}
             onClick={onClick}
         >
+            {/* Soft glow highlight based on category color */}
+            <div 
+                className="absolute -left-4 top-0 bottom-0 w-8 opacity-20 blur-xl pointer-events-none"
+                style={{ backgroundColor: catColor }}
+            />
             <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex flex-col flex-1 overflow-hidden pr-2">
                     <div className="flex items-center gap-2 mb-1">

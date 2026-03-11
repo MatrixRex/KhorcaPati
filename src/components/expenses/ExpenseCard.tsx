@@ -7,6 +7,7 @@ import { formatRelativeDate } from '@/utils/date';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Layers, ChevronDown, CornerDownRight } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
+import { useCategoryStore } from '@/stores/categoryStore';
 
 interface ExpenseCardProps {
     expense: Expense;
@@ -16,6 +17,10 @@ interface ExpenseCardProps {
 export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const { openEditExpense } = useUIStore();
+    const { categories } = useCategoryStore();
+
+    const catInfo = categories.find(c => c.name.toLowerCase() === expense.category.toLowerCase());
+    const catColor = catInfo?.color || '#3b82f6';
 
     const subExpenses = useLiveQuery(() =>
         expense.isNested ? db.expenses.where('parentId').equals(expense.id!).toArray() : []
@@ -34,11 +39,19 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                     isExpanded && "bg-muted/10 border-primary/20",
                     expense.isNested && !isExpanded && "bg-primary/5 border-primary/10"
                 )}
+                style={!isExpanded ? { 
+                    background: `linear-gradient(to right, ${catColor}15, transparent)`
+                } : {}}
                 onClick={onClick}
             >
                 {expense.isNested && (
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/40" />
                 )}
+                {/* Soft glow highlight based on category color */}
+                <div 
+                    className="absolute -left-4 top-0 bottom-0 w-8 opacity-25 blur-xl pointer-events-none"
+                    style={{ backgroundColor: catColor }}
+                />
                 <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex flex-col flex-1 overflow-hidden pr-2">
                         <div className="flex items-center gap-2 mb-1">

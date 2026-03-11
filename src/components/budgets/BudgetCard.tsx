@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useFilterStore } from '@/stores/filterStore';
 import { differenceInDays, parseISO, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
+import { useCategoryStore } from '@/stores/categoryStore';
 
 interface BudgetCardProps {
     budget: Budget;
@@ -118,14 +119,26 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
         }
     };
 
+    const { categories } = useCategoryStore();
+    const catInfo = categories.find(c => c.name.toLowerCase() === budget.category.toLowerCase());
+    const catColor = catInfo?.color || '#3b82f6';
+
     return (
         <Card
             className={cn(
-                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group/card",
+                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group/card relative",
                 isOverBudget && "border-destructive/30 bg-destructive/5"
             )}
+            style={{ 
+                background: `linear-gradient(to right, ${catColor}15, transparent)`
+            }}
             onClick={handleClick}
         >
+            {/* Soft glow highlight based on category color */}
+            <div 
+                className="absolute -left-4 top-0 bottom-0 w-8 opacity-25 blur-xl pointer-events-none"
+                style={{ backgroundColor: catColor }}
+            />
             <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                     <div>

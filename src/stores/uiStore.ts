@@ -17,6 +17,7 @@ interface UIState {
     isGoalSheetOpen: boolean;
     editingGoal?: Goal;
     isRecurringPaymentsListOpen: boolean;
+    isCategoryManagementOpen: boolean;
     selectedInventoryItem: string | null;
     returnPath: string | null;
     theme: Theme;
@@ -37,6 +38,8 @@ interface UIState {
     closeGoalSheet: () => void;
     openRecurringPaymentsList: () => void;
     closeRecurringPaymentsList: () => void;
+    openCategoryManagement: () => void;
+    closeCategoryManagement: () => void;
     openAddBudget: () => void;
     openEditBudget: (budget: Budget) => void;
     closeBudgetSheet: () => void;
@@ -62,6 +65,7 @@ export const useUIStore = create<UIState>()(
             isGoalSheetOpen: false,
             editingGoal: undefined,
             isRecurringPaymentsListOpen: false,
+            isCategoryManagementOpen: false,
             selectedInventoryItem: null,
             returnPath: null,
             theme: 'system',
@@ -76,7 +80,8 @@ export const useUIStore = create<UIState>()(
                        state.isRecurringPaymentSheetOpen ||
                        state.isBudgetSheetOpen ||
                        state.isGoalSheetOpen ||
-                       state.isRecurringPaymentsListOpen;
+                       state.isRecurringPaymentsListOpen ||
+                       state.isCategoryManagementOpen;
             },
 
             openAddExpense: (parentId) => set({
@@ -172,6 +177,12 @@ export const useUIStore = create<UIState>()(
 
             closeRecurringPaymentsList: () => set({
                 isRecurringPaymentsListOpen: false
+            }),
+            openCategoryManagement: () => set({
+                isCategoryManagementOpen: true
+            }),
+            closeCategoryManagement: () => set({
+                isCategoryManagementOpen: false
             }),
 
             setSelectedInventoryItem: (name) => set({

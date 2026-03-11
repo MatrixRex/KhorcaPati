@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { RecurringPaymentCard } from './RecurringPaymentCard';
 import { useUIStore } from '@/stores/uiStore';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Plus, Info } from 'lucide-react';
 
@@ -18,17 +18,23 @@ export function RecurringPaymentsListDrawer() {
             <SheetContent side="bottom" className="h-[92vh] rounded-t-[32px] p-0 overflow-hidden border-none bg-background">
                 <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
                 <div className="px-6 pb-6 h-full flex flex-col pt-2">
-                    <SheetHeader className="mb-6 flex flex-row items-center justify-between space-y-0">
-                        <SheetTitle className="text-xl font-black tracking-tight">Recurring Payments</SheetTitle>
-                        <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="rounded-full border-primary/20 text-primary hover:bg-primary/5 font-bold px-4"
-                            onClick={openAddRecurringPayment}
-                        >
-                            <Plus className="w-4 h-4 mr-1.5" />
-                            Add New
-                        </Button>
+                    <SheetHeader className="px-0 py-4 shrink-0">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <SheetTitle className="text-2xl font-black tracking-tight">Recurring</SheetTitle>
+                                <SheetDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
+                                    {recurringPayments?.length || 0} Total Payments
+                                </SheetDescription>
+                            </div>
+                            <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="rounded-full h-10 w-10 border-primary/20 bg-primary/5 text-primary"
+                                onClick={openAddRecurringPayment}
+                            >
+                                <Plus className="w-5 h-5" />
+                            </Button>
+                        </div>
                     </SheetHeader>
 
                     {!recurringPayments || recurringPayments.length === 0 ? (

@@ -1,4 +1,3 @@
-import { CategoryManager } from '@/components/shared/CategoryManager';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { useUIStore, type Theme } from '@/stores/uiStore';
 import { useState, useEffect } from 'react';
@@ -240,8 +239,46 @@ export default function Settings() {
                 </section>
 
                 <section>
-                    <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">Categories</h2>
-                    <CategoryManager />
+                    <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">Management</h2>
+                    <div className="grid grid-cols-1 gap-3">
+                        <Button
+                            variant="outline"
+                            onClick={() => useUIStore.getState().openCategoryManagement()}
+                            className="h-16 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                                    <Check className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col items-start">
+                                    <span className="text-sm font-bold">Categories</span>
+                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">Manage names and colors</span>
+                                </div>
+                            </div>
+                            <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Monitor className="w-4 h-4 rotate-[-90deg]" />
+                            </div>
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            onClick={() => useUIStore.getState().openRecurringPaymentsList()}
+                            className="h-16 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500 group-hover:scale-110 transition-transform">
+                                    <Bell className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col items-start">
+                                    <span className="text-sm font-bold">Recurring Payments</span>
+                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">Edit schedules and status</span>
+                                </div>
+                            </div>
+                            <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Monitor className="w-4 h-4 rotate-[-90deg]" />
+                            </div>
+                        </Button>
+                    </div>
                 </section>
 
                 <section className="pt-6 border-t">

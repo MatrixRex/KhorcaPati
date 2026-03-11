@@ -8,6 +8,7 @@ import { RecurringPaymentForm } from '@/components/recurring/RecurringPaymentFor
 import { RecurringPaymentsListDrawer } from '@/components/recurring/RecurringPaymentsListDrawer';
 import { BudgetForm } from '@/components/budgets/BudgetForm';
 import { GoalForm } from '@/components/goals/GoalForm';
+import { CategoryManagementDrawer } from '@/components/shared/CategoryManagementDrawer';
 import { useUIStore } from '@/stores/uiStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 
@@ -21,6 +22,7 @@ export function GlobalUI() {
         isBudgetSheetOpen, editingBudget, closeBudgetSheet,
         isGoalSheetOpen, editingGoal, closeGoalSheet,
         isRecurringPaymentsListOpen,
+        isCategoryManagementOpen,
         theme, expenseSessionId, subSessionId
     } = useUIStore();
     const { ensureDefaultCategory, loadCategories } = useCategoryStore();
@@ -64,7 +66,7 @@ export function GlobalUI() {
     // Add beforeunload listener to prevent accidental reload/close when editing
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen || isRecurringPaymentsListOpen) {
+            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen || isRecurringPaymentsListOpen || isCategoryManagementOpen) {
                 e.preventDefault();
                 e.returnValue = ''; // Required for some browsers
                 return '';
@@ -98,6 +100,7 @@ export function GlobalUI() {
             )}
 
             <RecurringPaymentsListDrawer />
+            <CategoryManagementDrawer />
 
             {/* Main Expense Sheet */}
             <Sheet open={isExpenseSheetOpen} onOpenChange={(open) => !open && handleCloseExpense()}>

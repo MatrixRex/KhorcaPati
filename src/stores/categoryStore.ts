@@ -1,6 +1,25 @@
 import { create } from 'zustand';
 import { db, type Category } from '@/db/schema';
 
+export const CATEGORY_COLORS = [
+    '#3b82f6', // Blue
+    '#ef4444', // Red
+    '#10b981', // Emerald
+    '#f59e0b', // Amber
+    '#8b5cf6', // Violet
+    '#ec4899', // Pink
+    '#06b6d4', // Cyan
+    '#f97316', // Orange
+    '#14b8a6', // Teal
+    '#6366f1', // Indigo
+    '#d946ef', // Fuchsia
+    '#84cc16', // Lime
+    '#22c55e', // Green
+    '#eab308', // Yellow
+    '#a855f7', // Purple
+    '#f43f5e', // Rose
+];
+
 interface CategoryState {
     categories: Category[];
     isLoading: boolean;
@@ -61,7 +80,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
         }
     },
 
-    addCategory: async (name, color = '#3b82f6', icon = 'Tag') => {
+    addCategory: async (name, color, icon = 'Tag') => {
         const trimmedName = name.trim();
         if (!trimmedName) return 0;
 
@@ -71,9 +90,12 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
         const existing = await db.categories.where('name').equalsIgnoreCase(capitalizedName).first();
         if (existing) return existing.id!;
 
+        // Use provided color or pick random from presets
+        const finalColor = color || CATEGORY_COLORS[Math.floor(Math.random() * CATEGORY_COLORS.length)];
+
         const id = await db.categories.add({
             name: capitalizedName,
-            color,
+            color: finalColor,
             icon,
             isDefault: false
         });

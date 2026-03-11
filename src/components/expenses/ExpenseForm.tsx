@@ -60,7 +60,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
         return null;
     });
     const [currentId, setCurrentId] = useState<number | undefined>(initialData?.id);
-    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+    const isSavingRef = useRef(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showUngroupDialog, setShowUngroupDialog] = useState(false);
     const [showNumberPad, setShowNumberPad] = useState(false);
@@ -134,7 +134,6 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
     const handleUngroup = async () => {
         if (!currentId || !subExpenses) return;
         try {
-            setSaveStatus('saving');
             await db.transaction('rw', db.expenses, async () => {
                 const subIds = subExpenses.map(s => s.id!).filter(id => id !== undefined);
                 if (subIds.length > 0) {
@@ -148,7 +147,6 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             onSuccess?.();
         } catch (err) {
             console.error("Ungrouping failed:", err);
-            setSaveStatus('error');
         }
     };
 
@@ -192,9 +190,9 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             setWasAmountEdited(true); // Show error outline immediately
             return;
         }
-        if (saveStatus === 'saving') return currentId || initialData?.id;
+        if (isSavingRef.current) return currentId;
 
-        setSaveStatus('saving');
+        isSavingRef.current = true;
         try {
             const categoryInDb = await db.categories
                 .filter(c => c.name.toLowerCase() === data.category.trim().toLowerCase())
@@ -231,12 +229,12 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                 setCurrentId(newId);
                 await processItems(newId, data.note || '', data.date);
             }
-            setSaveStatus('saved');
             return savedId;
         } catch (err) {
             console.error("Save failed:", err);
-            setSaveStatus('error');
             return undefined;
+        } finally {
+            isSavingRef.current = false;
         }
     };
 
@@ -256,7 +254,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             type="button"
                             onClick={() => {
                                 form.setValue('type', 'expense', { shouldDirty: true });
-                                form.handleSubmit(performSave)();
+                                if (currentId) form.handleSubmit(performSave)();
                             }}
                             className={cn(
                                 "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
@@ -271,7 +269,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             type="button"
                             onClick={() => {
                                 form.setValue('type', 'income', { shouldDirty: true });
-                                form.handleSubmit(performSave)();
+                                if (currentId) form.handleSubmit(performSave)();
                             }}
                             className={cn(
                                 "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
@@ -543,7 +541,10 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                 if (!match) {
                                     form.setValue('category', 'Unsorted');
                                 }
-                                onCancel();
+                                
+                                // Perform a final save before closing
+                                await form.handleSubmit(performSave)();
+                                onSuccess ? onSuccess() : (onCancel && onCancel());
                             }}
                             className="w-full h-11 rounded-xl font-bold"
                         >

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { type Expense, type RecurringPayment } from '@/db/schema';
+import { type Expense, type RecurringPayment, type Budget, type Goal } from '@/db/schema';
 
 export type Theme = 'light' | 'dark' | 'system';
 
@@ -12,6 +12,10 @@ interface UIState {
     editingSubRecord?: Expense;
     isRecurringPaymentSheetOpen: boolean;
     editingRecurringPayment?: RecurringPayment;
+    isBudgetSheetOpen: boolean;
+    editingBudget?: Budget;
+    isGoalSheetOpen: boolean;
+    editingGoal?: Goal;
     selectedInventoryItem: string | null;
     returnPath: string | null;
     theme: Theme;
@@ -27,15 +31,22 @@ interface UIState {
     openAddRecurringPayment: () => void;
     openEditRecurringPayment: (payment: RecurringPayment) => void;
     closeRecurringPaymentSheet: () => void;
+    openAddBudget: () => void;
+    openEditBudget: (budget: Budget) => void;
+    closeBudgetSheet: () => void;
+    openAddGoal: () => void;
+    openEditGoal: (goal: Goal) => void;
+    closeGoalSheet: () => void;
     setSelectedInventoryItem: (name: string | null) => void;
     setReturnPath: (path: string | null) => void;
     setTheme: (theme: Theme) => void;
     setFontScale: (scale: number) => void;
+    isInEditingMode: () => boolean;
 }
 
 export const useUIStore = create<UIState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
             isExpenseSheetOpen: false,
             editingExpense: undefined,
             initialParentId: null,
@@ -43,12 +54,25 @@ export const useUIStore = create<UIState>()(
             editingSubRecord: undefined,
             isRecurringPaymentSheetOpen: false,
             editingRecurringPayment: undefined,
+            isBudgetSheetOpen: false,
+            editingBudget: undefined,
+            isGoalSheetOpen: false,
+            editingGoal: undefined,
             selectedInventoryItem: null,
             returnPath: null,
             theme: 'system',
             fontScale: 1.1,
             expenseSessionId: '',
             subSessionId: '',
+
+            isInEditingMode: () => {
+                const state = get();
+                return state.isExpenseSheetOpen || 
+                       state.isSubRecordSheetOpen || 
+                       state.isRecurringPaymentSheetOpen ||
+                       state.isBudgetSheetOpen ||
+                       state.isGoalSheetOpen;
+            },
 
             openAddExpense: (parentId) => set({
                 isExpenseSheetOpen: true,
@@ -105,6 +129,36 @@ export const useUIStore = create<UIState>()(
             closeRecurringPaymentSheet: () => set({
                 isRecurringPaymentSheetOpen: false,
                 editingRecurringPayment: undefined
+            }),
+            
+            openAddBudget: () => set({
+                isBudgetSheetOpen: true,
+                editingBudget: undefined
+            }),
+
+            openEditBudget: (budget) => set({
+                isBudgetSheetOpen: true,
+                editingBudget: budget
+            }),
+
+            closeBudgetSheet: () => set({
+                isBudgetSheetOpen: false,
+                editingBudget: undefined
+            }),
+
+            openAddGoal: () => set({
+                isGoalSheetOpen: true,
+                editingGoal: undefined
+            }),
+
+            openEditGoal: (goal) => set({
+                isGoalSheetOpen: true,
+                editingGoal: goal
+            }),
+
+            closeGoalSheet: () => set({
+                isGoalSheetOpen: false,
+                editingGoal: undefined
             }),
 
             setSelectedInventoryItem: (name) => set({

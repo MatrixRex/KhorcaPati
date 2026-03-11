@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ExpenseForm } from '@/components/expenses/ExpenseForm';
 import { RecurringPaymentForm } from '@/components/recurring/RecurringPaymentForm';
+import { BudgetForm } from '@/components/budgets/BudgetForm';
+import { GoalForm } from '@/components/goals/GoalForm';
 import { useUIStore } from '@/stores/uiStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 
@@ -15,6 +17,8 @@ export function GlobalUI() {
         isExpenseSheetOpen, editingExpense, initialParentId, returnPath, openAddExpense, closeExpenseSheet,
         isSubRecordSheetOpen, editingSubRecord, closeSubRecordSheet,
         isRecurringPaymentSheetOpen, editingRecurringPayment, closeRecurringPaymentSheet,
+        isBudgetSheetOpen, editingBudget, closeBudgetSheet,
+        isGoalSheetOpen, editingGoal, closeGoalSheet,
         theme, expenseSessionId, subSessionId
     } = useUIStore();
     const { ensureDefaultCategory, loadCategories } = useCategoryStore();
@@ -54,9 +58,20 @@ export function GlobalUI() {
         closeSubRecordSheet();
     };
 
-    const handleCloseRecurring = () => {
-        closeRecurringPaymentSheet();
-    };
+
+    // Add beforeunload listener to prevent accidental reload/close when editing
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen) {
+                e.preventDefault();
+                e.returnValue = ''; // Required for some browsers
+                return '';
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isGoalSheetOpen]);
 
     useEffect(() => {
         const init = async () => {
@@ -121,7 +136,7 @@ export function GlobalUI() {
 
 
             {/* Recurring Payment Sheet */}
-            <Sheet open={isRecurringPaymentSheetOpen} onOpenChange={(open) => !open && handleCloseRecurring()}>
+            <Sheet open={isRecurringPaymentSheetOpen} onOpenChange={(open) => !open && closeRecurringPaymentSheet()}>
                 <SheetContent
                     side="bottom"
                     className="h-[90vh] sm:h-auto rounded-t-xl p-0 overflow-y-auto w-full max-w-md mx-auto z-50 pointer-events-auto"
@@ -132,8 +147,41 @@ export function GlobalUI() {
                         </SheetHeader>
                         <RecurringPaymentForm
                             initialData={editingRecurringPayment}
-                            onSuccess={handleCloseRecurring}
-                            onCancel={handleCloseRecurring}
+                            onSuccess={closeRecurringPaymentSheet}
+                            onCancel={closeRecurringPaymentSheet}
+                        />
+                    </div>
+                </SheetContent>
+            </Sheet>
+
+            {/* Budget Sheet */}
+            <Sheet open={isBudgetSheetOpen} onOpenChange={(open) => !open && closeBudgetSheet()}>
+                <SheetContent side="bottom" className="h-[90vh] sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
+                    <div className="p-6 mb-8 text-foreground">
+                        <SheetHeader className="mb-6 text-left border-b pb-4">
+                            <SheetTitle className="text-xl font-black">{editingBudget ? 'Edit Budget' : 'New Budget Limit'}</SheetTitle>
+                        </SheetHeader>
+                        <BudgetForm
+                            key={editingBudget?.id ?? 'new-budget'}
+                            initialData={editingBudget}
+                            onSuccess={closeBudgetSheet}
+                            onCancel={closeBudgetSheet}
+                        />
+                    </div>
+                </SheetContent>
+            </Sheet>
+
+            {/* Goal Sheet */}
+            <Sheet open={isGoalSheetOpen} onOpenChange={(open) => !open && closeGoalSheet()}>
+                <SheetContent side="bottom" className="h-[90vh] sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
+                    <div className="p-6 mb-8 text-foreground">
+                        <SheetHeader className="mb-6 text-left border-b pb-4">
+                            <SheetTitle className="text-xl font-black">{editingGoal ? 'Edit Saving Goal' : 'Add Saving Goal'}</SheetTitle>
+                        </SheetHeader>
+                        <GoalForm
+                            initialData={editingGoal}
+                            onSuccess={closeGoalSheet}
+                            onCancel={closeGoalSheet}
                         />
                     </div>
                 </SheetContent>

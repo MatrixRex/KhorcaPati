@@ -18,7 +18,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useUIStore } from '@/stores/uiStore';
 import { ChevronRight, Plus, Layers, Trash2, Calculator } from 'lucide-react';
 import { NumberPad } from '@/components/shared/NumberPad';
-import { ItemSuggestions } from './ItemSuggestions';
+import { SuggestionInput } from './SuggestionInput';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -249,7 +249,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
     return (
         <>
-            <form className="space-y-4">
+            <form className="space-y-4 pb-24">
                 <div className="flex justify-between items-center mb-2">
                     <div className="flex bg-muted p-1 rounded-xl w-full">
                         <button
@@ -410,9 +410,10 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                         control={form.control}
                         name="note"
                         render={({ field }) => (
-                            <ItemSuggestions
+                            <SuggestionInput
                                 ref={noteRef}
                                 id="note"
+                                type="note"
                                 placeholder={isNested ? "Trip to Cox's Bazar" : "Grocery: Oil 1L, Rice 2kg"}
                                 value={field.value || ''}
                                 onChange={(val: string) => {

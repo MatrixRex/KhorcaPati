@@ -199,7 +199,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
 
     return (
         <>
-            <form className="space-y-4">
+            <form className="space-y-4 pb-24">
                 <div className="flex justify-between items-center mb-2">
                     <div className="flex bg-muted p-1 rounded-xl w-full">
                         <button

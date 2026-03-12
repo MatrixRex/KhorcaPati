@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refined header layout: Date filter is now positioned to the rightmost for consistency.
 - More concise date filter labels (e.g., "March", "Mar W2") and shortened dropdown options.
 - Default category renamed to "Unlisted" and logic updated to Allow renaming while maintaining default status.
-- UI improvements: Removed redundant category headings on Settings page.
+- UI improvements: Wide suggestion bar for better accessibility; auto-select text on focus for Category/Goal; removed redundant category headings on Settings page.
 
 ### Fixed
 - Fixed category duplication bug: Implemented Version 8 database migration with unique constraint on category names.

@@ -47,7 +47,7 @@ export const GoalComboBox = React.forwardRef<HTMLInputElement, GoalComboBoxProps
                 onEnter={() => {
                    onEnter?.();
                 }}
-                placeholder={goals.length > 0 ? "Select goal..." : "No goals yet"}
+                placeholder="No Goal"
                 className="h-12 rounded-xl"
             />
         );

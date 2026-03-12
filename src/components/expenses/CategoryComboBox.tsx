@@ -32,7 +32,7 @@ export const CategoryComboBox = React.forwardRef<HTMLInputElement, CategoryCombo
                 setTimeout(() => onEnter?.(), 100);
             } else {
                 onChange(selected);
-                setTimeout(() => onEnter?.(), 100);
+                onEnter?.();
             }
         };
 
@@ -43,6 +43,11 @@ export const CategoryComboBox = React.forwardRef<HTMLInputElement, CategoryCombo
                 onClick: () => handleSelect(`＋ Create "${value.trim()}"`)
             };
         }, [value, hasExactMatch, handleSelect]);
+
+        const defaultCategoryName = React.useMemo(() => {
+            const def = categories.find(c => c.isDefault);
+            return def?.name || "Unlisted";
+        }, [categories]);
 
         return (
             <SuggestionInput
@@ -55,14 +60,8 @@ export const CategoryComboBox = React.forwardRef<HTMLInputElement, CategoryCombo
                 onChange={onChange}
                 onBlur={onBlur}
                 onSelectSuggestion={handleSelect}
-                onEnter={() => {
-                    if (sortedNames.length > 0) {
-                        handleSelect(sortedNames[0]);
-                    } else {
-                        onEnter?.();
-                    }
-                }}
-                placeholder="Search or enter category..."
+                onEnter={onEnter}
+                placeholder={defaultCategoryName}
                 className="h-12 rounded-xl"
             />
         );

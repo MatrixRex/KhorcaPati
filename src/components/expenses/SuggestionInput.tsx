@@ -129,6 +129,8 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
 
         const icon = type === 'category' ? '🏷️' : '📦';
 
+        const [isFocused, setIsFocused] = useState(false);
+
         return (
             <div className="relative w-full">
                 <Popover open={isOpen} onOpenChange={setIsOpen} modal={false}>
@@ -138,8 +140,11 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
                             id={id}
                             value={value}
                             autoComplete="off"
-                            placeholder={placeholder}
-                            className={className}
+                            autoCorrect="off"
+                            spellCheck="false"
+                            enterKeyHint={isMulti ? "enter" : "next"}
+                            placeholder={isFocused ? "" : placeholder}
+                            className={cn(className, !isFocused && !value && "opacity-50")}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                 setCursorPos(e.target.selectionStart || 0);
                                 onChange(e.target.value);
@@ -149,30 +154,52 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
                                     setIsOpen(false);
                                 }
                                 if (e.key === 'Enter') {
-                                    if (isOpen && filteredSuggestions.length > 0) {
+                                    // If there are suggestions visible, pick the first one
+                                    if (filteredSuggestions.length > 0) {
                                         e.preventDefault();
                                         handleSelect(filteredSuggestions[0]);
-                                    } else if (isOpen && action) {
+                                    } 
+                                    // Otherwise if there is a pending action (like creating a category), trigger it
+                                    else if (action) {
                                         e.preventDefault();
                                         action.onClick();
-                                    } else {
-                                        onEnter?.();
+                                    } 
+                                    // If no suggestions, check if we typed an exact match (even if it's hidden from the dropdown)
+                                    // This handles the case where you type "food" and it should match "Food" (official category)
+                                    else {
+                                        const exactMatch = suggestionsList.find(s => 
+                                            s.toLowerCase().trim() === currentPart.toLowerCase().trim()
+                                        );
+                                        if (exactMatch && !isMulti) {
+                                            e.preventDefault();
+                                            handleSelect(exactMatch);
+                                        } else {
+                                            onEnter?.();
+                                        }
                                     }
                                 }
                             }}
                             onFocus={() => {
+                                setIsFocused(true);
+                                if (!isMulti && value) {
+                                    inputRef.current?.select();
+                                }
                                 if (filteredSuggestions.length > 0 || action) setIsOpen(true);
                                 setTimeout(() => {
                                     inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                 }, 300);
                             }}
                             onBlur={() => {
+                                setIsFocused(false);
                                 setTimeout(() => {
                                     setIsOpen(false);
                                     onBlur?.();
                                 }, 200);
                             }}
                             onClick={(e) => {
+                                if (!isMulti && value) {
+                                    (e.target as HTMLInputElement).select();
+                                }
                                 setCursorPos((e.target as HTMLInputElement).selectionStart || 0);
                                 if (filteredSuggestions.length > 0 || action) setIsOpen(true);
                                 setTimeout(() => {
@@ -182,11 +209,12 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
                         />
                     </PopoverAnchor>
                     <PopoverContent
-                        className="p-1 w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-2xl border-primary/20 shadow-2xl z-[100] bg-background/95 backdrop-blur-md"
-                        align="start"
+                        className="p-1 w-[calc(100vw-48px)] max-w-md overflow-hidden rounded-2xl border-primary/20 shadow-2xl z-[100] bg-background/95 backdrop-blur-md"
+                        align="center"
                         side="top"
                         sideOffset={8}
-                        avoidCollisions={false}
+                        avoidCollisions={true}
+                        collisionPadding={24}
                         onOpenAutoFocus={(e) => e.preventDefault()}
                         onInteractOutside={(e) => {
                             const target = e.target as HTMLElement;

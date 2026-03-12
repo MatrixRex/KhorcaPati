@@ -92,7 +92,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
         defaultValues: {
             amount: initialData?.amount || 0,
             type: initialData?.type || 'expense',
-            category: initialData?.category || 'Unsorted',
+            category: initialData?.category || '',
             goalId: initialData?.goalId || null,
             date: initialData?.date || format(new Date(), 'yyyy-MM-dd'),
             note: initialData?.note || '',
@@ -127,7 +127,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
     };
 
     const handleCategoryEnter = () => {
-        setTimeout(() => noteRef.current?.focus(), 150);
+        setTimeout(() => noteRef.current?.focus(), 50);
     };
 
     const handleNoteEnter = () => {
@@ -200,7 +200,8 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             const categoryInDb = await db.categories
                 .filter(c => c.name.toLowerCase() === data.category.trim().toLowerCase())
                 .first();
-            const validCategory = categoryInDb?.name || 'Unsorted';
+            const defaultCat = await db.categories.where('isDefault').equals(1).first();
+            const validCategory = categoryInDb?.name || defaultCat?.name || 'Unlisted';
 
             // Prevent self-parenting
             let finalParentId = fixedParentId;
@@ -561,7 +562,8 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                 const currentVal = form.getValues('category');
                                 const match = categories.find(c => c.name.toLowerCase() === currentVal.trim().toLowerCase());
                                 if (!match) {
-                                    form.setValue('category', 'Unsorted');
+                                    const defCat = categories.find(c => c.isDefault);
+                                    form.setValue('category', defCat?.name || 'Unlisted');
                                 }
                                 
                                 // Perform a final save before closing

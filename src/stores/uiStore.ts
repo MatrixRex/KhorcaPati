@@ -23,6 +23,8 @@ interface UIState {
     isBudgetRecordsSheetOpen: boolean;
     budgetForRecords?: Budget;
     isRecurringPaymentsListOpen: boolean;
+    isBudgetsListOpen: boolean;
+    isGoalsListOpen: boolean;
     isCategoryManagementOpen: boolean;
     selectedInventoryItem: string | null;
     returnPath: string | null;
@@ -50,6 +52,10 @@ interface UIState {
     closeBudgetRecordsSheet: () => void;
     openRecurringPaymentsList: () => void;
     closeRecurringPaymentsList: () => void;
+    openBudgetsList: () => void;
+    closeBudgetsList: () => void;
+    openGoalsList: () => void;
+    closeGoalsList: () => void;
     openCategoryManagement: () => void;
     closeCategoryManagement: () => void;
     openAddBudget: () => void;
@@ -83,6 +89,8 @@ export const useUIStore = create<UIState>()(
             isBudgetRecordsSheetOpen: false,
             budgetForRecords: undefined,
             isRecurringPaymentsListOpen: false,
+            isBudgetsListOpen: false,
+            isGoalsListOpen: false,
             isCategoryManagementOpen: false,
             selectedInventoryItem: null,
             returnPath: null,
@@ -100,9 +108,11 @@ export const useUIStore = create<UIState>()(
                        state.isGoalSheetOpen ||
                        state.isGoalProgressSheetOpen ||
                        state.isGoalRecordsSheetOpen ||
-                       state.isBudgetRecordsSheetOpen ||
-                       state.isRecurringPaymentsListOpen ||
-                       state.isCategoryManagementOpen;
+                        state.isBudgetRecordsSheetOpen || 
+                        state.isRecurringPaymentsListOpen ||
+                        state.isBudgetsListOpen ||
+                        state.isGoalsListOpen ||
+                        state.isCategoryManagementOpen;
             },
 
             openAddExpense: (parentId) => set({
@@ -226,6 +236,22 @@ export const useUIStore = create<UIState>()(
 
             closeRecurringPaymentsList: () => set({
                 isRecurringPaymentsListOpen: false
+            }),
+
+            openBudgetsList: () => set({
+                isBudgetsListOpen: true
+            }),
+
+            closeBudgetsList: () => set({
+                isBudgetsListOpen: false
+            }),
+
+            openGoalsList: () => set({
+                isGoalsListOpen: true
+            }),
+
+            closeGoalsList: () => set({
+                isGoalsListOpen: false
             }),
             openCategoryManagement: () => set({
                 isCategoryManagementOpen: true

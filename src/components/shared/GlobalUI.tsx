@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Edit2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -8,9 +8,11 @@ import { RecurringPaymentForm } from '@/components/recurring/RecurringPaymentFor
 import { RecurringPaymentsListDrawer } from '@/components/recurring/RecurringPaymentsListDrawer';
 import { BudgetForm } from '@/components/budgets/BudgetForm';
 import { BudgetRecordsList } from '@/components/budgets/BudgetRecordsList';
+import { BudgetsListDrawer } from '@/components/budgets/BudgetsListDrawer';
 import { GoalForm } from '@/components/goals/GoalForm';
 import { GoalLinker } from '@/components/goals/GoalLinker';
 import { GoalRecordsList } from '@/components/goals/GoalRecordsList';
+import { GoalsListDrawer } from '@/components/goals/GoalsListDrawer';
 import { CategoryManagementDrawer } from '@/components/shared/CategoryManagementDrawer';
 import { useUIStore } from '@/stores/uiStore';
 import { useCategoryStore } from '@/stores/categoryStore';
@@ -27,7 +29,10 @@ export function GlobalUI() {
         isGoalSheetOpen, editingGoal, closeGoalSheet,
         isGoalProgressSheetOpen, goalForProgress, closeGoalProgressSheet,
         isGoalRecordsSheetOpen, goalForRecords, closeGoalRecordsSheet,
+        openEditGoal, openEditBudget,
         isRecurringPaymentsListOpen,
+        isBudgetsListOpen,
+        isGoalsListOpen,
         isCategoryManagementOpen,
         theme, expenseSessionId, subSessionId
     } = useUIStore();
@@ -72,7 +77,7 @@ export function GlobalUI() {
     // Add beforeunload listener to prevent accidental reload/close when editing
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isBudgetRecordsSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isRecurringPaymentsListOpen || isCategoryManagementOpen) {
+            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isBudgetRecordsSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isRecurringPaymentsListOpen || isBudgetsListOpen || isGoalsListOpen || isCategoryManagementOpen) {
                 e.preventDefault();
                 e.returnValue = ''; // Required for some browsers
                 return '';
@@ -81,7 +86,7 @@ export function GlobalUI() {
 
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isBudgetRecordsSheetOpen, isGoalSheetOpen, isGoalProgressSheetOpen, isGoalRecordsSheetOpen]);
+    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isBudgetRecordsSheetOpen, isGoalSheetOpen, isGoalProgressSheetOpen, isGoalRecordsSheetOpen, isRecurringPaymentsListOpen, isBudgetsListOpen, isGoalsListOpen, isCategoryManagementOpen]);
 
     useEffect(() => {
         const init = async () => {
@@ -106,6 +111,8 @@ export function GlobalUI() {
             )}
 
             <RecurringPaymentsListDrawer />
+            <BudgetsListDrawer />
+            <GoalsListDrawer />
             <CategoryManagementDrawer />
 
             {/* Main Expense Sheet */}
@@ -223,9 +230,24 @@ export function GlobalUI() {
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
                     <div className="p-6 pb-12 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-black uppercase tracking-tight text-primary">Goal Savings Detail</span>
-                                <SheetTitle className="text-2xl font-black">{goalForRecords?.title}</SheetTitle>
+                            <div className="flex items-center justify-between">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black uppercase tracking-tight text-primary">Goal Savings Detail</span>
+                                    <SheetTitle className="text-2xl font-black">{goalForRecords?.title}</SheetTitle>
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-10 w-10 rounded-full hover:bg-primary/10 text-primary transition-all"
+                                    onClick={() => {
+                                        if (goalForRecords) {
+                                            openEditGoal(goalForRecords);
+                                            closeGoalRecordsSheet();
+                                        }
+                                    }}
+                                >
+                                    <Edit2 className="w-5 h-5" />
+                                </Button>
                             </div>
                         </SheetHeader>
                         <div className="mt-6">
@@ -242,9 +264,24 @@ export function GlobalUI() {
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
                     <div className="p-6 pb-12 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-black uppercase tracking-tight text-primary">Budget Usage Detail</span>
-                                <SheetTitle className="text-2xl font-black capitalize">{budgetForRecords?.category}</SheetTitle>
+                            <div className="flex items-center justify-between">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black uppercase tracking-tight text-primary">Budget Usage Detail</span>
+                                    <SheetTitle className="text-2xl font-black capitalize">{budgetForRecords?.category}</SheetTitle>
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-10 w-10 rounded-full hover:bg-primary/10 text-primary transition-all"
+                                    onClick={() => {
+                                        if (budgetForRecords) {
+                                            openEditBudget(budgetForRecords);
+                                            closeBudgetRecordsSheet();
+                                        }
+                                    }}
+                                >
+                                    <Edit2 className="w-5 h-5" />
+                                </Button>
                             </div>
                         </SheetHeader>
                         <div className="mt-6">

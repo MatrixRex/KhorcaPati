@@ -7,6 +7,7 @@ import { ExpenseForm } from '@/components/expenses/ExpenseForm';
 import { RecurringPaymentForm } from '@/components/recurring/RecurringPaymentForm';
 import { RecurringPaymentsListDrawer } from '@/components/recurring/RecurringPaymentsListDrawer';
 import { BudgetForm } from '@/components/budgets/BudgetForm';
+import { BudgetRecordsList } from '@/components/budgets/BudgetRecordsList';
 import { GoalForm } from '@/components/goals/GoalForm';
 import { GoalLinker } from '@/components/goals/GoalLinker';
 import { GoalRecordsList } from '@/components/goals/GoalRecordsList';
@@ -22,6 +23,7 @@ export function GlobalUI() {
         isSubRecordSheetOpen, editingSubRecord, closeSubRecordSheet,
         isRecurringPaymentSheetOpen, editingRecurringPayment, closeRecurringPaymentSheet,
         isBudgetSheetOpen, editingBudget, closeBudgetSheet,
+        isBudgetRecordsSheetOpen, budgetForRecords, closeBudgetRecordsSheet,
         isGoalSheetOpen, editingGoal, closeGoalSheet,
         isGoalProgressSheetOpen, goalForProgress, closeGoalProgressSheet,
         isGoalRecordsSheetOpen, goalForRecords, closeGoalRecordsSheet,
@@ -70,7 +72,7 @@ export function GlobalUI() {
     // Add beforeunload listener to prevent accidental reload/close when editing
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isRecurringPaymentsListOpen || isCategoryManagementOpen) {
+            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isBudgetRecordsSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isRecurringPaymentsListOpen || isCategoryManagementOpen) {
                 e.preventDefault();
                 e.returnValue = ''; // Required for some browsers
                 return '';
@@ -79,7 +81,7 @@ export function GlobalUI() {
 
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isGoalSheetOpen, isGoalProgressSheetOpen, isGoalRecordsSheetOpen]);
+    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isBudgetRecordsSheetOpen, isGoalSheetOpen, isGoalProgressSheetOpen, isGoalRecordsSheetOpen]);
 
     useEffect(() => {
         const init = async () => {
@@ -229,6 +231,25 @@ export function GlobalUI() {
                         <div className="mt-6">
                             {goalForRecords && (
                                 <GoalRecordsList goal={goalForRecords} />
+                            )}
+                        </div>
+                    </div>
+                </SheetContent>
+            </Sheet>
+            {/* Budget Records Sheet */}
+            <Sheet open={isBudgetRecordsSheetOpen} onOpenChange={(open) => !open && closeBudgetRecordsSheet()}>
+                <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
+                    <div className="p-6 pb-12 text-foreground">
+                        <SheetHeader className="mb-6 text-left border-b pb-4">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black uppercase tracking-tight text-primary">Budget Usage Detail</span>
+                                <SheetTitle className="text-2xl font-black capitalize">{budgetForRecords?.category}</SheetTitle>
+                            </div>
+                        </SheetHeader>
+                        <div className="mt-6">
+                            {budgetForRecords && (
+                                <BudgetRecordsList budget={budgetForRecords} />
                             )}
                         </div>
                     </div>

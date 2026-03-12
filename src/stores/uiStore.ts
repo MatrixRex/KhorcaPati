@@ -20,6 +20,8 @@ interface UIState {
     goalForProgress?: Goal;
     isGoalRecordsSheetOpen: boolean;
     goalForRecords?: Goal;
+    isBudgetRecordsSheetOpen: boolean;
+    budgetForRecords?: Budget;
     isRecurringPaymentsListOpen: boolean;
     isCategoryManagementOpen: boolean;
     selectedInventoryItem: string | null;
@@ -44,6 +46,8 @@ interface UIState {
     closeGoalProgressSheet: () => void;
     openGoalRecords: (goal: Goal) => void;
     closeGoalRecordsSheet: () => void;
+    openBudgetRecords: (budget: Budget) => void;
+    closeBudgetRecordsSheet: () => void;
     openRecurringPaymentsList: () => void;
     closeRecurringPaymentsList: () => void;
     openCategoryManagement: () => void;
@@ -76,6 +80,8 @@ export const useUIStore = create<UIState>()(
             goalForProgress: undefined,
             isGoalRecordsSheetOpen: false,
             goalForRecords: undefined,
+            isBudgetRecordsSheetOpen: false,
+            budgetForRecords: undefined,
             isRecurringPaymentsListOpen: false,
             isCategoryManagementOpen: false,
             selectedInventoryItem: null,
@@ -94,6 +100,7 @@ export const useUIStore = create<UIState>()(
                        state.isGoalSheetOpen ||
                        state.isGoalProgressSheetOpen ||
                        state.isGoalRecordsSheetOpen ||
+                       state.isBudgetRecordsSheetOpen ||
                        state.isRecurringPaymentsListOpen ||
                        state.isCategoryManagementOpen;
             },
@@ -205,6 +212,14 @@ export const useUIStore = create<UIState>()(
                 goalForRecords: undefined
             }),
 
+            openBudgetRecords: (budget: Budget) => set({
+                isBudgetRecordsSheetOpen: true,
+                budgetForRecords: budget
+            }),
+            closeBudgetRecordsSheet: () => set({
+                isBudgetRecordsSheetOpen: false,
+                budgetForRecords: undefined
+            }),
             openRecurringPaymentsList: () => set({
                 isRecurringPaymentsListOpen: true
             }),

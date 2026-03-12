@@ -5,10 +5,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { formatRelativeDate } from '@/utils/date';
 import { getBudgetWindow } from '@/utils/budgetWindow';
 import { cn } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
-import { useFilterStore } from '@/stores/filterStore';
 import { differenceInDays, parseISO, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 import { useCategoryStore } from '@/stores/categoryStore';
+import { useUIStore } from '@/stores/uiStore';
 
 interface BudgetCardProps {
     budget: Budget;
@@ -71,8 +70,7 @@ function findOverspentInfo(budget: Budget, expenses: Expense[]) {
 }
 
 export function BudgetCard({ budget, onClick }: BudgetCardProps) {
-    const navigate = useNavigate();
-    const { setCategory } = useFilterStore();
+    const { openBudgetRecords } = useUIStore();
 
     const expenses = useLiveQuery(
         () => db.expenses.where('category').equals(budget.category).toArray(),
@@ -114,8 +112,7 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
         if (onClick) {
             onClick();
         } else {
-            setCategory(budget.category);
-            navigate('/expenses');
+            openBudgetRecords(budget);
         }
     };
 

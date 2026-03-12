@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-03-12
+
 ### Added
 - Custom premium **NumberPad** with built-in calculator functionality (+, -, *, /) for all amount inputs.
 - Inventory sorting options (Alphabetical and Total Count).

@@ -27,7 +27,6 @@ export function GoalList() {
                 <GoalCard
                     key={goal.id}
                     goal={goal}
-                    onClick={() => console.log('Edit goal', goal.id)}
                 />
             ))}
         </div>

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { db, type Expense } from '@/db/schema';
+import { useGoalStore } from './goalStore';
 
 interface ExpenseState {
     expenses: Expense[];
@@ -16,9 +17,6 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
 
     loadExpenses: async () => {
         set({ isLoading: true });
-        // This is essentially starting a subscription or just doing an initial fetch.
-        // In React components, using useLiveQuery from dexie-react-hooks is better for reactivity,
-        // but the store can be used for actions and raw data fetching.
         try {
             const data = await db.expenses.toArray();
             set({ expenses: data, isLoading: false });
@@ -31,8 +29,9 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
     addExpense: async (expense) => {
         try {
             const id = await db.expenses.add(expense);
-            // Let dexie liveQuery handle UI updates, but we can also refetch here manually
-            // if not using liveQuery, but assuming we use liveQuery in UI, this just writes to DB.
+            if (expense.goalId) {
+                await useGoalStore.getState().recalculateGoalAmount(expense.goalId);
+            }
             return id as number;
         } catch (error) {
             console.error("Failed to add expense", error);
@@ -42,7 +41,22 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
 
     updateExpense: async (id, expense) => {
         try {
-            return await db.expenses.update(id, expense);
+            const oldExpense = await db.expenses.get(id);
+            const oldGoalId = oldExpense?.goalId;
+            
+            await db.expenses.update(id, expense);
+            
+            const newExpense = await db.expenses.get(id);
+            const newGoalId = newExpense?.goalId;
+
+            if (newGoalId) {
+                await useGoalStore.getState().recalculateGoalAmount(newGoalId);
+            }
+            if (oldGoalId && oldGoalId !== newGoalId) {
+                await useGoalStore.getState().recalculateGoalAmount(oldGoalId);
+            }
+            
+            return id;
         } catch (error) {
             console.error("Failed to update expense", error);
             throw error;
@@ -51,11 +65,17 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
 
     deleteExpense: async (id) => {
         try {
-            // Also delete sub-expenses when deleting parent
+            const expense = await db.expenses.get(id);
+            const goalId = expense?.goalId;
+
             await db.transaction('rw', db.expenses, async () => {
                 await db.expenses.where('parentId').equals(id).delete();
                 await db.expenses.delete(id);
             });
+
+            if (goalId) {
+                await useGoalStore.getState().recalculateGoalAmount(goalId);
+            }
         } catch (error) {
             console.error("Failed to delete expense", error);
             throw error;

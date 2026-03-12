@@ -13,6 +13,7 @@ import { parseItemInput } from '@/parsers/itemParser';
 import { format, parseISO } from 'date-fns';
 import { db, type Expense } from '@/db/schema';
 import { CategoryComboBox } from './CategoryComboBox';
+import { GoalComboBox } from './GoalComboBox';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useUIStore } from '@/stores/uiStore';
@@ -34,6 +35,7 @@ const expenseSchema = z.object({
     amount: z.number().min(0.01, 'Please enter a valid amount'),
     type: z.enum(['expense', 'income']),
     category: z.string().min(1, 'Category is required'),
+    goalId: z.number().nullable().optional(),
     date: z.string(),
     note: z.string().optional(),
     isRecurring: z.boolean(),
@@ -91,6 +93,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             amount: initialData?.amount || 0,
             type: initialData?.type || 'expense',
             category: initialData?.category || 'Unsorted',
+            goalId: initialData?.goalId || null,
             date: initialData?.date || format(new Date(), 'yyyy-MM-dd'),
             note: initialData?.note || '',
             isRecurring: initialData?.isRecurring || false,
@@ -209,6 +212,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                 ...data,
                 type: data.type,
                 category: validCategory,
+                goalId: data.goalId || null,
                 note: data.note || '',
                 parentId: finalParentId,
                 isNested: data.isNested,
@@ -247,7 +251,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
     return (
         <>
-            <form className="space-y-4 pb-24">
+            <form className="space-y-4 pb-6">
                 <div className="flex justify-between items-center mb-2">
                     <div className="flex bg-muted p-1 rounded-xl w-full">
                         <button
@@ -385,22 +389,40 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                     </div>
                 </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="category" className="text-[11px] font-bold uppercase">Category</Label>
-                    <div className="w-full">
-                        <CategoryComboBox
-                            ref={categoryRef}
-                            value={form.watch('category')}
-                            onChange={(val: string) => {
-                                form.setValue('category', val, { shouldDirty: true });
-                            }}
-                            onBlur={() => form.handleSubmit(performSave)()}
-                            onEnter={handleCategoryEnter}
-                        />
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="category" className="text-[11px] font-bold uppercase">Category</Label>
+                        <div className="w-full">
+                            <CategoryComboBox
+                                ref={categoryRef}
+                                value={form.watch('category')}
+                                onChange={(val: string) => {
+                                    form.setValue('category', val, { shouldDirty: true });
+                                }}
+                                onBlur={() => form.handleSubmit(performSave)()}
+                                onEnter={handleCategoryEnter}
+                            />
+                        </div>
                     </div>
-                    {form.formState.errors.category && (
-                        <p className="text-destructive text-[10px] font-bold">{form.formState.errors.category.message}</p>
-                    )}
+
+                    <div className="space-y-2">
+                        <Label htmlFor="goal" className="text-[11px] font-bold uppercase">Link to Goal</Label>
+                        <div className="w-full">
+                            <Controller
+                                control={form.control}
+                                name="goalId"
+                                render={({ field }) => (
+                                    <GoalComboBox
+                                        value={field.value ?? null}
+                                        onChange={(val) => {
+                                            field.onChange(val);
+                                            form.handleSubmit(performSave)();
+                                        }}
+                                    />
+                                )}
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div className="space-y-2">

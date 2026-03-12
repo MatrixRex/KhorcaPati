@@ -8,6 +8,8 @@ import { RecurringPaymentForm } from '@/components/recurring/RecurringPaymentFor
 import { RecurringPaymentsListDrawer } from '@/components/recurring/RecurringPaymentsListDrawer';
 import { BudgetForm } from '@/components/budgets/BudgetForm';
 import { GoalForm } from '@/components/goals/GoalForm';
+import { GoalLinker } from '@/components/goals/GoalLinker';
+import { GoalRecordsList } from '@/components/goals/GoalRecordsList';
 import { CategoryManagementDrawer } from '@/components/shared/CategoryManagementDrawer';
 import { useUIStore } from '@/stores/uiStore';
 import { useCategoryStore } from '@/stores/categoryStore';
@@ -21,6 +23,8 @@ export function GlobalUI() {
         isRecurringPaymentSheetOpen, editingRecurringPayment, closeRecurringPaymentSheet,
         isBudgetSheetOpen, editingBudget, closeBudgetSheet,
         isGoalSheetOpen, editingGoal, closeGoalSheet,
+        isGoalProgressSheetOpen, goalForProgress, closeGoalProgressSheet,
+        isGoalRecordsSheetOpen, goalForRecords, closeGoalRecordsSheet,
         isRecurringPaymentsListOpen,
         isCategoryManagementOpen,
         theme, expenseSessionId, subSessionId
@@ -66,7 +70,7 @@ export function GlobalUI() {
     // Add beforeunload listener to prevent accidental reload/close when editing
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen || isRecurringPaymentsListOpen || isCategoryManagementOpen) {
+            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isRecurringPaymentsListOpen || isCategoryManagementOpen) {
                 e.preventDefault();
                 e.returnValue = ''; // Required for some browsers
                 return '';
@@ -75,7 +79,7 @@ export function GlobalUI() {
 
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isGoalSheetOpen]);
+    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isGoalSheetOpen, isGoalProgressSheetOpen, isGoalRecordsSheetOpen]);
 
     useEffect(() => {
         const init = async () => {
@@ -92,10 +96,10 @@ export function GlobalUI() {
         <>
             {showFAB && (
                 <Button
-                    className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-50 bg-primary text-primary-foreground hover:bg-primary/90"
+                    className="fixed bottom-20 right-4 h-14 w-14 rounded-full z-50 bg-primary text-primary-foreground shadow-2xl shadow-primary/40 hover:scale-[1.1] active:scale-[0.9] transition-all duration-300 border-4 border-background"
                     onClick={() => openAddExpense()}
                 >
-                    <Plus className="w-6 h-6" />
+                    <Plus className="w-7 h-7 stroke-[3]" />
                 </Button>
             )}
 
@@ -104,9 +108,9 @@ export function GlobalUI() {
 
             {/* Main Expense Sheet */}
             <Sheet open={isExpenseSheetOpen} onOpenChange={(open) => !open && handleCloseExpense()}>
-                <SheetContent side="bottom" className="h-[92vh] rounded-t-[32px] p-0 overflow-hidden border-none bg-background">
+                <SheetContent side="bottom" className="max-h-[92dvh] h-auto rounded-t-[32px] p-0 border-none bg-background">
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="px-6 pb-6 h-full overflow-y-auto pt-2">
+                    <div className="px-6 pb-6 overflow-y-auto pt-2">
                         <SheetHeader className="mb-6 text-left">
                             <SheetTitle>{editingExpense ? 'Edit Record' : 'Add Record'}</SheetTitle>
                         </SheetHeader>
@@ -123,9 +127,9 @@ export function GlobalUI() {
 
             {/* Sub-Record Sheet */}
             <Sheet open={isSubRecordSheetOpen} onOpenChange={(open) => !open && handleCloseSubRecord()}>
-                <SheetContent side="bottom" className="h-[85vh] rounded-t-[32px] p-0 overflow-hidden border-none bg-background z-[60]">
+                <SheetContent side="bottom" className="max-h-[85dvh] h-auto rounded-t-[32px] p-0 border-none bg-background z-[60]">
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="px-6 pb-6 h-full overflow-y-auto pt-2">
+                    <div className="px-6 pb-6 overflow-y-auto pt-2">
                         <SheetHeader className="mb-6 text-left">
                             <SheetTitle>{editingSubRecord ? 'Edit Sub-Record' : 'Add Sub-Record'}</SheetTitle>
                         </SheetHeader>
@@ -146,7 +150,7 @@ export function GlobalUI() {
             <Sheet open={isRecurringPaymentSheetOpen} onOpenChange={(open) => !open && closeRecurringPaymentSheet()}>
                 <SheetContent
                     side="bottom"
-                    className="h-[90vh] sm:h-auto rounded-t-xl p-0 overflow-y-auto w-full max-w-md mx-auto z-50 pointer-events-auto"
+                    className="max-h-[90dvh] h-auto sm:h-auto rounded-t-xl p-0 overflow-y-auto w-full max-w-md mx-auto z-50 pointer-events-auto"
                 >
                     <div className="p-4 sm:p-6 mb-8">
                         <SheetHeader className="mb-4 text-left">
@@ -163,7 +167,7 @@ export function GlobalUI() {
 
             {/* Budget Sheet */}
             <Sheet open={isBudgetSheetOpen} onOpenChange={(open) => !open && closeBudgetSheet()}>
-                <SheetContent side="bottom" className="h-[90vh] sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
+                <SheetContent side="bottom" className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
                     <div className="p-6 mb-8 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <SheetTitle className="text-xl font-black">{editingBudget ? 'Edit Budget' : 'New Budget Limit'}</SheetTitle>
@@ -180,7 +184,7 @@ export function GlobalUI() {
 
             {/* Goal Sheet */}
             <Sheet open={isGoalSheetOpen} onOpenChange={(open) => !open && closeGoalSheet()}>
-                <SheetContent side="bottom" className="h-[90vh] sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
+                <SheetContent side="bottom" className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
                     <div className="p-6 mb-8 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <SheetTitle className="text-xl font-black">{editingGoal ? 'Edit Saving Goal' : 'Add Saving Goal'}</SheetTitle>
@@ -190,6 +194,43 @@ export function GlobalUI() {
                             onSuccess={closeGoalSheet}
                             onCancel={closeGoalSheet}
                         />
+                    </div>
+                </SheetContent>
+            </Sheet>
+            {/* Goal Linker Sheet (repurposed from Progress) */}
+            <Sheet open={isGoalProgressSheetOpen} onOpenChange={(open) => !open && closeGoalProgressSheet()}>
+                <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
+                    <div className="p-6 pb-12 text-foreground">
+                        <SheetHeader className="mb-6 text-left">
+                            <SheetTitle className="text-xl font-black">Link Records to Goal</SheetTitle>
+                        </SheetHeader>
+                        {goalForProgress && (
+                            <GoalLinker
+                                goal={goalForProgress}
+                                onSuccess={closeGoalProgressSheet}
+                            />
+                        )}
+                    </div>
+                </SheetContent>
+            </Sheet>
+
+            {/* Goal Records Sheet */}
+            <Sheet open={isGoalRecordsSheetOpen} onOpenChange={(open) => !open && closeGoalRecordsSheet()}>
+                <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
+                    <div className="p-6 pb-12 text-foreground">
+                        <SheetHeader className="mb-6 text-left border-b pb-4">
+                            <div className="flex flex-col">
+                                <span className="text-[10px] font-black uppercase tracking-tight text-primary">Goal Savings Detail</span>
+                                <SheetTitle className="text-2xl font-black">{goalForRecords?.title}</SheetTitle>
+                            </div>
+                        </SheetHeader>
+                        <div className="mt-6">
+                            {goalForRecords && (
+                                <GoalRecordsList goal={goalForRecords} />
+                            )}
+                        </div>
                     </div>
                 </SheetContent>
             </Sheet>

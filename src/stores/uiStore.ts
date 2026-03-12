@@ -16,6 +16,10 @@ interface UIState {
     editingBudget?: Budget;
     isGoalSheetOpen: boolean;
     editingGoal?: Goal;
+    isGoalProgressSheetOpen: boolean;
+    goalForProgress?: Goal;
+    isGoalRecordsSheetOpen: boolean;
+    goalForRecords?: Goal;
     isRecurringPaymentsListOpen: boolean;
     isCategoryManagementOpen: boolean;
     selectedInventoryItem: string | null;
@@ -36,6 +40,10 @@ interface UIState {
     openAddGoal: () => void;
     openEditGoal: (goal: Goal) => void;
     closeGoalSheet: () => void;
+    openAddGoalProgress: (goal: Goal) => void;
+    closeGoalProgressSheet: () => void;
+    openGoalRecords: (goal: Goal) => void;
+    closeGoalRecordsSheet: () => void;
     openRecurringPaymentsList: () => void;
     closeRecurringPaymentsList: () => void;
     openCategoryManagement: () => void;
@@ -64,6 +72,10 @@ export const useUIStore = create<UIState>()(
             editingBudget: undefined,
             isGoalSheetOpen: false,
             editingGoal: undefined,
+            isGoalProgressSheetOpen: false,
+            goalForProgress: undefined,
+            isGoalRecordsSheetOpen: false,
+            goalForRecords: undefined,
             isRecurringPaymentsListOpen: false,
             isCategoryManagementOpen: false,
             selectedInventoryItem: null,
@@ -80,6 +92,8 @@ export const useUIStore = create<UIState>()(
                        state.isRecurringPaymentSheetOpen ||
                        state.isBudgetSheetOpen ||
                        state.isGoalSheetOpen ||
+                       state.isGoalProgressSheetOpen ||
+                       state.isGoalRecordsSheetOpen ||
                        state.isRecurringPaymentsListOpen ||
                        state.isCategoryManagementOpen;
             },
@@ -169,6 +183,26 @@ export const useUIStore = create<UIState>()(
             closeGoalSheet: () => set({
                 isGoalSheetOpen: false,
                 editingGoal: undefined
+            }),
+
+            openAddGoalProgress: (goal: Goal) => set({
+                isGoalProgressSheetOpen: true,
+                goalForProgress: goal
+            }),
+
+            closeGoalProgressSheet: () => set({
+                isGoalProgressSheetOpen: false,
+                goalForProgress: undefined
+            }),
+
+            openGoalRecords: (goal: Goal) => set({
+                isGoalRecordsSheetOpen: true,
+                goalForRecords: goal
+            }),
+
+            closeGoalRecordsSheet: () => set({
+                isGoalRecordsSheetOpen: false,
+                goalForRecords: undefined
             }),
 
             openRecurringPaymentsList: () => set({

@@ -29,10 +29,10 @@ export function RecurringPaymentsListDrawer() {
                             <Button 
                                 variant="outline" 
                                 size="icon" 
-                                className="rounded-full h-10 w-10 border-primary/20 bg-primary/5 text-primary"
+                                className="h-10 w-10 rounded-full border-2 border-primary text-primary hover:bg-primary/10 hover:scale-[1.05] active:scale-[0.95] transition-all bg-transparent"
                                 onClick={openAddRecurringPayment}
                             >
-                                <Plus className="w-5 h-5" />
+                                <Plus className="w-5 h-5 stroke-[3]" />
                             </Button>
                         </div>
                     </SheetHeader>

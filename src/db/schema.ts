@@ -4,6 +4,7 @@ export interface Expense {
     id?: number;
     parentId: number | null;      // null = top-level; set = sub-expense
     isNested: boolean;            // true = parent record with sub-records
+    goalId?: number | null;       // link to a savings goal
     title?: string;
     amount: number;
     type: 'expense' | 'income';
@@ -177,6 +178,18 @@ db.version(8).stores({
     if (toDelete.length > 0) {
         await tx.table('categories').bulkDelete(toDelete);
     }
+});
+
+db.version(10).stores({
+    expenses: '++id, parentId, isNested, goalId, date, category, isRecurring, type',
+    items: '++id, expenseId, name, date',
+    budgets: '++id, category, timelineType, recurringInterval',
+    goals: '++id, createdAt',
+    categories: '++id, &name, isDefault',
+    recurringPayments: '++id, title, nextDueDate, category, type'
+}).upgrade(async () => {
+    // Drop goalLogs table if possible, though Dexie handles versioning mostly by schema.
+    // We just won't include it in version 10 schema.
 });
 
 export { db };

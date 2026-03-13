@@ -273,7 +273,7 @@ export default function Settings() {
 
                 <div className="flex flex-col items-center justify-center gap-1 opacity-20 py-8">
                     <span className="text-[10px] font-bold uppercase tracking-[0.2em]">KhorcaPati</span>
-                    <span className="text-[10px] font-medium font-mono">1.0.0</span>
+                    <span className="text-[10px] font-medium font-mono">1.1.0</span>
                 </div>
 
                 <div className="h-20" />

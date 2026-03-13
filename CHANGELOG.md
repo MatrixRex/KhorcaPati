@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-13
+
+### Added
+- **Edit Main Balance**: Dedicated drawer for manual balance adjustments with optional record creation.
+- **Goal Management**: Integrated savings goals tracking into the Settings management section.
+- **Budget Records**: New detailed view to track specific expenses contributing to a budget.
+- **Full Bangla Support**: Comprehensive localization for the Expense Form and core UI components.
+- **Enhanced Navigation**: Full support for mobile "Back" gestures and "Escape" key across all drawers and dialogs.
+
+### Changed
+- **Premium Aesthetics**: Replaced dashboard card backgrounds with sophisticated, vibrant gradients.
+- **Unified Logic**: Refactored `SuggestionInput` into a generic, high-performance reusable component.
+- **Flexible UI**: Improved suggestion dropdowns to occupy full container width for better readability.
+
+### Fixed
+- **Mobile Experience**: Resolved suggestion popover "jumping" and positioning issues on smaller screens.
+- **System Stability**: Fixed notification delivery issues and improved overall background service reliability.
+
 ## [1.0.0] - 2026-03-12
 
 ### Added

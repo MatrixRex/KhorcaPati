@@ -1,93 +1,99 @@
-# `<img src="public/icon-512.png" width="48" height="48" alt="KhorcaPati Logo" vertical-align="middle">` KhorcaPati
+# <img src="public/icon-512.png" width="48" height="48" alt="KhorcaPati Logo" align="center"> KhorcaPati (খরচাপাতি)
 
 [![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![PWA Ready](https://img.shields.io/badge/PWA-Ready-orange?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
 
-**KhorcaPati** (খরচাপাতি) is a premium, local-first personal finance manager designed for speed, beauty, and offline-ready accessibility. It empowers you to track expenses, manage recurring bills, and reach your savings goals with a stunning user interface.
+**KhorcaPati** is a premium, privacy-first personal finance manager designed for speed, beauty, and offline-ready accessibility. It empowers you to track expenses, manage recurring bills, and reach your savings goals with a stunning, glassmorphic user interface.
 
-[**Explore the Live Site**](https://matrixrex.github.io/KhorcaPati/)
-
----
-
-## ✨ Features
-
-- **💎 Premium Aesthetics**: Dynamic mesh gradients, glassmorphism, and smooth micro-animations for a state-of-the-art feel.
-- **⚡ Smart Input**: Effortlessly track items within a single note. Type "Grocery: Rice 2kg, Oil 1L" and let the app auto-parse quantities for you.
-- **📅 Recurring Payments**: Never miss a bill. Manage electricity, rent, or subscriptions with automatic next-due date calculations.
-- **🎯 Savings Goals**: Visualize your financial journey with dedicated progress trackers for your big purchases.
-- **📦 Collection Mode**: Organize related expenses into nested "Collections" for projects, trips, or events.
-- **📱 PWA Ready**: Install it on your home screen. It works offline and syncs your data locally using IndexedDB.
-- **📊 Insightful Reports**: Clean visualizations of your spending habits across categories.
+[**🚀 Explore the Live App**](https://matrixrex.github.io/KhorcaPati/)
 
 ---
 
-## 📖 User Guide
+## ✨ Key Features
 
-### 📲 Installing the PWA
+### 💎 Premium Design & UX
+- **Stunning Aesthetics**: Experience a modern UI with mesh gradients, glassmorphism, and smooth micro-animations.
+- **Dynamic Themes**: Support for Dark, Light, and System modes with a custom font scaling system for accessibility.
+- **Responsive Layout**: Designed for mobile-first experience but works flawlessly on desktop.
 
-KhorcaPati is a Progressive Web App (PWA), meaning you can install it on your device for an app-like experience and offline access.
+### 🧠 Smart Tracking
+- **NLP Power**: Type natural notes like "Grocery: Rice 2kg, Oil 1L" and the app auto-parses quantities and items for granular tracking.
+- **Collection Mode**: Organize related expenses into nested "Collections" (perfect for trips, projects, or events).
+- **Recurring Payments**: Stay on top of bills (rent, subscriptions) with automatic next-due date calculations and tracking.
 
-#### **On Mobile (iOS & Android)**
+### 🎯 Financial Intelligence
+- **Savings Goals**: Visualize your journey towards big purchases with dedicated progress trackers.
+- **Budget Management**: Set and track limits for different categories to stay within your means.
+- **Insightful Reports**: Deep-dive into your spending habits with categorized charts and trend visualizations.
 
-1. Open [KhorcaPati](https://matrixrex.github.io/KhorcaPati/) in your browser (Safari on iOS, Chrome on Android).
-2. **iOS**: Tap the **Share** button (square with arrow) and select **"Add to Home Screen"**.
-3. **Android**: Tap the **Three Dots** (menu) and select **"Install App"** or **"Add to Home Screen"**.
+### 🔒 Privacy & Performance
+- **Local-First**: All data is stored locally on your device via IndexedDB (Dexie.js). No cloud sync means maximum privacy.
+- **PWA Ready**: Install as a native-like app on your home screen with full offline support.
+- **Fast & Lightweight**: Built with Vite and React 19 for instantaneous performance.
+- **Data Portability**: Easily export your data to JSON or import from backups.
 
-#### **On Desktop (Chrome & Edge)**
+---
 
-1. Navigate to the site.
-2. Click the **Install Icon** at the right end of the address bar.
-3. Confirm by clicking **"Install"**.
+## 📲 PWA Installation Guide
 
-### 💡 How to Use
+Installing **KhorcaPati** on your device gives you an app-like experience with offline access and a dedicated home screen icon.
 
-- **Quick Entry**: Use the smart input bar at the top to quickly add items without needing an expense record first.
-- **Smart Parsing**: Type something like `Rice 2kg, Oil 1L` in the note field of an expense. The app automatically extracts these for item-level tracking.
-- **Collections**: Toggle **"Collection"** when adding a record to create a parent entry for nested expenses (useful for trips or project budgeting).
-- **Recurring Bills**: Set an interval (Daily, Monthly, etc.) in the Recurring form to track fixed costs and get reminders for upcoming dues.
+### 🍎 For iOS (iPhone/iPad)
+1. Open [KhorcaPati](https://matrixrex.github.io/KhorcaPati/) in **Safari**.
+2. Tap the **Share** button 📤 (the square with an upward arrow).
+3. Scroll down and select **"Add to Home Screen"**.
+4. Tap **Add** to confirm.
+
+### 🤖 For Android
+1. Open [KhorcaPati](https://matrixrex.github.io/KhorcaPati/) in **Chrome**.
+2. Tap the **Three Dots** menu icon in the top-right corner.
+3. Select **"Install App"** or **"Add to Home Screen"**.
+4. Follow the on-screen prompts to install.
+
+### 💻 For Desktop (Chrome/Edge/Safari)
+1. Navigate to the [KhorcaPati](https://matrixrex.github.io/KhorcaPati/) website.
+2. In the address bar, look for the **Install Icon** (usually a computer with a down arrow).
+3. Click **Install**.
+4. On macOS Safari, use **File > Add to Dock**.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Core**: React 19 + TypeScript
-- **Styling**: Tailwind CSS + Shadcn UI
-- **Database**: IndexedDB via [Dexie.js](https://dexie.org/)
-- **Animations**: Lucide React + Tailwind Animate
-- **State Management**: Zustand
-- **Build Tool**: Vite
+- **Framework**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS 4.0](https://tailwindcss.com/) + [Shadcn UI](https://ui.shadcn.com/)
+- **State**: [Zustand](https://zustand-demo.pmnd.rs/)
+- **Database**: [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) via [Dexie.js](https://dexie.org/)
+- **Animations**: [Tailwind Animate](https://github.com/jamiebuilds/tailwindcss-animate) + [Lucide Icons](https://lucide.dev/)
+- **I18n**: [i18next](https://www.i18next.com/) (English & Bangla)
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Development Setup
 
 ### Prerequisites
+- **Node.js**: v18 or later
+- **Package Manager**: [pnpm](https://pnpm.io/) (highly recommended)
 
-- [Node.js](https://nodejs.org/) (Latest LTS)
-- [pnpm](https://pnpm.io/) (Recommended)
-
-### Local Development
-
-1. **Clone the repository:**
-
+### Getting Started
+1. **Clone the repo:**
    ```bash
    git clone https://github.com/MatrixRex/KhorcaPati.git
    cd KhorcaPati
    ```
 2. **Install dependencies:**
-
    ```bash
    pnpm install
    ```
-3. **Start the development server:**
-
+3. **Run development server:**
    ```bash
    pnpm dev
    ```
 4. **Build for production:**
-
    ```bash
    pnpm build
    ```
@@ -96,18 +102,21 @@ KhorcaPati is a Progressive Web App (PWA), meaning you can install it on your de
 
 ## 📂 Project Structure
 
-- `src/components`: Reusable UI components and feature-specific forms.
-- `src/pages`: Main application views (Dashboard, Goals, Reports, etc.).
-- `src/stores`: State management using Zustand.
-- `src/db`: Database schema and Dexie configuration.
-- `src/parsers`: Natural language parsing for smart inputs.
+- `src/components`: UI components organized by feature (budgets, expenses, goals, items, recurring).
+- `src/pages`: Main view components (Dashboard, Settings, Reports, etc.).
+- `src/stores`: Zustand state stores for UI, Settings, and Data.
+- `src/db`: Dexie database schema and management logic.
+- `src/parsers`: Custom NLP logic for smart input notes.
+- `src/lib`: Core utilities for data management, formatting, and PWA setup.
 
 ---
 
 ## 📜 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the **MIT License**. See `LICENSE` for details.
 
 ---
 
-Built with ❤️ by [MatrixRex](https://github.com/MatrixRex)
+<p align="center">
+  Built with ❤️ by <a href="https://github.com/MatrixRex">MatrixRex</a>
+</p>

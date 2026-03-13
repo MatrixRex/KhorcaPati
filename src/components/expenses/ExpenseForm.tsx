@@ -434,9 +434,11 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             <div className="flex bg-muted p-0.5 rounded-lg border border-border/50">
                                 <button
                                     type="button"
-                                    onClick={() => {
+                                    onPointerDown={(e) => {
+                                        e.preventDefault(); // Prevent input blur → keyboard stays open
                                         form.setValue('itemAutoTrack', true, { shouldDirty: true });
                                         form.handleSubmit(performSave)();
+                                        noteRef.current?.focus();
                                     }}
                                     className={cn(
                                         "px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-md transition-all",
@@ -447,9 +449,11 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => {
+                                    onPointerDown={(e) => {
+                                        e.preventDefault(); // Prevent input blur → keyboard stays open
                                         form.setValue('itemAutoTrack', false, { shouldDirty: true });
                                         form.handleSubmit(performSave)();
+                                        noteRef.current?.focus();
                                     }}
                                     className={cn(
                                         "px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-md transition-all",

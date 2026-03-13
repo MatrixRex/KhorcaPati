@@ -111,7 +111,7 @@ export function BalanceEditDrawer() {
                                     value={newBalance}
                                     onChange={(e) => setNewBalance(e.target.value)}
                                     className="h-12 pl-9 pr-4 text-2xl font-black rounded-2xl bg-muted/20 border-none focus-visible:ring-2 focus-visible:ring-primary"
-                                    placeholder="0"
+                                    placeholder={t('balancePlaceholder')}
                                     autoFocus
                                 />
                             </div>

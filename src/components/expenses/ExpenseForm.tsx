@@ -470,7 +470,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                 ref={noteRef}
                                 id="note"
                                 type="note"
-                                placeholder={isNested ? "Trip to Cox's Bazar" : (form.watch('itemAutoTrack') ? "Grocery: Oil 1L, Rice 2kg" : "Add some notes here...")}
+                                placeholder={isNested ? t('collectionTitlePlaceholder') : (form.watch('itemAutoTrack') ? t('expenseNotePlaceholder') : t('expenseNoteOnlyPlaceholder'))}
                                 value={field.value || ''}
                                 onChange={(val: string) => {
                                     field.onChange(val);

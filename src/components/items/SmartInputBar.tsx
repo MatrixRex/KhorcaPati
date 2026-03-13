@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { parseItemInput } from '@/parsers/itemParser';
 import { useItemStore } from '@/stores/itemStore';
+import { useTranslation } from 'react-i18next';
 
 export function SmartInputBar() {
     const [input, setInput] = useState('');
     const addItem = useItemStore((state) => state.addItem);
+    const { t } = useTranslation();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,7 +40,7 @@ export function SmartInputBar() {
             <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Type here... e.g. 'oil 1L'"
+                placeholder={t('smartInputPlaceholder')}
                 className="flex-1"
                 autoCorrect="off"
                 autoCapitalize="none"

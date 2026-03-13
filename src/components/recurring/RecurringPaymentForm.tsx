@@ -250,7 +250,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                     <Label htmlFor="title">{t('recurringTitle')}</Label>
                     <Input
                         id="title"
-                        placeholder="Electricity Bill, Rent, etc."
+                        placeholder={t('recurringTitlePlaceholder')}
                         {...form.register('title', {
                             onBlur: handleBlur
                         })}
@@ -356,7 +356,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                     <Label htmlFor="note">{t('note')} ({t('optional')})</Label>
                     <Input
                         id="note"
-                        placeholder="Any additional details"
+                        placeholder={t('recurringNotePlaceholder')}
                         autoCorrect="off"
                         autoCapitalize="none"
                         spellCheck={true}

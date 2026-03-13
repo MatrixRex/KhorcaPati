@@ -129,8 +129,6 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
 
         const icon = type === 'category' ? '🏷️' : '📦';
 
-        const [isFocused, setIsFocused] = useState(false);
-
         return (
             <div className="relative w-full">
                 <Popover open={isOpen} onOpenChange={setIsOpen} modal={false}>
@@ -143,8 +141,8 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
                             autoCorrect="off"
                             spellCheck="false"
                             enterKeyHint={isMulti ? "enter" : "next"}
-                            placeholder={isFocused ? "" : placeholder}
-                            className={cn(className, !isFocused && !value && "opacity-50")}
+                            placeholder={placeholder}
+                            className={cn(className)}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                 setCursorPos(e.target.selectionStart || 0);
                                 onChange(e.target.value);
@@ -180,7 +178,6 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
                                 }
                             }}
                             onFocus={() => {
-                                setIsFocused(true);
                                 if (!isMulti && value) {
                                     inputRef.current?.select();
                                 }
@@ -190,7 +187,6 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
                                 }, 300);
                             }}
                             onBlur={() => {
-                                setIsFocused(false);
                                 setTimeout(() => {
                                     setIsOpen(false);
                                     onBlur?.();

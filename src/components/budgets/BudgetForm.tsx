@@ -159,6 +159,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                         type="number"
                         step="0.01"
                         inputMode="decimal"
+                        placeholder={t('budgetLimitPlaceholder')}
                         onKeyDown={(e) => {
                             if (['e', 'E', '+', '-'].includes(e.key)) {
                                 e.preventDefault();

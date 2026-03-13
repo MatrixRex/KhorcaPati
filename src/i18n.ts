@@ -247,7 +247,15 @@ const resources = {
       "titleRequired": "Title is required",
       "amountRequired": "Amount is required",
       "oneTime": "One-time",
-      "selectInterval": "Select interval"
+      "selectInterval": "Select interval",
+      "recurringTitlePlaceholder": "e.g. Electricity Bill, Rent",
+      "recurringNotePlaceholder": "e.g. Paid via bKash",
+      "budgetLimitPlaceholder": "e.g. 5000",
+      "smartInputPlaceholder": "e.g. Rice 2kg, Oil 1L",
+      "balancePlaceholder": "e.g. 10000",
+      "collectionTitlePlaceholder": "e.g. Cox's Bazar Trip",
+      "expenseNotePlaceholder": "e.g. Grocery: Oil 1L, Rice 2kg",
+      "expenseNoteOnlyPlaceholder": "e.g. Lunch at office"
     }
   },
   bn: {
@@ -495,7 +503,15 @@ const resources = {
       "titleRequired": "শিরোনাম প্রয়োজন",
       "amountRequired": "পরিমাণ প্রয়োজন",
       "oneTime": "একবার",
-      "selectInterval": "বিরতি নির্বাচন করুন"
+      "selectInterval": "বিরতি নির্বাচন করুন",
+      "recurringTitlePlaceholder": "যেমন: বিদ্যুৎ বিল, ভাড়া",
+      "recurringNotePlaceholder": "যেমন: bKash এ পরিশোধ",
+      "budgetLimitPlaceholder": "যেমন: ৫০০০",
+      "smartInputPlaceholder": "যেমন: চাল ২কেজি, তেল ১লি",
+      "balancePlaceholder": "যেমন: ১০০০০",
+      "collectionTitlePlaceholder": "যেমন: কক্সবাজার ভ্রমণ",
+      "expenseNotePlaceholder": "যেমন: মুদিখানা: তেল ১লি, চাল ২কেজি",
+      "expenseNoteOnlyPlaceholder": "যেমন: অফিসে দুপুরের খাবার"
     }
   }
 };

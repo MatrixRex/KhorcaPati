@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-13
+
+### Added
+- **Data Backup & Restore**: Full support for exporting and importing app data via JSON files in Settings.
+- **Inventory Drawer**: Inventory item details now open in a bottom drawer (Sheet) for a consistent mobile experience.
+
+### Changed
+- **UI Refinement**: Enhanced visual consistency across management screens.
+- **Text Wrapping**: Improved text wrapping and truncation in various UI components.
+
 ## [1.1.0] - 2026-03-13
 
 ### Added

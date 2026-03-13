@@ -16,6 +16,7 @@ import Reports from '@/pages/Reports';
 import Settings from '@/pages/Settings';
 
 import { ReloadPrompt } from '@/components/shared/ReloadPrompt';
+import { WelcomeModal } from '@/components/shared/WelcomeModal';
 
 /** Requests notification permission once on app start, then runs budget alert checks. */
 function NotificationManager() {
@@ -76,6 +77,7 @@ function App() {
         <NotificationManager />
         <GlobalUI />
         <ReloadPrompt />
+        <WelcomeModal />
         <BottomNav />
       </div>
     </HashRouter>

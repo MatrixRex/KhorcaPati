@@ -30,7 +30,11 @@ export default function Settings() {
     const handleReset = async () => {
         const { db } = await import('@/db/schema');
         await db.delete();
+        // Explicitly clear persisted settings so balance resets and welcome screen shows again
+        useSettingsStore.setState({ initialBalance: 0, hasSeenWelcome: false });
         localStorage.clear();
+        // Navigate to dashboard before reload so settings page isn't re-opened
+        window.location.hash = '/';
         window.location.reload();
     };
 

@@ -4,17 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { useUIStore } from '@/stores/uiStore';
+import { useTranslation } from 'react-i18next';
 
 export default function Budgets() {
+    const { t } = useTranslation();
     const { openAddBudget, openEditBudget } = useUIStore();
 
     return (
         <PageContainer
-            title="Budgets"
+            title={t('budgets')}
             showBackButton
             headerAction={
                 <Button size="sm" onClick={openAddBudget} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md">
-                    <Plus className="w-4 h-4 mr-1" /> Add
+                    <Plus className="w-4 h-4 mr-1" /> {t('add')}
                 </Button>
             }
         >

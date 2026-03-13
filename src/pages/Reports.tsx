@@ -13,6 +13,7 @@ import { PageContainer } from '@/components/shared/PageContainer';
 
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useTranslation } from 'react-i18next';
 
 // Removed hardcoded COLORS array
 
@@ -46,6 +47,7 @@ const SankeyNode = ({ x, y, width, height, index, payload, containerWidth }: any
 };
 
 export default function Reports() {
+    const { t } = useTranslation();
     const { startDate, endDate } = useFilterStore();
     const { fontScale } = useUIStore();
     const { categories: categoryList } = useCategoryStore();
@@ -93,7 +95,7 @@ export default function Reports() {
         const categories = Array.from(categoryMap.entries()).sort((a, b) => b[1] - a[1]);
 
         const nodes = [
-            { name: 'Income', fill: '#10b981' }
+            { name: t('incomeLabel'), fill: '#10b981' }
         ];
         const links: any[] = [];
 
@@ -136,24 +138,24 @@ export default function Reports() {
         });
 
         return { sankeyData, categoryData, timelineData, totalIncome, totalExpense };
-    }, [expenses, startDate, endDate]);
+    }, [expenses, startDate, endDate, t]);
 
     if (!reportData) return null;
 
     const { sankeyData, categoryData, timelineData, totalIncome, totalExpense } = reportData;
 
     return (
-        <PageContainer title="Analytics" showDateFilter>
+        <PageContainer title={t('analytics')} showDateFilter>
             <div className="space-y-8 pb-10">
 
                 {/* 1. Expense Flow: Sankey Diagram */}
                 <Card className="border-none shadow-sm bg-muted/30 rounded-3xl overflow-hidden">
                     <CardHeader className="pb-0 pt-6 px-6">
-                        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Expense Flow (Sankey)</CardTitle>
+                        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t('expenseFlow')}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-6 h-[260px]">
                         {totalIncome === 0 && totalExpense === 0 ? (
-                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic opacity-50">No flow data</div>
+                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic opacity-50">{t('noFlowData')}</div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
                                 <Sankey
@@ -179,11 +181,11 @@ export default function Reports() {
                 {/* Summary Mini Cards */}
                 <div className="grid grid-cols-2 gap-4 px-1">
                     <div className="bg-green-500/10 p-4 rounded-2xl border border-green-500/20">
-                        <p className="text-[9px] font-bold uppercase text-green-600 tracking-widest mb-1">Total Income</p>
+                        <p className="text-[9px] font-bold uppercase text-green-600 tracking-widest mb-1">{t('totalIncome')}</p>
                         <p className="text-xl font-black text-green-600">৳{totalIncome.toFixed(0)}</p>
                     </div>
                     <div className="bg-red-500/10 p-4 rounded-2xl border border-red-500/20">
-                        <p className="text-[9px] font-bold uppercase text-red-600 tracking-widest mb-1">Total Expense</p>
+                        <p className="text-[9px] font-bold uppercase text-red-600 tracking-widest mb-1">{t('totalExpense')}</p>
                         <p className="text-xl font-black text-red-600">৳{totalExpense.toFixed(0)}</p>
                     </div>
                 </div>
@@ -191,14 +193,14 @@ export default function Reports() {
                 {/* 2. Spending by Category: Horizontal Bars */}
                 <Card className="border-none shadow-sm bg-muted/30 rounded-3xl overflow-hidden">
                     <CardHeader className="pb-0 pt-6 px-6">
-                        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Spending by Category</CardTitle>
+                        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t('spendingByCategory')}</CardTitle>
                     </CardHeader>
                     <CardContent
                         className="px-4 pt-6 pb-2"
                         style={{ height: `${Math.max(categoryData.length * 45 + 60, 150)}px` }}
                     >
                         {categoryData.length === 0 ? (
-                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic opacity-50">No expense data</div>
+                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic opacity-50">{t('noExpenseDataAcross')}</div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart
@@ -243,11 +245,11 @@ export default function Reports() {
                 {/* 3. Timeline: Line Chart */}
                 <Card className="border-none shadow-sm bg-muted/30 rounded-3xl overflow-hidden">
                     <CardHeader className="pb-0 pt-6 px-6">
-                        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Balance Growth Timeline</CardTitle>
+                        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t('balanceGrowthTimeline')}</CardTitle>
                     </CardHeader>
                     <CardContent className="px-2 pt-6 pb-4 h-[350px]">
                         {timelineData.length === 0 ? (
-                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic opacity-50">No timeline data</div>
+                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic opacity-50">{t('noTimelineData')}</div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={timelineData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
@@ -282,7 +284,7 @@ export default function Reports() {
                                                     <div className="bg-background/95 backdrop-blur-md p-3 border border-border rounded-2xl shadow-xl">
                                                         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
                                                         <p className="text-sm font-black flex items-center gap-2">
-                                                            Balance: ৳{data.runningBalance.toFixed(0)}
+                                                            {t('balance')}: ৳{data.runningBalance.toFixed(0)}
                                                         </p>
                                                         <div className="flex gap-3 mt-1">
                                                             {data.income > 0 && (
@@ -330,11 +332,11 @@ export default function Reports() {
                         <div className="mt-6 flex justify-center gap-6">
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm" />
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Income Day</span>
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">{t('incomeDay')}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm" />
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Expense Day</span>
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">{t('expenseDay')}</span>
                             </div>
                         </div>
                     </CardContent>

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Delete, Check, Equal, X } from 'lucide-react';
 import { useCloseWatcher } from '@/hooks/use-close-watcher';
+import { useTranslation } from 'react-i18next';
 
 interface NumberPadProps {
     value: string;
@@ -13,6 +14,7 @@ interface NumberPadProps {
 }
 
 export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPadProps) {
+    const { t } = useTranslation();
     useCloseWatcher(true, onClose);
     const [display, setDisplay] = useState(value || '0');
     const [liveResult, setLiveResult] = useState<string>(value || '0');
@@ -136,7 +138,7 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4 px-2">
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
-                        {label || 'Input Amount'}
+                        {label || t('inputAmount')}
                     </span>
                     <Button type="button" variant="ghost" size="icon-xs" onClick={onClose} className="rounded-full opacity-40 hover:opacity-100">
                         <X className="w-4 h-4" />
@@ -166,7 +168,7 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
                         className="col-span-2 h-14 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-none"
                         onClick={() => handlePress('AC')}
                     >
-                        Clear All
+                        {t('clearAll')}
                     </Button>
                     <Button
                         type="button"
@@ -205,7 +207,7 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
                         onClick={handleDone}
                     >
                         <Check className="w-5 h-5 mr-3" />
-                        Confirm Amount
+                        {t('confirmAmount')}
                     </Button>
                 </div>
             </div>

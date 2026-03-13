@@ -343,18 +343,18 @@ export function ItemTracker() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>{t('deleteItem')}</AlertDialogTitle>
                         <AlertDialogDescription className="space-y-4">
-                            <p>{t('deleteItemConfirm')}</p>
+                            <span className="block">{t('deleteItemConfirm')}</span>
                             {affectedItemNames.length > 0 && (
-                                <div className="bg-destructive/5 p-3 rounded-xl border border-destructive/10">
-                                    <p className="text-[10px] font-black uppercase tracking-wider text-destructive mb-2">{t('alsoAffects')}</p>
-                                    <div className="flex flex-wrap gap-2">
+                                <span className="block bg-destructive/5 p-3 rounded-xl border border-destructive/10">
+                                    <span className="block text-[10px] font-black uppercase tracking-wider text-destructive mb-2">{t('alsoAffects')}</span>
+                                    <span className="flex flex-wrap gap-2">
                                         {affectedItemNames.map(name => (
                                             <span key={name} className="px-2 py-0.5 bg-destructive/10 text-destructive text-[10px] font-bold rounded-md capitalize">
                                                 {name}
                                             </span>
                                         ))}
-                                    </div>
-                                </div>
+                                    </span>
+                                </span>
                             )}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -377,18 +377,18 @@ export function ItemTracker() {
                             {t('deleteWholeItem')}
                         </AlertDialogTitle>
                         <AlertDialogDescription className="space-y-4">
-                            <p>{t('deleteWholeItemConfirm')}</p>
+                            <span className="block">{t('deleteWholeItemConfirm')}</span>
                             {affectedItemNames.length > 0 && (
-                                <div className="bg-destructive/5 p-3 rounded-xl border border-destructive/10">
-                                    <p className="text-[10px] font-black uppercase tracking-wider text-destructive mb-2">{t('alsoAffects')}</p>
-                                    <div className="flex flex-wrap gap-2">
+                                <span className="block bg-destructive/5 p-3 rounded-xl border border-destructive/10">
+                                    <span className="block text-[10px] font-black uppercase tracking-wider text-destructive mb-2">{t('alsoAffects')}</span>
+                                    <span className="flex flex-wrap gap-2">
                                         {affectedItemNames.map(name => (
                                             <span key={name} className="px-2 py-0.5 bg-destructive/10 text-destructive text-[10px] font-bold rounded-md capitalize">
                                                 {name}
                                             </span>
                                         ))}
-                                    </div>
-                                </div>
+                                    </span>
+                                </span>
                             )}
                         </AlertDialogDescription>
                     </AlertDialogHeader>

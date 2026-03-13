@@ -16,6 +16,8 @@ function Sheet({
     onOpenChange?.(false)
   }, [onOpenChange])
 
+  useCloseWatcher(!!open, onClose)
+
   return (
     <SheetContext.Provider value={{ onClose }}>
       <SheetPrimitive.Root
@@ -72,12 +74,6 @@ function SheetContent({
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
 }) {
-  const { onClose } = React.useContext(SheetContext)
-
-  useCloseWatcher(true, () => {
-    onClose?.()
-  })
-
   return (
     <SheetPortal>
       <SheetOverlay />

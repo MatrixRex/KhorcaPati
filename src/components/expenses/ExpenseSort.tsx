@@ -7,16 +7,18 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 import { useFilterStore, type ExpenseSortBy } from '@/stores/filterStore';
+import { useTranslation } from 'react-i18next';
 
 export function ExpenseSort() {
+    const { t } = useTranslation();
     const { expenseSortBy, setExpenseSortBy } = useFilterStore();
     const [isOpen, setIsOpen] = React.useState(false);
 
     const labels: Record<ExpenseSortBy, string> = {
-        latest: 'Latest First',
-        oldest: 'Oldest First',
-        'amount-high': 'Amount: High → Low',
-        'amount-low': 'Amount: Low → High'
+        latest: t('latestFirst'),
+        oldest: t('oldestFirst'),
+        'amount-high': t('amountHighLow'),
+        'amount-low': t('amountLowHigh')
     };
 
     const icons: Record<ExpenseSortBy, React.ReactNode> = {
@@ -41,7 +43,7 @@ export function ExpenseSort() {
             <PopoverContent className="w-56 p-2 overflow-hidden" align="end">
                 <div className="flex flex-col space-y-1">
                     <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        Sort Records By
+                        {t('sortRecordsBy')}
                     </div>
                     {(['latest', 'oldest', 'amount-high', 'amount-low'] as ExpenseSortBy[]).map((option) => (
                         <Button

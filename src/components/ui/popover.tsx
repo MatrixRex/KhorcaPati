@@ -15,6 +15,8 @@ function Popover({
     onOpenChange?.(false)
   }, [onOpenChange])
 
+  useCloseWatcher(!!open, onClose)
+
   return (
     <PopoverContext.Provider value={{ onClose }}>
       <PopoverPrimitive.Root
@@ -39,12 +41,6 @@ function PopoverContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
-  const { onClose } = React.useContext(PopoverContext)
-
-  useCloseWatcher(true, () => {
-    onClose?.()
-  })
-
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content

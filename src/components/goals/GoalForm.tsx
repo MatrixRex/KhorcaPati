@@ -9,6 +9,7 @@ import { useGoalStore } from '@/stores/goalStore';
 import { type Goal } from '@/db/schema';
 import { NumberPad } from '@/components/shared/NumberPad';
 import { Calculator } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const goalSchema = z.object({
     title: z.string().min(1, 'Title is required'),
@@ -27,6 +28,7 @@ interface GoalFormProps {
 }
 
 export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
+    const { t } = useTranslation();
     const addGoal = useGoalStore((state) => state.addGoal);
     const updateGoal = useGoalStore((state) => state.updateGoal);
     const [activeField, setActiveField] = useState<'target' | 'current' | null>(null);
@@ -66,8 +68,8 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
     return (
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-                <Label htmlFor="title">Goal Title</Label>
-                <Input id="title" placeholder="e.g. New Phone" {...form.register('title')} />
+                <Label htmlFor="title">{t('goalTitle')}</Label>
+                <Input id="title" placeholder={t('goalExample')} {...form.register('title')} />
                 {form.formState.errors.title && (
                     <p className="text-destructive text-sm">{form.formState.errors.title.message}</p>
                 )}
@@ -75,7 +77,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2 relative">
-                    <Label htmlFor="targetAmount">Target (৳)</Label>
+                    <Label htmlFor="targetAmount">{t('target')} (৳)</Label>
                     <div className="relative">
                         <Input
                             id="targetAmount"
@@ -90,7 +92,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                 </div>
 
                 <div className="space-y-2 relative">
-                    <Label htmlFor="currentAmount">Saved (৳)</Label>
+                    <Label htmlFor="currentAmount">{t('saved')} (৳)</Label>
                     <div className="relative">
                         <Input
                             id="currentAmount"
@@ -107,7 +109,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                 {activeField && (
                     <NumberPad
                         value={String(form.getValues(activeField === 'target' ? 'targetAmount' : 'currentAmount'))}
-                        label={activeField === 'target' ? 'Target Savings Goal' : 'Already Saved Amount'}
+                        label={activeField === 'target' ? t('targetGoalLabel') : t('savedAmountLabel')}
                         onChange={(val) => {
                             const num = parseFloat(val);
                             if (!isNaN(num)) {
@@ -121,15 +123,15 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="deadline">Deadline (Optional)</Label>
+                <Label htmlFor="deadline">{t('deadline')} ({t('optional')})</Label>
                 <Input id="deadline" type="date" {...form.register('deadline')} />
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="note">Note (Optional)</Label>
+                <Label htmlFor="note">{t('note')} ({t('optional')})</Label>
                 <Input
                     id="note"
-                    placeholder="Personal goal..."
+                    placeholder={t('personalGoalExample')}
                     autoCorrect="off"
                     autoCapitalize="none"
                     spellCheck={true}
@@ -139,11 +141,11 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
 
             <div className="flex gap-2 pt-4">
                 <Button type="submit" className="flex-1">
-                    {initialData ? 'Update Goal' : 'Add Goal'}
+                    {initialData ? t('updateGoal') : t('addGoal')}
                 </Button>
                 {onCancel && (
                     <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-                        Cancel
+                        {t('cancel')}
                     </Button>
                 )}
             </div>

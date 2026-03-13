@@ -21,12 +21,13 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useTranslation } from 'react-i18next';
 
-const INTERVALS: { value: BudgetRecurringInterval; label: string }[] = [
-    { value: 'daily', label: 'Daily' },
-    { value: 'weekly', label: 'Weekly' },
-    { value: 'monthly', label: 'Monthly' },
-    { value: 'yearly', label: 'Yearly' },
+const INTERVALS: { value: BudgetRecurringInterval; labelKey: string }[] = [
+    { value: 'daily', labelKey: 'daily' },
+    { value: 'weekly', labelKey: 'weekly' },
+    { value: 'monthly', labelKey: 'monthly' },
+    { value: 'yearly', labelKey: 'yearly' },
 ];
 
 const budgetSchema = z.object({
@@ -59,6 +60,7 @@ interface BudgetFormProps {
 }
 
 export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps) {
+    const { t } = useTranslation();
     const addBudget = useBudgetStore((state) => state.addBudget);
     const updateBudget = useBudgetStore((state) => state.updateBudget);
     const deleteBudget = useBudgetStore((state) => state.deleteBudget);
@@ -136,7 +138,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
 
                 {/* Category */}
                 <div className="space-y-2">
-                    <Label>Category</Label>
+                    <Label>{t('category')}</Label>
                     <CategoryComboBox
                         value={form.watch('category')}
                         onChange={(val) => {
@@ -151,7 +153,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
 
                 {/* Limit amount */}
                 <div className="space-y-2">
-                    <Label htmlFor="limitAmount">Budget Limit (৳)</Label>
+                    <Label htmlFor="limitAmount">{t('budgetLimit')} (৳)</Label>
                     <Input
                         id="limitAmount"
                         type="number"
@@ -174,7 +176,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
 
                 {/* ── Timeline mode toggle ───────────────────────────── */}
                 <div className="space-y-3">
-                    <Label>Timeline</Label>
+                    <Label>{t('timeline')}</Label>
 
                     {/* Segmented control */}
                     <div className="grid grid-cols-2 gap-1 p-1 rounded-lg bg-muted">
@@ -190,7 +192,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                                         : 'text-muted-foreground hover:text-foreground'
                                 )}
                             >
-                                {mode === 'recurring' ? '↺ Recurring' : '📅 Date Range'}
+                                {mode === 'recurring' ? `↺ ${t('recurring')}` : `📅 ${t('dateRange')}`}
                             </button>
                         ))}
                     </div>
@@ -198,9 +200,9 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                     {/* Recurring: interval chips */}
                     {timelineType === 'recurring' && (
                         <div className="space-y-2">
-                            <p className="text-xs text-muted-foreground">Resets every period automatically</p>
+                            <p className="text-xs text-muted-foreground">{t('resetsEveryPeriod')}</p>
                             <div className="grid grid-cols-4 gap-2">
-                                {INTERVALS.map(({ value, label }) => (
+                                {INTERVALS.map(({ value, labelKey }) => (
                                     <button
                                         key={value}
                                         type="button"
@@ -212,7 +214,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                                                 : 'bg-background border-border text-muted-foreground hover:bg-muted'
                                         )}
                                     >
-                                        {label}
+                                        {t(labelKey)}
                                     </button>
                                 ))}
                             </div>
@@ -225,10 +227,10 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                     {/* Range: from / to date pickers */}
                     {timelineType === 'range' && (
                         <div className="space-y-3">
-                            <p className="text-xs text-muted-foreground">Track spending within a fixed window</p>
+                            <p className="text-xs text-muted-foreground">{t('trackFixedWindow')}</p>
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1.5">
-                                    <Label htmlFor="startDate" className="text-xs">From</Label>
+                                    <Label htmlFor="startDate" className="text-xs">{t('from')}</Label>
                                     <Controller
                                         control={form.control}
                                         name="startDate"
@@ -245,7 +247,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                                     )}
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label htmlFor="endDate" className="text-xs">To</Label>
+                                    <Label htmlFor="endDate" className="text-xs">{t('to')}</Label>
                                     <Controller
                                         control={form.control}
                                         name="endDate"
@@ -269,7 +271,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                 {/* Alert threshold */}
                 <div className="space-y-2">
                     <Label htmlFor="alertThreshold">
-                        Alert at{' '}
+                        {t('alertAt')}{' '}
                         <span className="text-primary font-semibold">
                             {Math.round(form.watch('alertThreshold') * 100)}%
                         </span>
@@ -288,11 +290,11 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                 {/* Actions */}
                 <div className="flex gap-2 pt-2">
                     <Button type="submit" className="flex-1">
-                        {initialData ? 'Update Budget' : 'Add Budget'}
+                        {initialData ? t('updateBudget') : t('addBudget')}
                     </Button>
                     {onCancel && (
                         <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-                            Cancel
+                            {t('cancel')}
                         </Button>
                     )}
                 </div>
@@ -304,7 +306,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                         className="w-full"
                         onClick={() => setShowDeleteDialog(true)}
                     >
-                        Delete Budget
+                        {t('deleteBudget')}
                     </Button>
                 )}
             </form>
@@ -312,19 +314,18 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent className="w-[90%] rounded-xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Delete this budget?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('deleteBudgetQuestion')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will permanently remove the budget limit for{' '}
-                            <span className="font-semibold">{initialData?.category}</span>.
+                            {t('deleteBudgetDescription', { category: initialData?.category })}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-row gap-2 mt-4">
-                        <AlertDialogCancel className="flex-1 mt-0">Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className="flex-1 mt-0">{t('cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
                             className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                            Delete
+                            {t('deleteRecord')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

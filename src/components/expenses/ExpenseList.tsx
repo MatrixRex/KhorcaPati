@@ -3,12 +3,14 @@ import { db, type Expense } from '@/db/schema';
 import { ExpenseCard } from './ExpenseCard';
 import { useFilterStore } from '@/stores/filterStore';
 import { isWithinInterval } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 interface ExpenseListProps {
     onEdit?: (expense: Expense) => void;
 }
 
 export function ExpenseList({ onEdit }: ExpenseListProps) {
+    const { t } = useTranslation();
     const { startDate, endDate, selectedCategory, expenseSortBy } = useFilterStore();
 
     const expenses = useLiveQuery(async () => {
@@ -55,15 +57,15 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
 
 
     if (!expenses) {
-        return <div className="p-4 text-center text-muted-foreground">Loading...</div>;
+        return <div className="p-4 text-center text-muted-foreground">{t('loading')}</div>;
     }
 
     if (expenses.length === 0) {
         return (
             <div className="p-8 text-center flex flex-col items-center justify-center">
                 <div className="text-4xl mb-4">📝</div>
-                <h3 className="font-semibold text-lg">No expenses yet</h3>
-                <p className="text-muted-foreground text-sm">Tap the + button to add one.</p>
+                <h3 className="font-semibold text-lg">{t('noExpenses')}</h3>
+                <p className="text-muted-foreground text-sm">{t('tapAdd')}</p>
             </div>
         );
     }

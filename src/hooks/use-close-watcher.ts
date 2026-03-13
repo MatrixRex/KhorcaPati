@@ -10,6 +10,12 @@ const fallbackStack: string[] = []
 export function useCloseWatcher(isOpen: boolean, onClose: () => void) {
     const watcherRef = useRef<any>(null)
     const isInternalClose = useRef(false)
+    const onCloseRef = useRef(onClose)
+
+    // Keep the callback ref up to date
+    useEffect(() => {
+        onCloseRef.current = onClose
+    }, [onClose])
 
     useEffect(() => {
         // We only care about initializing when it opens
@@ -38,7 +44,7 @@ export function useCloseWatcher(isOpen: boolean, onClose: () => void) {
         if ("CloseWatcher" in window) {
             const watcher = new (window as any).CloseWatcher()
             watcher.onclose = () => {
-                onClose()
+                onCloseRef.current()
                 watcherRef.current = null
             }
             watcherRef.current = watcher
@@ -51,7 +57,7 @@ export function useCloseWatcher(isOpen: boolean, onClose: () => void) {
                 if (fallbackStack[fallbackStack.length - 1] === stateId) {
                     fallbackStack.pop()
                     isInternalClose.current = true
-                    onClose()
+                    onCloseRef.current()
                     watcherRef.current = null
                 }
             }
@@ -59,8 +65,6 @@ export function useCloseWatcher(isOpen: boolean, onClose: () => void) {
             const handleKeyDown = (e: KeyboardEvent) => {
                 if (e.key === "Escape" && fallbackStack[fallbackStack.length - 1] === stateId) {
                     // Only trigger if we are the top-most watcher
-                    // We don't call onClose directly, we trigger a back navigation
-                    // which will then trigger handlePopState to keep history clean.
                     window.history.back()
                 }
             }
@@ -82,7 +86,7 @@ export function useCloseWatcher(isOpen: boolean, onClose: () => void) {
         }
 
         return () => {
-            // Cleanup if the component unmounts while "open" (though usually isOpen would change first)
+            // Cleanup if the component unmounts while "open"
             if (watcherRef.current) {
                 if ("CloseWatcher" in window) {
                     watcherRef.current.destroy()
@@ -95,5 +99,5 @@ export function useCloseWatcher(isOpen: boolean, onClose: () => void) {
                 watcherRef.current = null
             }
         }
-    }, [isOpen, onClose])
+    }, [isOpen])
 }

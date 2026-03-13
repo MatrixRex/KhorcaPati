@@ -9,8 +9,10 @@ import {
 } from '@/components/ui/popover';
 import { useFilterStore } from '@/stores/filterStore';
 import { useCategoryStore } from '@/stores/categoryStore';
+import { useTranslation } from 'react-i18next';
 
 export function CategoryFilter() {
+    const { t } = useTranslation();
     const { selectedCategory, setCategory } = useFilterStore();
     const { categories, loadCategories } = useCategoryStore();
     const [isOpen, setIsOpen] = React.useState(false);
@@ -44,7 +46,7 @@ export function CategoryFilter() {
                     >
                         <Tag className={cn("h-3.5 w-3.5 opacity-60", selectedCategory && "opacity-100")} />
                         <span className="truncate max-w-[80px] hidden sm:inline">
-                            {selectedCategory || 'Category'}
+                            {selectedCategory || t('category')}
                         </span>
                         {!selectedCategory ? (
                             <ChevronDown className={cn("h-3 w-3 opacity-40 transition-transform duration-200", isOpen && "rotate-180")} />
@@ -71,7 +73,7 @@ export function CategoryFilter() {
                         >
                             <span className="flex items-center gap-2">
                                 <Tag className="h-3.5 w-3.5 opacity-40" />
-                                All Categories
+                                {t('allCategories')}
                             </span>
                             {selectedCategory === null && <Check className="h-3.5 w-3.5" />}
                         </Button>

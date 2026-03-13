@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { useEffect } from 'react';
 import { Plus, Edit2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -63,17 +64,17 @@ export function GlobalUI() {
         }
     }, [theme]);
 
-    const handleCloseExpense = () => {
+    const handleCloseExpense = React.useCallback(() => {
         const path = returnPath;
         closeExpenseSheet();
         if (path) {
             navigate(path);
         }
-    };
+    }, [returnPath, closeExpenseSheet, navigate]);
 
-    const handleCloseSubRecord = () => {
+    const handleCloseSubRecord = React.useCallback(() => {
         closeSubRecordSheet();
-    };
+    }, [closeSubRecordSheet]);
 
 
     // Add beforeunload listener to prevent accidental reload/close when editing

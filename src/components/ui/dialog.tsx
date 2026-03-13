@@ -19,6 +19,8 @@ function Dialog({
     onOpenChange?.(false)
   }, [onOpenChange])
 
+  useCloseWatcher(!!open, onClose)
+
   return (
     <DialogContext.Provider value={{ onClose }}>
       <DialogPrimitive.Root
@@ -73,12 +75,6 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
-  const { onClose } = React.useContext(DialogContext)
-
-  useCloseWatcher(true, () => {
-    onClose?.()
-  })
-
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />

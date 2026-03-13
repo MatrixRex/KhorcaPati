@@ -38,8 +38,10 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import type { Category } from '@/db/schema';
+import { useTranslation } from 'react-i18next';
 
 export function CategoryManagementDrawer() {
+    const { t } = useTranslation();
     const { isCategoryManagementOpen, closeCategoryManagement } = useUIStore();
     const { categories, addCategory, updateCategory, deleteCategory } = useCategoryStore();
     
@@ -105,9 +107,9 @@ export function CategoryManagementDrawer() {
                 <SheetHeader className="px-6 py-4 shrink-0">
                     <div className="flex items-center justify-between">
                         <div>
-                            <SheetTitle className="text-2xl font-black tracking-tight">Categories</SheetTitle>
+                            <SheetTitle className="text-2xl font-black tracking-tight">{t('categories')}</SheetTitle>
                             <SheetDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
-                                {categories.length} Total Categories
+                                {categories.length} {t('totalCategories')}
                             </SheetDescription>
                         </div>
                         <Button 
@@ -125,17 +127,17 @@ export function CategoryManagementDrawer() {
                     {/* Add Mode */}
                     {isAddingMode && (
                         <div className="mb-6 p-4 rounded-3xl bg-primary/5 border border-primary/20 animate-in fade-in slide-in-from-top-4 duration-300">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary mb-3 block">New Category Name</Label>
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary mb-3 block">{t('newCategoryName')}</Label>
                             <div className="flex gap-2">
                                 <Input 
                                     value={newCategoryName}
                                     onChange={(e) => setNewCategoryName(e.target.value)}
-                                    placeholder="e.g. Health, Coffee"
+                                    placeholder={t('categoryExample')}
                                     className="h-11 rounded-xl bg-background border-primary/20 focus:border-primary"
                                     autoFocus
                                     onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
                                 />
-                                <Button onClick={handleAdd} className="h-11 px-4 rounded-xl font-bold">Add</Button>
+                                <Button onClick={handleAdd} className="h-11 px-4 rounded-xl font-bold">{t('add')}</Button>
                                 <Button variant="ghost" size="icon" onClick={() => setIsAddingMode(false)} className="h-11 w-11 rounded-xl text-muted-foreground">
                                     <X className="w-4 h-4" />
                                 </Button>
@@ -189,7 +191,7 @@ export function CategoryManagementDrawer() {
                                                         <span className="text-base font-black tracking-tight">{cat.name}</span>
                                                     )}
                                                     <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground opacity-60">
-                                                        {cat.isDefault ? 'System Default' : `Category ID: ${cat.id}`}
+                                                        {cat.isDefault ? t('systemDefault') : `${t('categoryId')}: ${cat.id}`}
                                                     </span>
                                                 </div>
                                             </div>
@@ -233,7 +235,7 @@ export function CategoryManagementDrawer() {
                                                 <div className="space-y-4">
                                                     <div>
                                                         <div className="flex items-center justify-between mb-3">
-                                                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Choose Color</Label>
+                                                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{t('chooseColor')}</Label>
                                                             <button 
                                                                 onClick={() => setShowColorPicker(!showColorPicker)}
                                                                 className={cn(
@@ -241,7 +243,7 @@ export function CategoryManagementDrawer() {
                                                                     showColorPicker ? "bg-primary text-white" : "bg-muted text-muted-foreground"
                                                                 )}
                                                             >
-                                                                {showColorPicker ? 'Presets' : 'Custom'}
+                                                                {showColorPicker ? t('presets') : t('custom')}
                                                             </button>
                                                         </div>
 
@@ -254,7 +256,7 @@ export function CategoryManagementDrawer() {
                                                                     />
                                                                     <div className="flex-1 space-y-2">
                                                                         <div className="flex justify-between">
-                                                                             <span className="text-[10px] font-bold text-muted-foreground">Adjust Hue</span>
+                                                                             <span className="text-[10px] font-bold text-muted-foreground">{t('adjustHue')}</span>
                                                                              <span className="text-[10px] font-black text-primary uppercase">{customColor}</span>
                                                                         </div>
                                                                         <input 
@@ -295,7 +297,7 @@ export function CategoryManagementDrawer() {
                                                         className="w-full h-12 rounded-2xl font-black text-sm uppercase tracking-widest gap-2 shadow-lg shadow-primary/10"
                                                         onClick={handleUpdate}
                                                     >
-                                                        Save Changes
+                                                        {t('saveChanges')}
                                                     </Button>
                                                 </div>
                                             </div>
@@ -315,21 +317,21 @@ export function CategoryManagementDrawer() {
                         <div className="w-16 h-16 rounded-2xl bg-destructive/10 flex items-center justify-center text-destructive mx-auto mb-2">
                             <Trash2 size={32} />
                         </div>
-                        <AlertDialogTitle className="text-xl font-black text-center">Delete "{deletingCategory?.name}"?</AlertDialogTitle>
+                        <AlertDialogTitle className="text-xl font-black text-center">{t('deleteCategoryQuestion', { name: deletingCategory?.name })}</AlertDialogTitle>
                         <AlertDialogDescription className="text-center text-xs font-medium text-muted-foreground leading-relaxed">
-                            What should happen to the expenses currently tagged in this category?
+                            {t('deleteCategoryDescription')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
 
                     <div className="py-6 space-y-4">
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Migrate Expenses To</Label>
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t('migrateExpensesTo')}</Label>
                             <Select value={migrateToId} onValueChange={setMigrateToId}>
                                 <SelectTrigger className="h-12 rounded-xl border-muted/50 focus:border-primary">
-                                    <SelectValue placeholder="Move to another category" />
+                                    <SelectValue placeholder={t('moveToAnotherCategory')} />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-2xl">
-                                    <SelectItem value="none">Default (Unlisted)</SelectItem>
+                                    <SelectItem value="none">{t('defaultUnlisted')}</SelectItem>
                                     {categories
                                         .filter(c => c.id !== deletingCategory?.id)
                                         .map(c => (
@@ -345,8 +347,8 @@ export function CategoryManagementDrawer() {
                             <AlertCircle className="w-3.5 h-3.5 text-muted-foreground opacity-60" />
                             <p className="text-[10px] text-muted-foreground font-medium">
                                 {migrateToId === 'none'
-                                    ? "Transactions will be moved to 'Unlisted'."
-                                    : "Transactions will be moved to the selected category."
+                                    ? t('migrateToUnlistedInfo')
+                                    : t('migrateToSelectedInfo')
                                 }
                             </p>
                         </div>
@@ -354,10 +356,10 @@ export function CategoryManagementDrawer() {
 
                     <AlertDialogFooter className="flex-col gap-3">
                         <AlertDialogAction onClick={handleDelete} className="h-12 rounded-2xl bg-destructive text-destructive-foreground font-bold text-sm shadow-lg shadow-destructive/20 active:scale-95 transition-all w-full">
-                            Confirm Deletion
+                            {t('confirmDeletion')}
                         </AlertDialogAction>
                         <AlertDialogCancel className="h-12 rounded-2xl border-none bg-secondary/50 font-bold text-sm active:scale-95 transition-all w-full mt-0">
-                            Cancel
+                            {t('cancel')}
                         </AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>

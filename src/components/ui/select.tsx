@@ -16,6 +16,8 @@ function Select({
     onOpenChange?.(false)
   }, [onOpenChange])
 
+  useCloseWatcher(!!open, onClose)
+
   return (
     <SelectContext.Provider value={{ onClose }}>
       <SelectPrimitive.Root
@@ -73,12 +75,6 @@ function SelectContent({
   align = "center",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
-  const { onClose } = React.useContext(SelectContext)
-
-  useCloseWatcher(true, () => {
-    onClose?.()
-  })
-
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content

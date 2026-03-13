@@ -16,6 +16,8 @@ function AlertDialog({
     onOpenChange?.(false)
   }, [onOpenChange])
 
+  useCloseWatcher(!!open, onClose)
+
   return (
     <AlertDialogContext.Provider value={{ onClose }}>
       <AlertDialogPrimitive.Root
@@ -67,12 +69,6 @@ function AlertDialogContent({
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
   size?: "default" | "sm"
 }) {
-  const { onClose } = React.useContext(AlertDialogContext)
-
-  useCloseWatcher(true, () => {
-    onClose?.()
-  })
-
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />

@@ -25,6 +25,8 @@ export default function Settings() {
     const { language, setLanguage } = useSettingsStore();
     const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
     const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+    const [isImportSuccessOpen, setIsImportSuccessOpen] = useState(false);
+    const [isImportErrorOpen, setIsImportErrorOpen] = useState(false);
     const [importFile, setImportFile] = useState<File | null>(null);
 
     const handleReset = async () => {
@@ -59,11 +61,10 @@ export default function Settings() {
         try {
             const text = await importFile.text();
             await importData(text);
-            alert(t('importSuccess'));
-            window.location.reload();
+            setIsImportSuccessOpen(true);
         } catch (error) {
             console.error('Import failed:', error);
-            alert(t('importError'));
+            setIsImportErrorOpen(true);
         } finally {
             setIsImportDialogOpen(false);
             setImportFile(null);
@@ -334,6 +335,50 @@ export default function Settings() {
                     </AlertDialogContent>
                 </AlertDialog>
 
+                <AlertDialog open={isImportSuccessOpen} onOpenChange={setIsImportSuccessOpen}>
+                    <AlertDialogContent className="w-[90%] rounded-[32px] p-8 border-none bg-background shadow-2xl">
+                        <AlertDialogHeader className="space-y-4">
+                            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-2 animate-in zoom-in duration-500">
+                                <Check size={32} strokeWidth={3} />
+                            </div>
+                            <AlertDialogTitle className="text-xl font-black text-center">{t('importSuccessTitle') || 'Import Successful'}</AlertDialogTitle>
+                            <AlertDialogDescription className="text-center text-xs font-medium text-muted-foreground leading-relaxed">
+                                {t('importSuccessMessage') || 'Your data has been restored. The app needs to reload to apply changes.'}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="mt-8">
+                            <AlertDialogAction
+                                onClick={() => window.location.reload()}
+                                className="h-12 rounded-2xl bg-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-all w-full"
+                            >
+                                {t('reloadNow') || 'Reload Now'}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
+                <AlertDialog open={isImportErrorOpen} onOpenChange={setIsImportErrorOpen}>
+                    <AlertDialogContent className="w-[90%] rounded-[32px] p-8 border-none bg-background shadow-2xl">
+                        <AlertDialogHeader className="space-y-4">
+                            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center text-destructive mx-auto mb-2">
+                                <Trash2 size={32} />
+                            </div>
+                            <AlertDialogTitle className="text-xl font-black text-center text-destructive">{t('importErrorTitle') || 'Import Failed'}</AlertDialogTitle>
+                            <AlertDialogDescription className="text-center text-xs font-medium text-muted-foreground leading-relaxed">
+                                {t('importErrorMessage') || 'There was an error importing your data. Please make sure the file is valid.'}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="mt-8">
+                            <AlertDialogAction
+                                onClick={() => setIsImportErrorOpen(false)}
+                                className="h-12 rounded-2xl bg-destructive text-destructive-foreground font-bold text-sm shadow-lg shadow-destructive/20 active:scale-95 transition-all w-full"
+                            >
+                                {t('close') || 'Close'}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
                 <section className="pt-6 border-t">
                     <h2 className="text-sm font-medium text-destructive mb-3 px-1">{t('dangerZone')}</h2>
                     <div className="bg-destructive/5 p-6 rounded-3xl border border-destructive/20 space-y-4">
@@ -381,7 +426,7 @@ export default function Settings() {
 
                 <div className="flex flex-col items-center justify-center gap-1 opacity-20 py-8">
                     <span className="text-[10px] font-bold uppercase tracking-[0.2em]">KhorcaPati</span>
-                    <span className="text-[10px] font-medium font-mono">1.2.0</span>
+                    <span className="text-[10px] font-medium font-mono">1.3.0</span>
                 </div>
 
                 <div className="h-20" />

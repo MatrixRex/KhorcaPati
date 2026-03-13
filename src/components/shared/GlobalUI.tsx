@@ -16,8 +16,10 @@ import { GoalsListDrawer } from '@/components/goals/GoalsListDrawer';
 import { CategoryManagementDrawer } from '@/components/shared/CategoryManagementDrawer';
 import { useUIStore } from '@/stores/uiStore';
 import { useCategoryStore } from '@/stores/categoryStore';
+import { useTranslation } from 'react-i18next';
 
 export function GlobalUI() {
+    const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const {
@@ -121,7 +123,7 @@ export function GlobalUI() {
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
                     <div className="px-6 pb-6 overflow-y-auto pt-2">
                         <SheetHeader className="mb-6 text-left">
-                            <SheetTitle>{editingExpense ? 'Edit Record' : 'Add Record'}</SheetTitle>
+                            <SheetTitle>{editingExpense ? t('editRecord') : t('addRecord')}</SheetTitle>
                         </SheetHeader>
                         <ExpenseForm
                             key={editingExpense?.id || `new-parent-${expenseSessionId}`}
@@ -140,7 +142,7 @@ export function GlobalUI() {
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
                     <div className="px-6 pb-6 overflow-y-auto pt-2">
                         <SheetHeader className="mb-6 text-left">
-                            <SheetTitle>{editingSubRecord ? 'Edit Sub-Record' : 'Add Sub-Record'}</SheetTitle>
+                            <SheetTitle>{editingSubRecord ? t('editSubRecord') : t('addSubRecord')}</SheetTitle>
                         </SheetHeader>
                         <ExpenseForm
                             key={editingSubRecord?.id || `new-sub-${subSessionId}`}
@@ -163,7 +165,7 @@ export function GlobalUI() {
                 >
                     <div className="p-4 sm:p-6 mb-8">
                         <SheetHeader className="mb-4 text-left">
-                            <SheetTitle>{editingRecurringPayment ? 'Edit Recurring Payment' : 'Add Recurring Payment'}</SheetTitle>
+                            <SheetTitle>{editingRecurringPayment ? t('editRecurring') : t('addRecurring')}</SheetTitle>
                         </SheetHeader>
                         <RecurringPaymentForm
                             initialData={editingRecurringPayment}
@@ -179,7 +181,7 @@ export function GlobalUI() {
                 <SheetContent side="bottom" className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
                     <div className="p-6 mb-8 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
-                            <SheetTitle className="text-xl font-black">{editingBudget ? 'Edit Budget' : 'New Budget Limit'}</SheetTitle>
+                            <SheetTitle className="text-xl font-black">{editingBudget ? t('editBudget') : t('newBudgetLimit')}</SheetTitle>
                         </SheetHeader>
                         <BudgetForm
                             key={editingBudget?.id ?? 'new-budget'}
@@ -196,7 +198,7 @@ export function GlobalUI() {
                 <SheetContent side="bottom" className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
                     <div className="p-6 mb-8 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
-                            <SheetTitle className="text-xl font-black">{editingGoal ? 'Edit Saving Goal' : 'Add Saving Goal'}</SheetTitle>
+                            <SheetTitle className="text-xl font-black">{editingGoal ? t('editSavingGoal') : t('addSavingGoal')}</SheetTitle>
                         </SheetHeader>
                         <GoalForm
                             initialData={editingGoal}
@@ -212,7 +214,7 @@ export function GlobalUI() {
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
                     <div className="p-6 pb-12 text-foreground">
                         <SheetHeader className="mb-6 text-left">
-                            <SheetTitle className="text-xl font-black">Link Records to Goal</SheetTitle>
+                            <SheetTitle className="text-xl font-black">{t('linkRecordsToGoal')}</SheetTitle>
                         </SheetHeader>
                         {goalForProgress && (
                             <GoalLinker
@@ -232,7 +234,7 @@ export function GlobalUI() {
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] font-black uppercase tracking-tight text-primary">Goal Savings Detail</span>
+                                    <span className="text-[10px] font-black uppercase tracking-tight text-primary">{t('goalSavingsDetail')}</span>
                                     <SheetTitle className="text-2xl font-black">{goalForRecords?.title}</SheetTitle>
                                 </div>
                                 <Button
@@ -266,7 +268,7 @@ export function GlobalUI() {
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col">
-                                    <span className="text-[10px] font-black uppercase tracking-tight text-primary">Budget Usage Detail</span>
+                                    <span className="text-[10px] font-black uppercase tracking-tight text-primary">{t('budgetUsageDetail')}</span>
                                     <SheetTitle className="text-2xl font-black capitalize">{budgetForRecords?.category}</SheetTitle>
                                 </div>
                                 <Button

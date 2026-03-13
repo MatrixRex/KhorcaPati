@@ -14,8 +14,10 @@ import { useUIStore } from '@/stores/uiStore';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { BalanceEditDrawer } from '@/components/shared/BalanceEditDrawer';
+import { useTranslation } from 'react-i18next';
 
 export default function Dashboard() {
+    const { t } = useTranslation();
     const currentMonth = format(new Date(), 'yyyy-MM');
     const { 
         openEditExpense, 
@@ -80,7 +82,7 @@ export default function Dashboard() {
 
     return (
         <PageContainer
-            title="খরচা পাতি"
+            title={t('appTitle')}
         >
             {/* At A Glance - Premium Gradient Card */}
             <Card 
@@ -95,7 +97,7 @@ export default function Dashboard() {
                         <div className="text-8xl font-black italic select-none text-white">৳</div>
                     </div>
                     
-                    <p className="text-white/60 text-xs font-bold uppercase tracking-[0.2em] mb-1 relative z-10">Current Balance</p>
+                    <p className="text-white/60 text-xs font-bold uppercase tracking-[0.2em] mb-1 relative z-10">{t('currentBalance')}</p>
                     <div className="flex items-baseline gap-1 mb-4 relative z-10">
                         <span className="text-xl font-bold text-white/40 decoration-white/20 underline decoration-2 underline-offset-4">৳</span>
                         <h2 className="text-4xl font-black tracking-tight text-white">{totalBalance.toLocaleString()}</h2>
@@ -103,12 +105,12 @@ export default function Dashboard() {
 
                     <div className="flex items-center gap-4 relative z-10 mt-2 border-t border-white/10 pt-4">
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-bold uppercase text-white/40 tracking-wider">Income</span>
+                            <span className="text-[10px] font-bold uppercase text-white/40 tracking-wider">{t('income')}</span>
                             <span className="text-sm font-black text-[#5ed16c]">৳{totalIncome.toFixed(0)}</span>
                         </div>
                         <div className="w-px h-6 bg-white/10" />
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-bold uppercase text-white/40 tracking-wider">Expenses</span>
+                            <span className="text-[10px] font-bold uppercase text-white/40 tracking-wider">{t('expenses')}</span>
                             <span className="text-sm font-black text-[#ff5252]">৳{totalSpent.toFixed(0)}</span>
                         </div>
                     </div>
@@ -118,11 +120,11 @@ export default function Dashboard() {
             {/* Recent Expenses */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">Recent Expenses</h2>
-                    <Link to="/expenses" className="text-xs text-primary font-bold hover:underline uppercase">View All</Link>
+                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">{t('recentExpenses')}</h2>
+                    <Link to="/expenses" className="text-xs text-primary font-bold hover:underline uppercase">{t('viewAll')}</Link>
                 </div>
                 {!recentExpenses || recentExpenses.length === 0 ? (
-                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">No expenses yet.</p>
+                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">{t('noExpenses')}</p>
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {recentExpenses.map(exp => (
@@ -135,7 +137,7 @@ export default function Dashboard() {
             {/* Recurring Payments */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">Recurring</h2>
+                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">{t('recurring')}</h2>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -146,7 +148,7 @@ export default function Dashboard() {
                     </Button>
                 </div>
                 {!recurringPayments || recurringPayments.length === 0 ? (
-                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">No overdue or upcoming payments.</p>
+                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">{t('noRecurring')}</p>
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {recurringPayments.map(payment => (
@@ -163,7 +165,7 @@ export default function Dashboard() {
             {/* Budget Overview */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">Budgets</h2>
+                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">{t('budgets')}</h2>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -174,7 +176,7 @@ export default function Dashboard() {
                     </Button>
                 </div>
                 {!budgets || budgets.length === 0 ? (
-                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">No budgets set.</p>
+                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">{t('noBudgets')}</p>
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {budgets.map(budget => (
@@ -187,7 +189,7 @@ export default function Dashboard() {
             {/* Active Goals */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">Active Goals</h2>
+                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">{t('activeGoals')}</h2>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -198,7 +200,7 @@ export default function Dashboard() {
                     </Button>
                 </div>
                 {!activeGoals || activeGoals.length === 0 ? (
-                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">No active goals.</p>
+                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">{t('noGoals')}</p>
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {activeGoals.map(goal => (

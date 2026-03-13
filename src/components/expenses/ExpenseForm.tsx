@@ -7,6 +7,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useExpenseStore } from '@/stores/expenseStore';
 import { useItemStore } from '@/stores/itemStore';
 import { parseItemInput } from '@/parsers/itemParser';
@@ -31,6 +32,8 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+import { useTranslation } from 'react-i18next';
+
 const expenseSchema = z.object({
     amount: z.number().min(0.01, 'Please enter a valid amount'),
     type: z.enum(['expense', 'income']),
@@ -54,6 +57,7 @@ interface ExpenseFormProps {
 }
 
 export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, onCancel, hideCollectionToggle }: ExpenseFormProps) {
+    const { t } = useTranslation();
 
     // Store initial parentId locally on mount to prevent it from changing if the global store changes
     const [fixedParentId] = useState<number | null>(() => {
@@ -268,7 +272,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     : "text-muted-foreground hover:text-foreground"
                             )}
                         >
-                            Expense
+                            {t('expenseLabel')}
                         </button>
                         <button
                             type="button"
@@ -283,7 +287,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     : "text-muted-foreground hover:text-foreground"
                             )}
                         >
-                            Income
+                            {t('incomeLabel')}
                         </button>
                     </div>
                 </div>
@@ -296,14 +300,14 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                         <div className="flex flex-col">
                             <div className="flex items-center gap-2">
                                 <Layers className={cn("w-4 h-4", isNested ? "text-primary" : "text-muted-foreground")} />
-                                <span className="text-xs font-black uppercase tracking-tight">Collection Mode</span>
+                                <span className="text-xs font-black uppercase tracking-tight">{t('collectionMode')}</span>
                             </div>
-                            <span className="text-[9px] text-muted-foreground font-medium">Group multiple records into this folder</span>
+                            <span className="text-[9px] text-muted-foreground font-medium">{t('collectionDescription')}</span>
                         </div>
 
-                        <button
-                            type="button"
-                            onClick={() => {
+                        <Switch
+                            checked={isNested}
+                            onCheckedChange={() => {
                                 const newVal = !isNested;
                                 if (!newVal && subExpenses && subExpenses.length > 0) {
                                     setShowUngroupDialog(true);
@@ -312,23 +316,14 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     form.handleSubmit(performSave)();
                                 }
                             }}
-                            className={cn(
-                                "w-10 h-5 rounded-full transition-colors relative",
-                                isNested ? "bg-primary" : "bg-muted-foreground/30"
-                            )}
-                        >
-                            <div className={cn(
-                                "absolute top-1 w-3 h-3 bg-white rounded-full transition-all duration-300",
-                                isNested ? "left-6" : "left-1"
-                            )} />
-                        </button>
+                        />
                     </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2 relative">
                         <Label htmlFor="amount" className={cn("text-[11px] font-bold uppercase", isNested && "opacity-50")}>
-                            {isNested ? 'Total Amount' : 'Amount'}
+                            {isNested ? t('totalAmount') : t('amount')}
                         </Label>
                         <div className="relative">
                             <Input
@@ -354,7 +349,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                         {showNumberPad && (
                             <NumberPad
                                 value={String(form.getValues('amount'))}
-                                label={form.watch('type') === 'expense' ? 'Expense Amount' : 'Income Amount'}
+                                label={form.watch('type') === 'expense' ? `${t('expenseLabel')} ${t('amount')}` : `${t('incomeLabel')} ${t('amount')}`}
                                 onChange={(val) => {
                                     const num = parseFloat(val);
                                     if (!isNaN(num)) {
@@ -368,7 +363,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                         )}
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="date" className={cn("text-[11px] font-bold uppercase", isNested && "opacity-50")}>Date</Label>
+                        <Label htmlFor="date" className={cn("text-[11px] font-bold uppercase", isNested && "opacity-50")}>{t('date')}</Label>
                         <Controller
                             control={form.control}
                             name="date"
@@ -392,7 +387,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="category" className="text-[11px] font-bold uppercase">Category</Label>
+                        <Label htmlFor="category" className="text-[11px] font-bold uppercase">{t('category')}</Label>
                         <div className="w-full">
                             <CategoryComboBox
                                 ref={categoryRef}
@@ -407,7 +402,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="goal" className="text-[11px] font-bold uppercase">Link to Goal</Label>
+                        <Label htmlFor="goal" className="text-[11px] font-bold uppercase">{t('linkToGoal')}</Label>
                         <div className="w-full">
                             <Controller
                                 control={form.control}
@@ -427,7 +422,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="note" className="text-[11px] font-bold uppercase">{isNested ? 'Collection Title' : 'Note / Items'}</Label>
+                    <Label htmlFor="note" className="text-[11px] font-bold uppercase">{isNested ? t('collectionTitle') : t('noteItems')}</Label>
                     <Controller
                         control={form.control}
                         name="note"
@@ -450,15 +445,15 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             />
                         )}
                     />
-                    {!isNested && <p className="text-[9px] text-muted-foreground font-medium italic">Items separated by commas or new lines will be auto-tracked.</p>}
+                    {!isNested && <p className="text-[9px] text-muted-foreground font-medium italic">{t('autoTrackDescription')}</p>}
                 </div>
 
                 {isNested && (
                     <div className="space-y-3 pt-4 border-t border-dashed border-border mt-2">
                         <div className="flex items-center justify-between">
                             <div className="flex flex-col">
-                                <Label className="text-[11px] font-black uppercase tracking-widest text-primary">Sub Records</Label>
-                                <span className="text-[9px] text-muted-foreground">Individual expenses in this collection</span>
+                                <Label className="text-[11px] font-black uppercase tracking-widest text-primary">{t('subRecords')}</Label>
+                                <span className="text-[9px] text-muted-foreground">{t('individualExpenses')}</span>
                             </div>
                             <Button
                                 type="button"
@@ -482,7 +477,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
                             >
                                 <Plus className="w-3.5 h-3.5" />
-                                Add Sub-Record
+                                {t('addSubRecord')}
                             </Button>
                         </div>
 
@@ -527,7 +522,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     <div className="w-10 h-10 rounded-full bg-muted/20 flex items-center justify-center mb-1">
                                         <Layers className="w-5 h-5 opacity-20" />
                                     </div>
-                                    This collection is empty.
+                                    {t('thisCollectionIsEmpty')}
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -536,7 +531,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         }}
                                         className="text-primary font-black uppercase tracking-tighter not-italic hover:underline mt-1"
                                     >
-                                        Add first record
+                                        {t('addFirstRecord')}
                                     </button>
                                 </div>
                             )}
@@ -572,7 +567,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             }}
                             className="w-full h-11 rounded-xl font-bold"
                         >
-                            Done
+                            {t('done')}
                         </Button>
                     )}
                     {(currentId || initialData) && (
@@ -583,7 +578,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             className="w-full text-destructive hover:bg-destructive/5 h-11 rounded-xl"
                         >
                             <Trash2 className="w-4 h-4 mr-2" />
-                            Delete Record
+                            {t('deleteRecord')}
                         </Button>
                     )}
                 </div>
@@ -592,15 +587,15 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent className="w-[90%] rounded-2xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('areYouSure')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will permanently delete this record{isNested ? ' and ALL its sub-records' : ''}.
+                            {t('thisWillPermanentlyDelete')}{isNested ? t('andSubRecords') : ''}.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-row gap-2 mt-4">
-                        <AlertDialogCancel className="flex-1 mt-0 rounded-xl">Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className="flex-1 mt-0 rounded-xl">{t('cancel')}</AlertDialogCancel>
                         <AlertDialogAction onClick={handleDelete} className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
-                            Delete
+                            {t('deleteRecord')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -608,15 +603,15 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             <AlertDialog open={showUngroupDialog} onOpenChange={setShowUngroupDialog}>
                 <AlertDialogContent className="w-[90%] rounded-2xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Ungroup Collection?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('ungroupCollection')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will delete this collection folder and convert all <span className="font-bold text-foreground">{subExpenses?.length} sub-records</span> into individual normal records.
+                            {t('ungroupDescription')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-row gap-2 mt-4">
-                        <AlertDialogCancel className="flex-1 mt-0 rounded-xl">Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className="flex-1 mt-0 rounded-xl">{t('cancel')}</AlertDialogCancel>
                         <AlertDialogAction onClick={handleUngroup} className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl">
-                            Ungroup
+                            {t('ungroup')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

@@ -1,16 +1,19 @@
 import { NavLink } from 'react-router-dom';
 import { Home, Receipt, PackageSearch, PieChart, SquareMenu } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-    { path: '/', label: 'Dash', icon: Home },
-    { path: '/expenses', label: 'Records', icon: Receipt },
-    { path: '/items', label: 'Items', icon: PackageSearch },
-    { path: '/reports', label: 'Reports', icon: PieChart },
-    { path: '/settings', label: 'Settings', icon: SquareMenu },
-];
+import { useTranslation } from 'react-i18next';
 
 export function BottomNav() {
+    const { t } = useTranslation();
+
+    const navItems = [
+        { path: '/', label: t('dash'), icon: Home },
+        { path: '/expenses', label: t('records'), icon: Receipt },
+        { path: '/items', label: t('items'), icon: PackageSearch },
+        { path: '/reports', label: t('reports'), icon: PieChart },
+        { path: '/settings', label: t('settings'), icon: SquareMenu },
+    ];
+
     return (
         <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-t border-border/40 h-[var(--bottom-nav-height)] pointer-events-auto shadow-[0_-4px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
             <ul className="flex items-center justify-around h-full max-w-md mx-auto">

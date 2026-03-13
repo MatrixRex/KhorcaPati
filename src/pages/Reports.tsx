@@ -12,6 +12,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { PageContainer } from '@/components/shared/PageContainer';
 
 import { useCategoryStore } from '@/stores/categoryStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 // Removed hardcoded COLORS array
 
@@ -48,6 +49,7 @@ export default function Reports() {
     const { startDate, endDate } = useFilterStore();
     const { fontScale } = useUIStore();
     const { categories: categoryList } = useCategoryStore();
+    const { initialBalance } = useSettingsStore();
 
     const expenses = useLiveQuery(async () => {
         return await db.expenses.filter(e => !e.parentId).toArray();
@@ -111,7 +113,15 @@ export default function Reports() {
         }));
 
         // 3. Line Chart Timeline Data
-        let runningBalance = 0;
+        const beforeRange = expenses.filter(exp => {
+            const date = new Date(exp.date);
+            return date < startDate;
+        });
+        const balanceBeforeRange = initialBalance + beforeRange.reduce((sum, exp) => {
+            return exp.type === 'income' ? sum + exp.amount : sum - exp.amount;
+        }, 0);
+
+        let runningBalance = balanceBeforeRange;
         const timelineData = Array.from(dailyAggs.entries()).map(([date, vals]) => {
             const change = vals.income - vals.expense;
             runningBalance += change;

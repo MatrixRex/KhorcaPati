@@ -470,6 +470,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                 ref={noteRef}
                                 id="note"
                                 type="note"
+                                disableSuggestions={isNested || !form.watch('itemAutoTrack')}
                                 placeholder={isNested ? t('collectionTitlePlaceholder') : (form.watch('itemAutoTrack') ? t('expenseNotePlaceholder') : t('expenseNoteOnlyPlaceholder'))}
                                 value={field.value || ''}
                                 onChange={(val: string) => {

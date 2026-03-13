@@ -15,6 +15,7 @@ interface SuggestionInputProps {
     type?: 'note' | 'category';
     customSuggestions?: string[];
     isMulti?: boolean;
+    disableSuggestions?: boolean;
     onSelectSuggestion?: (suggestion: string) => void;
     action?: {
         label: string;
@@ -25,7 +26,7 @@ interface SuggestionInputProps {
 const STRIP_HEIGHT = 44; // px — height of the chip row
 
 export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInputProps>(
-    ({ value, onChange, onBlur, onEnter, id, placeholder, className, type = 'note', customSuggestions, isMulti = true, onSelectSuggestion, action }, ref) => {
+    ({ value, onChange, onBlur, onEnter, id, placeholder, className, type = 'note', customSuggestions, isMulti = true, disableSuggestions = false, onSelectSuggestion, action }, ref) => {
         const [isFocused, setIsFocused] = useState(false);
         const [cursorPos, setCursorPos] = useState(0);
         const internalRef = useRef<HTMLInputElement>(null);
@@ -35,9 +36,9 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
         const wrapperRef = useRef<HTMLDivElement>(null);
         const [stripStyle, setStripStyle] = useState<React.CSSProperties>({});
 
-        // Get unique item names sorted by frequency (only if no custom suggestions)
+        // Get unique item names sorted by frequency (only if no custom suggestions and suggestions not disabled)
         const dbSuggestions = useLiveQuery(async () => {
-            if (customSuggestions) return [];
+            if (customSuggestions || disableSuggestions) return [];
             const items = await db.items.toArray();
             const counts: Record<string, number> = {};
             items.forEach(item => {
@@ -49,9 +50,10 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
             return Object.entries(counts)
                 .sort((a, b) => b[1] - a[1])
                 .map(([name]) => name);
-        }, [customSuggestions]);
+        }, [customSuggestions, disableSuggestions]);
 
-        const suggestionsList = customSuggestions || dbSuggestions || [];
+        // Gate on disableSuggestions as a final guard regardless of cached query state
+        const suggestionsList = disableSuggestions ? [] : (customSuggestions || dbSuggestions || []);
 
         const currentPart = useMemo(() => {
             if (!isMulti) return value.trim();

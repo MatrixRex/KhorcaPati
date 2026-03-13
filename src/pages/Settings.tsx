@@ -2,10 +2,11 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { useUIStore, type Theme } from '@/stores/uiStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useState } from 'react';
-import { Moon, Sun, Monitor, Check, Trash2, Bell, Target, Wallet, Languages } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, Trash2, Bell, Target, Wallet, Languages, Download, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
+import { exportData, importData } from '@/lib/data-management';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -23,12 +24,46 @@ export default function Settings() {
     const { theme, setTheme, fontScale, setFontScale } = useUIStore();
     const { language, setLanguage } = useSettingsStore();
     const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+    const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+    const [importFile, setImportFile] = useState<File | null>(null);
 
     const handleReset = async () => {
         const { db } = await import('@/db/schema');
         await db.delete();
         localStorage.clear();
         window.location.reload();
+    };
+
+    const handleExport = async () => {
+        try {
+            await exportData();
+        } catch (error) {
+            console.error('Export failed:', error);
+        }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setImportFile(e.target.files[0]);
+            setIsImportDialogOpen(true);
+        }
+    };
+
+    const handleImport = async () => {
+        if (!importFile) return;
+
+        try {
+            const text = await importFile.text();
+            await importData(text);
+            alert(t('importSuccess'));
+            window.location.reload();
+        } catch (error) {
+            console.error('Import failed:', error);
+            alert(t('importError'));
+        } finally {
+            setIsImportDialogOpen(false);
+            setImportFile(null);
+        }
     };
 
     const languages = [
@@ -151,18 +186,18 @@ export default function Settings() {
                         <Button
                             variant="outline"
                             onClick={() => useUIStore.getState().openCategoryManagement()}
-                            className="h-16 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                            className="h-auto py-4 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
                         >
-                            <div className="flex items-center gap-4">
-                                <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform shrink-0">
                                     <Check className="w-5 h-5" />
                                 </div>
-                                <div className="flex flex-col items-start">
+                                <div className="flex flex-col items-start min-w-0">
                                     <span className="text-sm font-bold">{t('categories')}</span>
-                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">{t('manageNames')}</span>
+                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight leading-tight">{t('manageNames')}</span>
                                 </div>
                             </div>
-                            <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                                 <Monitor className="w-4 h-4 rotate-[-90deg]" />
                             </div>
                         </Button>
@@ -170,18 +205,18 @@ export default function Settings() {
                         <Button
                             variant="outline"
                             onClick={() => useUIStore.getState().openRecurringPaymentsList()}
-                            className="h-16 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                            className="h-auto py-4 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
                         >
-                            <div className="flex items-center gap-4">
-                                <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500 group-hover:scale-110 transition-transform">
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500 group-hover:scale-110 transition-transform shrink-0">
                                     <Bell className="w-5 h-5" />
                                 </div>
-                                <div className="flex flex-col items-start">
+                                <div className="flex flex-col items-start min-w-0">
                                     <span className="text-sm font-bold">{t('recurringPayments')}</span>
-                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">{t('editSchedules')}</span>
+                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight leading-tight">{t('editSchedules')}</span>
                                 </div>
                             </div>
-                            <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                                 <Monitor className="w-4 h-4 rotate-[-90deg]" />
                             </div>
                         </Button>
@@ -189,18 +224,18 @@ export default function Settings() {
                         <Button
                             variant="outline"
                             onClick={() => useUIStore.getState().openBudgetsList()}
-                            className="h-16 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                            className="h-auto py-4 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
                         >
-                            <div className="flex items-center gap-4">
-                                <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform shrink-0">
                                     <Wallet className="w-5 h-5" />
                                 </div>
-                                <div className="flex flex-col items-start">
+                                <div className="flex flex-col items-start min-w-0">
                                     <span className="text-sm font-bold">{t('budgets')}</span>
-                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">{t('setLimits')}</span>
+                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight leading-tight">{t('setLimits')}</span>
                                 </div>
                             </div>
-                            <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                                 <Monitor className="w-4 h-4 rotate-[-90deg]" />
                             </div>
                         </Button>
@@ -208,23 +243,92 @@ export default function Settings() {
                         <Button
                             variant="outline"
                             onClick={() => useUIStore.getState().openGoalsList()}
-                            className="h-16 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                            className="h-auto py-4 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
                         >
-                            <div className="flex items-center gap-4">
-                                <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform shrink-0">
                                     <Target className="w-5 h-5" />
                                 </div>
-                                <div className="flex flex-col items-start">
+                                <div className="flex flex-col items-start min-w-0">
                                     <span className="text-sm font-bold">{t('savingsGoals')}</span>
-                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">{t('manageTargets')}</span>
+                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight leading-tight">{t('manageTargets')}</span>
                                 </div>
                             </div>
-                            <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                                 <Monitor className="w-4 h-4 rotate-[-90deg]" />
                             </div>
                         </Button>
                     </div>
                 </section>
+
+                <section>
+                    <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">{t('dataManagement')}</h2>
+                    <div className="grid grid-cols-1 gap-3">
+                        <Button
+                            variant="outline"
+                            onClick={handleExport}
+                            className="h-auto py-4 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                        >
+                            <div className="flex items-center gap-4 w-full">
+                                <div className="p-2.5 rounded-xl bg-green-500/10 text-green-500 group-hover:scale-110 transition-transform shrink-0">
+                                    <Download className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col items-start flex-1 min-w-0">
+                                    <span className="text-sm font-bold">{t('exportData')}</span>
+                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight leading-tight">{t('exportDescription')}</span>
+                                </div>
+                            </div>
+                        </Button>
+
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept=".json"
+                                onChange={handleFileChange}
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                            />
+                            <Button
+                                variant="outline"
+                                className="h-auto py-4 w-full justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            >
+                                <div className="flex items-center gap-4 w-full">
+                                    <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform shrink-0">
+                                        <Upload className="w-5 h-5" />
+                                    </div>
+                                    <div className="flex flex-col items-start flex-1 min-w-0">
+                                        <span className="text-sm font-bold">{t('importData')}</span>
+                                        <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight leading-tight">{t('importDescription')}</span>
+                                    </div>
+                                </div>
+                            </Button>
+                        </div>
+                    </div>
+                </section>
+
+                <AlertDialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+                    <AlertDialogContent className="w-[90%] rounded-[32px] p-8 border-none bg-background shadow-2xl">
+                        <AlertDialogHeader className="space-y-4">
+                            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mx-auto mb-2">
+                                <Upload size={32} />
+                            </div>
+                            <AlertDialogTitle className="text-xl font-black text-center">{t('importData')}</AlertDialogTitle>
+                            <AlertDialogDescription className="text-center text-xs font-medium text-muted-foreground leading-relaxed">
+                                {t('overwriteWarning')}
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="flex-col gap-3 mt-8">
+                            <AlertDialogAction
+                                onClick={handleImport}
+                                className="h-12 rounded-2xl bg-primary text-primary-foreground font-bold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-all w-full"
+                            >
+                                {t('import')}
+                            </AlertDialogAction>
+                            <AlertDialogCancel className="h-12 rounded-2xl border-none bg-secondary/50 font-bold text-sm active:scale-95 transition-all w-full mt-0">
+                                {t('cancel')}
+                            </AlertDialogCancel>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
 
                 <section className="pt-6 border-t">
                     <h2 className="text-sm font-medium text-destructive mb-3 px-1">{t('dangerZone')}</h2>

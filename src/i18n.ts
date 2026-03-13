@@ -165,7 +165,17 @@ const resources = {
       "latestFirst": "Latest First",
       "oldestFirst": "Oldest First",
       "amountHighLow": "Amount: High → Low",
-      "amountLowHigh": "Amount: Low → High"
+      "amountLowHigh": "Amount: Low → High",
+      "dataManagement": "Data Management",
+      "exportData": "Export Data",
+      "importData": "Import Data",
+      "exportDescription": "Download a backup of all your data as a JSON file.",
+      "importDescription": "Restore your data from a backup file. This will replace all current data.",
+      "overwriteWarning": "This will permanently replace all your existing data with the data from the backup file. This action cannot be undone.",
+      "export": "Export",
+      "import": "Import",
+      "importSuccess": "Data imported successfully! The app will now reload.",
+      "importError": "Failed to import data. Please make sure the file is a valid backup."
     }
   },
   bn: {
@@ -330,7 +340,17 @@ const resources = {
       "latestFirst": "নতুনগুলো আগে",
       "oldestFirst": "পুরানো গুলো আগে",
       "amountHighLow": "পরিমাণ: বেশি → কম",
-      "amountLowHigh": "পরিমাণ: কম → বেশি"
+      "amountLowHigh": "পরিমাণ: কম → বেশি",
+      "dataManagement": "তথ্য ব্যবস্থাপনা",
+      "exportData": "তথ্য রপ্তানি",
+      "importData": "তথ্য আমদানি",
+      "exportDescription": "ব্যাকআপ JSON ফাইল ডাউনলোড করুন।",
+      "importDescription": "ব্যাকআপ JSON ফাইল আপলোড করুন। এটি বর্তমান সমস্ত তথ্য মুছে ফেলবে।",
+      "overwriteWarning": "এটি আপনার বর্তমান সমস্ত তথ্য মুছে ফেলবে এবং ব্যাকআপ ফাইলের তথ্য দিয়ে প্রতিস্থাপন করবে।",
+      "export": "রপ্তানি",
+      "import": "আমদানি",
+      "importSuccess": "তথ্য সফলভাবে আপলোড করা হয়েছে! অ্যাপটি এখন রিলোড হবে।",
+      "importError": "তথ্য আপলোড করতে ব্যর্থ হয়েছে। অনুগ্রহ করে নিশ্চিত করুন যে ফাইলটি সঠিক।"
     }
   }
 };

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { SuggestionInput } from "./SuggestionInput";
 import { useCategoryStore } from "@/stores/categoryStore";
+import { useTranslation } from "react-i18next";
 
 interface CategoryComboBoxProps {
     value: string;
@@ -12,6 +13,7 @@ interface CategoryComboBoxProps {
 export const CategoryComboBox = React.forwardRef<HTMLInputElement, CategoryComboBoxProps>(
     ({ value, onChange, onBlur, onEnter }, ref) => {
         const { categories, addCategory } = useCategoryStore();
+        const { t } = useTranslation();
 
         const sortedNames = React.useMemo(() => {
             return [...categories]
@@ -44,11 +46,6 @@ export const CategoryComboBox = React.forwardRef<HTMLInputElement, CategoryCombo
             };
         }, [value, hasExactMatch, handleSelect]);
 
-        const defaultCategoryName = React.useMemo(() => {
-            const def = categories.find(c => c.isDefault);
-            return def?.name || "Unlisted";
-        }, [categories]);
-
         return (
             <SuggestionInput
                 ref={ref}
@@ -61,10 +58,9 @@ export const CategoryComboBox = React.forwardRef<HTMLInputElement, CategoryCombo
                 onBlur={onBlur}
                 onSelectSuggestion={handleSelect}
                 onEnter={onEnter}
-                placeholder={defaultCategoryName}
+                placeholder={t('categoryPlaceholder')}
                 className="h-12 rounded-xl"
             />
         );
     }
 );
-

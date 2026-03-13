@@ -3,11 +3,29 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 import { Select as SelectPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { useCloseWatcher } from "@/hooks/use-close-watcher"
+
+const SelectContext = React.createContext<{ onClose?: () => void }>({})
 
 function Select({
+  open,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />
+  const onClose = React.useCallback(() => {
+    onOpenChange?.(false)
+  }, [onOpenChange])
+
+  return (
+    <SelectContext.Provider value={{ onClose }}>
+      <SelectPrimitive.Root
+        data-slot="select"
+        open={open}
+        onOpenChange={onOpenChange}
+        {...props}
+      />
+    </SelectContext.Provider>
+  )
 }
 
 function SelectGroup({
@@ -55,6 +73,12 @@ function SelectContent({
   align = "center",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  const { onClose } = React.useContext(SelectContext)
+
+  useCloseWatcher(true, () => {
+    onClose?.()
+  })
+
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content

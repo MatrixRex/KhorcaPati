@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { format, parseISO, differenceInCalendarDays } from 'date-fns';
@@ -11,6 +12,8 @@ import { Link } from 'react-router-dom';
 import { Settings2 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { PageContainer } from '@/components/shared/PageContainer';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { BalanceEditDrawer } from '@/components/shared/BalanceEditDrawer';
 
 export default function Dashboard() {
     const currentMonth = format(new Date(), 'yyyy-MM');
@@ -19,8 +22,10 @@ export default function Dashboard() {
         openEditRecurringPayment, 
         openRecurringPaymentsList,
         openBudgetsList,
-        openGoalsList
+        openGoalsList,
+        openBalanceEdit
     } = useUIStore();
+    const { initialBalance } = useSettingsStore();
 
     const expensesThisMonth = useLiveQuery(async () => {
         const all = await db.expenses.filter(e => !e.parentId).toArray();
@@ -63,14 +68,25 @@ export default function Dashboard() {
 
     const totalSpent = expensesThisMonth?.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0) || 0;
     const totalIncome = expensesThisMonth?.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0) || 0;
-    const totalBalance = totalIncome - totalSpent;
+    
+    const allExpenses = useLiveQuery(() => db.expenses.filter(e => !e.parentId).toArray());
+    const totalBalance = useMemo(() => {
+        if (!allExpenses) return initialBalance;
+        const derived = allExpenses.reduce((sum, exp) => {
+            return exp.type === 'income' ? sum + exp.amount : sum - exp.amount;
+        }, 0);
+        return initialBalance + derived;
+    }, [allExpenses, initialBalance]);
 
     return (
         <PageContainer
             title="খরচা পাতি"
         >
             {/* At A Glance - Premium Gradient Card */}
-            <Card className="mb-6 border-none shadow-xl rounded-[28px] overflow-hidden group relative">
+            <Card 
+                className="mb-6 border-none shadow-xl rounded-[28px] overflow-hidden group relative cursor-pointer active:scale-[0.98] transition-all"
+                onClick={openBalanceEdit}
+            >
                 {/* Clean Premium Gradient Background */}
                 <div className="absolute inset-0 bg-gradient-to-br from-[#1e293b] via-[#334155] to-[#0f172a] transition-transform duration-500 group-hover:scale-105" />
                 
@@ -191,6 +207,8 @@ export default function Dashboard() {
                     </div>
                 )}
             </div>
+
+            <BalanceEditDrawer />
         </PageContainer>
     );
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Delete, Check, Equal, X } from 'lucide-react';
+import { useCloseWatcher } from '@/hooks/use-close-watcher';
 
 interface NumberPadProps {
     value: string;
@@ -12,6 +13,7 @@ interface NumberPadProps {
 }
 
 export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPadProps) {
+    useCloseWatcher(true, onClose);
     const [display, setDisplay] = useState(value || '0');
     const [liveResult, setLiveResult] = useState<string>(value || '0');
 

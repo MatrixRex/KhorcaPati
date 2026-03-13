@@ -2,11 +2,29 @@ import * as React from "react"
 import { Popover as PopoverPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
+import { useCloseWatcher } from "@/hooks/use-close-watcher"
+
+const PopoverContext = React.createContext<{ onClose?: () => void }>({})
 
 function Popover({
+  open,
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />
+  const onClose = React.useCallback(() => {
+    onOpenChange?.(false)
+  }, [onOpenChange])
+
+  return (
+    <PopoverContext.Provider value={{ onClose }}>
+      <PopoverPrimitive.Root
+        data-slot="popover"
+        open={open}
+        onOpenChange={onOpenChange}
+        {...props}
+      />
+    </PopoverContext.Provider>
+  )
 }
 
 function PopoverTrigger({
@@ -21,6 +39,12 @@ function PopoverContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+  const { onClose } = React.useContext(PopoverContext)
+
+  useCloseWatcher(true, () => {
+    onClose?.()
+  })
+
   return (
     <PopoverPrimitive.Portal>
       <PopoverPrimitive.Content

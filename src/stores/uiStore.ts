@@ -26,6 +26,7 @@ interface UIState {
     isBudgetsListOpen: boolean;
     isGoalsListOpen: boolean;
     isCategoryManagementOpen: boolean;
+    isBalanceEditDrawerOpen: boolean;
     selectedInventoryItem: string | null;
     returnPath: string | null;
     theme: Theme;
@@ -58,6 +59,8 @@ interface UIState {
     closeGoalsList: () => void;
     openCategoryManagement: () => void;
     closeCategoryManagement: () => void;
+    openBalanceEdit: () => void;
+    closeBalanceEdit: () => void;
     openAddBudget: () => void;
     openEditBudget: (budget: Budget) => void;
     closeBudgetSheet: () => void;
@@ -92,6 +95,7 @@ export const useUIStore = create<UIState>()(
             isBudgetsListOpen: false,
             isGoalsListOpen: false,
             isCategoryManagementOpen: false,
+            isBalanceEditDrawerOpen: false,
             selectedInventoryItem: null,
             returnPath: null,
             theme: 'system',
@@ -112,7 +116,8 @@ export const useUIStore = create<UIState>()(
                         state.isRecurringPaymentsListOpen ||
                         state.isBudgetsListOpen ||
                         state.isGoalsListOpen ||
-                        state.isCategoryManagementOpen;
+                        state.isCategoryManagementOpen ||
+                        state.isBalanceEditDrawerOpen;
             },
 
             openAddExpense: (parentId) => set({
@@ -258,6 +263,12 @@ export const useUIStore = create<UIState>()(
             }),
             closeCategoryManagement: () => set({
                 isCategoryManagementOpen: false
+            }),
+            openBalanceEdit: () => set({
+                isBalanceEditDrawerOpen: true
+            }),
+            closeBalanceEdit: () => set({
+                isBalanceEditDrawerOpen: false
             }),
 
             setSelectedInventoryItem: (name) => set({

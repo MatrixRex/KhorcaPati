@@ -43,26 +43,11 @@ export function useCloseWatcher(isOpen: boolean, onClose: () => void) {
             }
             watcherRef.current = watcher
         } else {
-            // Fallback: history.pushState and popstate
-            // Each modal gets its own state entry
+            // Fallback: history.pushState and popstate + Escape key
             const stateId = `watcher-${Date.now()}`
             window.history.pushState({ watcherId: stateId }, "")
 
             const handlePopState = () => {
-                // In the fallback, when popstate fires, we've moved BACK in history.
-                // If this watcher was active, it means we likely moved from its state to the previous one.
-                // Since popstate is global, we need to ensure only the one that was just popped closes.
-                // We use a simple ref-check or state-check if needed, but for simplicity in a stack-like
-                // history, the most recently added listener is usually the one we want to trigger
-                // if we can manage it. Actually, just closing and letting the caller handle state is enough
-                // IF we ensure we don't close others.
-
-                // Better: Only trigger if this watcher's state is no longer the current one.
-                // But since we just went back, none of the watchers' states will be current
-                // if they were all pushed.
-
-                // Let's use a simpler approach: only the handler for the "top" one should run.
-                // We can check if we are the top of a global stack.
                 if (fallbackStack[fallbackStack.length - 1] === stateId) {
                     fallbackStack.pop()
                     isInternalClose.current = true
@@ -71,12 +56,23 @@ export function useCloseWatcher(isOpen: boolean, onClose: () => void) {
                 }
             }
 
+            const handleKeyDown = (e: KeyboardEvent) => {
+                if (e.key === "Escape" && fallbackStack[fallbackStack.length - 1] === stateId) {
+                    // Only trigger if we are the top-most watcher
+                    // We don't call onClose directly, we trigger a back navigation
+                    // which will then trigger handlePopState to keep history clean.
+                    window.history.back()
+                }
+            }
+
             fallbackStack.push(stateId)
             window.addEventListener("popstate", handlePopState)
+            window.addEventListener("keydown", handleKeyDown)
 
             watcherRef.current = {
                 destroy: () => {
                     window.removeEventListener("popstate", handlePopState)
+                    window.removeEventListener("keydown", handleKeyDown)
                     const index = fallbackStack.indexOf(stateId)
                     if (index !== -1) {
                         fallbackStack.splice(index, 1)

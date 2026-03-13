@@ -81,41 +81,44 @@ export function BalanceEditDrawer() {
 
     return (
         <Sheet open={isBalanceEditDrawerOpen} onOpenChange={(open) => !open && closeBalanceEdit()}>
-            <SheetContent side="bottom" className="rounded-t-[40px] p-0 border-none overflow-hidden flex flex-col max-h-[85vh]">
-                <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mt-4 mb-2 shrink-0" />
+            <SheetContent side="bottom" className="rounded-t-[28px] p-0 border-none overflow-hidden flex flex-col max-h-[85vh]">
+                <div className="w-10 h-1 bg-muted rounded-full mx-auto mt-3 mb-1 shrink-0" />
                 
-                <SheetHeader className="px-6 py-4 shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                            <Wallet className="w-6 h-6" />
+                {/* Compact header */}
+                <SheetHeader className="px-4 py-2 shrink-0">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                            <Wallet className="w-4 h-4" />
                         </div>
                         <div>
-                            <SheetTitle className="text-2xl font-black tracking-tight text-left">{t('editBalance')}</SheetTitle>
-                            <SheetDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground/60 text-left">
+                            <SheetTitle className="text-lg font-black tracking-tight text-left leading-tight">{t('editBalance')}</SheetTitle>
+                            <SheetDescription className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground/60 text-left">
                                 {t('balanceDrawerDescription')}
                             </SheetDescription>
                         </div>
                     </div>
                 </SheetHeader>
 
-                <div className="flex-1 overflow-y-auto px-6 pb-10 space-y-8">
-                    <div className="space-y-4">
-                        <div className="space-y-2">
+                <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
+                    <div className="space-y-3">
+                        {/* Balance input */}
+                        <div className="space-y-1.5">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t('desiredBalance')}</Label>
                             <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-black text-muted-foreground/40 italic">৳</span>
+                                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xl font-black text-muted-foreground/40 italic">৳</span>
                                 <Input 
                                     type="number"
                                     value={newBalance}
                                     onChange={(e) => setNewBalance(e.target.value)}
-                                    className="h-16 pl-10 pr-6 text-3xl font-black rounded-3xl bg-muted/20 border-none focus-visible:ring-2 focus-visible:ring-primary"
+                                    className="h-12 pl-9 pr-4 text-2xl font-black rounded-2xl bg-muted/20 border-none focus-visible:ring-2 focus-visible:ring-primary"
                                     placeholder="0"
                                     autoFocus
                                 />
                             </div>
                         </div>
 
-                        <div className="bg-primary/5 border border-primary/10 rounded-3xl p-4 flex items-center justify-between">
+                        {/* Toggle */}
+                        <div className="bg-primary/5 border border-primary/10 rounded-2xl px-3 py-2.5 flex items-center justify-between">
                             <div className="flex flex-col">
                                 <span className="text-xs font-bold text-primary">{t('createAdjustmentRecord')}</span>
                                 <span className="text-[10px] text-primary/60 font-medium">{t('adjustmentDescription')}</span>
@@ -127,10 +130,11 @@ export function BalanceEditDrawer() {
                             />
                         </div>
 
+                        {/* Warning */}
                         {!createRecord && (
-                            <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-amber-600">
+                            <div className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl bg-amber-500/5 border border-amber-500/20 text-amber-600">
                                 <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                                <div className="space-y-1">
+                                <div className="space-y-0.5">
                                     <p className="text-xs font-bold">{t('headsUp')}</p>
                                     <p className="text-[10px] font-semibold opacity-80 leading-relaxed">
                                         {t('balanceUpdateWarning')}
@@ -140,21 +144,22 @@ export function BalanceEditDrawer() {
                         )}
                     </div>
 
-                    <div className="space-y-3 pt-4">
-                        <div className="flex justify-between items-center px-2">
+                    {/* Actions */}
+                    <div className="space-y-2 pt-1">
+                        <div className="flex justify-between items-center px-1 pb-1">
                             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">{t('current')}</span>
                             <span className="text-sm font-black opacity-40 italic">৳{formatAmount(currentTotalBalance)}</span>
                         </div>
                         <Button 
-                            className="w-full h-14 rounded-3xl font-black text-sm uppercase tracking-widest gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            className="w-full h-11 rounded-2xl font-black text-sm uppercase tracking-widest gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
                             onClick={handleSave}
                         >
-                            <Check className="w-5 h-5 stroke-[3]" />
+                            <Check className="w-4 h-4 stroke-[3]" />
                             {t('updateBalance')}
                         </Button>
                         <Button 
                             variant="ghost"
-                            className="w-full h-12 rounded-2xl font-bold text-xs uppercase tracking-widest text-muted-foreground"
+                            className="w-full h-9 rounded-xl font-bold text-xs uppercase tracking-widest text-muted-foreground"
                             onClick={closeBalanceEdit}
                         >
                             {t('cancel')}

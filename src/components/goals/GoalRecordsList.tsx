@@ -5,6 +5,7 @@ import { format, parseISO } from 'date-fns';
 import { Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 import { useGoalStore } from '@/stores/goalStore';
 import { Button } from '@/components/ui/button';
+import { formatAmount } from '@/lib/utils';
 
 interface GoalRecordsListProps {
     goal: Goal;
@@ -45,7 +46,7 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
                         <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">Total Deposits</span>
                     </div>
                     <div className="text-xl font-black">
-                        ৳{linkedExpenses.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0).toLocaleString()}
+                        ৳{formatAmount(linkedExpenses.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0))}
                     </div>
                 </div>
                 <div className="bg-green-600/5 p-4 rounded-3xl border border-green-600/10">
@@ -54,7 +55,7 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
                         <span className="text-[9px] font-black uppercase tracking-widest text-green-600/60">Total Withdrawals</span>
                     </div>
                     <div className="text-xl font-black">
-                        ৳{linkedExpenses.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0).toLocaleString()}
+                        ৳{formatAmount(linkedExpenses.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0))}
                     </div>
                 </div>
             </div>
@@ -93,7 +94,7 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
                                     "text-sm font-black tabular-nums",
                                     exp.type === 'income' ? "text-green-600" : "text-primary"
                                 )}>
-                                    {exp.type === 'income' ? '-' : '+'}৳{exp.amount.toLocaleString()}
+                                    {exp.type === 'income' ? '-' : '+'}৳{formatAmount(exp.amount)}
                                 </span>
                             </div>
                             <Button

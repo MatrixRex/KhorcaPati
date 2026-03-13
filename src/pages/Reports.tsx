@@ -14,6 +14,7 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTranslation } from 'react-i18next';
+import { formatAmount } from '@/lib/utils';
 
 // Removed hardcoded COLORS array
 
@@ -170,7 +171,7 @@ export default function Reports() {
                                 >
                                     <Tooltip
                                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                        formatter={(value) => `৳${Number(value).toFixed(0)}`}
+                                        formatter={(value) => `৳${formatAmount(Number(value))}`}
                                     />
                                 </Sankey>
                             </ResponsiveContainer>
@@ -182,11 +183,11 @@ export default function Reports() {
                 <div className="grid grid-cols-2 gap-4 px-1">
                     <div className="bg-green-500/10 p-4 rounded-2xl border border-green-500/20">
                         <p className="text-[9px] font-bold uppercase text-green-600 tracking-widest mb-1">{t('totalIncome')}</p>
-                        <p className="text-xl font-black text-green-600">৳{totalIncome.toFixed(0)}</p>
+                        <p className="text-xl font-black text-green-600">৳{formatAmount(totalIncome)}</p>
                     </div>
                     <div className="bg-red-500/10 p-4 rounded-2xl border border-red-500/20">
                         <p className="text-[9px] font-bold uppercase text-red-600 tracking-widest mb-1">{t('totalExpense')}</p>
-                        <p className="text-xl font-black text-red-600">৳{totalExpense.toFixed(0)}</p>
+                        <p className="text-xl font-black text-red-600">৳{formatAmount(totalExpense)}</p>
                     </div>
                 </div>
 
@@ -232,7 +233,7 @@ export default function Reports() {
                                             position="right"
                                             fontSize={10}
                                             fontWeight={800}
-                                            formatter={(v: any) => `৳${v.toFixed(0)}`}
+                                            formatter={(v: any) => `৳${formatAmount(Number(v))}`}
                                             className="fill-foreground/70"
                                         />
                                     </Bar>
@@ -272,7 +273,7 @@ export default function Reports() {
                                         fontSize={Math.round(10 * fontScale)}
                                         tickLine={false}
                                         axisLine={false}
-                                        tickFormatter={(v) => `৳${v}`}
+                                        tickFormatter={(v) => `৳${formatAmount(v)}`}
                                         className="font-bold opacity-60"
                                         width={Math.round(65 * fontScale)}
                                     />
@@ -284,14 +285,14 @@ export default function Reports() {
                                                     <div className="bg-background/95 backdrop-blur-md p-3 border border-border rounded-2xl shadow-xl">
                                                         <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
                                                         <p className="text-sm font-black flex items-center gap-2">
-                                                            {t('balance')}: ৳{data.runningBalance.toFixed(0)}
+                                                            {t('balance')}: ৳{formatAmount(data.runningBalance)}
                                                         </p>
                                                         <div className="flex gap-3 mt-1">
                                                             {data.income > 0 && (
-                                                                <p className="text-[9px] font-black text-green-500 uppercase tracking-tighter">+৳{data.income.toFixed(0)}</p>
+                                                                <p className="text-[9px] font-black text-green-500 uppercase tracking-tighter">+৳{formatAmount(data.income)}</p>
                                                             )}
                                                             {data.expense > 0 && (
-                                                                <p className="text-[9px] font-black text-red-500 uppercase tracking-tighter">-৳{data.expense.toFixed(0)}</p>
+                                                                <p className="text-[9px] font-black text-red-500 uppercase tracking-tighter">-৳{formatAmount(data.expense)}</p>
                                                             )}
                                                         </div>
                                                     </div>

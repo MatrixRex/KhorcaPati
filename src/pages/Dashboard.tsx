@@ -15,6 +15,7 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { BalanceEditDrawer } from '@/components/shared/BalanceEditDrawer';
 import { useTranslation } from 'react-i18next';
+import { formatAmount } from '@/lib/utils';
 
 export default function Dashboard() {
     const { t } = useTranslation();
@@ -100,18 +101,18 @@ export default function Dashboard() {
                     <p className="text-white/60 text-xs font-bold uppercase tracking-[0.2em] mb-1 relative z-10">{t('currentBalance')}</p>
                     <div className="flex items-baseline gap-1 mb-4 relative z-10">
                         <span className="text-xl font-bold text-white/40 decoration-white/20 underline decoration-2 underline-offset-4">৳</span>
-                        <h2 className="text-4xl font-black tracking-tight text-white">{totalBalance.toLocaleString()}</h2>
+                        <h2 className="text-4xl font-black tracking-tight text-white">{formatAmount(totalBalance)}</h2>
                     </div>
 
                     <div className="flex items-center gap-4 relative z-10 mt-2 border-t border-white/10 pt-4">
                         <div className="flex flex-col">
                             <span className="text-[10px] font-bold uppercase text-white/40 tracking-wider">{t('income')}</span>
-                            <span className="text-sm font-black text-[#5ed16c]">৳{totalIncome.toFixed(0)}</span>
+                            <span className="text-sm font-black text-[#5ed16c]">৳{formatAmount(totalIncome)}</span>
                         </div>
                         <div className="w-px h-6 bg-white/10" />
                         <div className="flex flex-col">
                             <span className="text-[10px] font-bold uppercase text-white/40 tracking-wider">{t('expenses')}</span>
-                            <span className="text-sm font-black text-[#ff5252]">৳{totalSpent.toFixed(0)}</span>
+                            <span className="text-sm font-black text-[#ff5252]">৳{formatAmount(totalSpent)}</span>
                         </div>
                     </div>
                 </CardContent>

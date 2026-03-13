@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, formatAmount } from '@/lib/utils';
 import { Delete, Check, Equal, X } from 'lucide-react';
 import { useCloseWatcher } from '@/hooks/use-close-watcher';
 import { useTranslation } from 'react-i18next';
@@ -155,7 +155,7 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
                     <div className="w-full overflow-x-auto whitespace-nowrap scrollbar-none text-right">
                         <span className="text-4xl font-black tracking-tight text-primary flex items-center justify-end">
                             <span className="text-xl mr-1 font-bold opacity-40">৳</span>
-                            {liveResult}
+                            {formatAmount(liveResult)}
                         </span>
                     </div>
                 </div>

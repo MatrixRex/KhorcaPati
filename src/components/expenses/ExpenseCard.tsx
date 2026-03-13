@@ -8,6 +8,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Layers, ChevronDown, CornerDownRight } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useCategoryStore } from '@/stores/categoryStore';
+import { formatAmount } from '@/lib/utils';
 
 interface ExpenseCardProps {
     expense: Expense;
@@ -82,7 +83,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                                 "font-black text-base",
                                 expense.type === 'income' ? "text-green-600" : "text-primary"
                             )}>
-                                {expense.type === 'income' ? '+' : ''}৳{expense.amount.toFixed(0)}
+                                {expense.type === 'income' ? '+' : ''}৳{formatAmount(expense.amount)}
                             </span>
                             {expense.parentId && (
                                 <Badge variant="outline" className="text-[10px] font-black uppercase border-primary/20 text-primary px-1 h-3.5 mt-0.5">
@@ -130,7 +131,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                                 "text-xs font-black",
                                 sub.type === 'income' ? "text-green-600" : "text-primary"
                             )}>
-                                ৳{sub.amount.toFixed(0)}
+                                ৳{formatAmount(sub.amount)}
                             </span>
                         </div>
                     ))}

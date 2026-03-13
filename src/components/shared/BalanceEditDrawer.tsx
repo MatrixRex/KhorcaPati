@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Wallet, Check, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatAmount } from '@/lib/utils';
 
 export function BalanceEditDrawer() {
     const { isBalanceEditDrawerOpen, closeBalanceEdit } = useUIStore();
@@ -63,6 +64,7 @@ export function BalanceEditDrawer() {
                 isRecurring: false,
                 recurringInterval: null,
                 recurringNextDue: null,
+                itemAutoTrack: false,
                 tags: [],
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
@@ -140,7 +142,7 @@ export function BalanceEditDrawer() {
                     <div className="space-y-3 pt-4">
                         <div className="flex justify-between items-center px-2">
                             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Current</span>
-                            <span className="text-sm font-black opacity-40 italic">৳{currentTotalBalance.toLocaleString()}</span>
+                            <span className="text-sm font-black opacity-40 italic">৳{formatAmount(currentTotalBalance)}</span>
                         </div>
                         <Button 
                             className="w-full h-14 rounded-3xl font-black text-sm uppercase tracking-widest gap-2 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"

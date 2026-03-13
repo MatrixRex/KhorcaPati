@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { formatRelativeDate } from '@/utils/date';
 import { getBudgetWindow } from '@/utils/budgetWindow';
-import { cn } from '@/lib/utils';
+import { cn, formatAmount } from '@/lib/utils';
 import { differenceInDays, parseISO, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -143,7 +143,7 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{timelineLabel(budget)}</p>
                     </div>
                     <span className="text-xs text-muted-foreground font-black uppercase text-right shrink-0 ml-2 bg-muted px-1.5 py-0.5 rounded-md">
-                        ৳{spent.toFixed(0)} <span className="opacity-40">/</span> ৳{budget.limitAmount.toFixed(0)}
+                        ৳{formatAmount(spent)} <span className="opacity-40">/</span> ৳{formatAmount(budget.limitAmount)}
                     </span>
                 </div>
 
@@ -162,7 +162,7 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
                     </div>
                     {isOverBudget && (
                         <p className="text-xs text-destructive font-black uppercase tracking-tighter shrink-0 ml-2 animate-pulse">
-                            -৳{(spent - budget.limitAmount).toFixed(0)}
+                            -৳{formatAmount(spent - budget.limitAmount)}
                         </p>
                     )}
                 </div>

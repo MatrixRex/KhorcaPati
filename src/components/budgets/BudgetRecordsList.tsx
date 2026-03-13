@@ -3,6 +3,7 @@ import { db, type Budget } from '@/db/schema';
 import { format, parseISO, isWithinInterval } from 'date-fns';
 import { TrendingDown, Receipt } from 'lucide-react';
 import { getBudgetWindow } from '@/utils/budgetWindow';
+import { formatAmount } from '@/lib/utils';
 
 interface BudgetRecordsListProps {
     budget: Budget;
@@ -58,7 +59,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                         <span className="text-[9px] font-black uppercase tracking-widest text-destructive/60">Total Spent</span>
                     </div>
                     <div className="text-xl font-black">
-                        ৳{totalSpent.toLocaleString()}
+                        ৳{formatAmount(totalSpent)}
                     </div>
                 </div>
                 <div className="bg-primary/5 p-4 rounded-3xl border border-primary/10">
@@ -69,7 +70,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                         <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">Remaining</span>
                     </div>
                     <div className="text-xl font-black">
-                        ৳{remaining.toLocaleString()}
+                        ৳{formatAmount(remaining)}
                     </div>
                 </div>
             </div>
@@ -105,7 +106,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                         </div>
                         <div className="text-right">
                             <span className="text-sm font-black tabular-nums text-destructive">
-                                ৳{exp.amount.toLocaleString()}
+                                ৳{formatAmount(exp.amount)}
                             </span>
                         </div>
                     </div>

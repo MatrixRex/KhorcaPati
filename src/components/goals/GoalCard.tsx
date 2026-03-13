@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 
-import { cn } from '@/lib/utils';
+import { cn, formatAmount } from '@/lib/utils';
 
 interface GoalCardProps {
     goal: Goal;
@@ -53,7 +53,7 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
 
                     <div className="flex items-center gap-2 ml-2">
                         <span className="text-xs text-muted-foreground font-black uppercase text-right shrink-0 bg-muted px-1.5 py-0.5 rounded-md">
-                            ৳{goal.currentAmount.toLocaleString()} <span className="opacity-40">/</span> ৳{goal.targetAmount.toLocaleString()}
+                            ৳{formatAmount(goal.currentAmount)} <span className="opacity-40">/</span> ৳{formatAmount(goal.targetAmount)}
                         </span>
                         <Button
                             size="icon"

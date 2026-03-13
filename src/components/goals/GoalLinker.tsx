@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Goal, type Expense } from '@/db/schema';
 import { useGoalStore } from '@/stores/goalStore';
-import { cn } from '@/lib/utils';
+import { cn, formatAmount } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
 import { Check, Search, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -117,7 +117,7 @@ export function GoalLinker({ goal, onSuccess }: GoalLinkerProps) {
                                         "text-base font-black tabular-nums",
                                         exp.type === 'income' ? "text-green-600" : "text-primary"
                                     )}>
-                                        {exp.type === 'income' ? '-' : '+'}৳{exp.amount.toLocaleString()}
+                                        {exp.type === 'income' ? '-' : '+'}৳{formatAmount(exp.amount)}
                                     </span>
                                     <div className="text-[9px] font-bold text-muted-foreground/60 uppercase">
                                         {exp.type === 'income' ? 'Withdrawal' : 'Deposit'}

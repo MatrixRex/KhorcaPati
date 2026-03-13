@@ -7,12 +7,15 @@ import { cn } from '@/lib/utils';
 import { formatRelativeDate } from '@/utils/date';
 import { useCategoryStore } from '@/stores/categoryStore';
 
+import { useTranslation } from 'react-i18next';
+
 interface RecurringPaymentCardProps {
     payment: RecurringPayment;
     onClick?: () => void;
 }
 
 export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardProps) {
+    const { t } = useTranslation();
     const nextDate = parseISO(payment.nextDueDate);
     const now = new Date();
     const diffInDays = differenceInCalendarDays(nextDate, now);
@@ -46,21 +49,21 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
                             {payment.title}
                         </h3>
                         <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 font-bold uppercase tracking-wider flex items-center">
-                            <Clock className="w-2 h-2 mr-1" /> {payment.interval}
+                            <Clock className="w-2 h-2 mr-1" /> {t(payment.interval.toLowerCase())}
                         </Badge>
                         {isUpcoming && !isOverdue && (
                             <span className="text-[9px] font-black uppercase text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
-                                In {diffInDays} {diffInDays === 1 ? 'day' : 'days'}
+                                {t('inDaysShort', { count: diffInDays })}
                             </span>
                         )}
                         {isOverdue && (
                             <Badge variant="destructive" className="text-[9px] px-1.5 py-0 h-4 uppercase font-black tracking-widest animate-pulse">
-                                Overdue
+                                {t('overdue')}
                             </Badge>
                         )}
                         {!isOverdue && !isUpcoming && (
                             <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 uppercase font-bold tracking-tight bg-green-100 text-green-700 hover:bg-green-100">
-                                Paid / Scheduled
+                                {t('paidScheduled')}
                             </Badge>
                         )}
                     </div>

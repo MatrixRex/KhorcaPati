@@ -5,9 +5,11 @@ import { useUIStore } from '@/stores/uiStore';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Plus, Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function GoalsListDrawer() {
     const { isGoalsListOpen, closeGoalsList, openAddGoal, openEditGoal } = useUIStore();
+    const { t } = useTranslation();
 
     const goals = useLiveQuery(async () => {
         return await db.goals.orderBy('createdAt').reverse().toArray();
@@ -21,9 +23,9 @@ export function GoalsListDrawer() {
                     <SheetHeader className="px-0 py-4 shrink-0">
                         <div className="flex items-center justify-between">
                             <div>
-                                <SheetTitle className="text-2xl font-black tracking-tight">Savings Goals</SheetTitle>
+                                <SheetTitle className="text-2xl font-black tracking-tight">{t('savingsGoals')}</SheetTitle>
                                 <SheetDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
-                                    {goals?.length || 0} Total Goals
+                                    {goals?.length || 0} {t('totalGoals')}
                                 </SheetDescription>
                             </div>
                             <Button 
@@ -43,11 +45,11 @@ export function GoalsListDrawer() {
                                 <Info className="w-8 h-8 text-muted-foreground/40" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg mb-1">No Goals Yet</h3>
-                                <p className="text-sm text-muted-foreground max-w-[200px]">Save for something special by creating a new goal.</p>
+                                <h3 className="font-bold text-lg mb-1">{t('noGoalsYet')}</h3>
+                                <p className="text-sm text-muted-foreground max-w-[200px]">{t('goalSetupDescription')}</p>
                             </div>
                             <Button onClick={openAddGoal} className="mt-4 rounded-full px-8">
-                                Add First Goal
+                                {t('addFirstGoal')}
                             </Button>
                         </div>
                     ) : (

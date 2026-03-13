@@ -9,7 +9,10 @@ interface BudgetRecordsListProps {
     budget: Budget;
 }
 
+import { useTranslation } from 'react-i18next';
+
 export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
+    const { t } = useTranslation();
     const window = getBudgetWindow(budget);
     
     const expenses = useLiveQuery(() => 
@@ -42,9 +45,9 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                 <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
                     <Receipt className="w-8 h-8 text-muted-foreground/20" />
                 </div>
-                <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground">No records yet</h4>
+                <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground">{t('noRecords')}</h4>
                 <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold uppercase">
-                    Records in {budget.category} for this period will appear here.
+                    {t('recordsInPeriod', { category: budget.category })}
                 </p>
             </div>
         );
@@ -56,7 +59,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                 <div className="bg-destructive/5 p-4 rounded-3xl border border-destructive/10">
                     <div className="flex items-center gap-2 mb-1">
                         <TrendingDown className="w-3 h-3 text-destructive" />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-destructive/60">Total Spent</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-destructive/60">{t('spent')}</span>
                     </div>
                     <div className="text-xl font-black">
                         ৳{formatAmount(totalSpent)}
@@ -67,7 +70,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                         <div className="w-3 h-3 rounded-full bg-primary/20 flex items-center justify-center">
                             <div className="w-1 h-1 rounded-full bg-primary" />
                         </div>
-                        <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">Remaining</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">{t('remaining')}</span>
                     </div>
                     <div className="text-xl font-black">
                         ৳{formatAmount(remaining)}
@@ -76,7 +79,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
             </div>
 
             <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4 ml-1">
-                Records for {budget.category}
+                {t('recordsForCategory', { category: budget.category })}
             </div>
 
             <div className="space-y-2">
@@ -98,7 +101,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                                     {exp.isNested && (
                                         <>
                                             <span>•</span>
-                                            <span className="text-primary/60">Nested Record</span>
+                                            <span className="text-primary/60">{t('nestedRecord')}</span>
                                         </>
                                     )}
                                 </div>

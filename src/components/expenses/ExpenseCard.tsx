@@ -15,7 +15,10 @@ interface ExpenseCardProps {
     onClick?: () => void;
 }
 
+import { useTranslation } from 'react-i18next';
+
 export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
+    const { t } = useTranslation();
     const [isExpanded, setIsExpanded] = useState(false);
     const { openEditExpense } = useUIStore();
     const { categories } = useCategoryStore();
@@ -57,11 +60,11 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                     <div className="flex flex-col flex-1 overflow-hidden pr-2">
                         <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-bold text-sm tracking-tight truncate group-hover:text-primary transition-colors capitalize">
-                                {expense.note || expense.type}
+                                {expense.note || t(expense.type)}
                             </h3>
                             {expense.isRecurring && (
                                 <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4 font-bold uppercase tracking-wider">
-                                    ↺ {expense.recurringInterval}
+                                    ↺ {t(expense.recurringInterval?.toLowerCase() || '')}
                                 </Badge>
                             )}
                             {expense.isNested && (
@@ -87,7 +90,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                             </span>
                             {expense.parentId && (
                                 <Badge variant="outline" className="text-[10px] font-black uppercase border-primary/20 text-primary px-1 h-3.5 mt-0.5">
-                                    Sub
+                                    {t('sub')}
                                 </Badge>
                             )}
                         </div>
@@ -122,7 +125,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                                 <CornerDownRight className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
                                 <div className="flex flex-col overflow-hidden">
                                     <span className="text-xs font-bold truncate capitalize group-hover/sub:text-primary transition-colors">
-                                        {sub.note || sub.type}
+                                        {sub.note || t(sub.type)}
                                     </span>
                                     <span className="text-[10px] text-muted-foreground uppercase">{sub.category}</span>
                                 </div>
@@ -137,7 +140,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                     ))}
                     {subExpenses.length === 0 && (
                         <div className="ml-7 p-3 text-[10px] text-muted-foreground italic border border-dashed rounded-xl border-border/40 text-center">
-                            Empty collection
+                            {t('emptyCollection')}
                         </div>
                     )}
                 </div>

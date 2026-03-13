@@ -42,6 +42,8 @@ const recurringSchema = z.object({
     note: z.string().optional(),
 });
 
+import { useTranslation } from 'react-i18next';
+
 type RecurringFormValues = z.infer<typeof recurringSchema>;
 
 interface RecurringPaymentFormProps {
@@ -60,6 +62,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
     const addRecurringPayment = useRecurringPaymentStore((state) => state.addRecurringPayment);
     const updateRecurringPayment = useRecurringPaymentStore((state) => state.updateRecurringPayment);
     const deleteRecurringPayment = useRecurringPaymentStore((state) => state.deleteRecurringPayment);
+    const { t } = useTranslation();
 
     const form = useForm<RecurringFormValues>({
         resolver: zodResolver(recurringSchema),
@@ -100,6 +103,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                 recurringNextDue: null,
                 parentId: null,
                 isNested: false,
+                itemAutoTrack: false,
                 tags: [],
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -215,7 +219,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                     : "text-muted-foreground hover:text-foreground"
                             )}
                         >
-                            Expense
+                            {t('expenseLabel')}
                         </button>
                         <button
                             type="button"
@@ -230,20 +234,20 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                     : "text-muted-foreground hover:text-foreground"
                             )}
                         >
-                            Income
+                            {t('incomeLabel')}
                         </button>
                     </div>
                 </div>
                 <div className="flex items-center">
                     <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                        {saveStatus === 'saving' && 'Saving...'}
-                        {saveStatus === 'saved' && 'All changes saved'}
-                        {saveStatus === 'error' && <span className="text-destructive">Error saving</span>}
+                        {saveStatus === 'saving' && t('saving')}
+                        {saveStatus === 'saved' && t('allChangesSaved')}
+                        {saveStatus === 'error' && <span className="text-destructive">{t('errorSaving')}</span>}
                     </div>
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="title">Title</Label>
+                    <Label htmlFor="title">{t('recurringTitle')}</Label>
                     <Input
                         id="title"
                         placeholder="Electricity Bill, Rent, etc."
@@ -252,13 +256,13 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                         })}
                     />
                     {form.formState.errors.title && (
-                        <p className="text-destructive text-sm">{form.formState.errors.title.message}</p>
+                        <p className="text-destructive text-sm">{t('titleRequired')}</p>
                     )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2 relative">
-                        <Label htmlFor="amount">Amount</Label>
+                        <Label htmlFor="amount">{t('amount')}</Label>
                         <div className="relative">
                             <Input
                                 id="amount"
@@ -272,13 +276,13 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                             <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                         </div>
                         {form.formState.errors.amount && (
-                            <p className="text-destructive text-sm">{form.formState.errors.amount.message}</p>
+                            <p className="text-destructive text-sm">{t('amountRequired')}</p>
                         )}
 
                         {showNumberPad && (
                             <NumberPad
                                 value={String(form.getValues('amount'))}
-                                label={form.watch('type') === 'expense' ? 'Recurring Expense' : 'Recurring Income'}
+                                label={form.watch('type') === 'expense' ? t('recurring') + ' ' + t('expenseLabel') : t('recurring') + ' ' + t('incomeLabel')}
                                 onChange={(val) => {
                                     const num = parseFloat(val);
                                     if (!isNaN(num)) {
@@ -294,7 +298,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                         )}
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="startDate">Start Date</Label>
+                        <Label htmlFor="startDate">{t('startDate')}</Label>
                         <Controller
                             control={form.control}
                             name="startDate"
@@ -316,7 +320,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <Label htmlFor="category">Category</Label>
+                        <Label htmlFor="category">{t('category')}</Label>
                         <CategoryComboBox
                             value={form.watch('category')}
                             onChange={(val: string) => {
@@ -326,7 +330,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="interval">Interval</Label>
+                        <Label htmlFor="interval">{t('interval')}</Label>
                         <Select
                             value={form.watch('interval')}
                             onValueChange={(val: any) => {
@@ -335,21 +339,21 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                             }}
                         >
                             <SelectTrigger>
-                                <SelectValue placeholder="Select interval" />
+                                <SelectValue placeholder={t('selectInterval')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="one-time">One-time</SelectItem>
-                                <SelectItem value="daily">Daily</SelectItem>
-                                <SelectItem value="weekly">Weekly</SelectItem>
-                                <SelectItem value="monthly">Monthly</SelectItem>
-                                <SelectItem value="yearly">Yearly</SelectItem>
+                                <SelectItem value="one-time">{t('oneTime')}</SelectItem>
+                                <SelectItem value="daily">{t('daily')}</SelectItem>
+                                <SelectItem value="weekly">{t('weekly')}</SelectItem>
+                                <SelectItem value="monthly">{t('monthly')}</SelectItem>
+                                <SelectItem value="yearly">{t('yearly')}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="note">Note (Optional)</Label>
+                    <Label htmlFor="note">{t('note')} ({t('optional')})</Label>
                     <Input
                         id="note"
                         placeholder="Any additional details"
@@ -371,7 +375,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 onClick={handleConfirm}
                                 className="w-full bg-green-600 hover:bg-green-700 text-white"
                             >
-                                Confirm Payment
+                                {t('confirmPayment')}
                             </Button>
                             <Button
                                 type="button"
@@ -379,7 +383,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 onClick={handleSkip}
                                 className="w-full"
                             >
-                                Skip / Next
+                                {t('skipNext')}
                             </Button>
                         </div>
                     )}
@@ -390,12 +394,12 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                             onClick={async () => {
                                 const values = form.getValues();
                                 if (values.amount <= 0) {
-                                    form.setError('amount', { message: 'Amount is required' });
+                                    form.setError('amount', { message: t('amountRequired') });
                                     setShowNumberPad(true);
                                     return;
                                 }
                                 if (!values.title.trim()) {
-                                    form.setError('title', { message: 'Title is required' });
+                                    form.setError('title', { message: t('titleRequired') });
                                     return;
                                 }
 
@@ -405,7 +409,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                             }}
                             className="w-full h-11 rounded-xl font-bold"
                         >
-                            Done
+                            {t('done')}
                         </Button>
                     )}
                     {(currentId || initialData) && (
@@ -415,7 +419,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                             onClick={() => setShowDeleteDialog(true)}
                             className="w-full"
                         >
-                            Delete Recurring Payment
+                            {t('deleteRecurring')}
                         </Button>
                     )}
                 </div>
@@ -424,15 +428,15 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent className="w-[90%] rounded-xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('areYouSure')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will permanently delete this recurring payment schedule.
+                            {t('deleteBudgetDescription').replace('{{category}}', form.getValues('title'))}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-row gap-2 mt-4">
-                        <AlertDialogCancel className="flex-1 mt-0">Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className="flex-1 mt-0">{t('cancel')}</AlertDialogCancel>
                         <AlertDialogAction onClick={handleDelete} className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                            Delete
+                            {t('delete')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

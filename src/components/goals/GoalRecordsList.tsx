@@ -11,7 +11,10 @@ interface GoalRecordsListProps {
     goal: Goal;
 }
 
+import { useTranslation } from 'react-i18next';
+
 export function GoalRecordsList({ goal }: GoalRecordsListProps) {
+    const { t } = useTranslation();
     const linkExpenseToGoal = useGoalStore((state) => state.linkExpenseToGoal);
 
     const linkedExpenses = useLiveQuery(() => 
@@ -29,9 +32,9 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
                 <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
                     <TrendingUp className="w-8 h-8 text-muted-foreground/20" />
                 </div>
-                <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground">No records yet</h4>
+                <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground">{t('noRecords')}</h4>
                 <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold uppercase">
-                    Tap the + button on the goal card to link your savings records.
+                    {t('goalLinkDescription')}
                 </p>
             </div>
         );
@@ -43,7 +46,7 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
                 <div className="bg-primary/5 p-4 rounded-3xl border border-primary/10">
                     <div className="flex items-center gap-2 mb-1">
                         <TrendingUp className="w-3 h-3 text-primary" />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">Total Deposits</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">{t('totalDeposits')}</span>
                     </div>
                     <div className="text-xl font-black">
                         ৳{formatAmount(linkedExpenses.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0))}
@@ -52,7 +55,7 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
                 <div className="bg-green-600/5 p-4 rounded-3xl border border-green-600/10">
                     <div className="flex items-center gap-2 mb-1">
                         <TrendingDown className="w-3 h-3 text-green-600" />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-green-600/60">Total Withdrawals</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-green-600/60">{t('totalWithdrawals')}</span>
                     </div>
                     <div className="text-xl font-black">
                         ৳{formatAmount(linkedExpenses.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0))}
@@ -61,7 +64,7 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
             </div>
 
             <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4 ml-1">
-                Recent Contributions
+                {t('recentContributions')}
             </div>
 
             <div className="space-y-2">

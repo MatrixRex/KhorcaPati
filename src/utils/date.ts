@@ -7,6 +7,7 @@ import {
     parseISO,
     isValid
 } from 'date-fns';
+import i18next from 'i18next';
 
 /**
  * Returns a human-readable string for a date (Today, Tomorrow, Yesterday, or formatted date).
@@ -16,11 +17,11 @@ import {
 export function formatRelativeDate(dateStr: string | Date, includeYear = false): string {
     const date = typeof dateStr === 'string' ? parseISO(dateStr) : dateStr;
 
-    if (!isValid(date)) return 'Invalid Date';
+    if (!isValid(date)) return i18next.t('invalidDate');
 
-    if (isToday(date)) return 'Today';
-    if (isTomorrow(date)) return 'Tomorrow';
-    if (isYesterday(date)) return 'Yesterday';
+    if (isToday(date)) return i18next.t('today');
+    if (isTomorrow(date)) return i18next.t('tomorrow');
+    if (isYesterday(date)) return i18next.t('yesterday');
 
     const fallbackFormat = includeYear ? 'MMM d, yyyy' : 'MMM d';
     return format(date, fallbackFormat);
@@ -35,10 +36,10 @@ export function getRelativeTimeLabel(dateStr: string | Date): string {
 
     const diff = differenceInCalendarDays(date, now);
 
-    if (diff === 0) return 'Due today';
-    if (diff === 1) return 'Tomorrow';
-    if (diff === -1) return 'Yesterday';
+    if (diff === 0) return i18next.t('dueToday');
+    if (diff === 1) return i18next.t('tomorrow');
+    if (diff === -1) return i18next.t('yesterday');
 
-    if (diff > 0) return `in ${diff} days`;
-    return `${Math.abs(diff)} days ago`;
+    if (diff > 0) return i18next.t('inDays', { count: diff });
+    return i18next.t('daysAgo', { count: Math.abs(diff) });
 }

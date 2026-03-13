@@ -5,9 +5,11 @@ import { useUIStore } from '@/stores/uiStore';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Plus, Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function RecurringPaymentsListDrawer() {
     const { isRecurringPaymentsListOpen, closeRecurringPaymentsList, openAddRecurringPayment, openEditRecurringPayment } = useUIStore();
+    const { t } = useTranslation();
 
     const recurringPayments = useLiveQuery(async () => {
         return await db.recurringPayments.orderBy('nextDueDate').toArray();
@@ -21,9 +23,9 @@ export function RecurringPaymentsListDrawer() {
                     <SheetHeader className="px-0 py-4 shrink-0">
                         <div className="flex items-center justify-between">
                             <div>
-                                <SheetTitle className="text-2xl font-black tracking-tight">Recurring</SheetTitle>
+                                <SheetTitle className="text-2xl font-black tracking-tight">{t('recurring')}</SheetTitle>
                                 <SheetDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
-                                    {recurringPayments?.length || 0} Total Payments
+                                    {recurringPayments?.length || 0} {t('totalPayments')}
                                 </SheetDescription>
                             </div>
                             <Button 
@@ -43,11 +45,11 @@ export function RecurringPaymentsListDrawer() {
                                 <Info className="w-8 h-8 text-muted-foreground/40" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg mb-1">No Recurring Payments</h3>
-                                <p className="text-sm text-muted-foreground max-w-[200px]">Set up your monthly bills, subscriptions, or income.</p>
+                                <h3 className="font-bold text-lg mb-1">{t('noRecurringPayments')}</h3>
+                                <p className="text-sm text-muted-foreground max-w-[200px]">{t('recurringSetupDescription')}</p>
                             </div>
                             <Button onClick={openAddRecurringPayment} className="mt-4 rounded-full px-8">
-                                Get Started
+                                {t('getStarted')}
                             </Button>
                         </div>
                     ) : (

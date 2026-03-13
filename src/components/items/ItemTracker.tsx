@@ -90,15 +90,15 @@ export function ItemTracker() {
     }, [startDate, endDate]);
 
     if (!items) {
-        return <div className="p-4 text-center text-muted-foreground">Loading items...</div>;
+        return <div className="p-4 text-center text-muted-foreground">{t('loadingItems')}</div>;
     }
 
     if (items.length === 0) {
         return (
             <div className="p-8 text-center flex flex-col items-center justify-center h-[50vh]">
                 <div className="text-4xl mb-4 opacity-50">📦</div>
-                <h3 className="font-semibold text-lg">Inventory empty</h3>
-                <p className="text-muted-foreground text-sm">Add items using the smart input bar above.</p>
+                <h3 className="font-semibold text-lg">{t('inventoryEmpty')}</h3>
+                <p className="text-muted-foreground text-sm">{t('inventoryEmptyDescription')}</p>
             </div>
         );
     }
@@ -192,7 +192,7 @@ export function ItemTracker() {
                                     {group.name}
                                 </h3>
                                 <p className="text-[11px] text-muted-foreground font-medium">
-                                    {group.records.length} {group.records.length === 1 ? 'record' : 'records'}
+                                    {group.records.length} {group.records.length === 1 ? t('record') : t('records_plural')}
                                 </p>
                             </div>
                         </div>
@@ -233,10 +233,10 @@ export function ItemTracker() {
                                             </div>
                                             <div>
                                                 <SheetTitle className="text-xl font-black capitalize leading-tight">
-                                                    {groupedItems[selectedInventoryItem.toLowerCase().trim()].name}
+                                                {groupedItems[selectedInventoryItem.toLowerCase().trim()].name}
                                                 </SheetTitle>
                                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                                                    Item Details
+                                                    {t('itemDetails')}
                                                 </p>
                                             </div>
                                         </div>
@@ -252,7 +252,7 @@ export function ItemTracker() {
 
                                 <div className="flex items-center justify-between gap-4 bg-muted/30 p-4 rounded-2xl border border-border/50">
                                     <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.1em]">Total Stock</span>
+                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.1em]">{t('totalStock')}</span>
                                         <div className="flex items-baseline gap-1.5 mt-0.5">
                                             <span className="text-2xl font-black text-primary leading-none">
                                                 {groupedItems[selectedInventoryItem.toLowerCase().trim()].totalQty}
@@ -267,7 +267,7 @@ export function ItemTracker() {
                                             <History size={18} className="text-muted-foreground/60" />
                                         </div>
                                         <span className="text-[10px] font-medium text-muted-foreground mt-1">
-                                            {groupedItems[selectedInventoryItem.toLowerCase().trim()].records.length} records
+                                            {groupedItems[selectedInventoryItem.toLowerCase().trim()].records.length} {groupedItems[selectedInventoryItem.toLowerCase().trim()].records.length === 1 ? t('record') : t('records_plural')}
                                         </span>
                                     </div>
                                 </div>
@@ -276,7 +276,7 @@ export function ItemTracker() {
                             {/* Entry History List */}
                             <div className="flex-1 overflow-auto px-6 py-6 flex flex-col gap-3 pb-24">
                                 <div className="flex items-center justify-between mb-1">
-                                    <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Transaction History</h4>
+                                    <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">{t('transactionHistory')}</h4>
                                     <div className="h-px bg-border flex-1 ml-4" />
                                 </div>
 

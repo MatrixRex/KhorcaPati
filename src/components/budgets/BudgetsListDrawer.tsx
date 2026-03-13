@@ -5,9 +5,11 @@ import { useUIStore } from '@/stores/uiStore';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Plus, Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function BudgetsListDrawer() {
     const { isBudgetsListOpen, closeBudgetsList, openAddBudget, openEditBudget } = useUIStore();
+    const { t } = useTranslation();
 
     const budgets = useLiveQuery(async () => {
         return await db.budgets.toArray();
@@ -21,9 +23,9 @@ export function BudgetsListDrawer() {
                     <SheetHeader className="px-0 py-4 shrink-0">
                         <div className="flex items-center justify-between">
                             <div>
-                                <SheetTitle className="text-2xl font-black tracking-tight">Budgets</SheetTitle>
+                                <SheetTitle className="text-2xl font-black tracking-tight">{t('budgets')}</SheetTitle>
                                 <SheetDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
-                                    {budgets?.length || 0} Categories Tracked
+                                    {budgets?.length || 0} {t('categoriesTracked')}
                                 </SheetDescription>
                             </div>
                             <Button 
@@ -43,11 +45,11 @@ export function BudgetsListDrawer() {
                                 <Info className="w-8 h-8 text-muted-foreground/40" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-lg mb-1">No Budgets Set</h3>
-                                <p className="text-sm text-muted-foreground max-w-[200px]">Set spending limits for different categories to stay on track.</p>
+                                <h3 className="font-bold text-lg mb-1">{t('noBudgetsSet')}</h3>
+                                <p className="text-sm text-muted-foreground max-w-[200px]">{t('budgetSetupDescription')}</p>
                             </div>
                             <Button onClick={openAddBudget} className="mt-4 rounded-full px-8">
-                                Create Budget
+                                {t('createBudget')}
                             </Button>
                         </div>
                     ) : (

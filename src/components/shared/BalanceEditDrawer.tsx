@@ -18,11 +18,13 @@ import { Switch } from '@/components/ui/switch';
 import { Wallet, Check, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatAmount } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 export function BalanceEditDrawer() {
     const { isBalanceEditDrawerOpen, closeBalanceEdit } = useUIStore();
     const { initialBalance, setInitialBalance } = useSettingsStore();
     const { addExpense } = useExpenseStore();
+    const { t } = useTranslation();
 
     const allExpenses = useLiveQuery(() => db.expenses.filter(e => !e.parentId).toArray()) || [];
     
@@ -58,9 +60,9 @@ export function BalanceEditDrawer() {
                 isNested: false,
                 amount: Math.abs(diff),
                 type: diff > 0 ? 'income' : 'expense',
-                category: 'Adjustment',
+                category: t('adjustment'),
                 date: format(new Date(), 'yyyy-MM-dd'),
-                note: 'Balance manual adjustment',
+                note: t('balanceManualAdjustment'),
                 isRecurring: false,
                 recurringInterval: null,
                 recurringNextDue: null,
@@ -88,9 +90,9 @@ export function BalanceEditDrawer() {
                             <Wallet className="w-6 h-6" />
                         </div>
                         <div>
-                            <SheetTitle className="text-2xl font-black tracking-tight text-left">Edit Balance</SheetTitle>
+                            <SheetTitle className="text-2xl font-black tracking-tight text-left">{t('editBalance')}</SheetTitle>
                             <SheetDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground/60 text-left">
-                                Set your current cash in hand
+                                {t('balanceDrawerDescription')}
                             </SheetDescription>
                         </div>
                     </div>
@@ -99,7 +101,7 @@ export function BalanceEditDrawer() {
                 <div className="flex-1 overflow-y-auto px-6 pb-10 space-y-8">
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Desired Balance</Label>
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">{t('desiredBalance')}</Label>
                             <div className="relative">
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-black text-muted-foreground/40 italic">৳</span>
                                 <Input 
@@ -115,8 +117,8 @@ export function BalanceEditDrawer() {
 
                         <div className="bg-primary/5 border border-primary/10 rounded-3xl p-4 flex items-center justify-between">
                             <div className="flex flex-col">
-                                <span className="text-xs font-bold text-primary">Create adjustment record</span>
-                                <span className="text-[10px] text-primary/60 font-medium">Add an income/expense entry for the difference</span>
+                                <span className="text-xs font-bold text-primary">{t('createAdjustmentRecord')}</span>
+                                <span className="text-[10px] text-primary/60 font-medium">{t('adjustmentDescription')}</span>
                             </div>
                             <Switch 
                                 checked={createRecord} 
@@ -129,10 +131,9 @@ export function BalanceEditDrawer() {
                             <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-amber-600">
                                 <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
                                 <div className="space-y-1">
-                                    <p className="text-xs font-bold">Heads up!</p>
+                                    <p className="text-xs font-bold">{t('headsUp')}</p>
                                     <p className="text-[10px] font-semibold opacity-80 leading-relaxed">
-                                        Updating without a record will change your 'Starting Balance' hidden in settings. 
-                                        This won't show up in your recent activity or reports as a transaction.
+                                        {t('balanceUpdateWarning')}
                                     </p>
                                 </div>
                             </div>
@@ -141,7 +142,7 @@ export function BalanceEditDrawer() {
 
                     <div className="space-y-3 pt-4">
                         <div className="flex justify-between items-center px-2">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Current</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">{t('current')}</span>
                             <span className="text-sm font-black opacity-40 italic">৳{formatAmount(currentTotalBalance)}</span>
                         </div>
                         <Button 
@@ -149,14 +150,14 @@ export function BalanceEditDrawer() {
                             onClick={handleSave}
                         >
                             <Check className="w-5 h-5 stroke-[3]" />
-                            Update Balance
+                            {t('updateBalance')}
                         </Button>
                         <Button 
                             variant="ghost"
                             className="w-full h-12 rounded-2xl font-bold text-xs uppercase tracking-widest text-muted-foreground"
                             onClick={closeBalanceEdit}
                         >
-                            Cancel
+                            {t('cancel')}
                         </Button>
                     </div>
                 </div>

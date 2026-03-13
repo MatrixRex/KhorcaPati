@@ -9,13 +9,16 @@ import {
 } from '@/components/ui/popover';
 import { useFilterStore, type InventorySortBy } from '@/stores/filterStore';
 
+import { useTranslation } from 'react-i18next';
+
 export function InventorySort() {
     const { inventorySortBy, setInventorySortBy } = useFilterStore();
     const [isOpen, setIsOpen] = React.useState(false);
+    const { t } = useTranslation();
 
     const labels: Record<InventorySortBy, string> = {
-        alphabet: 'Alphabetical',
-        count: 'Total Count'
+        alphabet: t('alphabetical'),
+        count: t('totalCount')
     };
 
     const icons: Record<InventorySortBy, React.ReactNode> = {
@@ -39,7 +42,7 @@ export function InventorySort() {
             <PopoverContent className="w-48 p-0 overflow-hidden" align="end">
                 <div className="flex flex-col p-2 space-y-1">
                     <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        Sort By
+                        {t('sortBy')}
                     </div>
                     {(['alphabet', 'count'] as InventorySortBy[]).map((option) => (
                         <Button

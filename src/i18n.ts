@@ -175,7 +175,14 @@ const resources = {
       "export": "Export",
       "import": "Import",
       "importSuccess": "Data imported successfully! The app will now reload.",
-      "importError": "Failed to import data. Please make sure the file is a valid backup."
+      "importError": "Failed to import data. Please make sure the file is a valid backup.",
+      "itemsLabel": "Items",
+      "notesLabel": "Note",
+      "deleteItem": "Delete Item",
+      "deleteItemConfirm": "This will stop tracking this item as an inventory entry and keep it as a note in the transaction.",
+      "deleteWholeItem": "Delete Whole Item",
+      "deleteWholeItemConfirm": "This will stop tracking all record entries under this item in all history and convert them to notes.",
+      "alsoAffects": "Also stop tracking these items:"
     }
   },
   bn: {
@@ -350,7 +357,14 @@ const resources = {
       "export": "রপ্তানি",
       "import": "আমদানি",
       "importSuccess": "তথ্য সফলভাবে আপলোড করা হয়েছে! অ্যাপটি এখন রিলোড হবে।",
-      "importError": "তথ্য আপলোড করতে ব্যর্থ হয়েছে। অনুগ্রহ করে নিশ্চিত করুন যে ফাইলটি সঠিক।"
+      "importError": "তথ্য আপলোড করতে ব্যর্থ হয়েছে। অনুগ্রহ করে নিশ্চিত করুন যে ফাইলটি সঠিক।",
+      "itemsLabel": "পণ্য",
+      "notesLabel": "নোট",
+      "deleteItem": "পণ্য মুছুন",
+      "deleteItemConfirm": "এটি পণ্যটিকে ইনভেন্টরি থেকে সরিয়ে দেবে এবং লেনদেনে শুধুমাত্র নোট হিসেবে রাখবে।",
+      "deleteWholeItem": "সম্পূর্ণ পণ্য মুছুন",
+      "deleteWholeItemConfirm": "এটি এই পণ্যের সকল তথ্য ইনভেন্টরি থেকে সরিয়ে দেবে এবং লেনদেনে শুধুমাত্র নোট হিসেবে রাখবে।",
+      "alsoAffects": "এই পণ্যগুলোর ট্র্যাকও বন্ধ হয়ে যাবে:"
     }
   }
 };

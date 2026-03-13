@@ -14,6 +14,7 @@ export interface Expense {
     isRecurring: boolean;
     recurringInterval: 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
     recurringNextDue: string | null;
+    itemAutoTrack: boolean;       // new: toggle to auto-track items from note
     tags: string[];
     createdAt: string;
     updatedAt: string;
@@ -192,5 +193,17 @@ db.version(10).stores({
     // We just won't include it in version 10 schema.
 });
 
-export { db };
+db.version(11).stores({
+    expenses: '++id, parentId, isNested, goalId, date, category, isRecurring, type, itemAutoTrack',
+    items: '++id, expenseId, name, date',
+    budgets: '++id, category, timelineType, recurringInterval',
+    goals: '++id, createdAt',
+    categories: '++id, &name, isDefault',
+    recurringPayments: '++id, title, nextDueDate, category, type'
+}).upgrade((tx) => {
+    return tx.table('expenses').toCollection().modify((expense: Expense) => {
+        if (expense.itemAutoTrack === undefined) expense.itemAutoTrack = true;
+    });
+});
 
+export { db };

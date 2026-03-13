@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import { BottomNav } from '@/components/shared/BottomNav';
 import { GlobalUI } from '@/components/shared/GlobalUI';
 import { useBudgetNotifications } from '@/hooks/useBudgetNotifications';
@@ -49,10 +50,17 @@ function App() {
     }
   }, []);
 
+  const isAnyDrawerOpen = useUIStore((state) => state.isInEditingMode());
+  const isInventoryItemOpen = useUIStore((state) => !!state.selectedInventoryItem);
+  const shouldBlur = isAnyDrawerOpen || isInventoryItemOpen;
+
   return (
     <HashRouter>
       <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
-        <main className="flex-1 w-full max-w-md mx-auto relative overflow-hidden">
+        <main className={cn(
+          "flex-1 w-full max-w-md mx-auto relative overflow-hidden transition-all duration-300",
+          shouldBlur ? "blur-[2px] scale-[0.98] opacity-60" : "blur-0 scale-100 opacity-100"
+        )}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/expenses" element={<Expenses />} />

@@ -43,6 +43,7 @@ const expenseSchema = z.object({
     note: z.string().optional(),
     isRecurring: z.boolean(),
     isNested: z.boolean(),
+    itemAutoTrack: z.boolean(),
     recurringInterval: z.enum(['daily', 'weekly', 'monthly', 'yearly']).nullable(),
 });
 
@@ -102,6 +103,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             note: initialData?.note || '',
             isRecurring: initialData?.isRecurring || false,
             isNested: initialData?.isNested || false,
+            itemAutoTrack: initialData?.itemAutoTrack ?? true,
             recurringInterval: initialData?.recurringInterval || null,
         },
     });
@@ -221,6 +223,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                 note: data.note || '',
                 parentId: finalParentId,
                 isNested: data.isNested,
+                itemAutoTrack: data.itemAutoTrack,
                 recurringNextDue: null,
                 tags: initialData?.tags || [],
                 createdAt: initialData?.createdAt || new Date().toISOString(),
@@ -231,12 +234,16 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             if (currentId) {
                 await updateExpense(currentId, payload);
                 await db.items.where('expenseId').equals(currentId).delete();
-                await processItems(currentId, data.note || '', data.date);
+                if (data.itemAutoTrack) {
+                    await processItems(currentId, data.note || '', data.date);
+                }
             } else {
                 const newId = await addExpense(payload);
                 savedId = newId;
                 setCurrentId(newId);
-                await processItems(newId, data.note || '', data.date);
+                if (data.itemAutoTrack) {
+                    await processItems(newId, data.note || '', data.date);
+                }
             }
             return savedId;
         } catch (err) {
@@ -422,7 +429,39 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="note" className="text-[11px] font-bold uppercase">{isNested ? t('collectionTitle') : t('noteItems')}</Label>
+                    <div className="flex items-center justify-between">
+                        {!isNested && (
+                            <div className="flex bg-muted p-0.5 rounded-lg border border-border/50">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        form.setValue('itemAutoTrack', true, { shouldDirty: true });
+                                        form.handleSubmit(performSave)();
+                                    }}
+                                    className={cn(
+                                        "px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-md transition-all",
+                                        form.watch('itemAutoTrack') ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
+                                    )}
+                                >
+                                    {t('itemsLabel')}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        form.setValue('itemAutoTrack', false, { shouldDirty: true });
+                                        form.handleSubmit(performSave)();
+                                    }}
+                                    className={cn(
+                                        "px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-md transition-all",
+                                        !form.watch('itemAutoTrack') ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
+                                    )}
+                                >
+                                    {t('notesLabel')}
+                                </button>
+                            </div>
+                        )}
+                        {isNested && <Label htmlFor="note" className="text-[11px] font-bold uppercase">{t('collectionTitle')}</Label>}
+                    </div>
                     <Controller
                         control={form.control}
                         name="note"
@@ -431,7 +470,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                 ref={noteRef}
                                 id="note"
                                 type="note"
-                                placeholder={isNested ? "Trip to Cox's Bazar" : "Grocery: Oil 1L, Rice 2kg"}
+                                placeholder={isNested ? "Trip to Cox's Bazar" : (form.watch('itemAutoTrack') ? "Grocery: Oil 1L, Rice 2kg" : "Add some notes here...")}
                                 value={field.value || ''}
                                 onChange={(val: string) => {
                                     field.onChange(val);
@@ -445,7 +484,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             />
                         )}
                     />
-                    {!isNested && <p className="text-[9px] text-muted-foreground font-medium italic">{t('autoTrackDescription')}</p>}
+                    {!isNested && form.watch('itemAutoTrack') && <p className="text-[9px] text-muted-foreground font-medium italic">{t('autoTrackDescription')}</p>}
                 </div>
 
                 {isNested && (

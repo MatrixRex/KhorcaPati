@@ -3,34 +3,83 @@ import { db, type Item } from '@/db/schema';
 import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { useState } from 'react';
-import { ChevronRight, Package, StickyNote, ArrowLeft, ExternalLink, History } from 'lucide-react';
+import { ChevronRight, Package, ExternalLink, History, Trash2 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useNavigate } from 'react-router-dom';
 import { useCloseWatcher } from '@/hooks/use-close-watcher';
+import { useTranslation } from 'react-i18next';
 
 import { useFilterStore } from '@/stores/filterStore';
 import { isWithinInterval } from 'date-fns';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from "@/components/ui/sheet";
 
 export function ItemTracker() {
     const { startDate, endDate, inventorySortBy } = useFilterStore();
     const { selectedInventoryItem, setSelectedInventoryItem, openEditExpense } = useUIStore();
-    const [touchStartX, setTouchStartX] = useState(0);
+    const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
+    const [showDeleteWholeConfirm, setShowDeleteWholeConfirm] = useState(false);
+    const [affectedItemNames, setAffectedItemNames] = useState<string[]>([]);
     const navigate = useNavigate();
+    const { t } = useTranslation();
+
+    const handleDeleteItem = async (item: Item) => {
+        if (!item.expenseId) {
+            await db.items.delete(item.id!);
+            return;
+        }
+
+        try {
+            await db.transaction('rw', [db.items, db.expenses], async () => {
+                // 1. Disable auto-tracking for the source expense
+                await db.expenses.update(item.expenseId!, { itemAutoTrack: false });
+                
+                // 2. Delete ALL items for this expense (converts them to notes only)
+                await db.items.where('expenseId').equals(item.expenseId!).delete();
+            });
+            setItemToDelete(null);
+        } catch (error) {
+            console.error("Failed to delete item:", error);
+        }
+    };
+
+    const handleDeleteWholeItem = async (name: string) => {
+        try {
+            const affectedItems = await db.items.where('name').equals(name).toArray();
+            const expenseIds = Array.from(new Set(affectedItems.map(item => item.expenseId).filter(Boolean)));
+
+            await db.transaction('rw', [db.items, db.expenses], async () => {
+                for (const expId of expenseIds) {
+                    await db.expenses.update(expId!, { itemAutoTrack: false });
+                }
+                await db.items.where('expenseId').anyOf(expenseIds as number[]).delete();
+                await db.items.where('name').equals(name).delete();
+            });
+            
+            setShowDeleteWholeConfirm(false);
+            setSelectedInventoryItem(null);
+        } catch (error) {
+            console.error("Failed to delete whole item:", error);
+        }
+    };
 
     // Close on back button / Esc
     useCloseWatcher(!!selectedInventoryItem, () => setSelectedInventoryItem(null));
-
-    const handleTouchStart = (e: React.TouchEvent) => {
-        setTouchStartX(e.touches[0].clientX);
-    };
-
-    const handleTouchEnd = (e: React.TouchEvent) => {
-        const touchEndX = e.changedTouches[0].clientX;
-        // If swiped from left edge (>50px swipe, starting from leftmost 40px)
-        if (touchStartX < 40 && touchEndX - touchStartX > 70) {
-            setSelectedInventoryItem(null);
-        }
-    };
 
     const items = useLiveQuery(async () => {
         const all = await db.items.orderBy('date').reverse().toArray();
@@ -88,110 +137,44 @@ export function ItemTracker() {
         }
     };
 
-    if (selectedInventoryItem && groupedItems[selectedInventoryItem.toLowerCase().trim()]) {
-        const group = groupedItems[selectedInventoryItem.toLowerCase().trim()];
+    const prepareDeleteItem = async (item: Item) => {
+        if (item.expenseId) {
+            const others = await db.items
+                .where('expenseId')
+                .equals(item.expenseId)
+                .toArray();
+            
+            const otherNames = Array.from(new Set(
+                others
+                    .filter(o => o.id !== item.id)
+                    .map(o => o.name)
+            ));
+            setAffectedItemNames(otherNames);
+        } else {
+            setAffectedItemNames([]);
+        }
+        setItemToDelete(item);
+    };
+
+    const prepareDeleteWholeItem = async (name: string) => {
+        const affectedItems = await db.items.where('name').equals(name).toArray();
+        const expenseIds = Array.from(new Set(affectedItems.map(item => item.expenseId).filter(Boolean)));
+        
+        const allLinkedItems = await db.items
+            .where('expenseId')
+            .anyOf(expenseIds as number[])
+            .toArray();
+        
+        const otherNames = Array.from(new Set(
+            allLinkedItems
+                .filter(o => o.name.toLowerCase().trim() !== name.toLowerCase().trim())
+                .map(o => o.name)
+        ));
+        
+        setAffectedItemNames(otherNames);
+        setShowDeleteWholeConfirm(true);
+    };
         return (
-            <div
-                className="fixed top-0 left-0 right-0 bottom-16 z-40 bg-background flex flex-col animate-in slide-in-from-right duration-300 pointer-events-auto"
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-            >
-                {/* Full-screen Detail Header */}
-                <div className="safe-top bg-card border-b shadow-sm pt-10 px-4 pb-4">
-                    <div className="flex items-center gap-4 mb-6">
-                        <button
-                            onClick={() => setSelectedInventoryItem(null)}
-                            className="p-2 -ml-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-all active:scale-95"
-                        >
-                            <ArrowLeft size={24} />
-                        </button>
-                        <h2 className="text-lg font-bold flex-1 truncate">Item Details</h2>
-                    </div>
-
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-4 flex-1 min-w-0">
-                            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                                <Package size={28} />
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                                <h3 className="text-xl font-bold truncate capitalize leading-tight">
-                                    {group.name}
-                                </h3>
-                                <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                                    <History size={12} />
-                                    {group.records.length} historical records
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex flex-col items-end shrink-0 bg-secondary/30 p-2.5 rounded-xl border border-border/50">
-                            <div className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Total Stock</div>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-primary leading-none">{group.totalQty}</span>
-                                <span className="text-xs font-bold text-muted-foreground">{group.unit}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Entry History List */}
-                <div className="flex-1 overflow-auto p-4 flex flex-col gap-[var(--item-gap)] pb-10">
-                    <div className="flex items-center justify-between px-1">
-                        <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Transaction History</h4>
-                        <div className="h-px bg-border flex-1 ml-4" />
-                    </div>
-
-                    {group.records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((record, idx) => (
-                        <div
-                            key={record.id || idx}
-                            onClick={() => handleEntryClick(record.expenseId)}
-                            className="group transition-all active:scale-[0.98] cursor-pointer"
-                        >
-                            <Card className="overflow-hidden border-none bg-muted/30 group-hover:bg-muted/50 transition-colors">
-                                <CardContent className="p-4 flex items-center justify-between">
-                                    <div className="flex items-center gap-4 min-w-0 flex-1">
-                                        <div className="w-10 h-10 rounded-lg bg-background border flex flex-col items-center justify-center shrink-0 shadow-sm">
-                                            <span className="text-[9px] font-bold text-muted-foreground uppercase leading-none mb-0.5">
-                                                {format(new Date(record.date), 'MMM')}
-                                            </span>
-                                            <span className="text-base font-bold leading-none">
-                                                {format(new Date(record.date), 'dd')}
-                                            </span>
-                                        </div>
-
-                                        <div className="flex flex-col min-w-0">
-                                            <div className="flex items-baseline gap-1.5">
-                                                <span className="text-base font-bold">+{record.qty}</span>
-                                                <span className="text-[10px] font-semibold text-muted-foreground">{record.unit}</span>
-                                            </div>
-
-                                            {record.rawInput && record.rawInput.toLowerCase() !== record.name.toLowerCase() && (
-                                                <p className="text-[10px] text-muted-foreground italic truncate">
-                                                    "{record.rawInput}"
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-3">
-                                        {record.note && (
-                                            <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
-                                                <StickyNote size={14} />
-                                            </div>
-                                        )}
-                                        <div className="w-8 h-8 rounded-full bg-primary/5 group-hover:bg-primary/20 flex items-center justify-center text-primary transition-colors">
-                                            <ExternalLink size={14} />
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-    }
-
-    return (
         <div className="flex flex-col gap-[var(--item-gap)] pb-24">
             {groupedList.map((group) => (
                 <Card
@@ -226,6 +209,200 @@ export function ItemTracker() {
                     </CardContent>
                 </Card>
             ))}
+
+            {/* Inventory Item Details Drawer */}
+            <Sheet 
+                open={!!selectedInventoryItem} 
+                onOpenChange={(open) => !open && setSelectedInventoryItem(null)}
+            >
+                <SheetContent 
+                    side="bottom" 
+                    className="h-[92dvh] rounded-t-[32px] p-0 border-none bg-background overflow-hidden flex flex-col"
+                >
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
+                    
+                    {selectedInventoryItem && groupedItems[selectedInventoryItem.toLowerCase().trim()] && (
+                        <div className="flex flex-col h-full overflow-hidden">
+                            {/* Drawer Header */}
+                            <div className="px-6 pb-6 pt-2 shrink-0 border-b">
+                                <SheetHeader className="text-left mb-6">
+                                    <div className="flex items-center justify-between w-full">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                                <Package size={20} />
+                                            </div>
+                                            <div>
+                                                <SheetTitle className="text-xl font-black capitalize leading-tight">
+                                                    {groupedItems[selectedInventoryItem.toLowerCase().trim()].name}
+                                                </SheetTitle>
+                                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                                    Item Details
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => prepareDeleteWholeItem(selectedInventoryItem)}
+                                            className="w-10 h-10 rounded-full bg-destructive/5 hover:bg-destructive/10 flex items-center justify-center text-destructive transition-colors shrink-0"
+                                            title={t('deleteWholeItem')}
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                </SheetHeader>
+
+                                <div className="flex items-center justify-between gap-4 bg-muted/30 p-4 rounded-2xl border border-border/50">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.1em]">Total Stock</span>
+                                        <div className="flex items-baseline gap-1.5 mt-0.5">
+                                            <span className="text-2xl font-black text-primary leading-none">
+                                                {groupedItems[selectedInventoryItem.toLowerCase().trim()].totalQty}
+                                            </span>
+                                            <span className="text-xs font-bold text-muted-foreground uppercase">
+                                                {groupedItems[selectedInventoryItem.toLowerCase().trim()].unit}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col items-end">
+                                        <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center border shadow-sm">
+                                            <History size={18} className="text-muted-foreground/60" />
+                                        </div>
+                                        <span className="text-[10px] font-medium text-muted-foreground mt-1">
+                                            {groupedItems[selectedInventoryItem.toLowerCase().trim()].records.length} records
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Entry History List */}
+                            <div className="flex-1 overflow-auto px-6 py-6 flex flex-col gap-3 pb-24">
+                                <div className="flex items-center justify-between mb-1">
+                                    <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Transaction History</h4>
+                                    <div className="h-px bg-border flex-1 ml-4" />
+                                </div>
+
+                                {groupedItems[selectedInventoryItem.toLowerCase().trim()].records
+                                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                                    .map((record, idx) => (
+                                        <div
+                                            key={record.id || idx}
+                                            onClick={() => handleEntryClick(record.expenseId)}
+                                            className="group transition-all active:scale-[0.98] cursor-pointer"
+                                        >
+                                            <Card className="overflow-hidden border-none bg-muted/40 group-hover:bg-muted/60 transition-colors rounded-2xl">
+                                                <CardContent className="p-4 flex items-center justify-between">
+                                                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                                                        <div className="w-10 h-10 rounded-xl bg-background border flex flex-col items-center justify-center shrink-0 shadow-sm">
+                                                            <span className="text-[8px] font-black text-muted-foreground uppercase leading-none mb-0.5">
+                                                                {format(new Date(record.date), 'MMM')}
+                                                            </span>
+                                                            <span className="text-sm font-black leading-none">
+                                                                {format(new Date(record.date), 'dd')}
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="flex flex-col min-w-0">
+                                                            <div className="flex items-baseline gap-1.5">
+                                                                <span className="text-base font-black">+{record.qty}</span>
+                                                                <span className="text-[10px] font-bold text-muted-foreground uppercase">{record.unit}</span>
+                                                            </div>
+
+                                                            {record.rawInput && record.rawInput.toLowerCase() !== record.name.toLowerCase() && (
+                                                                <p className="text-[10px] text-muted-foreground italic truncate leading-tight mt-0.5">
+                                                                    "{record.rawInput}"
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                prepareDeleteItem(record);
+                                                            }}
+                                                            className="w-8 h-8 rounded-full bg-destructive/5 hover:bg-destructive/10 flex items-center justify-center text-destructive transition-colors"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                        <div className="w-8 h-8 rounded-full bg-primary/5 group-hover:bg-primary/20 flex items-center justify-center text-primary transition-colors">
+                                                            <ExternalLink size={14} />
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    )}
+                </SheetContent>
+            </Sheet>
+
+            <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
+                <AlertDialogContent className="w-[90%] rounded-2xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('deleteItem')}</AlertDialogTitle>
+                        <AlertDialogDescription className="space-y-4">
+                            <p>{t('deleteItemConfirm')}</p>
+                            {affectedItemNames.length > 0 && (
+                                <div className="bg-destructive/5 p-3 rounded-xl border border-destructive/10">
+                                    <p className="text-[10px] font-black uppercase tracking-wider text-destructive mb-2">{t('alsoAffects')}</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {affectedItemNames.map(name => (
+                                            <span key={name} className="px-2 py-0.5 bg-destructive/10 text-destructive text-[10px] font-bold rounded-md capitalize">
+                                                {name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex-row gap-2 mt-4">
+                        <AlertDialogCancel className="flex-1 mt-0 rounded-xl">{t('cancel')}</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={() => itemToDelete && handleDeleteItem(itemToDelete)} 
+                            className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+                        >
+                            {t('done')}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog open={showDeleteWholeConfirm} onOpenChange={setShowDeleteWholeConfirm}>
+                <AlertDialogContent className="w-[90%] rounded-2xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-destructive flex items-center gap-2">
+                            <Trash2 size={18} />
+                            {t('deleteWholeItem')}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="space-y-4">
+                            <p>{t('deleteWholeItemConfirm')}</p>
+                            {affectedItemNames.length > 0 && (
+                                <div className="bg-destructive/5 p-3 rounded-xl border border-destructive/10">
+                                    <p className="text-[10px] font-black uppercase tracking-wider text-destructive mb-2">{t('alsoAffects')}</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {affectedItemNames.map(name => (
+                                            <span key={name} className="px-2 py-0.5 bg-destructive/10 text-destructive text-[10px] font-bold rounded-md capitalize">
+                                                {name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex-row gap-2 mt-4">
+                        <AlertDialogCancel className="flex-1 mt-0 rounded-xl">{t('cancel')}</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={() => selectedInventoryItem && handleDeleteWholeItem(selectedInventoryItem)} 
+                            className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+                        >
+                            {t('done')}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { cn, formatAmount } from '@/lib/utils';
+import { cn, formatAmount, formatNumber } from '@/lib/utils';
 import { Delete, Check, Equal, X } from 'lucide-react';
 import { useCloseWatcher } from '@/hooks/use-close-watcher';
 import { useTranslation } from 'react-i18next';
@@ -149,7 +149,7 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
                 <div className="bg-muted/30 rounded-3xl p-5 mb-6 flex flex-col items-end gap-1 border border-border/20 shadow-inner">
                     <div className="w-full overflow-x-auto whitespace-nowrap scrollbar-none text-right">
                         <span className="text-sm font-bold text-muted-foreground font-mono opacity-60">
-                            {display}
+                            {display.split('').map(char => /[0-9]/.test(char) ? formatNumber(char) : char).join('')}
                         </span>
                     </div>
                     <div className="w-full overflow-x-auto whitespace-nowrap scrollbar-none text-right">
@@ -182,6 +182,7 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
                     {/* Main Keys */}
                     {keys.flat().map((key) => {
                         const isOperator = ['/', '*', '-', '+', '='].includes(key);
+                        const isNumber = /[0-9]/.test(key);
                         return (
                             <Button
                                 type="button"
@@ -195,10 +196,11 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
                                 )}
                                 onClick={() => handlePress(key)}
                             >
-                                {key === '=' ? <Equal className="w-5 h-5" /> : key}
+                                {key === '=' ? <Equal className="w-5 h-5" /> : (isNumber ? formatNumber(key) : key)}
                             </Button>
                         );
                     })}
+
 
                     {/* Done Button */}
                     <Button

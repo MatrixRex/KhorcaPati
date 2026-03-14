@@ -1,5 +1,4 @@
 import {
-    format,
     isToday,
     isTomorrow,
     isYesterday,
@@ -23,9 +22,13 @@ export function formatRelativeDate(dateStr: string | Date, includeYear = false):
     if (isTomorrow(date)) return i18next.t('tomorrow');
     if (isYesterday(date)) return i18next.t('yesterday');
 
-    const fallbackFormat = includeYear ? 'MMM d, yyyy' : 'MMM d';
-    return format(date, fallbackFormat);
+    return new Intl.DateTimeFormat(i18next.language, {
+        month: 'short',
+        day: 'numeric',
+        year: includeYear ? 'numeric' : undefined
+    }).format(date);
 }
+
 
 /**
  * Returns a label like "in 3 days" or "5 days ago"

@@ -28,6 +28,8 @@ import {
     SheetHeader,
     SheetTitle,
 } from "@/components/ui/sheet";
+import { formatNumber } from '@/lib/utils';
+
 
 export function ItemTracker() {
     const { startDate, endDate, inventorySortBy } = useFilterStore();
@@ -192,7 +194,7 @@ export function ItemTracker() {
                                     {group.name}
                                 </h3>
                                 <p className="text-[11px] text-muted-foreground font-medium">
-                                    {group.records.length} {group.records.length === 1 ? t('record') : t('records_plural')}
+                                    {t(group.records.length === 1 ? 'record' : 'records_plural', { count: group.records.length })}
                                 </p>
                             </div>
                         </div>
@@ -200,7 +202,7 @@ export function ItemTracker() {
                         <div className="flex items-center gap-4">
                             <div className="flex flex-col items-end">
                                 <div className="flex items-baseline gap-1">
-                                    <span className="font-bold text-base text-primary leading-none">{group.totalQty}</span>
+                                    <span className="font-bold text-base text-primary leading-none">{formatNumber(group.totalQty)}</span>
                                     <span className="text-[10px] font-bold text-muted-foreground uppercase">{group.unit}</span>
                                 </div>
                             </div>
@@ -255,7 +257,7 @@ export function ItemTracker() {
                                         <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.1em]">{t('totalStock')}</span>
                                         <div className="flex items-baseline gap-1.5 mt-0.5">
                                             <span className="text-2xl font-black text-primary leading-none">
-                                                {groupedItems[selectedInventoryItem.toLowerCase().trim()].totalQty}
+                                                {formatNumber(groupedItems[selectedInventoryItem.toLowerCase().trim()].totalQty)}
                                             </span>
                                             <span className="text-xs font-bold text-muted-foreground uppercase">
                                                 {groupedItems[selectedInventoryItem.toLowerCase().trim()].unit}
@@ -266,9 +268,6 @@ export function ItemTracker() {
                                         <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center border shadow-sm">
                                             <History size={18} className="text-muted-foreground/60" />
                                         </div>
-                                        <span className="text-[10px] font-medium text-muted-foreground mt-1">
-                                            {groupedItems[selectedInventoryItem.toLowerCase().trim()].records.length} {groupedItems[selectedInventoryItem.toLowerCase().trim()].records.length === 1 ? t('record') : t('records_plural')}
-                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -296,13 +295,13 @@ export function ItemTracker() {
                                                                 {format(new Date(record.date), 'MMM')}
                                                             </span>
                                                             <span className="text-sm font-black leading-none">
-                                                                {format(new Date(record.date), 'dd')}
+                                                                {formatNumber(format(new Date(record.date), 'dd'))}
                                                             </span>
                                                         </div>
 
                                                         <div className="flex flex-col min-w-0">
                                                             <div className="flex items-baseline gap-1.5">
-                                                                <span className="text-base font-black">+{record.qty}</span>
+                                                                <span className="text-base font-black">+{formatNumber(record.qty)}</span>
                                                                 <span className="text-[10px] font-bold text-muted-foreground uppercase">{record.unit}</span>
                                                             </div>
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, formatAmount } from '@/lib/utils';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -15,6 +15,7 @@ import { format, parseISO } from 'date-fns';
 import { db, type Expense } from '@/db/schema';
 import { CategoryComboBox } from './CategoryComboBox';
 import { GoalComboBox } from './GoalComboBox';
+import i18n from '@/i18n';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useUIStore } from '@/stores/uiStore';
@@ -338,14 +339,14 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                 type="text"
                                 readOnly
                                 disabled={isNested}
-                                value={form.watch('amount') ? `৳${form.watch('amount').toFixed(0)}` : '৳0'}
+                                value={form.watch('amount') ? `৳${formatAmount(form.watch('amount'))}` : '৳০'}
                                 onClick={() => !isNested && setShowNumberPad(true)}
                                 className={cn(
                                     "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl transition-all",
                                     isNested ? "bg-muted border-dashed opacity-70" : "border-primary/20 shadow-sm focus:border-primary",
                                     !isNested && wasAmountEdited && form.getValues('amount') <= 0 && "border-destructive ring-2 ring-destructive/20"
                                 )}
-                                placeholder="৳0"
+                                placeholder="৳০"
                             />
                             {!isNested && <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />}
                         </div>
@@ -545,7 +546,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                     <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-medium uppercase tracking-tighter">
                                                         <span>{sub.category}</span>
                                                         <span>•</span>
-                                                        <span>{format(parseISO(sub.date), 'dd MMM')}</span>
+                                                        <span>{new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'short' }).format(parseISO(sub.date))}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -554,7 +555,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                     "text-sm font-black",
                                                     sub.type === 'income' ? "text-green-600" : "text-primary"
                                                 )}>
-                                                    ৳{sub.amount.toFixed(0)}
+                                                    ৳{formatAmount(sub.amount)}
                                                 </span>
                                                 <ChevronRight className="w-4 h-4 text-muted-foreground opacity-30 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                                             </div>

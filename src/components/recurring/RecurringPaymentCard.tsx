@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { parseISO, differenceInCalendarDays } from 'date-fns';
 import { Calendar, AlertCircle, Clock } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatAmount } from '@/lib/utils';
 import { formatRelativeDate } from '@/utils/date';
 import { useCategoryStore } from '@/stores/categoryStore';
 
@@ -90,7 +90,7 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
                         "font-black text-base transition-colors",
                         isOverdue ? "text-destructive" : payment.type === 'income' ? "text-green-600" : "text-primary group-hover:text-primary"
                     )}>
-                        {payment.type === 'income' ? '+' : ''}৳{payment.amount.toFixed(0)}
+                        {payment.type === 'income' ? '+' : ''}৳{formatAmount(payment.amount)}
                     </span>
                     {payment.note && (
                         <span className="text-[9px] text-muted-foreground/60 truncate max-w-[80px] font-medium italic mt-0.5">

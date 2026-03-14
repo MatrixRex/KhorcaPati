@@ -262,7 +262,13 @@ const resources = {
       "collectionTitlePlaceholder": "e.g. Cox's Bazar Trip",
       "expenseNotePlaceholder": "e.g. Oil 1L, Rice 2kg",
       "expenseNoteOnlyPlaceholder": "e.g. Lunch at office",
-      "categoryPlaceholder": "e.g. Food, Travel"
+      "categoryPlaceholder": "e.g. Food, Travel",
+      "endsToday": "Ends today",
+      "dayRemaining": "1 day remaining",
+      "daysRemaining": "{{count}} days remaining",
+      "utilized": "{{count}}% Utilized",
+      "savedPercent": "{{count}}% Saved",
+      "noNotes": "No notes added"
     }
   },
   bn: {
@@ -474,10 +480,10 @@ const resources = {
       "current": "বর্তমান",
       "adjustment": "সমন্বয়",
       "balanceManualAdjustment": "ব্যালেন্স ম্যানুয়াল সমন্বয়",
-      "record": "টি হিসাব",
-      "records_plural": "টি হিসাব",
+      "record": "পরিমান",
+      "records_plural": "পরিমান",
       "itemDetails": "পণ্যের বিস্তারিত",
-      "totalStock": "মোট স্টক",
+      "totalStock": "মোট পরিমান",
       "transactionHistory": "লেনদেনের ইতিহাস",
       "inventoryEmpty": "ইনভেন্টরি খালি",
       "inventoryEmptyDescription": "উপরের স্মার্ট ইনপুট বার ব্যবহার করে আইটেম যোগ করুন।",
@@ -525,7 +531,13 @@ const resources = {
       "collectionTitlePlaceholder": "যেমন: কক্সবাজার ভ্রমণ",
       "expenseNotePlaceholder": "যেমন: তেল ১লি, চাল ২কেজি",
       "expenseNoteOnlyPlaceholder": "যেমন: অফিসে দুপুরের খাবার",
-      "categoryPlaceholder": "যেমন: খাবার, ভ্রমণ"
+      "categoryPlaceholder": "যেমন: খাবার, ভ্রমণ",
+      "endsToday": "আজ শেষ হবে",
+      "dayRemaining": "১ দিন বাকি",
+      "daysRemaining": "{{count}} দিন বাকি",
+      "utilized": "{{count}}% ব্যয় হয়েছে",
+      "savedPercent": "{{count}}% জমানো হয়েছে",
+      "noNotes": "কোনো নোট নেই"
     }
   }
 };
@@ -538,6 +550,12 @@ i18n
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,
+      format: (value, _format, lng) => {
+        if (typeof value === 'number') {
+          return new Intl.NumberFormat(lng).format(value);
+        }
+        return value;
+      }
     }
   });
 

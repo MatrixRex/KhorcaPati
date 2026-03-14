@@ -13,7 +13,10 @@ interface GoalCardProps {
     onClick?: () => void;
 }
 
+import { useTranslation } from 'react-i18next';
+
 export function GoalCard({ goal, onClick }: GoalCardProps) {
+    const { t } = useTranslation();
     const { openAddGoalProgress, openGoalRecords } = useUIStore();
     const percentage = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
     const isCompleted = goal.currentAmount >= goal.targetAmount;
@@ -22,7 +25,7 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
         <Card
             onClick={onClick || (() => openGoalRecords(goal))}
             className={cn(
-                "group relative overflow-hidden transition-all duration-300 border-border/40 hover:border-primary/20 cursor-pointer shadow-sm active:scale-[0.98] rounded-2xl",
+                "group relative overflow-hidden transition-all duration-300 border-border/40 hover:border-primary/20 cursor-pointer shadow-sm active:scale-[0.98] transition-all rounded-2xl",
                 isCompleted && "border-primary/30"
             )}
             style={{ 
@@ -42,12 +45,12 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
                             </h3>
                             {isCompleted && (
                                 <span className="flex-shrink-0 text-[10px] font-black uppercase tracking-widest bg-primary text-primary-foreground px-1.5 py-0.5 rounded-md shadow-sm">
-                                    Done
+                                    {t('done')}
                                 </span>
                             )}
                         </div>
                         <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider line-clamp-1 opacity-60">
-                            {goal.note || 'No notes added'}
+                            {goal.note || t('noNotes')}
                         </p>
                     </div>
 
@@ -84,7 +87,7 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mt-1">
                         <div className="flex items-center gap-1.5 overflow-hidden">
                             <span className="text-muted-foreground/60 shrink-0">
-                                {percentage.toFixed(0)}% Saved
+                                {t('savedPercent', { count: Math.round(percentage) })}
                             </span>
                             {goal.deadline && (
                                 <span className="text-muted-foreground/30">•</span>
@@ -101,3 +104,4 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
         </Card>
     );
 }
+

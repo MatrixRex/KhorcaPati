@@ -9,12 +9,14 @@ import { differenceInDays, parseISO, startOfDay, endOfDay, isWithinInterval } fr
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useUIStore } from '@/stores/uiStore';
 
+import { useTranslation } from 'react-i18next';
+
 interface BudgetCardProps {
     budget: Budget;
     onClick?: () => void;
 }
 
-function timelineLabel(budget: Budget): string {
+function timelineLabel(budget: Budget, t: any): string {
     const now = startOfDay(new Date());
 
     if (budget.timelineType === 'recurring') {
@@ -23,21 +25,22 @@ function timelineLabel(budget: Budget): string {
             const endDate = endOfDay(parseISO(window.end));
             const daysLeft = differenceInDays(endDate, now);
 
-            if (daysLeft === 0) return 'Ends today';
-            if (daysLeft === 1) return '1 day remaining';
-            return `${daysLeft} days remaining`;
+            if (daysLeft === 0) return t('endsToday');
+            if (daysLeft === 1) return t('dayRemaining');
+            return t('daysRemaining', { count: daysLeft });
         }
 
         const labels: Record<string, string> = {
-            daily: 'Today', weekly: 'This week', monthly: 'This month', yearly: 'This year',
+            daily: t('today'), weekly: t('weekly'), monthly: t('monthly'), yearly: t('yearly'),
         };
-        return labels[budget.recurringInterval ?? 'monthly'] ?? 'This month';
+        return labels[budget.recurringInterval ?? 'monthly'] ?? t('monthly');
     }
     if (budget.startDate && budget.endDate) {
         return `${formatRelativeDate(budget.startDate)} – ${formatRelativeDate(budget.endDate, true)}`;
     }
     return '';
 }
+
 
 function findOverspentInfo(budget: Budget, expenses: Expense[]) {
     const window = getBudgetWindow(budget);
@@ -70,6 +73,7 @@ function findOverspentInfo(budget: Budget, expenses: Expense[]) {
 }
 
 export function BudgetCard({ budget, onClick }: BudgetCardProps) {
+    const { t } = useTranslation();
     const { openBudgetRecords } = useUIStore();
 
     const expenses = useLiveQuery(
@@ -140,7 +144,7 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
                 <div className="flex items-center justify-between">
                     <div>
                         <h3 className="font-bold text-sm tracking-tight truncate capitalize">{budget.category}</h3>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{timelineLabel(budget)}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{timelineLabel(budget, t)}</p>
                     </div>
                     <span className="text-xs text-muted-foreground font-black uppercase text-right shrink-0 ml-2 bg-muted px-1.5 py-0.5 rounded-md">
                         ৳{formatAmount(spent)} <span className="opacity-40">/</span> ৳{formatAmount(budget.limitAmount)}
@@ -152,11 +156,11 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
                 <div className="flex items-center justify-between mt-1">
                     <div className="flex items-center gap-1.5 overflow-hidden">
                         <span className={cn("text-[10px] font-black uppercase tracking-widest shrink-0", percentage >= 100 ? "text-destructive" : "text-muted-foreground/60")}>
-                            {percentage.toFixed(0)}% Utilized
+                            {t('utilized', { count: Math.round(percentage) })}
                         </span>
                         {isOverBudget && overspentInfo && (
                             <span className="text-[10px] font-black text-destructive/50 whitespace-nowrap overflow-hidden text-ellipsis">
-                                • {overspentInfo.daysAgo === 0 ? 'Today' : `${overspentInfo.daysAgo}d ago`}
+                                • {overspentInfo.daysAgo === 0 ? t('today') : t('daysAgo', { count: overspentInfo.daysAgo })}
                             </span>
                         )}
                     </div>
@@ -170,3 +174,4 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
         </Card>
     );
 }
+

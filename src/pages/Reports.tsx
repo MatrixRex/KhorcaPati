@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
-import { format, isWithinInterval, startOfDay } from 'date-fns';
+import { isWithinInterval, startOfDay } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList,
@@ -48,7 +48,7 @@ const SankeyNode = ({ x, y, width, height, index, payload, containerWidth }: any
 };
 
 export default function Reports() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { startDate, endDate } = useFilterStore();
     const { fontScale } = useUIStore();
     const { categories: categoryList } = useCategoryStore();
@@ -71,8 +71,11 @@ export default function Reports() {
         const categoryMap = new Map<string, number>();
         const dailyAggs = new Map<string, { income: number; expense: number }>();
 
+        const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+        const dateFormatter = new Intl.DateTimeFormat(i18n.language, dateOptions);
+
         filtered.forEach(exp => {
-            const day = format(startOfDay(new Date(exp.date)), 'MMM dd');
+            const day = dateFormatter.format(startOfDay(new Date(exp.date)));
             const currentDay = dailyAggs.get(day) || { income: 0, expense: 0 };
 
             if (exp.type === 'income') {
@@ -139,7 +142,7 @@ export default function Reports() {
         });
 
         return { sankeyData, categoryData, timelineData, totalIncome, totalExpense };
-    }, [expenses, startDate, endDate, t]);
+    }, [expenses, startDate, endDate, t, i18n.language]);
 
     if (!reportData) return null;
 
@@ -222,7 +225,7 @@ export default function Reports() {
                                     <Tooltip
                                         cursor={{ fill: 'transparent' }}
                                         contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                        formatter={(value) => `৳${Number(value).toFixed(0)}`}
+                                        formatter={(value) => `৳${formatAmount(Number(value))}`}
                                     />
                                     <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={20}>
                                         {categoryData.map((entry: any, index: number) => (

@@ -32,7 +32,7 @@ import { formatNumber } from '@/lib/utils';
 
 
 export function ItemTracker() {
-    const { startDate, endDate, inventorySortBy } = useFilterStore();
+    const { startDate, endDate, inventorySortBy, selectedCategory } = useFilterStore();
     const { selectedInventoryItem, setSelectedInventoryItem, openEditExpense } = useUIStore();
     const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
     const [showDeleteWholeConfirm, setShowDeleteWholeConfirm] = useState(false);
@@ -84,12 +84,27 @@ export function ItemTracker() {
     useCloseWatcher(!!selectedInventoryItem, () => setSelectedInventoryItem(null));
 
     const items = useLiveQuery(async () => {
-        const all = await db.items.orderBy('date').reverse().toArray();
+        let all: Item[];
+        if (selectedCategory) {
+            // Find all expenses in this category
+            const expenseIds = (await db.expenses
+                .where('category').equals(selectedCategory)
+                .primaryKeys()) as number[];
+            
+            // Find items linked to these expenses
+            all = await db.items
+                .where('expenseId')
+                .anyOf(expenseIds)
+                .toArray();
+        } else {
+            all = await db.items.orderBy('date').reverse().toArray();
+        }
+
         return all.filter(item => {
             const date = new Date(item.date);
             return isWithinInterval(date, { start: startDate, end: endDate });
         });
-    }, [startDate, endDate]);
+    }, [startDate, endDate, selectedCategory]);
 
     if (!items) {
         return <div className="p-4 text-center text-muted-foreground">{t('loadingItems')}</div>;

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { cn, formatAmount, formatNumber } from '@/lib/utils';
-import { Delete, Check, Equal } from 'lucide-react';
+import { cn, formatNumber } from '@/lib/utils';
+import { Delete, Check } from 'lucide-react';
 import { useCloseWatcher } from '@/hooks/use-close-watcher';
 import { useTranslation } from 'react-i18next';
 
@@ -127,11 +127,6 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
             const live = calculateLive(newDisplay);
             setLiveResult(live);
             onChange(live);
-        } else if (key === '=') {
-            const final = calculateLive(display);
-            setDisplay(final);
-            setLiveResult(final);
-            onChange(final);
         } else {
             let newDisplay = display;
             if (display === '0' && !['+', '-', '*', '/', '.'].includes(key)) {
@@ -155,90 +150,98 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
         onDone();
     };
 
-    const keys = [
-        ['7', '8', '9', '/'],
-        ['4', '5', '6', '*'],
-        ['1', '2', '3', '-'],
-        ['0', '.', '=', '+']
+    const padLayout = [
+        { key: 'AC', span: 2 }, { key: 'DEL', span: 1 }, { key: '/', span: 1 },
+        { key: '7', span: 1 }, { key: '8', span: 1 }, { key: '9', span: 1 }, { key: '*', span: 1 },
+        { key: '4', span: 1 }, { key: '5', span: 1 }, { key: '6', span: 1 }, { key: '-', span: 1 },
+        { key: '1', span: 1 }, { key: '2', span: 1 }, { key: '3', span: 1 }, { key: '+', span: 1 },
+        { key: '0', span: 1 }, { key: '.', span: 1 }, { key: 'DONE', span: 2 }
     ];
 
     return (
         <div ref={rootRef} className="fixed inset-x-0 bottom-0 z-[100] animate-in slide-in-from-bottom duration-300 pointer-events-none">
             {/* Click-away area (transparent) */}
             <div className="fixed inset-0 pointer-events-auto" onClick={onClose} />
-
+            
             <div className="bg-background/95 backdrop-blur-2xl border-t border-white/5 rounded-t-[32px] p-4 pb-8 shadow-[0_-15px_40px_rgba(0,0,0,0.3)] max-w-md mx-auto pointer-events-auto relative ring-1 ring-white/5">
                 {/* Compact Indicator */}
                 <div className="w-12 h-1 bg-muted/30 rounded-full mx-auto mb-3" />
-
-                {/* Compact Header & Live Preview */}
-                <div className="flex items-center justify-between mb-3 px-2">
-                    <div className="flex flex-col">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-primary mb-0.5">
+                
+                {/* Compact Header (Formula Only) */}
+                <div className="mb-4 px-2">
+                    <div className="flex flex-col overflow-hidden">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-primary/70 mb-1">
                             {label || t('inputAmount')}
                         </span>
-                        <div className="flex items-center gap-1.5 overflow-hidden">
-                            <span className="text-[10px] font-bold text-muted-foreground/60 whitespace-nowrap">
-                                {display.split('').map(char => /[0-9]/.test(char) ? formatNumber(char) : char).join('')}
-                            </span>
+                        <div className="text-2xl font-bold text-foreground overflow-hidden whitespace-nowrap overflow-ellipsis">
+                            {display.split('').map(char => /[0-9]/.test(char) ? formatNumber(char) : char).join('')}
                         </div>
-                    </div>
-                    <div className="text-xl font-black text-primary tabular-nums">
-                        <span className="text-sm mr-0.5 opacity-40">৳</span>
-                        {formatAmount(liveResult)}
                     </div>
                 </div>
 
                 <div className="grid grid-cols-4 gap-2">
-                    {/* AC and Delete Row (Slimmer) */}
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        className="col-span-2 h-11 rounded-xl text-[10px] font-black uppercase tracking-widest bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-none"
-                        onClick={() => handlePress('AC')}
-                    >
-                        {t('clearAll')}
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        className="col-span-2 h-11 rounded-xl bg-muted/40 hover:bg-muted/60 border-none"
-                        onClick={() => handlePress('DEL')}
-                    >
-                        <Delete className="w-4 h-4 opacity-60" />
-                    </Button>
+                    {padLayout.map(({ key, span }) => {
+                        const colSpanClass = span === 2 ? "col-span-2" : "col-span-1";
 
-                    {/* Main Keys (Compacter) */}
-                    {keys.flat().map((key) => {
-                        const isOperator = ['/', '*', '-', '+', '='].includes(key);
+                        if (key === 'AC') {
+                            return (
+                                <Button
+                                    key={key}
+                                    type="button"
+                                    variant="secondary"
+                                    className={`${colSpanClass} h-12 rounded-xl text-[11px] font-black bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-none uppercase tracking-widest`}
+                                    onClick={() => handlePress('AC')}
+                                >
+                                    {t('clearAll')}
+                                </Button>
+                            );
+                        }
+                        if (key === 'DEL') {
+                            return (
+                                <Button
+                                    key={key}
+                                    type="button"
+                                    variant="secondary"
+                                    className={`${colSpanClass} h-12 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 border-none text-orange-600`}
+                                    onClick={() => handlePress('DEL')}
+                                >
+                                    <Delete className="w-5 h-5 opacity-80" />
+                                </Button>
+                            );
+                        }
+                        if (key === 'DONE') {
+                            return (
+                                <Button
+                                    key={key}
+                                    type="button"
+                                    className={`${colSpanClass} h-12 rounded-xl bg-primary text-primary-foreground font-black text-xs uppercase tracking-[0.15em] shadow-lg shadow-primary/20 active:scale-[0.98] transition-all`}
+                                    onClick={handleDone}
+                                >
+                                    <Check className="w-4 h-4 mr-2" />
+                                    {t('confirm')}
+                                </Button>
+                            );
+                        }
+
+                        const isOperator = ['/', '*', '-', '+'].includes(key);
                         const isNumber = /[0-9]/.test(key);
+
                         return (
                             <Button
                                 type="button"
                                 key={key}
                                 variant={isOperator ? "default" : "outline"}
                                 className={cn(
-                                    "h-12 rounded-xl text-base font-bold transition-all active:scale-90 shadow-sm",
-                                    key === '=' ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" :
-                                        isOperator ? "bg-primary/5 text-primary border-none hover:bg-primary/15" :
-                                            "bg-card/50 border-white/5 hover:bg-muted/30"
+                                    `${colSpanClass} h-12 rounded-xl text-lg font-bold transition-all active:scale-95 shadow-sm`,
+                                    isOperator ? "bg-primary/10 text-primary border-none hover:bg-primary/20" :
+                                        "bg-card border-border/5 border hover:bg-muted/50"
                                 )}
                                 onClick={() => handlePress(key)}
                             >
-                                {key === '=' ? <Equal className="w-5 h-5" /> : (isNumber ? formatNumber(key) : key)}
+                                {isNumber ? formatNumber(key) : key}
                             </Button>
                         );
                     })}
-
-                    {/* Done Button (Compact and prominent) */}
-                    <Button
-                        type="button"
-                        className="col-span-4 h-12 rounded-xl mt-1 bg-primary text-primary-foreground font-black text-xs uppercase tracking-[0.15em] shadow-lg shadow-primary/20 active:scale-[0.98] transition-all"
-                        onClick={handleDone}
-                    >
-                        <Check className="w-4 h-4 mr-2" />
-                        {t('confirm')}
-                    </Button>
                 </div>
             </div>
         </div>

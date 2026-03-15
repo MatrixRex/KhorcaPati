@@ -21,12 +21,15 @@ interface SuggestionInputProps {
         label: string;
         onClick: () => void;
     };
+    disabled?: boolean;
 }
+
 
 const STRIP_HEIGHT = 44; // px — height of the chip row
 
 export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInputProps>(
-    ({ value, onChange, onBlur, onEnter, id, placeholder, className, type = 'note', customSuggestions, isMulti = true, disableSuggestions = false, onSelectSuggestion, action }, ref) => {
+    ({ value, onChange, onBlur, onEnter, id, placeholder, className, type = 'note', customSuggestions, isMulti = true, disableSuggestions = false, onSelectSuggestion, action, disabled }, ref) => {
+
         const [isFocused, setIsFocused] = useState(false);
         const [cursorPos, setCursorPos] = useState(0);
         const internalRef = useRef<HTMLInputElement>(null);
@@ -155,8 +158,14 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
                         spellCheck="false"
                         enterKeyHint={isMulti ? 'enter' : 'next'}
                         placeholder={placeholder}
-                        className={cn(className)}
+                        className={cn(
+                            className,
+                            disabled && "bg-muted/50 border-dashed opacity-70 cursor-not-allowed grayscale-[0.5] font-medium"
+                        )}
+                        disabled={disabled}
+
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+
                             setCursorPos(e.target.selectionStart || 0);
                             onChange(e.target.value);
                         }}

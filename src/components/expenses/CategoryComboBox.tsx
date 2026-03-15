@@ -8,14 +8,20 @@ interface CategoryComboBoxProps {
     onChange: (value: string) => void;
     onBlur?: () => void;
     onEnter?: () => void;
+    disabled?: boolean;
+    placeholder?: string;
 }
 
+
+
 export const CategoryComboBox = React.forwardRef<HTMLInputElement, CategoryComboBoxProps>(
-    ({ value, onChange, onBlur, onEnter }, ref) => {
+    ({ value, onChange, onBlur, onEnter, disabled, placeholder }, ref) => {
         const { categories, addCategory } = useCategoryStore();
+
         const { t } = useTranslation();
 
         const sortedNames = React.useMemo(() => {
+
             return [...categories]
                 .sort((a, b) => a.name.localeCompare(b.name))
                 .map(c => c.name);
@@ -58,9 +64,12 @@ export const CategoryComboBox = React.forwardRef<HTMLInputElement, CategoryCombo
                 onBlur={onBlur}
                 onSelectSuggestion={handleSelect}
                 onEnter={onEnter}
-                placeholder={t('categoryPlaceholder')}
+                disabled={disabled}
+                placeholder={placeholder || t('categoryPlaceholder')}
+
                 className="h-12 rounded-xl"
             />
         );
     }
 );
+

@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { BottomNav } from '@/components/shared/BottomNav';
 import { GlobalUI } from '@/components/shared/GlobalUI';
 import { useBudgetNotifications } from '@/hooks/useBudgetNotifications';
 import { useRecurringNotifications } from '@/hooks/useRecurringNotifications';
 import { useUIStore } from '@/stores/uiStore';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import Dashboard from '@/pages/Dashboard';
 import Expenses from '@/pages/Expenses';
@@ -26,8 +27,9 @@ function NotificationManager() {
   return null;
 }
 
-function App() {
+function AppContent() {
   const { theme, fontScale } = useUIStore();
+  const location = useLocation();
 
   useEffect(() => {
     // 1. Theme Logic
@@ -57,31 +59,48 @@ function App() {
   const shouldBlur = isAnyDrawerOpen || isInventoryItemOpen;
 
   return (
-    <HashRouter>
-      <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
-        <main className={cn(
-          "flex-1 w-full max-w-md mx-auto relative overflow-hidden transition-all duration-300",
-          shouldBlur ? "blur-[2px] scale-[0.98] opacity-60" : "blur-0 scale-100 opacity-100"
-        )}>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/expenses" element={<Expenses />} />
-            <Route path="/items" element={<Items />} />
-            <Route path="/budgets" element={<Budgets />} />
-            <Route path="/goals" element={<Goals />} />
-            <Route path="/loans" element={<Loans />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
+    <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden">
+      <main className={cn(
+        "flex-1 w-full max-w-md mx-auto relative overflow-hidden transition-all duration-300",
+        shouldBlur ? "blur-[2px] scale-[0.98] opacity-60" : "blur-0 scale-100 opacity-100"
+      )}>
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="w-full h-full"
+          >
+            <Routes location={location}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/expenses" element={<Expenses />} />
+              <Route path="/items" element={<Items />} />
+              <Route path="/budgets" element={<Budgets />} />
+              <Route path="/goals" element={<Goals />} />
+              <Route path="/loans" element={<Loans />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </motion.div>
+        </AnimatePresence>
+      </main>
 
-        <NotificationManager />
-        <GlobalUI />
-        <ReloadPrompt />
-        <WelcomeModal />
-        <BottomNav />
-      </div>
+      <NotificationManager />
+      <GlobalUI />
+      <ReloadPrompt />
+      <WelcomeModal />
+      <BottomNav />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <HashRouter>
+      <AppContent />
     </HashRouter>
   );
 }

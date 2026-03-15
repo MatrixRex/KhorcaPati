@@ -131,10 +131,11 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
                             <div className="text-right">
                                 <span className={cn(
                                     "text-sm font-black tabular-nums",
-                                    exp.type === 'income' ? "text-green-600" : "text-primary"
+                                    exp.type === 'income' ? "text-green-600" : "text-red-600"
                                 )}>
                                     {exp.type === 'income' ? '-' : '+'}৳{formatAmount(exp.amount)}
                                 </span>
+
                             </div>
                             <Button
                                 size="icon"

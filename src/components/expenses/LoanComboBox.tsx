@@ -9,10 +9,13 @@ interface LoanComboBoxProps {
     onChange: (value: number | null) => void;
     onBlur?: () => void;
     onEnter?: () => void;
+    placeholder?: string;
 }
 
+
 export const LoanComboBox = React.forwardRef<HTMLInputElement, LoanComboBoxProps>(
-    ({ value, onChange, onBlur, onEnter }, ref) => {
+    ({ value, onChange, onBlur, onEnter, placeholder }, ref) => {
+
         const { t } = useTranslation();
         const loans = useLiveQuery(() => db.loans.toArray()) || [];
 
@@ -49,8 +52,9 @@ export const LoanComboBox = React.forwardRef<HTMLInputElement, LoanComboBoxProps
                 onEnter={() => {
                    onEnter?.();
                 }}
-                placeholder={t('noLoanLink')}
+                placeholder={placeholder || t('noLoanLink')}
                 className="h-12 rounded-xl"
+
             />
         );
     }

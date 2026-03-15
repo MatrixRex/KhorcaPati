@@ -83,10 +83,10 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                     <div className="flex items-center gap-3 shrink-0">
                         <div className="flex flex-col items-end">
                             <span className={cn(
-                                "font-black text-base",
-                                expense.type === 'income' ? "text-green-600" : "text-primary"
+                                "text-sm font-black tabular-nums",
+                                expense.type === 'income' ? "text-green-600" : "text-red-600"
                             )}>
-                                {expense.type === 'income' ? '+' : ''}৳{formatAmount(expense.amount)}
+                                {expense.type === 'income' ? '+' : '-'}৳{formatAmount(expense.amount)}
                             </span>
                             {expense.parentId && (
                                 <Badge variant="outline" className="text-[10px] font-black uppercase border-primary/20 text-primary px-1 h-3.5 mt-0.5">
@@ -132,11 +132,13 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                             </div>
                             <span className={cn(
                                 "text-xs font-black",
-                                sub.type === 'income' ? "text-green-600" : "text-primary"
+                                sub.type === 'income' ? "text-green-600" : "text-red-600"
                             )}>
                                 ৳{formatAmount(sub.amount)}
                             </span>
                         </div>
+
+
                     ))}
                     {subExpenses.length === 0 && (
                         <div className="ml-7 p-3 text-[10px] text-muted-foreground italic border border-dashed rounded-xl border-border/40 text-center">

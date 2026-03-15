@@ -163,10 +163,11 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
                                 <div className="text-right">
                                     <span className={cn(
                                         "text-sm font-black tabular-nums",
-                                        isPrimary ? "text-primary" : "text-green-600"
+                                        exp.type === 'income' ? "text-green-600" : "text-red-600"
                                     )}>
-                                        {isPrimary ? '+' : '-'}৳{formatAmount(exp.amount)}
+                                        {exp.type === 'income' ? '+' : '-'}৳{formatAmount(exp.amount)}
                                     </span>
+
                                 </div>
                                 <Button
                                     size="icon"

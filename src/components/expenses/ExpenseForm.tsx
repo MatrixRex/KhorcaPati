@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { cn, formatAmount } from '@/lib/utils';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,12 +16,14 @@ import { db, type Expense } from '@/db/schema';
 import { CategoryComboBox } from './CategoryComboBox';
 import { GoalComboBox } from './GoalComboBox';
 import { LoanComboBox } from './LoanComboBox';
-import i18n from '@/i18n';
+
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useUIStore } from '@/stores/uiStore';
-import { ChevronRight, Plus, Layers, Trash2, Calculator } from 'lucide-react';
+import { ChevronRight, Plus, Layers, Trash2, Calculator, Edit2 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { NumberPad } from '@/components/shared/NumberPad';
+
 import { SuggestionInput } from './SuggestionInput';
 import {
     AlertDialog,
@@ -35,6 +37,8 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { useTranslation } from 'react-i18next';
+import { SheetHeader, SheetTitle } from '@/components/ui/sheet';
+
 
 const expenseSchema = z.object({
     amount: z.number().min(0.01, 'Please enter a valid amount'),
@@ -63,7 +67,6 @@ interface ExpenseFormProps {
 export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, onCancel, hideCollectionToggle }: ExpenseFormProps) {
     const { t } = useTranslation();
 
-    // Store initial parentId locally on mount to prevent it from changing if the global store changes
     const [fixedParentId] = useState<number | null>(() => {
         if (initialData) return initialData.parentId;
         if (propParentId !== undefined) return propParentId;
@@ -77,8 +80,9 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
     const [wasAmountEdited, setWasAmountEdited] = useState(false);
     const categoryRef = useRef<HTMLInputElement>(null);
     const noteRef = useRef<HTMLInputElement>(null);
+    const [mode, setMode] = useState<'regular' | 'debt'>(initialData?.loanId ? 'debt' : 'regular');
 
-    // Focus Amount (NumberPad) on mount if it's a new record
+
     useEffect(() => {
         if (!initialData && !propParentId && !hideCollectionToggle) {
             setShowNumberPad(true);
@@ -100,7 +104,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
         defaultValues: {
             amount: initialData?.amount || 0,
             type: initialData?.type || 'expense',
-            category: initialData?.category || '',
+            category: initialData?.category || (mode === 'debt' ? 'Debt' : ''),
             goalId: initialData?.goalId || null,
             loanId: initialData?.loanId || null,
             date: initialData?.date || format(new Date(), 'yyyy-MM-dd'),
@@ -112,9 +116,53 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
         },
     });
 
+    const loanId = form.watch('loanId');
+    const selectedLoanInDb = useLiveQuery(async () => loanId ? await db.loans.get(loanId) : undefined, [loanId]);
+    const openEditLoan = useUIStore((state) => state.openEditLoan);
+
+    const loanLinkedExpenses = useLiveQuery(() => 
+        loanId ? db.expenses.where('loanId').equals(loanId).toArray() : []
+    , [loanId]) || [];
+
+    const loanProgress = useMemo(() => {
+        if (!selectedLoanInDb) return null;
+        const totalRepayments = loanLinkedExpenses
+            .filter(e => (selectedLoanInDb.type === 'taken' ? e.type === 'expense' : e.type === 'income'))
+            .reduce((s, e) => s + e.amount, 0);
+            
+        const totalAdditionalAmount = loanLinkedExpenses
+            .filter(e => (selectedLoanInDb.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
+            .reduce((s, e) => s + e.amount, 0);
+
+        const totalGrossAmount = selectedLoanInDb.totalAmount + totalAdditionalAmount;
+        const remainingAmount = Math.max(0, totalGrossAmount - totalRepayments);
+        const percentage = Math.min((totalRepayments / totalGrossAmount) * 100, 100);
+        
+        return { percentage, remainingAmount, totalGrossAmount };
+    }, [selectedLoanInDb, loanLinkedExpenses]);
+
+    useEffect(() => {
+        if (mode === 'debt') {
+            if (selectedLoanInDb) {
+                const categoryName = selectedLoanInDb.type === 'given' ? 'Lent' : 'Borrowed';
+                form.setValue('category', categoryName, { shouldDirty: true });
+                
+                // Set default type for new records in debt mode
+                // Lent (given) -> Repaid (income), Borrowed (taken) -> Paid Back (expense)
+                if (!initialData && !currentId) {
+                    const defaultType = selectedLoanInDb.type === 'given' ? 'income' : 'expense';
+                    form.setValue('type', defaultType, { shouldDirty: true });
+                }
+            } else {
+                form.setValue('category', 'Debt', { shouldDirty: true });
+            }
+            if (currentId) form.handleSubmit(performSave)();
+        }
+    }, [mode, selectedLoanInDb, initialData, currentId]);
+
+
     const isNested = form.watch('isNested');
 
-    // Auto-update amount and date for nested record based on sub-records
     useEffect(() => {
         if (isNested && subExpenses && subExpenses.length > 0) {
             const parentType = form.getValues('type');
@@ -126,7 +174,6 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             form.setValue('amount', Math.max(0, totalAmount));
             form.setValue('date', latestDate);
 
-            // Auto-save the parent after updating from sub-records
             performSave(form.getValues());
         }
     }, [isNested, subExpenses]);
@@ -150,10 +197,8 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             await db.transaction('rw', db.expenses, async () => {
                 const subIds = subExpenses.map(s => s.id!).filter(id => id !== undefined);
                 if (subIds.length > 0) {
-                    // Convert all sub-records to normal top-level records
                     await db.expenses.where('id').anyOf(subIds as number[]).modify({ parentId: null });
                 }
-                // Permanently delete the parent collection record
                 await db.expenses.delete(currentId);
             });
             setShowUngroupDialog(false);
@@ -177,7 +222,6 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
     const processItems = async (expenseId: number, note: string, date: string) => {
         if (!note) return;
-
         const itemLines = note.split(/[,\n]/).filter(s => s.trim());
         for (const line of itemLines) {
             const parsed = parseItemInput(line.trim());
@@ -197,10 +241,9 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
     };
 
     const performSave = async (data: ExpenseFormValues): Promise<number | undefined> => {
-        // Nested records can have 0 amount if no sub-records yet
         if (!data.isNested && data.amount <= 0) {
             form.setError('amount', { message: 'Please enter a valid amount' });
-            setWasAmountEdited(true); // Show error outline immediately
+            setWasAmountEdited(true);
             return;
         }
         if (isSavingRef.current) return currentId;
@@ -213,7 +256,6 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             const defaultCat = await db.categories.where('isDefault').equals(1).first();
             const validCategory = categoryInDb?.name || defaultCat?.name || 'Unlisted';
 
-            // Prevent self-parenting
             let finalParentId = fixedParentId;
             if (currentId && finalParentId === currentId) {
                 finalParentId = null;
@@ -268,343 +310,500 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
     return (
         <>
-            <form className="space-y-4 pb-6">
-                <div className="flex justify-between items-center mb-2">
-                    <div className="flex bg-muted p-1 rounded-xl w-full">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                form.setValue('type', 'expense', { shouldDirty: true });
-                                if (currentId) form.handleSubmit(performSave)();
-                            }}
-                            className={cn(
-                                "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
-                                form.watch('type') === 'expense'
-                                    ? "bg-primary text-primary-foreground shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground"
-                            )}
-                        >
-                            {t('expenseLabel')}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                form.setValue('type', 'income', { shouldDirty: true });
-                                if (currentId) form.handleSubmit(performSave)();
-                            }}
-                            className={cn(
-                                "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
-                                form.watch('type') === 'income'
-                                    ? "bg-green-600 text-white shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground"
-                            )}
-                        >
-                            {t('incomeLabel')}
-                        </button>
-                    </div>
+            <SheetHeader className="mb-6 flex flex-row items-center justify-between p-0">
+                <SheetTitle className="text-xl font-black">
+                    {initialData ? (hideCollectionToggle ? t('editSubRecord') : t('editRecord')) : (hideCollectionToggle ? t('addSubRecord') : t('addRecord'))}
+                </SheetTitle>
+                <div className="flex bg-muted p-0.5 rounded-lg border border-border/50">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setMode('regular');
+                            form.setValue('loanId', null, { shouldDirty: true });
+                        }}
+                        className={cn(
+                            "px-3 py-1 text-[10px] font-black uppercase tracking-tight rounded-md transition-all",
+                            mode === 'regular' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                        )}
+                    >
+                        {t('regular')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setMode('debt');
+                            form.setValue('itemAutoTrack', false, { shouldDirty: true });
+                            form.setValue('goalId', null, { shouldDirty: true });
+                        }}
+                        className={cn(
+                            "px-3 py-1 text-[10px] font-black uppercase tracking-tight rounded-md transition-all",
+                            mode === 'debt' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                        )}
+                    >
+                        {t('debt')}
+                    </button>
                 </div>
+            </SheetHeader>
 
-                {!hideCollectionToggle && (
-                    <div className={cn(
-                        "flex items-center justify-between p-3 rounded-2xl border transition-all duration-300",
-                        isNested ? "bg-primary/5 border-primary/20" : "bg-muted/30 border-border/20"
-                    )}>
-                        <div className="flex flex-col">
-                            <div className="flex items-center gap-2">
-                                <Layers className={cn("w-4 h-4", isNested ? "text-primary" : "text-muted-foreground")} />
-                                <span className="text-xs font-black uppercase tracking-tight">{t('collectionMode')}</span>
-                            </div>
-                            <span className="text-[9px] text-muted-foreground font-medium">{t('collectionDescription')}</span>
-                        </div>
-
-                        <Switch
-                            checked={isNested}
-                            onCheckedChange={() => {
-                                const newVal = !isNested;
-                                if (!newVal && subExpenses && subExpenses.length > 0) {
-                                    setShowUngroupDialog(true);
-                                } else {
-                                    form.setValue('isNested', newVal, { shouldDirty: true });
-                                    form.handleSubmit(performSave)();
-                                }
-                            }}
-                        />
-                    </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2 relative">
-                        <Label htmlFor="amount" className={cn("text-[11px] font-bold uppercase", isNested && "opacity-50")}>
-                            {isNested ? t('totalAmount') : t('amount')}
-                        </Label>
-                        <div className="relative">
-                            <Input
-                                id="amount"
-                                type="text"
-                                readOnly
-                                disabled={isNested}
-                                value={form.watch('amount') ? `৳${formatAmount(form.watch('amount'))}` : '৳০'}
-                                onClick={() => !isNested && setShowNumberPad(true)}
-                                className={cn(
-                                    "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl transition-all",
-                                    isNested ? "bg-muted border-dashed opacity-70" : "border-primary/20 shadow-sm focus:border-primary",
-                                    !isNested && wasAmountEdited && form.getValues('amount') <= 0 && "border-destructive ring-2 ring-destructive/20"
+            <form className="space-y-4 pb-6">
+                {mode === 'debt' ? (
+                    /* DEBT MODE LAYOUT */
+                    <>
+                        {/* 1. Loan Selection */}
+                        <div className="space-y-2">
+                            <Label htmlFor="loan" className="text-[11px] font-bold uppercase">{t('loans')}</Label>
+                            <div className="flex gap-2">
+                                <div className="flex-1">
+                                    <Controller
+                                        control={form.control}
+                                        name="loanId"
+                                        render={({ field }) => (
+                                            <LoanComboBox
+                                                value={field.value ?? null}
+                                                placeholder={t('selectLoan')}
+                                                onChange={(val) => {
+                                                    field.onChange(val);
+                                                    form.handleSubmit(performSave)();
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </div>
+                                {selectedLoanInDb && (
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        className="h-12 w-12 rounded-xl shrink-0 border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 shadow-sm"
+                                        onClick={() => openEditLoan(selectedLoanInDb)}
+                                    >
+                                        <Edit2 className="w-4 h-4" />
+                                    </Button>
                                 )}
-                                placeholder="৳০"
-                            />
-                            {!isNested && <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />}
+                            </div>
                         </div>
-                        {form.formState.errors.amount && (
-                            <p className="text-destructive text-[10px] font-bold">{form.formState.errors.amount.message}</p>
+
+                        {/* 2. Progress Bar & Remaining Amount */}
+                        {loanProgress && (
+                            <div className="bg-muted/30 p-4 rounded-2xl border border-border/10 space-y-3">
+                                <div className="flex justify-between items-end mb-1">
+                                    <div className="flex flex-col">
+                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+                                            {selectedLoanInDb?.type === 'given' ? t('collectionProgress') : t('loanProgress')}
+                                        </span>
+                                        <span className={cn(
+                                            "text-sm font-black",
+                                            selectedLoanInDb?.type === 'taken' ? "text-red-600" : "text-green-600"
+                                        )}>
+                                            ৳{formatAmount(loanProgress.remainingAmount)} {t('remaining')}
+                                        </span>
+                                    </div>
+                                    <span className="text-[10px] font-black text-muted-foreground/60">
+                                        {Math.round(loanProgress.percentage)}%
+                                    </span>
+                                </div>
+                                <Progress
+                                    value={loanProgress.percentage}
+                                    className="h-2"
+                                    indicatorClassName={cn(
+                                        "transition-all duration-1000 ease-out",
+                                        selectedLoanInDb?.type === 'taken' ? "bg-red-500" : "bg-green-500"
+                                    )}
+                                />
+                            </div>
                         )}
 
-                        {showNumberPad && (
-                            <NumberPad
-                                value={String(form.getValues('amount'))}
-                                label={form.watch('type') === 'expense' ? `${t('expenseLabel')} ${t('amount')}` : `${t('incomeLabel')} ${t('amount')}`}
-                                onChange={(val) => {
-                                    const num = parseFloat(val);
-                                    if (!isNaN(num)) {
-                                        form.setValue('amount', num);
-                                        setWasAmountEdited(true);
-                                    }
-                                }}
-                                onDone={handleAmountDone}
-                                onClose={() => setShowNumberPad(false)}
+                        {/* 3. Type Toggle */}
+                        <div className="flex justify-between items-center mb-2">
+                            <div className="flex bg-muted p-1 rounded-xl w-full">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        form.setValue('type', 'expense', { shouldDirty: true });
+                                        if (currentId) form.handleSubmit(performSave)();
+                                    }}
+                                    className={cn(
+                                        "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
+                                        form.watch('type') === 'expense'
+                                            ? "bg-red-600 text-white shadow-sm"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    {form.watch('category') === 'Lent' ? t('lentOut') : (form.watch('category') === 'Borrowed' ? t('paidBackOut') : t('expenseLabel'))}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        form.setValue('type', 'income', { shouldDirty: true });
+                                        if (currentId) form.handleSubmit(performSave)();
+                                    }}
+                                    className={cn(
+                                        "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
+                                        form.watch('type') === 'income'
+                                            ? "bg-green-600 text-white shadow-sm"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    {form.watch('category') === 'Lent' ? t('repaidIn') : (form.watch('category') === 'Borrowed' ? t('borrowedIn') : t('incomeLabel'))}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* 4. Amount + Date */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2 relative">
+                                <Label htmlFor="amount" className="text-[11px] font-bold uppercase">{t('amount')}</Label>
+                                <div className="relative">
+                                    <Input
+                                        id="amount"
+                                        type="text"
+                                        readOnly
+                                        value={form.watch('amount') ? `৳${formatAmount(form.watch('amount'))}` : '৳০'}
+                                        onClick={() => setShowNumberPad(true)}
+                                        className={cn(
+                                            "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl transition-all border-primary/20 shadow-sm focus:border-primary",
+                                            wasAmountEdited && form.getValues('amount') <= 0 && "border-destructive ring-2 ring-destructive/20"
+                                        )}
+                                        placeholder="৳০"
+                                    />
+                                    <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+                                </div>
+                                {form.formState.errors.amount && (
+                                    <p className="text-destructive text-[10px] font-bold">{form.formState.errors.amount.message}</p>
+                                )}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="date" className="text-[11px] font-bold uppercase">{t('date')}</Label>
+                                <Controller
+                                    control={form.control}
+                                    name="date"
+                                    render={({ field }) => (
+                                        <DatePicker
+                                            date={field.value ? parseISO(field.value) : undefined}
+                                            setDate={(date) => {
+                                                const newDate = date ? format(date, 'yyyy-MM-dd') : '';
+                                                field.onChange(newDate);
+                                                if (newDate) {
+                                                    form.handleSubmit(performSave)();
+                                                }
+                                            }}
+                                            className="h-12 rounded-xl font-medium"
+                                        />
+                                    )}
+                                />
+                            </div>
+                        </div>
+
+                        {/* 5. Note */}
+                        <div className="space-y-2">
+                            <Label htmlFor="note" className="text-[11px] font-bold uppercase">{t('note')}</Label>
+                            <Controller
+                                control={form.control}
+                                name="note"
+                                render={({ field }) => (
+                                    <SuggestionInput
+                                        ref={noteRef}
+                                        id="note"
+                                        type="note"
+                                        disableSuggestions
+                                        placeholder={t('expenseNoteOnlyPlaceholder')}
+                                        value={field.value || ''}
+                                        onChange={(val: string) => {
+                                            field.onChange(val);
+                                        }}
+                                        onBlur={() => {
+                                            field.onBlur();
+                                            handleBlur();
+                                        }}
+                                        onEnter={handleNoteEnter}
+                                        className="h-12 rounded-xl"
+                                    />
+                                )}
                             />
-                        )}
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="date" className={cn("text-[11px] font-bold uppercase", isNested && "opacity-50")}>{t('date')}</Label>
-                        <Controller
-                            control={form.control}
-                            name="date"
-                            render={({ field }) => (
-                                <DatePicker
-                                    disabled={isNested}
-                                    date={field.value ? parseISO(field.value) : undefined}
-                                    setDate={(date) => {
-                                        const newDate = date ? format(date, 'yyyy-MM-dd') : '';
-                                        field.onChange(newDate);
-                                        if (newDate) {
+                        </div>
+
+                        {/* 6. Category (Grayed Out) */}
+                        <div className="space-y-2">
+                            <Label htmlFor="category" className="text-[11px] font-bold uppercase">{t('category')}</Label>
+                            <div className="w-full">
+                                <CategoryComboBox
+                                    ref={categoryRef}
+                                    value={form.watch('category')}
+                                    disabled
+                                    placeholder={t('autoSetFromLoan')}
+                                    onChange={(val: string) => {
+                                        form.setValue('category', val, { shouldDirty: true });
+                                    }}
+                                    onBlur={() => form.handleSubmit(performSave)()}
+                                    onEnter={handleCategoryEnter}
+                                />
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    /* REGULAR MODE LAYOUT */
+                    <>
+                        <div className="flex justify-between items-center mb-2">
+                            <div className="flex bg-muted p-1 rounded-xl w-full">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        form.setValue('type', 'expense', { shouldDirty: true });
+                                        if (currentId) form.handleSubmit(performSave)();
+                                    }}
+                                    className={cn(
+                                        "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
+                                        form.watch('type') === 'expense'
+                                            ? "bg-red-600 text-white shadow-sm"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    {t('expenseLabel')}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        form.setValue('type', 'income', { shouldDirty: true });
+                                        if (currentId) form.handleSubmit(performSave)();
+                                    }}
+                                    className={cn(
+                                        "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
+                                        form.watch('type') === 'income'
+                                            ? "bg-green-600 text-white shadow-sm"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    {t('incomeLabel')}
+                                </button>
+                            </div>
+                        </div>
+
+                        {!hideCollectionToggle && (
+                            <div className={cn(
+                                "flex items-center justify-between p-3 rounded-2xl border transition-all duration-300",
+                                isNested ? "bg-primary/5 border-primary/20" : "bg-muted/30 border-border/20"
+                            )}>
+                                <div className="flex flex-col">
+                                    <div className="flex items-center gap-2">
+                                        <Layers className={cn("w-4 h-4", isNested ? "text-primary" : "text-muted-foreground")} />
+                                        <span className="text-xs font-black uppercase tracking-tight">{t('collectionMode')}</span>
+                                    </div>
+                                    <span className="text-[9px] text-muted-foreground font-medium">{t('collectionDescription')}</span>
+                                </div>
+                                <Switch
+                                    checked={isNested}
+                                    onCheckedChange={() => {
+                                        const newVal = !isNested;
+                                        if (!newVal && subExpenses && subExpenses.length > 0) {
+                                            setShowUngroupDialog(true);
+                                        } else {
+                                            form.setValue('isNested', newVal, { shouldDirty: true });
                                             form.handleSubmit(performSave)();
                                         }
                                     }}
-                                    className="h-12 rounded-xl font-medium"
                                 />
-                            )}
-                        />
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="category" className="text-[11px] font-bold uppercase">{t('category')}</Label>
-                    <div className="w-full">
-                        <CategoryComboBox
-                            ref={categoryRef}
-                            value={form.watch('category')}
-                            onChange={(val: string) => {
-                                form.setValue('category', val, { shouldDirty: true });
-                            }}
-                            onBlur={() => form.handleSubmit(performSave)()}
-                            onEnter={handleCategoryEnter}
-                        />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="goal" className="text-[11px] font-bold uppercase">{t('linkToGoal')}</Label>
-                        <div className="w-full">
-                            <Controller
-                                control={form.control}
-                                name="goalId"
-                                render={({ field }) => (
-                                    <GoalComboBox
-                                        value={field.value ?? null}
-                                        onChange={(val) => {
-                                            field.onChange(val);
-                                            form.handleSubmit(performSave)();
-                                        }}
-                                    />
-                                )}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="loan" className="text-[11px] font-bold uppercase">{t('linkToLoan')}</Label>
-                        <div className="w-full">
-                            <Controller
-                                control={form.control}
-                                name="loanId"
-                                render={({ field }) => (
-                                    <LoanComboBox
-                                        value={field.value ?? null}
-                                        onChange={(val) => {
-                                            field.onChange(val);
-                                            form.handleSubmit(performSave)();
-                                        }}
-                                    />
-                                )}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        {!isNested && (
-                            <div className="flex bg-muted p-0.5 rounded-lg border border-border/50">
-                                <button
-                                    type="button"
-                                    onPointerDown={(e) => {
-                                        e.preventDefault(); // Prevent input blur → keyboard stays open
-                                        form.setValue('itemAutoTrack', true, { shouldDirty: true });
-                                        form.handleSubmit(performSave)();
-                                        noteRef.current?.focus();
-                                    }}
-                                    className={cn(
-                                        "px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-md transition-all",
-                                        form.watch('itemAutoTrack') ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
-                                    )}
-                                >
-                                    {t('itemsLabel')}
-                                </button>
-                                <button
-                                    type="button"
-                                    onPointerDown={(e) => {
-                                        e.preventDefault(); // Prevent input blur → keyboard stays open
-                                        form.setValue('itemAutoTrack', false, { shouldDirty: true });
-                                        form.handleSubmit(performSave)();
-                                        noteRef.current?.focus();
-                                    }}
-                                    className={cn(
-                                        "px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-md transition-all",
-                                        !form.watch('itemAutoTrack') ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
-                                    )}
-                                >
-                                    {t('notesLabel')}
-                                </button>
                             </div>
                         )}
-                        {isNested && <Label htmlFor="note" className="text-[11px] font-bold uppercase">{t('collectionTitle')}</Label>}
-                    </div>
-                    <Controller
-                        control={form.control}
-                        name="note"
-                        render={({ field }) => (
-                            <SuggestionInput
-                                ref={noteRef}
-                                id="note"
-                                type="note"
-                                disableSuggestions={isNested || !form.watch('itemAutoTrack')}
-                                placeholder={isNested ? t('collectionTitlePlaceholder') : (form.watch('itemAutoTrack') ? t('expenseNotePlaceholder') : t('expenseNoteOnlyPlaceholder'))}
-                                value={field.value || ''}
-                                onChange={(val: string) => {
-                                    field.onChange(val);
-                                }}
-                                onBlur={() => {
-                                    field.onBlur();
-                                    handleBlur();
-                                }}
-                                onEnter={handleNoteEnter}
-                                className="h-12 rounded-xl"
-                            />
-                        )}
-                    />
-                    {!isNested && form.watch('itemAutoTrack') && <p className="text-[9px] text-muted-foreground font-medium italic">{t('autoTrackDescription')}</p>}
-                </div>
 
-                {isNested && (
-                    <div className="space-y-3 pt-4 border-t border-dashed border-border mt-2">
-                        <div className="flex items-center justify-between">
-                            <div className="flex flex-col">
-                                <Label className="text-[11px] font-black uppercase tracking-widest text-primary">{t('subRecords')}</Label>
-                                <span className="text-[9px] text-muted-foreground">{t('individualExpenses')}</span>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2 relative">
+                                <Label htmlFor="amount" className={cn("text-[11px] font-bold uppercase", isNested && "opacity-50")}>
+                                    {isNested ? t('totalAmount') : t('amount')}
+                                </Label>
+                                <div className="relative">
+                                    <Input
+                                        id="amount"
+                                        type="text"
+                                        readOnly
+                                        disabled={isNested}
+                                        value={form.watch('amount') ? `৳${formatAmount(form.watch('amount'))}` : '৳০'}
+                                        onClick={() => !isNested && setShowNumberPad(true)}
+                                        className={cn(
+                                            "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl transition-all",
+                                            isNested ? "bg-muted border-dashed opacity-70" : "border-primary/20 shadow-sm focus:border-primary",
+                                            !isNested && wasAmountEdited && form.getValues('amount') <= 0 && "border-destructive ring-2 ring-destructive/20"
+                                        )}
+                                        placeholder="৳০"
+                                    />
+                                    {!isNested && <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />}
+                                </div>
+                                {form.formState.errors.amount && (
+                                    <p className="text-destructive text-[10px] font-bold">{form.formState.errors.amount.message}</p>
+                                )}
                             </div>
-                            <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                className="h-8 text-[11px] gap-1.5 rounded-full px-4 border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 shadow-sm"
-                                onClick={async () => {
-                                    // Ensure isNested is explicitly true when adding a sub-record
-                                    if (!isNested) {
-                                        form.setValue('isNested', true);
-                                    }
-
-                                    let parentId = currentId || initialData?.id;
-                                    // Always save to ensure we have an ID and isNested state is persisted
-                                    parentId = await performSave({ ...form.getValues(), isNested: true });
-
-                                    if (parentId) {
-                                        useUIStore.getState().openAddSubRecord(parentId);
-                                    }
-                                }}
-
-                            >
-                                <Plus className="w-3.5 h-3.5" />
-                                {t('addSubRecord')}
-                            </Button>
+                            <div className="space-y-2">
+                                <Label htmlFor="date" className={cn("text-[11px] font-bold uppercase", isNested && "opacity-50")}>{t('date')}</Label>
+                                <Controller
+                                    control={form.control}
+                                    name="date"
+                                    render={({ field }) => (
+                                        <DatePicker
+                                            disabled={isNested}
+                                            date={field.value ? parseISO(field.value) : undefined}
+                                            setDate={(date) => {
+                                                const newDate = date ? format(date, 'yyyy-MM-dd') : '';
+                                                field.onChange(newDate);
+                                                if (newDate) {
+                                                    form.handleSubmit(performSave)();
+                                                }
+                                            }}
+                                            className="h-12 rounded-xl font-medium"
+                                        />
+                                    )}
+                                />
+                            </div>
                         </div>
 
-                        <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
-                            {subExpenses && subExpenses.length > 0 ? (
-                                <div className="grid gap-2">
-                                    {subExpenses.map((sub: any) => (
-                                        <div
-                                            key={sub.id}
-                                            className="flex items-center justify-between p-3 rounded-2xl bg-muted/20 border border-border/30 group hover:border-primary/30 hover:bg-muted/40 transition-all cursor-pointer"
-                                            onClick={() => useUIStore.getState().openEditSubRecord(sub)}
+                        <div className="space-y-2">
+                            <Label htmlFor="category" className="text-[11px] font-bold uppercase">{t('category')}</Label>
+                            <div className="w-full">
+                                <CategoryComboBox
+                                    ref={categoryRef}
+                                    value={form.watch('category')}
+                                    onChange={(val: string) => {
+                                        form.setValue('category', val, { shouldDirty: true });
+                                    }}
+                                    onBlur={() => form.handleSubmit(performSave)()}
+                                    onEnter={handleCategoryEnter}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="goal" className="text-[11px] font-bold uppercase">{t('linkToGoal')}</Label>
+                            <div className="w-full">
+                                <Controller
+                                    control={form.control}
+                                    name="goalId"
+                                    render={({ field }) => (
+                                        <GoalComboBox
+                                            value={field.value ?? null}
+                                            onChange={(val) => {
+                                                field.onChange(val);
+                                                form.handleSubmit(performSave)();
+                                            }}
+                                        />
+                                    )}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                {!isNested && (
+                                    <div className="flex bg-muted p-0.5 rounded-lg border border-border/50">
+                                        <button
+                                            type="button"
+                                            onPointerDown={(e) => {
+                                                e.preventDefault();
+                                                form.setValue('itemAutoTrack', true, { shouldDirty: true });
+                                                form.handleSubmit(performSave)();
+                                                noteRef.current?.focus();
+                                            }}
+                                            className={cn(
+                                                "px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-md transition-all",
+                                                form.watch('itemAutoTrack') ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
+                                            )}
                                         >
-                                            <div className="flex items-center gap-3 overflow-hidden">
-                                                <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center border border-border/40 shrink-0">
-                                                    <span className="text-xs">📄</span>
-                                                </div>
-                                                <div className="flex flex-col gap-0.5 overflow-hidden">
-                                                    <span className="text-xs font-bold truncate capitalize group-hover:text-primary transition-colors">
-                                                        {sub.note || sub.type}
-                                                    </span>
-                                                    <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-medium uppercase tracking-tighter">
-                                                        <span>{sub.category}</span>
-                                                        <span>•</span>
-                                                        <span>{new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'short' }).format(parseISO(sub.date))}</span>
+                                            {t('itemsLabel')}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onPointerDown={(e) => {
+                                                e.preventDefault();
+                                                form.setValue('itemAutoTrack', false, { shouldDirty: true });
+                                                form.handleSubmit(performSave)();
+                                                noteRef.current?.focus();
+                                            }}
+                                            className={cn(
+                                                "px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-md transition-all",
+                                                !form.watch('itemAutoTrack') ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
+                                            )}
+                                        >
+                                            {t('notesLabel')}
+                                        </button>
+                                    </div>
+                                )}
+                                {isNested && <Label htmlFor="note" className="text-[11px] font-bold uppercase">{t('collectionTitle')}</Label>}
+                            </div>
+                            <Controller
+                                control={form.control}
+                                name="note"
+                                render={({ field }) => (
+                                    <SuggestionInput
+                                        ref={noteRef}
+                                        id="note"
+                                        type="note"
+                                        disableSuggestions={isNested || !form.watch('itemAutoTrack')}
+                                        placeholder={isNested ? t('collectionTitlePlaceholder') : (form.watch('itemAutoTrack') ? t('expenseNotePlaceholder') : t('expenseNoteOnlyPlaceholder'))}
+                                        value={field.value || ''}
+                                        onChange={(val: string) => {
+                                            field.onChange(val);
+                                        }}
+                                        onBlur={() => {
+                                            field.onBlur();
+                                            handleBlur();
+                                        }}
+                                        onEnter={handleNoteEnter}
+                                        className="h-12 rounded-xl"
+                                    />
+                                )}
+                            />
+                            {!isNested && form.watch('itemAutoTrack') && <p className="text-[9px] text-muted-foreground font-medium italic">{t('autoTrackDescription')}</p>}
+                        </div>
+
+                        {isNested && (
+                            <div className="space-y-3 pt-4 border-t border-dashed border-border mt-2">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex flex-col">
+                                        <Label className="text-[11px] font-black uppercase tracking-widest text-primary">{t('subRecords')}</Label>
+                                        <span className="text-[9px] text-muted-foreground">{t('individualExpenses')}</span>
+                                    </div>
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-8 text-[11px] gap-1.5 rounded-full px-4 border-primary/30 bg-primary/5 text-primary hover:bg-primary/10 shadow-sm"
+                                        onClick={async () => {
+                                            if (!isNested) form.setValue('isNested', true);
+                                            const parentId = await performSave({ ...form.getValues(), isNested: true });
+                                            if (parentId) useUIStore.getState().openAddSubRecord(parentId);
+                                        }}
+                                    >
+                                        <Plus className="w-3.5 h-3.5" />
+                                        {t('addSubRecord')}
+                                    </Button>
+                                </div>
+                                <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
+                                    {subExpenses && subExpenses.length > 0 ? (
+                                        subExpenses.map((sub: Expense) => (
+                                            <div key={sub.id} className="flex flex-col gap-1 p-3 rounded-2xl bg-primary/5 border border-primary/10 group active:scale-[0.98] transition-all cursor-pointer">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-black">{sub.note || sub.category}</span>
+                                                        <span className="text-[10px] text-muted-foreground uppercase">{sub.category}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-3 ml-2">
+                                                        <span className={cn(
+                                                            "text-sm font-black",
+                                                            sub.type === 'income' ? "text-green-600" : "text-red-600"
+                                                        )}>
+                                                            ৳{formatAmount(sub.amount)}
+                                                        </span>
+                                                        <ChevronRight className="w-4 h-4 text-muted-foreground opacity-30 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-3 ml-2">
-                                                <span className={cn(
-                                                    "text-sm font-black",
-                                                    sub.type === 'income' ? "text-green-600" : "text-primary"
-                                                )}>
-                                                    ৳{formatAmount(sub.amount)}
-                                                </span>
-                                                <ChevronRight className="w-4 h-4 text-muted-foreground opacity-30 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="p-8 text-center border-2 border-dashed rounded-3xl bg-muted/20 border-border/20">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">{t('emptyCollection')}</p>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
-                            ) : (
-                                <div className="text-[11px] text-muted-foreground italic text-center py-8 border-2 border-dashed rounded-3xl border-muted flex flex-col items-center gap-2 bg-muted/5">
-                                    <div className="w-10 h-10 rounded-full bg-muted/20 flex items-center justify-center mb-1">
-                                        <Layers className="w-5 h-5 opacity-20" />
-                                    </div>
-                                    {t('thisCollectionIsEmpty')}
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            form.setValue('isNested', true);
-                                            form.handleSubmit(performSave)();
-                                        }}
-                                        className="text-primary font-black uppercase tracking-tighter not-italic hover:underline mt-1"
-                                    >
-                                        {t('addFirstRecord')}
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 <div className="pt-4 space-y-2">
@@ -613,7 +812,6 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             type="button"
                             variant="outline"
                             onClick={async () => {
-                                // If it's a new record and amount is 0, show error and don't close
                                 const values = form.getValues();
                                 if (!values.isNested && values.amount <= 0) {
                                     form.setError('amount', { message: 'Amount is required' });
@@ -621,15 +819,12 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     setShowNumberPad(true);
                                     return;
                                 }
-
                                 const currentVal = form.getValues('category');
                                 const match = categories.find(c => c.name.toLowerCase() === currentVal.trim().toLowerCase());
                                 if (!match) {
                                     const defCat = categories.find(c => c.isDefault);
                                     form.setValue('category', defCat?.name || 'Unlisted');
                                 }
-                                
-                                // Perform a final save before closing
                                 await form.handleSubmit(performSave)();
                                 onSuccess ? onSuccess() : (onCancel && onCancel());
                             }}
@@ -684,8 +879,22 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {showNumberPad && (
+                <NumberPad
+                    value={String(form.getValues('amount'))}
+                    label={form.watch('type') === 'expense' ? `${t('expenseLabel')} ${t('amount')}` : `${t('incomeLabel')} ${t('amount')}`}
+                    onChange={(val) => {
+                        const num = parseFloat(val);
+                        if (!isNaN(num)) {
+                            form.setValue('amount', num);
+                            setWasAmountEdited(true);
+                        }
+                    }}
+                    onDone={handleAmountDone}
+                    onClose={() => setShowNumberPad(false)}
+                />
+            )}
         </>
     );
 }
-
-

@@ -30,14 +30,19 @@ export function BottomNav() {
                         >
                             {({ isActive }) => (
                                 <>
+                                    {/* Active Tab Mountain Glow */}
+                                    {isActive && (
+                                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-16 bg-primary/30 blur-[32px] rounded-[100%] -z-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pointer-events-none" />
+                                    )}
+                                    
                                     <div className={cn(
-                                        "p-1.5 rounded-xl transition-all duration-300",
-                                        isActive ? "bg-primary/10 scale-110" : "group-hover:bg-accent/50"
+                                        "p-1.5 rounded-xl transition-all duration-300 relative z-10",
+                                        isActive ? "bg-primary/15 scale-110 shadow-lg shadow-primary/10" : "group-hover:bg-accent/50"
                                     )}>
                                         <item.icon className={cn("w-5 h-5", isActive ? "stroke-[2.5px]" : "stroke-[2px]")} />
                                     </div>
                                     <span className={cn(
-                                        "text-[10px] font-bold tracking-tight transition-all duration-300",
+                                        "text-[10px] font-bold tracking-tight transition-all duration-300 relative z-10",
                                         isActive ? "opacity-100 translate-y-0" : "opacity-70 group-hover:opacity-100"
                                     )}>
                                         {item.label}

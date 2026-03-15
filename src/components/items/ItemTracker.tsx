@@ -9,8 +9,10 @@ import { useNavigate } from 'react-router-dom';
 import { useCloseWatcher } from '@/hooks/use-close-watcher';
 import { useTranslation } from 'react-i18next';
 
+import { useCategoryStore } from '@/stores/categoryStore';
 import { useFilterStore } from '@/stores/filterStore';
 import { isWithinInterval } from 'date-fns';
+import { cn } from '@/lib/utils';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -83,30 +85,35 @@ export function ItemTracker() {
     // Close on back button / Esc
     useCloseWatcher(!!selectedInventoryItem, () => setSelectedInventoryItem(null));
 
-    const items = useLiveQuery(async () => {
+    const data = useLiveQuery(async () => {
         let all: Item[];
         if (selectedCategory) {
-            // Find all expenses in this category
             const expenseIds = (await db.expenses
                 .where('category').equals(selectedCategory)
                 .primaryKeys()) as number[];
-            
-            // Find items linked to these expenses
-            all = await db.items
-                .where('expenseId')
-                .anyOf(expenseIds)
-                .toArray();
+            all = await db.items.where('expenseId').anyOf(expenseIds).toArray();
         } else {
             all = await db.items.orderBy('date').reverse().toArray();
         }
 
-        return all.filter(item => {
+        const filtered = all.filter(item => {
             const date = new Date(item.date);
             return isWithinInterval(date, { start: startDate, end: endDate });
         });
+
+        const expenseIds = Array.from(new Set(filtered.map(i => i.expenseId).filter(Boolean))) as number[];
+        const expenses = await db.expenses.where('id').anyOf(expenseIds).toArray();
+        const eMap = new Map(expenses.map(e => [e.id!, e.category]));
+
+        return { items: filtered, expenseMap: eMap };
     }, [startDate, endDate, selectedCategory]);
 
-    if (!items) {
+    const items = data?.items;
+    const expenseMap = data?.expenseMap || new Map<number, string>();
+
+    const { categories } = useCategoryStore();
+
+    if (items === undefined) {
         return <div className="p-4 text-center text-muted-foreground">{t('loadingItems')}</div>;
     }
 
@@ -136,7 +143,15 @@ export function ItemTracker() {
         return acc;
     }, {} as Record<string, { name: string; totalQty: number; unit: string; records: Item[] }>);
 
-    const groupedList = Object.values(groupedItems).sort((a, b) => {
+    const groupedList = Object.values(groupedItems).map(group => {
+        // Find first record with an expenseId to determine category/color
+        const recordWithExpense = group.records.find(r => r.expenseId);
+        const category = recordWithExpense?.expenseId ? expenseMap.get(recordWithExpense.expenseId) : null;
+        const catInfo = categories.find(c => c.name.toLowerCase() === category?.toLowerCase());
+        const color = catInfo?.color || '#3b82f6';
+        
+        return { ...group, color, category };
+    }).sort((a, b) => {
         if (inventorySortBy === 'alphabet') {
             return a.name.localeCompare(b.name);
         } else {
@@ -191,37 +206,61 @@ export function ItemTracker() {
         setAffectedItemNames(otherNames);
         setShowDeleteWholeConfirm(true);
     };
-        return (
+    const selectedGroup = selectedInventoryItem ? groupedList.find(g => g.name.toLowerCase().trim() === selectedInventoryItem.toLowerCase().trim()) : null;
+    const drawerColor = selectedGroup?.color || '#3b82f6';
+
+    return (
         <div className="flex flex-col gap-[var(--item-gap)] pb-24">
             {groupedList.map((group) => (
                 <Card
                     key={group.name}
-                    className="overflow-hidden hover:bg-muted/30 active:scale-[0.98] transition-all cursor-pointer border-none bg-card shadow-sm"
+                    className="overflow-hidden hover:bg-muted/30 active:scale-[0.98] transition-all cursor-pointer border-border/40 shadow-sm rounded-2xl group/card relative"
+                    style={{ 
+                        background: `linear-gradient(to right, ${group.color}15, transparent)`
+                    }}
                     onClick={() => setSelectedInventoryItem(group.name)}
                 >
+                    {/* Soft glow highlight based on category color */}
+                    <div 
+                        className="absolute -left-4 top-0 bottom-0 w-8 opacity-25 blur-xl pointer-events-none"
+                        style={{ backgroundColor: group.color }}
+                    />
                     <CardContent className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-4 flex-1 min-w-0">
-                            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 transition-transform group-hover:scale-110">
+                            <div 
+                                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover/card:scale-110"
+                                style={{ backgroundColor: `${group.color}20`, color: group.color }}
+                            >
                                 <Package size={24} />
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <h3 className="font-semibold text-sm truncate capitalize leading-tight">
+                                <h3 className="font-bold text-sm tracking-tight truncate capitalize leading-tight group-hover/card:text-primary transition-colors">
                                     {group.name}
                                 </h3>
-                                <p className="text-[11px] text-muted-foreground font-medium">
-                                    {t(group.records.length === 1 ? 'record' : 'records_plural', { count: group.records.length })}
-                                </p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60 shrink-0">
+                                        {t(group.records.length === 1 ? 'record' : 'records_plural', { count: group.records.length })}
+                                    </p>
+                                    {group.category && (
+                                        <span className="text-[10px] text-muted-foreground/30">•</span>
+                                    )}
+                                    {group.category && (
+                                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter truncate">
+                                            {group.category}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-4">
                             <div className="flex flex-col items-end">
                                 <div className="flex items-baseline gap-1">
-                                    <span className="font-bold text-base text-primary leading-none">{formatNumber(group.totalQty)}</span>
-                                    <span className="text-[10px] font-bold text-muted-foreground uppercase">{group.unit}</span>
+                                    <span className="font-black text-base leading-none" style={{ color: group.color }}>{formatNumber(group.totalQty)}</span>
+                                    <span className="text-[10px] font-black text-muted-foreground uppercase">{group.unit}</span>
                                 </div>
                             </div>
-                            <ChevronRight className="text-muted-foreground opacity-30" size={16} />
+                            <ChevronRight className="text-muted-foreground/30" size={16} />
                         </div>
                     </CardContent>
                 </Card>
@@ -234,23 +273,28 @@ export function ItemTracker() {
             >
                 <SheetContent 
                     side="bottom" 
-                    className="h-[92dvh] rounded-t-[32px] p-0 border-none bg-background overflow-hidden flex flex-col"
+                    className="h-[92dvh] rounded-t-[32px] p-0 border-t border-white/10 bg-background/60 backdrop-blur-xl overflow-hidden flex flex-col"
+                    style={{ background: `linear-gradient(to bottom, ${drawerColor}10, transparent)` }}
                 >
-                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
+                    <div className="absolute top-0 left-0 right-0 h-32 opacity-15 blur-3xl pointer-events-none" style={{ backgroundColor: drawerColor }} />
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0 relative z-10" />
                     
-                    {selectedInventoryItem && groupedItems[selectedInventoryItem.toLowerCase().trim()] && (
-                        <div className="flex flex-col h-full overflow-hidden">
+                    {selectedInventoryItem && selectedGroup && (
+                        <div className="flex flex-col h-full overflow-hidden relative z-10">
                             {/* Drawer Header */}
-                            <div className="px-6 pb-6 pt-2 shrink-0 border-b">
-                                <SheetHeader className="text-left mb-6">
+                            <div className="px-6 pb-6 pt-2 shrink-0 border-b border-border/40">
+                                <SheetHeader className="text-left mb-6 p-0">
                                     <div className="flex items-center justify-between w-full">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                            <div 
+                                                className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform"
+                                                style={{ backgroundColor: `${drawerColor}15`, color: drawerColor }}
+                                            >
                                                 <Package size={20} />
                                             </div>
                                             <div>
                                                 <SheetTitle className="text-xl font-black capitalize leading-tight">
-                                                {groupedItems[selectedInventoryItem.toLowerCase().trim()].name}
+                                                {selectedGroup.name}
                                                 </SheetTitle>
                                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                                                     {t('itemDetails')}
@@ -296,56 +340,87 @@ export function ItemTracker() {
 
                                 {groupedItems[selectedInventoryItem.toLowerCase().trim()].records
                                     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                                    .map((record, idx) => (
-                                        <div
-                                            key={record.id || idx}
-                                            onClick={() => handleEntryClick(record.expenseId)}
-                                            className="group transition-all active:scale-[0.98] cursor-pointer"
-                                        >
-                                            <Card className="overflow-hidden border-none bg-muted/40 group-hover:bg-muted/60 transition-colors rounded-2xl">
-                                                <CardContent className="p-4 flex items-center justify-between">
-                                                    <div className="flex items-center gap-4 min-w-0 flex-1">
-                                                        <div className="w-10 h-10 rounded-xl bg-background border flex flex-col items-center justify-center shrink-0 shadow-sm">
-                                                            <span className="text-[8px] font-black text-muted-foreground uppercase leading-none mb-0.5">
-                                                                {format(new Date(record.date), 'MMM')}
-                                                            </span>
-                                                            <span className="text-sm font-black leading-none">
-                                                                {formatNumber(format(new Date(record.date), 'dd'))}
-                                                            </span>
-                                                        </div>
+                                    .map((record, idx) => {
+                                        const category = record.expenseId ? expenseMap.get(record.expenseId) : null;
+                                        const catInfo = categories.find(c => c.name.toLowerCase() === category?.toLowerCase());
+                                        const color = catInfo?.color || '#3b82f6';
 
-                                                        <div className="flex flex-col min-w-0">
-                                                            <div className="flex items-baseline gap-1.5">
-                                                                <span className="text-base font-black">+{formatNumber(record.qty)}</span>
-                                                                <span className="text-[10px] font-bold text-muted-foreground uppercase">{record.unit}</span>
+                                        return (
+                                            <div
+                                                key={record.id || idx}
+                                                onClick={() => handleEntryClick(record.expenseId)}
+                                                className="group/record transition-all active:scale-[0.98] cursor-pointer"
+                                            >
+                                                <Card 
+                                                    className={cn(
+                                                        "overflow-hidden border-border/40 hover:border-primary/20 transition-colors rounded-2xl relative"
+                                                    )}
+                                                    style={{ 
+                                                        background: `linear-gradient(to right, ${color}10, transparent)`
+                                                    }}
+                                                >
+                                                    {/* Soft glow highlight for record */}
+                                                    <div 
+                                                        className="absolute -left-2 top-0 bottom-0 w-4 opacity-15 blur-lg pointer-events-none"
+                                                        style={{ backgroundColor: color }}
+                                                    />
+                                                    <CardContent className="p-4 flex items-center justify-between">
+                                                        <div className="flex items-center gap-4 min-w-0 flex-1">
+                                                            <div 
+                                                                className="w-10 h-10 rounded-xl bg-background border flex flex-col items-center justify-center shrink-0 shadow-sm"
+                                                                style={{ borderColor: `${color}40` }}
+                                                            >
+                                                                <span className="text-[8px] font-black text-muted-foreground uppercase leading-none mb-0.5">
+                                                                    {format(new Date(record.date), 'MMM')}
+                                                                </span>
+                                                                <span className="text-sm font-black leading-none">
+                                                                    {formatNumber(format(new Date(record.date), 'dd'))}
+                                                                </span>
                                                             </div>
 
-                                                            {record.rawInput && record.rawInput.toLowerCase() !== record.name.toLowerCase() && (
-                                                                <p className="text-[10px] text-muted-foreground italic truncate leading-tight mt-0.5">
-                                                                    "{record.rawInput}"
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                    </div>
+                                                            <div className="flex flex-col min-w-0">
+                                                                <div className="flex items-baseline gap-1.5 leading-none">
+                                                                    <span className="text-base font-black" style={{ color }}>+{formatNumber(record.qty)}</span>
+                                                                    <span className="text-[10px] font-black text-muted-foreground uppercase">{record.unit}</span>
+                                                                </div>
 
-                                                    <div className="flex items-center gap-2">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                prepareDeleteItem(record);
-                                                            }}
-                                                            className="w-8 h-8 rounded-full bg-destructive/5 hover:bg-destructive/10 flex items-center justify-center text-destructive transition-colors"
-                                                        >
-                                                            <Trash2 size={14} />
-                                                        </button>
-                                                        <div className="w-8 h-8 rounded-full bg-primary/5 group-hover:bg-primary/20 flex items-center justify-center text-primary transition-colors">
-                                                            <ExternalLink size={14} />
+                                                                <div className="flex items-center gap-1.5 mt-1">
+                                                                    {record.rawInput && record.rawInput.toLowerCase() !== record.name.toLowerCase() && (
+                                                                        <p className="text-[10px] text-muted-foreground italic truncate leading-tight opacity-70">
+                                                                            "{record.rawInput}"
+                                                                        </p>
+                                                                    )}
+                                                                    {record.rawInput && record.rawInput.toLowerCase() !== record.name.toLowerCase() && category && (
+                                                                        <span className="text-[10px] text-muted-foreground/30">•</span>
+                                                                    )}
+                                                                    {category && (
+                                                                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter truncate">
+                                                                            {category}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        </div>
-                                    ))}
+
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    prepareDeleteItem(record);
+                                                                }}
+                                                                className="w-8 h-8 rounded-full bg-destructive/5 hover:bg-destructive/10 flex items-center justify-center text-destructive transition-colors"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                            <div className="w-8 h-8 rounded-full bg-primary/5 group-hover/record:bg-primary/20 flex items-center justify-center text-primary transition-colors">
+                                                                <ExternalLink size={14} />
+                                                            </div>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </div>
+                                        );
+                                    })}
                             </div>
                         </div>
                     )}

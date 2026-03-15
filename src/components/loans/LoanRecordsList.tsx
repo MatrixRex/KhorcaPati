@@ -2,9 +2,11 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Loan } from '@/db/schema';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
-import { Trash2, TrendingUp, TrendingDown } from 'lucide-react';
+import { Trash2, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
 import { useLoanStore } from '@/stores/loanStore';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { formatRelativeDate } from '@/utils/date';
 import { formatAmount } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
@@ -37,9 +39,12 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
         .filter(e => (loan.type === 'taken' ? e.type === 'expense' : e.type === 'income'))
         .reduce((s, e) => s + e.amount, 0);
         
-    const totalAdditional = linkedExpenses
+    const totalAdditional = loan.totalAmount + linkedExpenses
         .filter(e => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
         .reduce((s, e) => s + e.amount, 0);
+
+    const percentage = Math.min((loan.currentAmount / loan.totalAmount) * 100, 100);
+    const isTaken = loan.type === 'taken';
 
     if (sortedExpenses.length === 0) {
         return (
@@ -56,7 +61,46 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
     }
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-6">
+            {/* Progress Section */}
+            <div className="space-y-3 px-1">
+                <div className="flex justify-between items-end mb-1">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+                            {t('loanProgress')}
+                        </span>
+                        <span className={cn(
+                            "text-lg font-black",
+                            isTaken ? "text-destructive" : "text-primary"
+                        )}>
+                            {t('percentDone', { percent: Math.round(percentage) })}
+                        </span>
+                    </div>
+                    {loan.dueDate && (
+                        <div className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded-lg border border-border/20">
+                            <Calendar className="w-3 h-3 text-muted-foreground" />
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                                {formatRelativeDate(loan.dueDate, true)}
+                            </span>
+                        </div>
+                    )}
+                </div>
+                <div className="relative h-3 w-full bg-muted/40 rounded-full overflow-hidden border border-border/10">
+                    <Progress
+                        value={percentage}
+                        className="h-full bg-transparent"
+                        indicatorClassName={cn(
+                            "transition-all duration-1000 ease-out",
+                            isTaken ? "bg-destructive shadow-[0_0_12px_rgba(239,68,68,0.3)]" : "bg-primary shadow-[0_0_12px_rgba(59,130,246,0.3)]"
+                        )}
+                    />
+                </div>
+                <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">
+                    <span>৳{formatAmount(loan.currentAmount)} {t('done')}</span>
+                    <span>৳{formatAmount(loan.totalAmount - loan.currentAmount)} {t('remaining')}</span>
+                </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3 mb-6">
                 <div className="bg-primary/5 p-4 rounded-3xl border border-primary/10">
                     <div className="flex items-center gap-2 mb-1">
@@ -73,7 +117,7 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
                     <div className="flex items-center gap-2 mb-1">
                         <TrendingDown className="w-3 h-3 text-green-600" />
                         <span className="text-[9px] font-black uppercase tracking-widest text-green-600/60">
-                            {loan.type === 'taken' ? t('income') : t('expense')}
+                            {loan.type === 'taken' ? t('taken') : t('given')}
                         </span>
                     </div>
                     <div className="text-xl font-black">

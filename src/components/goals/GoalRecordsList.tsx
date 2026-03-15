@@ -2,16 +2,17 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Goal } from '@/db/schema';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
-import { Trash2, TrendingUp, TrendingDown } from 'lucide-react';
+import { Trash2, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
 import { useGoalStore } from '@/stores/goalStore';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { formatRelativeDate } from '@/utils/date';
 import { formatAmount } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface GoalRecordsListProps {
     goal: Goal;
 }
-
-import { useTranslation } from 'react-i18next';
 
 export function GoalRecordsList({ goal }: GoalRecordsListProps) {
     const { t } = useTranslation();
@@ -40,8 +41,43 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
         );
     }
 
+    const percentage = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
+
     return (
-        <div className="space-y-3">
+        <div className="space-y-6">
+            {/* Progress Section */}
+            <div className="space-y-3 px-1">
+                <div className="flex justify-between items-end mb-1">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+                            {t('goalProgress')}
+                        </span>
+                        <span className="text-lg font-black text-primary">
+                            {t('percentDone', { percent: Math.round(percentage) })}
+                        </span>
+                    </div>
+                    {goal.deadline && (
+                        <div className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded-lg border border-border/20">
+                            <Calendar className="w-3 h-3 text-muted-foreground" />
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                                {formatRelativeDate(goal.deadline, true)}
+                            </span>
+                        </div>
+                    )}
+                </div>
+                <div className="relative h-3 w-full bg-muted/40 rounded-full overflow-hidden border border-border/10">
+                    <Progress
+                        value={percentage}
+                        className="h-full bg-transparent"
+                        indicatorClassName="transition-all duration-1000 ease-out bg-primary shadow-[0_0_12px_rgba(59,130,246,0.3)]"
+                    />
+                </div>
+                <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">
+                    <span>৳{formatAmount(goal.currentAmount)} {t('saved')}</span>
+                    <span>৳{formatAmount(goal.targetAmount - goal.currentAmount)} {t('remaining')}</span>
+                </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3 mb-6">
                 <div className="bg-primary/5 p-4 rounded-3xl border border-primary/10">
                     <div className="flex items-center gap-2 mb-1">

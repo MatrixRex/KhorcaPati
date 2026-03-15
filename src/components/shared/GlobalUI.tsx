@@ -173,7 +173,7 @@ export function GlobalUI() {
                     side="bottom"
                     className="max-h-[90dvh] h-auto sm:h-auto rounded-t-xl p-0 overflow-y-auto w-full max-w-md mx-auto z-50 pointer-events-auto"
                 >
-                    <div className="p-4 sm:p-6 mb-8">
+                    <div className="px-6 pt-2 mb-8">
                         <SheetHeader className="mb-4 text-left">
                             <SheetTitle>{editingRecurringPayment ? t('editRecurring') : t('addRecurring')}</SheetTitle>
                         </SheetHeader>
@@ -189,7 +189,7 @@ export function GlobalUI() {
             {/* Budget Sheet */}
             <Sheet open={isBudgetSheetOpen} onOpenChange={(open) => !open && closeBudgetSheet()}>
                 <SheetContent side="bottom" className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
-                    <div className="p-6 mb-8 text-foreground">
+                    <div className="px-6 pt-2 mb-8 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <SheetTitle className="text-xl font-black">{editingBudget ? t('editBudget') : t('newBudgetLimit')}</SheetTitle>
                         </SheetHeader>
@@ -206,7 +206,7 @@ export function GlobalUI() {
             {/* Goal Sheet */}
             <Sheet open={isGoalSheetOpen} onOpenChange={(open) => !open && closeGoalSheet()}>
                 <SheetContent side="bottom" className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
-                    <div className="p-6 mb-8 text-foreground">
+                    <div className="px-6 pt-2 mb-8 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <SheetTitle className="text-xl font-black">{editingGoal ? t('editSavingGoal') : t('addSavingGoal')}</SheetTitle>
                         </SheetHeader>
@@ -222,7 +222,7 @@ export function GlobalUI() {
             <Sheet open={isGoalProgressSheetOpen} onOpenChange={(open) => !open && closeGoalProgressSheet()}>
                 <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="p-6 pb-12 text-foreground">
+                    <div className="px-6 pt-2 pb-12 text-foreground">
                         <SheetHeader className="mb-6 text-left">
                             <SheetTitle className="text-xl font-black">{t('linkRecordsToGoal')}</SheetTitle>
                         </SheetHeader>
@@ -240,7 +240,7 @@ export function GlobalUI() {
             <Sheet open={isGoalRecordsSheetOpen} onOpenChange={(open) => !open && closeGoalRecordsSheet()}>
                 <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="p-6 pb-12 text-foreground">
+                    <div className="px-6 pt-2 pb-12 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col">
@@ -274,7 +274,7 @@ export function GlobalUI() {
             <Sheet open={isBudgetRecordsSheetOpen} onOpenChange={(open) => !open && closeBudgetRecordsSheet()}>
                 <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="p-6 pb-12 text-foreground">
+                    <div className="px-6 pt-2 pb-12 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col">
@@ -308,7 +308,7 @@ export function GlobalUI() {
             {/* Loan Sheet */}
             <Sheet open={isLoanSheetOpen} onOpenChange={(open) => !open && closeLoanSheet()}>
                 <SheetContent side="bottom" className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
-                    <div className="p-6 mb-8 text-foreground">
+                    <div className="px-6 pt-2 mb-8 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <SheetTitle className="text-xl font-black">{editingLoan ? t('editLoan') : t('addLoan')}</SheetTitle>
                         </SheetHeader>
@@ -325,7 +325,7 @@ export function GlobalUI() {
             <Sheet open={isLoanProgressSheetOpen} onOpenChange={(open) => !open && closeLoanProgressSheet()}>
                 <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="p-6 pb-12 text-foreground">
+                    <div className="px-6 pt-2 pb-12 text-foreground">
                         <SheetHeader className="mb-6 text-left">
                             <SheetTitle className="text-xl font-black">{t('linkToLoan')}</SheetTitle>
                         </SheetHeader>
@@ -343,7 +343,7 @@ export function GlobalUI() {
             <Sheet open={isLoanRecordsSheetOpen} onOpenChange={(open) => !open && closeLoanRecordsSheet()}>
                 <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="p-6 pb-12 text-foreground">
+                    <div className="px-6 pt-2 pb-12 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col">
@@ -351,6 +351,11 @@ export function GlobalUI() {
                                         {loanForRecords?.type === 'taken' ? t('borrowedFrom') : t('lentTo')}: {loanForRecords?.person}
                                     </span>
                                     <SheetTitle className="text-2xl font-black">{loanForRecords?.title}</SheetTitle>
+                                    {loanForRecords?.note && (
+                                        <p className="text-[11px] font-medium text-muted-foreground mt-1 opacity-70 italic">
+                                            "{loanForRecords.note}"
+                                        </p>
+                                    )}
                                 </div>
                                 <Button
                                     variant="ghost"

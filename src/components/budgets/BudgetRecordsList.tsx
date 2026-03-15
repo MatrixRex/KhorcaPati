@@ -1,15 +1,16 @@
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useTranslation } from 'react-i18next';
 import { db, type Budget } from '@/db/schema';
 import { format, parseISO, isWithinInterval } from 'date-fns';
-import { TrendingDown, Receipt } from 'lucide-react';
+import { TrendingDown, Receipt, Calendar } from 'lucide-react';
 import { getBudgetWindow } from '@/utils/budgetWindow';
-import { formatAmount } from '@/lib/utils';
+import { cn, formatAmount } from '@/lib/utils';
+import { Progress } from '@/components/ui/progress';
+import { formatRelativeDate } from '@/utils/date';
 
 interface BudgetRecordsListProps {
     budget: Budget;
 }
-
-import { useTranslation } from 'react-i18next';
 
 export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
     const { t } = useTranslation();
@@ -53,8 +54,50 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
         );
     }
 
+    const percentage = Math.min((totalSpent / budget.limitAmount) * 100, 100);
+    const isOver = totalSpent > budget.limitAmount;
+
     return (
-        <div className="space-y-3">
+        <div className="space-y-6">
+            {/* Progress Section */}
+            <div className="space-y-3 px-1">
+                <div className="flex justify-between items-end mb-1">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+                            {t('budgetProgress')}
+                        </span>
+                        <span className={cn(
+                            "text-lg font-black",
+                            isOver ? "text-destructive" : "text-primary"
+                        )}>
+                            {t('percentDone', { percent: Math.round(percentage) })}
+                        </span>
+                    </div>
+                    {window?.end && (
+                        <div className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded-lg border border-border/20">
+                            <Calendar className="w-3 h-3 text-muted-foreground" />
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                                {formatRelativeDate(window.end, true)}
+                            </span>
+                        </div>
+                    )}
+                </div>
+                <div className="relative h-3 w-full bg-muted/40 rounded-full overflow-hidden border border-border/10">
+                    <Progress
+                        value={percentage}
+                        className="h-full bg-transparent"
+                        indicatorClassName={cn(
+                            "transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(59,130,246,0.3)]",
+                            isOver ? "bg-destructive" : "bg-primary"
+                        )}
+                    />
+                </div>
+                <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">
+                    <span>৳{formatAmount(totalSpent)} {t('spent')}</span>
+                    <span>৳{formatAmount(remaining)} {t('remaining')}</span>
+                </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3 mb-6">
                 <div className="bg-destructive/5 p-4 rounded-3xl border border-destructive/10">
                     <div className="flex items-center gap-2 mb-1">

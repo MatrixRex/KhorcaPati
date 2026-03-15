@@ -127,7 +127,7 @@ export function DateRangeFilter() {
                             {timeframe === 'custom' && (
                                 <div className="flex items-center justify-center border-t pt-2 mt-2 pb-1 px-1">
                                     <div className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                                        {format(startDate, 'MMM dd')} - {format(endDate, 'MMM dd, yyyy')}
+                                        {format(startDate, 'MMM dd')} - {format(endDate, 'MMM dd, yy')}
                                     </div>
                                 </div>
                             )}

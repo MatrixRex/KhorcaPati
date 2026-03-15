@@ -46,7 +46,7 @@
   --glass-blur: 16px;
 
   /* --- App Structure --- */
-  --radius: 1.25rem;
+  --radius: 0.75rem;                       /* Balanced, modern roundness */
   --container-padding: 1.5rem;
   --header-height: 4.5rem;
   --bottom-nav-height: 5rem;
@@ -143,12 +143,13 @@
   --color-glass-border: var(--glass-border);
   --blur-glass: var(--glass-blur);
 
-  /* --- Radii --- */
-  --radius-sm: calc(var(--radius) - 0.75rem);
-  --radius-md: calc(var(--radius) - 0.5rem);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 0.25rem);
-  --radius-2xl: calc(var(--radius) + 0.5rem);
+  /* --- Radii System --- */
+  --radius-xs: calc(var(--radius) - 0.5rem);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 0.25rem);
+  --radius-xl: calc(var(--radius) + 0.5rem);
+  --radius-2xl: calc(var(--radius) + 0.75rem);
   --radius-3xl: calc(var(--radius) + 1rem);
 
   /* --- Spacing System --- */
@@ -253,5 +254,10 @@
 
   .interactive {
     @apply active:scale-95 hover:brightness-110 transition-all duration-200 cursor-pointer;
+  }
+
+  /* --- Design System Glows --- */
+  .card-glow {
+    @apply absolute -left-6 -top-4 -bottom-4 w-24 opacity-20 blur-3xl pointer-events-none;
   }
 }

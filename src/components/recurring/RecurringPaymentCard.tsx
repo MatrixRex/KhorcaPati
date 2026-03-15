@@ -29,18 +29,18 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
     return (
         <Card
             className={cn(
-                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group border-l-4 relative",
-                isOverdue ? "border-l-destructive bg-destructive/5" : isUpcoming ? "border-l-amber-500 bg-amber-500/5" : "border-l-green-500 bg-green-500/5 shadow-none opacity-80"
+                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-xl overflow-hidden group relative",
+                isOverdue ? "bg-destructive/5" : isUpcoming ? "bg-amber-500/5" : "bg-green-500/5 shadow-none opacity-80"
             )}
             style={{ 
-                background: `linear-gradient(to right, ${catColor}15, transparent)`
+                background: `linear-gradient(to right, ${catColor}1F, transparent)`
             }}
             onClick={onClick}
         >
-            {/* Soft glow highlight based on category color */}
+            {/* Categorical Glow (Standardized) */}
             <div 
-                className="absolute -left-4 top-0 bottom-0 w-8 opacity-20 blur-xl pointer-events-none"
-                style={{ backgroundColor: catColor }}
+                className="card-glow"
+                style={{ backgroundColor: isOverdue ? 'oklch(var(--destructive))' : isUpcoming ? 'oklch(var(--warning))' : catColor }}
             />
             <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex flex-col flex-1 overflow-hidden pr-2">

@@ -34,7 +34,7 @@ export function PageContainer({
     return (
         <div className={cn("flex flex-col h-full w-full", className)}>
             {/* Consistent Header */}
-            <header className="flex items-center justify-between px-[var(--container-padding)] h-[var(--header-height)] shrink-0 border-b/5 shadow-sm bg-background/80 backdrop-blur-md sticky top-0 z-30">
+            <header className="flex items-center justify-between px-container h-header shrink-0 glass sticky top-0 z-30 border-t-0 border-x-0">
                 <div className="flex items-center gap-2 overflow-hidden">
                     {showBackButton && (
                         <Button

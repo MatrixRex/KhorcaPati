@@ -94,7 +94,7 @@ export default function Dashboard() {
         >
             {/* At A Glance - Premium Gradient Card */}
             <Card 
-                className="mb-6 border-none shadow-xl rounded-[28px] overflow-hidden group relative cursor-pointer active:scale-[0.98] transition-all"
+                className="mb-6 border-none shadow-xl rounded-xl overflow-hidden group relative cursor-pointer active:scale-[0.98] transition-all"
                 onClick={openBalanceEdit}
             >
                 {/* Clean Premium Gradient Background */}

@@ -66,7 +66,7 @@ export function WelcomeModal() {
 
             {/* Sheet — slides up from bottom like the rest of the app */}
             <div className="fixed inset-x-0 bottom-0 z-[201] flex justify-center animate-reveal">
-                <div className="w-full max-w-md rounded-t-3xl glass shadow-2xl pb-safe">
+                <div className="w-full max-w-md rounded-t-xl glass shadow-2xl pb-safe">
 
                     {/* Drag handle */}
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-1" />
@@ -154,7 +154,7 @@ export function WelcomeModal() {
                         {/* CTA */}
                         <Button
                             type="button"
-                            className="w-full h-12 rounded-2xl font-bold text-sm shadow-sm active:scale-95 transition-all"
+                            className="w-full h-12 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all"
                             onClick={handleDone}
                         >
                             {t('getStarted')} →

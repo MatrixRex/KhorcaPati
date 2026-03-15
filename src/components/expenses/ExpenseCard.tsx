@@ -39,21 +39,18 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
         <div className="flex flex-col gap-1">
             <Card
                 className={cn(
-                    "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border shadow-sm rounded-2xl overflow-hidden group relative",
+                    "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border shadow-sm rounded-xl overflow-hidden group relative",
                     isExpanded && "bg-muted/10 border-primary/20",
                     expense.isNested && !isExpanded && "bg-primary/5 border-primary/10"
                 )}
-                style={!isExpanded ? { 
-                    background: `linear-gradient(to right, ${catColor}15, transparent)`
-                } : {}}
+                style={{
+                    background: `linear-gradient(to right, ${catColor}1F, transparent)`
+                }}
                 onClick={onClick}
             >
-                {expense.isNested && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/40" />
-                )}
-                {/* Soft glow highlight based on category color */}
-                <div 
-                    className="absolute -left-4 top-0 bottom-0 w-8 opacity-25 blur-xl pointer-events-none"
+                {/* Categorical Glow (Standardized) */}
+                <div
+                    className="card-glow"
                     style={{ backgroundColor: catColor }}
                 />
                 <CardContent className="p-4 flex items-center justify-between">

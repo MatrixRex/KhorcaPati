@@ -25,17 +25,15 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
         <Card
             onClick={onClick || (() => openGoalRecords(goal))}
             className={cn(
-                "group relative overflow-hidden transition-all duration-300 border-border hover:border-primary/20 cursor-pointer shadow-sm active:scale-[0.98] transition-all rounded-2xl",
+                "group relative overflow-hidden transition-all duration-300 border-border hover:border-primary/20 cursor-pointer shadow-sm active:scale-[0.98] transition-all rounded-xl",
                 isCompleted && "border-primary/30"
             )}
             style={{ 
-                background: `linear-gradient(to right, hsl(var(--primary))08, transparent)`
+                background: `linear-gradient(to right, color-mix(in oklch, var(--primary) 12%, transparent), transparent)`
             }}
         >
-            {/* Soft glow highlight based on primary color */}
-            <div 
-                className="absolute -left-4 top-0 bottom-0 w-8 opacity-20 blur-xl pointer-events-none bg-primary"
-            />
+            {/* Primary Glow */}
+            <div className="card-glow bg-primary" />
             <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">

@@ -127,17 +127,17 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
     return (
         <Card
             className={cn(
-                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border shadow-sm rounded-2xl overflow-hidden group/card relative",
+                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border shadow-sm rounded-xl overflow-hidden group/card relative",
                 isOverBudget && "border-destructive/30 bg-destructive/10"
             )}
             style={{ 
-                background: `linear-gradient(to right, ${catColor}15, transparent)`
+                background: `linear-gradient(to right, ${catColor}1F, transparent)`
             }}
             onClick={handleClick}
         >
-            {/* Soft glow highlight based on category color */}
+            {/* Categorical Glow */}
             <div 
-                className="absolute -left-4 top-0 bottom-0 w-8 opacity-25 blur-xl pointer-events-none"
+                className="card-glow"
                 style={{ backgroundColor: catColor }}
             />
             <CardContent className="p-4 space-y-3">

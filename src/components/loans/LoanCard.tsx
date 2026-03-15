@@ -42,16 +42,17 @@ export function LoanCard({ loan, onClick }: LoanCardProps) {
         <Card
             onClick={onClick || (() => openLoanRecords(loan))}
             className={cn(
-                "group relative overflow-hidden transition-all duration-300 border-border hover:border-primary/20 cursor-pointer shadow-sm active:scale-[0.98] transition-all rounded-2xl",
+                "group relative overflow-hidden transition-all duration-300 border-border hover:border-primary/20 cursor-pointer shadow-sm active:scale-[0.98] transition-all rounded-xl",
                 isCompleted && "border-primary/30"
             )}
             style={{ 
-                background: `linear-gradient(to right, ${isTaken ? 'hsl(var(--destructive))08' : 'hsl(var(--primary))08'}, transparent)`
+                background: `linear-gradient(to right, color-mix(in oklch, var(${isTaken ? '--destructive' : '--primary'}) 12%, transparent), transparent)`
             }}
         >
+            {/* Status Glow */}
             <div 
                 className={cn(
-                    "absolute -left-4 top-0 bottom-0 w-8 opacity-20 blur-xl pointer-events-none",
+                    "card-glow",
                     isTaken ? "bg-destructive" : "bg-primary"
                 )}
             />

@@ -394,6 +394,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                     field.onChange(val);
                                                     form.handleSubmit(performSave)();
                                                 }}
+                                                className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                                             />
                                         )}
                                     />
@@ -464,7 +465,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     className={cn(
                                         "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
                                         form.watch('type') === 'expense'
-                                            ? "bg-red-600 text-white shadow-sm"
+                                            ? "bg-rose-500 text-white shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
@@ -479,7 +480,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     className={cn(
                                         "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
                                         form.watch('type') === 'income'
-                                            ? "bg-green-600 text-white shadow-sm"
+                                            ? "bg-emerald-500 text-white shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
@@ -500,7 +501,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         value={form.watch('amount') ? `৳${formatAmount(form.watch('amount'))}` : '৳০'}
                                         onClick={() => setShowNumberPad(true)}
                                         className={cn(
-                                            "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl transition-all border-primary/20 shadow-sm focus:border-primary",
+                                            "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl transition-all border-border bg-background/50 shadow-sm focus:bg-background/80 focus:border-primary/50",
                                             wasAmountEdited && form.getValues('amount') <= 0 && "border-destructive ring-2 ring-destructive/20"
                                         )}
                                         placeholder="৳০"
@@ -508,7 +509,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
                                 </div>
                                 {form.formState.errors.amount && (
-                                    <p className="text-destructive text-[10px] font-bold">{form.formState.errors.amount.message}</p>
+                                    <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.amount.message}</p>
                                 )}
                             </div>
                             <div className="space-y-2">
@@ -555,7 +556,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                             handleBlur();
                                         }}
                                         onEnter={handleNoteEnter}
-                                        className="h-12 rounded-xl"
+                                        className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                                     />
                                 )}
                             />
@@ -575,6 +576,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     }}
                                     onBlur={() => form.handleSubmit(performSave)()}
                                     onEnter={handleCategoryEnter}
+                                    className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                                 />
                             </div>
                         </div>
@@ -593,7 +595,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     className={cn(
                                         "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
                                         form.watch('type') === 'expense'
-                                            ? "bg-red-600 text-white shadow-sm"
+                                            ? "bg-rose-500 text-white shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
@@ -608,7 +610,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     className={cn(
                                         "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
                                         form.watch('type') === 'income'
-                                            ? "bg-green-600 text-white shadow-sm"
+                                            ? "bg-emerald-500 text-white shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"
                                     )}
                                 >
@@ -659,7 +661,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         onClick={() => !isNested && setShowNumberPad(true)}
                                         className={cn(
                                             "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl transition-all",
-                                            isNested ? "bg-muted border-dashed opacity-70" : "border-primary/20 shadow-sm focus:border-primary",
+                                            isNested ? "bg-muted border-dashed opacity-70" : "bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50",
                                             !isNested && wasAmountEdited && form.getValues('amount') <= 0 && "border-destructive ring-2 ring-destructive/20"
                                         )}
                                         placeholder="৳০"
@@ -667,7 +669,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     {!isNested && <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />}
                                 </div>
                                 {form.formState.errors.amount && (
-                                    <p className="text-destructive text-[10px] font-bold">{form.formState.errors.amount.message}</p>
+                                    <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.amount.message}</p>
                                 )}
                             </div>
                             <div className="space-y-2">
@@ -686,7 +688,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                     form.handleSubmit(performSave)();
                                                 }
                                             }}
-                                            className="h-12 rounded-xl font-medium"
+                                            className="h-12 rounded-xl font-medium bg-background/50 border-border"
                                         />
                                     )}
                                 />
@@ -704,6 +706,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     }}
                                     onBlur={() => form.handleSubmit(performSave)()}
                                     onEnter={handleCategoryEnter}
+                                    className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                                 />
                             </div>
                         </div>
@@ -721,6 +724,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                 field.onChange(val);
                                                 form.handleSubmit(performSave)();
                                             }}
+                                            className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                                         />
                                     )}
                                 />
@@ -784,7 +788,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                             handleBlur();
                                         }}
                                         onEnter={handleNoteEnter}
-                                        className="h-12 rounded-xl"
+                                        className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                                     />
                                 )}
                             />
@@ -877,7 +881,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             type="button"
                             variant="ghost"
                             onClick={() => setShowDeleteDialog(true)}
-                            className="w-full text-destructive hover:bg-destructive/5 h-11 rounded-xl"
+                            className="w-full text-rose-600 hover:bg-rose-500/10 h-11 rounded-xl font-black uppercase tracking-widest text-[11px] antialiased"
                         >
                             <Trash2 className="w-4 h-4 mr-2" />
                             {t('deleteRecord')}
@@ -896,7 +900,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-row gap-2 mt-4">
                         <AlertDialogCancel className="flex-1 mt-0 rounded-xl">{t('cancel')}</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete} className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl">
+                        <AlertDialogAction onClick={handleDelete} className="flex-1 bg-rose-500 text-white hover:bg-rose-600 rounded-xl">
                             {t('deleteRecord')}
                         </AlertDialogAction>
                     </AlertDialogFooter>

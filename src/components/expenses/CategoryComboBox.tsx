@@ -2,6 +2,7 @@ import * as React from "react";
 import { SuggestionInput } from "./SuggestionInput";
 import { useCategoryStore } from "@/stores/categoryStore";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 interface CategoryComboBoxProps {
     value: string;
@@ -10,12 +11,13 @@ interface CategoryComboBoxProps {
     onEnter?: () => void;
     disabled?: boolean;
     placeholder?: string;
+    className?: string;
 }
 
 
 
 export const CategoryComboBox = React.forwardRef<HTMLInputElement, CategoryComboBoxProps>(
-    ({ value, onChange, onBlur, onEnter, disabled, placeholder }, ref) => {
+    ({ value, onChange, onBlur, onEnter, disabled, placeholder, className }, ref) => {
         const { categories, addCategory } = useCategoryStore();
 
         const { t } = useTranslation();
@@ -67,7 +69,7 @@ export const CategoryComboBox = React.forwardRef<HTMLInputElement, CategoryCombo
                 disabled={disabled}
                 placeholder={placeholder || t('categoryPlaceholder')}
 
-                className="h-12 rounded-xl"
+                className={cn("h-12 rounded-xl", className)}
             />
         );
     }

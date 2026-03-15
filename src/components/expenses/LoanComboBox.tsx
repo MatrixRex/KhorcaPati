@@ -1,4 +1,5 @@
 import * as React from "react";
+import { cn } from '@/lib/utils';
 import { SuggestionInput } from "./SuggestionInput";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/db/schema";
@@ -12,11 +13,12 @@ interface LoanComboBoxProps {
     onBlur?: () => void;
     onEnter?: () => void;
     placeholder?: string;
+    className?: string;
 }
 
 
 export const LoanComboBox = React.forwardRef<HTMLInputElement, LoanComboBoxProps>(
-    ({ value, onChange, onBlur, onEnter, placeholder }, ref) => {
+    ({ value, onChange, onBlur, onEnter, placeholder, className }, ref) => {
 
         const { t } = useTranslation();
         const loans = useLiveQuery(() => db.loans.toArray()) || [];
@@ -66,8 +68,7 @@ export const LoanComboBox = React.forwardRef<HTMLInputElement, LoanComboBoxProps
                    onEnter?.();
                 }}
                 placeholder={placeholder || t('noLoanLink')}
-                className="h-12 rounded-xl"
-
+                className={cn("h-12 rounded-xl", className)}
             />
         );
     }

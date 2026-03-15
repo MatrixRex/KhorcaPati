@@ -1,4 +1,5 @@
 import * as React from "react";
+import { cn } from "@/lib/utils";
 import { SuggestionInput } from "./SuggestionInput";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/db/schema";
@@ -8,10 +9,11 @@ interface GoalComboBoxProps {
     onChange: (value: number | null) => void;
     onBlur?: () => void;
     onEnter?: () => void;
+    className?: string;
 }
 
 export const GoalComboBox = React.forwardRef<HTMLInputElement, GoalComboBoxProps>(
-    ({ value, onChange, onBlur, onEnter }, ref) => {
+    ({ value, onChange, onBlur, onEnter, className }, ref) => {
         const goals = useLiveQuery(() => db.goals.toArray()) || [];
 
         const goalNames = React.useMemo(() => {
@@ -48,7 +50,7 @@ export const GoalComboBox = React.forwardRef<HTMLInputElement, GoalComboBoxProps
                    onEnter?.();
                 }}
                 placeholder="No Goal"
-                className="h-12 rounded-xl"
+                className={cn("h-12 rounded-xl", className)}
             />
         );
     }

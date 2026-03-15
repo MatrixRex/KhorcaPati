@@ -281,7 +281,7 @@ export function GlobalUI() {
                                     variant="outline"
                                     className={cn(
                                         "h-10 w-10 rounded-full border-2 text-primary hover:bg-primary/10 hover:scale-[1.05] active:scale-[0.95] transition-all bg-transparent shrink-0",
-                                        loanForRecords?.type === 'taken' ? "border-destructive text-destructive hover:bg-destructive/10" : "border-primary text-primary"
+                                        loanForRecords?.type === 'taken' ? "border-rose-600/50 text-rose-600 hover:bg-rose-600/10" : "border-primary text-primary"
                                     )}
                                     onClick={() => {
                                         if (loanForRecords) {

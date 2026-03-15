@@ -13,7 +13,7 @@ import { format, addDays, addWeeks, addMonths, addYears, parseISO } from 'date-f
 import { db, type RecurringPayment } from '@/db/schema';
 import { CategoryComboBox } from '../expenses/CategoryComboBox';
 import { NumberPad } from '@/components/shared/NumberPad';
-import { Calculator } from 'lucide-react';
+import { Trash2, Calculator } from 'lucide-react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -230,7 +230,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                             className={cn(
                                 "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
                                 form.watch('type') === 'income'
-                                    ? "bg-green-600 text-white shadow-sm"
+                                    ? "bg-emerald-500 text-white shadow-sm"
                                     : "text-muted-foreground hover:text-foreground"
                             )}
                         >
@@ -242,7 +242,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                     <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                         {saveStatus === 'saving' && t('saving')}
                         {saveStatus === 'saved' && t('allChangesSaved')}
-                        {saveStatus === 'error' && <span className="text-destructive">{t('errorSaving')}</span>}
+                        {saveStatus === 'error' && <span className="text-rose-500/90">{t('errorSaving')}</span>}
                     </div>
                 </div>
 
@@ -251,12 +251,13 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                     <Input
                         id="title"
                         placeholder={t('recurringTitlePlaceholder')}
+                        className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                         {...form.register('title', {
                             onBlur: handleBlur
                         })}
                     />
                     {form.formState.errors.title && (
-                        <p className="text-destructive text-sm">{t('titleRequired')}</p>
+                        <p className="text-rose-600 text-[11px] font-black uppercase tracking-wider">{t('titleRequired')}</p>
                     )}
                 </div>
 
@@ -270,15 +271,14 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 readOnly
                                 value={form.watch('amount') || ''}
                                 onClick={() => setShowNumberPad(true)}
-                                className="pr-10 cursor-pointer caret-transparent"
+                                className="pr-10 cursor-pointer caret-transparent h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                                 placeholder="0"
                             />
                             <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                         </div>
                         {form.formState.errors.amount && (
-                            <p className="text-destructive text-sm">{t('amountRequired')}</p>
+                            <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.amount.message}</p>
                         )}
-
                         {showNumberPad && (
                             <NumberPad
                                 value={String(form.getValues('amount'))}
@@ -312,6 +312,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                             form.handleSubmit(performSave)();
                                         }
                                     }}
+                                    className="h-12 rounded-xl bg-background/50 border-border"
                                 />
                             )}
                         />
@@ -327,6 +328,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 form.setValue('category', val, { shouldDirty: true });
                             }}
                             onBlur={() => form.handleSubmit(performSave)()}
+                            className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                         />
                     </div>
                     <div className="space-y-2">
@@ -338,7 +340,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 form.handleSubmit(performSave)();
                             }}
                         >
-                            <SelectTrigger>
+                            <SelectTrigger className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50">
                                 <SelectValue placeholder={t('selectInterval')} />
                             </SelectTrigger>
                             <SelectContent>
@@ -360,6 +362,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                         autoCorrect="off"
                         autoCapitalize="none"
                         spellCheck={true}
+                        className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                         {...form.register('note', {
                             onBlur: handleBlur
                         })}
@@ -373,7 +376,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 type="button"
                                 variant="default"
                                 onClick={handleConfirm}
-                                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white h-12 rounded-xl font-bold"
                             >
                                 {t('confirmPayment')}
                             </Button>
@@ -414,13 +417,14 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                     )}
                     {(currentId || initialData) && (
                         <Button
-                            type="button"
-                            variant="destructive"
-                            onClick={() => setShowDeleteDialog(true)}
-                            className="w-full"
-                        >
-                            {t('deleteRecurring')}
-                        </Button>
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="w-full text-rose-600 hover:bg-rose-500/10 h-11 rounded-xl font-black uppercase tracking-widest text-[11px] antialiased"
+                >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    {t('deleteRecord')}
+                </Button>
                     )}
                 </div>
             </form>
@@ -435,8 +439,8 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-row gap-2 mt-4">
                         <AlertDialogCancel className="flex-1 mt-0">{t('cancel')}</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete} className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                            {t('delete')}
+                        <AlertDialogAction onClick={handleDelete} className="flex-1 bg-rose-600 text-white hover:bg-rose-700 rounded-xl">
+                            {t('deleteRecord')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

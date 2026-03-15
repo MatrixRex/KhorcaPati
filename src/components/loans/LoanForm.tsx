@@ -93,7 +93,7 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
                     className={cn(
                         "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
                         form.watch('type') === 'given'
-                            ? "bg-green-600 text-white shadow-sm"
+                            ? "bg-emerald-500 text-white shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
                     )}
                 >
@@ -104,11 +104,11 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="person" className="text-[11px] font-bold uppercase">{t('person')}</Label>
-                    <Input id="person" placeholder={t('personExample')} {...form.register('person')} className="h-11 rounded-xl" />
+                    <Input id="person" placeholder={t('personExample')} {...form.register('person')} className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50" />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="title" className="text-[11px] font-bold uppercase">{t('loanTitle')}</Label>
-                    <Input id="title" placeholder={t('loanExample')} {...form.register('title')} className="h-11 rounded-xl" />
+                    <Input id="title" placeholder={t('loanExample')} {...form.register('title')} className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50" />
                 </div>
             </div>
 
@@ -121,7 +121,7 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
                         readOnly
                         value={form.watch('totalAmount') ? `৳${form.watch('totalAmount')}` : '৳০'}
                         onClick={() => setActiveField('total')}
-                        className="pr-10 cursor-pointer caret-transparent font-bold text-lg h-12 rounded-xl"
+                        className="pr-10 cursor-pointer caret-transparent font-bold text-lg h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                     />
                     <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
                 </div>
@@ -153,7 +153,7 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
                             setDate={(date) => {
                                 field.onChange(date ? format(date, 'yyyy-MM-dd') : '');
                             }}
-                            className="h-11 rounded-xl"
+                            className="h-12 rounded-xl bg-background/50 border-border"
                         />
                     )}
                 />
@@ -167,7 +167,7 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
                     autoCorrect="off"
                     autoCapitalize="none"
                     spellCheck={true}
-                    className="h-11 rounded-xl"
+                    className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                     {...form.register('note')}
                 />
             </div>

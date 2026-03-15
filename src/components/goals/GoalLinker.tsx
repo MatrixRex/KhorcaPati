@@ -52,7 +52,7 @@ export function GoalLinker({ goal, onSuccess }: GoalLinkerProps) {
                             placeholder="Search records to link..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="pl-10 h-11 rounded-2xl bg-muted/40 border-none focus-visible:ring-primary"
+                            className="pl-10 h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50 transition-all font-medium"
                         />
                         {search && (
                             <button 

@@ -145,9 +145,10 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                             form.setValue('category', val, { shouldDirty: true });
                             form.clearErrors('category');
                         }}
+                        className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                     />
                     {form.formState.errors.category && (
-                        <p className="text-destructive text-sm">{form.formState.errors.category.message}</p>
+                        <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.category.message}</p>
                     )}
                 </div>
 
@@ -165,13 +166,14 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                                 e.preventDefault();
                             }
                         }}
+                        className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                         {...form.register('limitAmount', {
                             valueAsNumber: true,
                             setValueAs: (v) => v === "" ? 0 : Number(v)
                         })}
                     />
                     {form.formState.errors.limitAmount && (
-                        <p className="text-destructive text-sm">{form.formState.errors.limitAmount.message}</p>
+                        <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.limitAmount.message}</p>
                     )}
                 </div>
 
@@ -220,7 +222,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                                 ))}
                             </div>
                             {form.formState.errors.recurringInterval && (
-                                <p className="text-destructive text-sm">{form.formState.errors.recurringInterval.message}</p>
+                                <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.recurringInterval.message}</p>
                             )}
                         </div>
                     )}
@@ -244,7 +246,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                                         )}
                                     />
                                     {form.formState.errors.startDate && (
-                                        <p className="text-destructive text-xs">{form.formState.errors.startDate.message}</p>
+                                        <p className="text-rose-600 text-[10px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.startDate.message}</p>
                                     )}
                                 </div>
                                 <div className="space-y-1.5">
@@ -256,12 +258,12 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                                             <DatePicker
                                                 date={field.value ? parseISO(field.value) : undefined}
                                                 setDate={(date) => field.onChange(date ? format(date, 'yyyy-MM-dd') : '')}
-                                                className="h-9 text-xs"
+                                                className="h-12 rounded-xl text-xs bg-background/50 border-border"
                                             />
                                         )}
                                     />
                                     {form.formState.errors.endDate && (
-                                        <p className="text-destructive text-xs">{form.formState.errors.endDate.message}</p>
+                                        <p className="text-rose-600 text-[10px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.endDate.message}</p>
                                     )}
                                 </div>
                             </div>
@@ -303,8 +305,8 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                 {initialData?.id && (
                     <Button
                         type="button"
-                        variant="destructive"
-                        className="w-full"
+                        variant="ghost"
+                        className="w-full text-rose-500/80 hover:bg-rose-500/5 font-bold uppercase tracking-widest text-[10px]"
                         onClick={() => setShowDeleteDialog(true)}
                     >
                         {t('deleteBudget')}
@@ -324,7 +326,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                         <AlertDialogCancel className="flex-1 mt-0">{t('cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
-                            className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="flex-1 bg-rose-500 text-white hover:bg-rose-600 rounded-xl"
                         >
                             {t('deleteRecord')}
                         </AlertDialogAction>

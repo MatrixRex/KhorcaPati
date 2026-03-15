@@ -71,9 +71,14 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
                 <Label htmlFor="title">{t('goalTitle')}</Label>
-                <Input id="title" placeholder={t('goalExample')} {...form.register('title')} />
+                <Input 
+                    id="title" 
+                    placeholder={t('goalExample')} 
+                    className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                    {...form.register('title')} 
+                />
                 {form.formState.errors.title && (
-                    <p className="text-destructive text-sm">{form.formState.errors.title.message}</p>
+                    <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.title.message}</p>
                 )}
             </div>
 
@@ -87,7 +92,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                             readOnly
                             value={form.watch('targetAmount')}
                             onClick={() => setActiveField('target')}
-                            className="pr-10 cursor-pointer caret-transparent"
+                            className="pr-10 cursor-pointer caret-transparent h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                         />
                         <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                     </div>
@@ -102,7 +107,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                             readOnly
                             value={form.watch('currentAmount')}
                             onClick={() => setActiveField('current')}
-                            className="pr-10 cursor-pointer caret-transparent"
+                            className="pr-10 cursor-pointer caret-transparent h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                         />
                         <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                     </div>
@@ -130,13 +135,13 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                     control={form.control}
                     name="deadline"
                     render={({ field }) => (
-                        <DatePicker
-                            date={field.value ? parseISO(field.value) : undefined}
-                            setDate={(date) => {
-                                field.onChange(date ? format(date, 'yyyy-MM-dd') : '');
-                            }}
-                            className="h-10 rounded-md border-input bg-background"
-                        />
+                                <DatePicker
+                                    date={field.value ? parseISO(field.value) : undefined}
+                                    setDate={(date) => {
+                                        field.onChange(date ? format(date, 'yyyy-MM-dd') : '');
+                                    }}
+                                    className="h-12 rounded-xl bg-background/50 border-border"
+                                />
                     )}
                 />
             </div>
@@ -149,6 +154,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                     autoCorrect="off"
                     autoCapitalize="none"
                     spellCheck={true}
+                    className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                     {...form.register('note')}
                 />
             </div>

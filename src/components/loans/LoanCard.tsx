@@ -1,4 +1,5 @@
-import { type Loan } from '@/db/schema';
+import { db, type Loan, type Expense } from '@/db/schema';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { formatRelativeDate } from '@/utils/date';
@@ -16,8 +17,25 @@ interface LoanCardProps {
 export function LoanCard({ loan, onClick }: LoanCardProps) {
     const { t } = useTranslation();
     const { openAddLoanProgress, openLoanRecords } = useUIStore();
-    const percentage = Math.min((loan.currentAmount / loan.totalAmount) * 100, 100);
-    const isCompleted = loan.currentAmount >= loan.totalAmount;
+
+    // Query linked expenses in real-time to ensure progress is always accurate
+    const linkedExpenses = useLiveQuery(() => 
+        db.expenses.where('loanId').equals(loan.id!).toArray()
+    , [loan.id]) || [];
+
+    const totalRepayments = linkedExpenses
+        .filter((e: Expense) => (loan.type === 'taken' ? e.type === 'expense' : e.type === 'income'))
+        .reduce((s: number, e: Expense) => s + e.amount, 0);
+        
+    const totalAdditionalAmount = linkedExpenses
+        .filter((e: Expense) => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
+        .reduce((s: number, e: Expense) => s + e.amount, 0);
+
+    const totalGrossAmount = loan.totalAmount + totalAdditionalAmount;
+    const currentProgress = totalRepayments;
+    const percentage = totalGrossAmount > 0 ? Math.min((totalRepayments / totalGrossAmount) * 100, 100) : 0;
+    
+    const isCompleted = currentProgress >= totalGrossAmount && totalGrossAmount > 0;
     const isTaken = loan.type === 'taken';
 
     return (
@@ -58,7 +76,7 @@ export function LoanCard({ loan, onClick }: LoanCardProps) {
 
                     <div className="flex items-center gap-2 ml-2">
                         <span className="text-xs text-muted-foreground font-black uppercase text-right shrink-0 bg-muted px-1.5 py-0.5 rounded-md">
-                            ৳{formatAmount(loan.currentAmount)} <span className="opacity-40">/</span> ৳{formatAmount(loan.totalAmount)}
+                            ৳{formatAmount(currentProgress)} <span className="opacity-40">/</span> ৳{formatAmount(totalGrossAmount)}
                         </span>
                         <Button
                             size="icon"
@@ -104,7 +122,7 @@ export function LoanCard({ loan, onClick }: LoanCardProps) {
                             )}
                         </div>
                         <div className="text-[10px] font-black text-muted-foreground/40">
-                             {t('remaining')}: ৳{formatAmount(loan.totalAmount - loan.currentAmount)}
+                             {t('remaining')}: ৳{formatAmount(totalGrossAmount - currentProgress)}
                         </div>
                     </div>
                 </div>

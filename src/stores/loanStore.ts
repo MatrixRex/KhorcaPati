@@ -73,26 +73,21 @@ export const useLoanStore = create<LoanState>(() => ({
 
                 const linkedExpenses = await db.expenses.where('loanId').equals(loanId).toArray();
                 
-                let total = 0;
-                if (loan.type === 'taken') {
-                    // For borrowed loans, payments I make (expenses) INCREASE progress
-                    // Receiving more (income) DECREASES progress (increases debt effectively)
-                    total = linkedExpenses.reduce((sum, exp) => {
-                        return exp.type === 'expense' ? sum + exp.amount : sum - exp.amount;
-                    }, 0);
-                } else {
-                    // For lent loans, payments I receive (income) INCREASE progress
-                    // Giving more (expense) DECREASES progress
-                    total = linkedExpenses.reduce((sum, exp) => {
-                        return exp.type === 'income' ? sum + exp.amount : sum - exp.amount;
-                    }, 0);
-                }
+                const totalRepayments = linkedExpenses
+                    .filter(e => (loan.type === 'taken' ? e.type === 'expense' : e.type === 'income'))
+                    .reduce((s, e) => s + e.amount, 0);
+                    
+                const totalAdditionalAmount = linkedExpenses
+                    .filter(e => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
+                    .reduce((s, e) => s + e.amount, 0);
 
+                // Note: The UI calculates percentage as totalRepayments / (loan.totalAmount + totalAdditionalAmount)
+                // We update currentAmount to store the repayments progress
                 await db.loans.update(loanId, { 
-                    currentAmount: total,
+                    currentAmount: totalRepayments,
                     updatedAt: new Date().toISOString()
                 });
-                return total;
+                return totalRepayments;
             });
         } catch (err) {
             console.error("Failed to recalculate loan amount", err);

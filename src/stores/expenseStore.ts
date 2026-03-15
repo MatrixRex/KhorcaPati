@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { db, type Expense } from '@/db/schema';
 import { useGoalStore } from './goalStore';
+import { useLoanStore } from './loanStore';
 
 interface ExpenseState {
     expenses: Expense[];
@@ -32,6 +33,9 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
             if (expense.goalId) {
                 await useGoalStore.getState().recalculateGoalAmount(expense.goalId);
             }
+            if (expense.loanId) {
+                await useLoanStore.getState().recalculateLoanAmount(expense.loanId);
+            }
             return id as number;
         } catch (error) {
             console.error("Failed to add expense", error);
@@ -48,12 +52,21 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
             
             const newExpense = await db.expenses.get(id);
             const newGoalId = newExpense?.goalId;
+            const newLoanId = newExpense?.loanId;
 
             if (newGoalId) {
                 await useGoalStore.getState().recalculateGoalAmount(newGoalId);
             }
             if (oldGoalId && oldGoalId !== newGoalId) {
                 await useGoalStore.getState().recalculateGoalAmount(oldGoalId);
+            }
+
+            if (newLoanId) {
+                await useLoanStore.getState().recalculateLoanAmount(newLoanId);
+            }
+            const oldLoanId = oldExpense?.loanId;
+            if (oldLoanId && oldLoanId !== newLoanId) {
+                await useLoanStore.getState().recalculateLoanAmount(oldLoanId);
             }
             
             return id;
@@ -67,6 +80,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
         try {
             const expense = await db.expenses.get(id);
             const goalId = expense?.goalId;
+            const loanId = expense?.loanId;
 
             await db.transaction('rw', db.expenses, async () => {
                 await db.expenses.where('parentId').equals(id).delete();
@@ -75,6 +89,9 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
 
             if (goalId) {
                 await useGoalStore.getState().recalculateGoalAmount(goalId);
+            }
+            if (loanId) {
+                await useLoanStore.getState().recalculateLoanAmount(loanId);
             }
         } catch (error) {
             console.error("Failed to delete expense", error);

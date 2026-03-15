@@ -15,6 +15,7 @@ import { format, parseISO } from 'date-fns';
 import { db, type Expense } from '@/db/schema';
 import { CategoryComboBox } from './CategoryComboBox';
 import { GoalComboBox } from './GoalComboBox';
+import { LoanComboBox } from './LoanComboBox';
 import i18n from '@/i18n';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -40,6 +41,7 @@ const expenseSchema = z.object({
     type: z.enum(['expense', 'income']),
     category: z.string().min(1, 'Category is required'),
     goalId: z.number().nullable().optional(),
+    loanId: z.number().nullable().optional(),
     date: z.string(),
     note: z.string().optional(),
     isRecurring: z.boolean(),
@@ -100,6 +102,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             type: initialData?.type || 'expense',
             category: initialData?.category || '',
             goalId: initialData?.goalId || null,
+            loanId: initialData?.loanId || null,
             date: initialData?.date || format(new Date(), 'yyyy-MM-dd'),
             note: initialData?.note || '',
             isRecurring: initialData?.isRecurring || false,
@@ -221,6 +224,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                 type: data.type,
                 category: validCategory,
                 goalId: data.goalId || null,
+                loanId: data.loanId || null,
                 note: data.note || '',
                 parentId: finalParentId,
                 isNested: data.isNested,
@@ -393,22 +397,22 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="category" className="text-[11px] font-bold uppercase">{t('category')}</Label>
-                        <div className="w-full">
-                            <CategoryComboBox
-                                ref={categoryRef}
-                                value={form.watch('category')}
-                                onChange={(val: string) => {
-                                    form.setValue('category', val, { shouldDirty: true });
-                                }}
-                                onBlur={() => form.handleSubmit(performSave)()}
-                                onEnter={handleCategoryEnter}
-                            />
-                        </div>
+                <div className="space-y-2">
+                    <Label htmlFor="category" className="text-[11px] font-bold uppercase">{t('category')}</Label>
+                    <div className="w-full">
+                        <CategoryComboBox
+                            ref={categoryRef}
+                            value={form.watch('category')}
+                            onChange={(val: string) => {
+                                form.setValue('category', val, { shouldDirty: true });
+                            }}
+                            onBlur={() => form.handleSubmit(performSave)()}
+                            onEnter={handleCategoryEnter}
+                        />
                     </div>
+                </div>
 
+                <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="goal" className="text-[11px] font-bold uppercase">{t('linkToGoal')}</Label>
                         <div className="w-full">
@@ -417,6 +421,25 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                 name="goalId"
                                 render={({ field }) => (
                                     <GoalComboBox
+                                        value={field.value ?? null}
+                                        onChange={(val) => {
+                                            field.onChange(val);
+                                            form.handleSubmit(performSave)();
+                                        }}
+                                    />
+                                )}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="loan" className="text-[11px] font-bold uppercase">{t('linkToLoan')}</Label>
+                        <div className="w-full">
+                            <Controller
+                                control={form.control}
+                                name="loanId"
+                                render={({ field }) => (
+                                    <LoanComboBox
                                         value={field.value ?? null}
                                         onChange={(val) => {
                                             field.onChange(val);

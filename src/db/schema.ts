@@ -5,6 +5,7 @@ export interface Expense {
     parentId: number | null;      // null = top-level; set = sub-expense
     isNested: boolean;            // true = parent record with sub-records
     goalId?: number | null;       // link to a savings goal
+    loanId?: number | null;       // link to a loan
     title?: string;
     amount: number;
     type: 'expense' | 'income';
@@ -61,6 +62,19 @@ export interface Goal {
     updatedAt: string;
 }
 
+export interface Loan {
+    id?: number;
+    person: string;
+    title: string;
+    totalAmount: number;
+    currentAmount: number;   // Amount paid back (for taken) or received back (for given)
+    type: 'taken' | 'given'; // 'taken' = borrowed from someone, 'given' = lent to someone
+    dueDate: string | null;
+    note: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface Category {
     id?: number;
     name: string;
@@ -88,6 +102,7 @@ const db = new Dexie('KhorocaPatiDB') as Dexie & {
     items: EntityTable<Item, 'id'>;
     budgets: EntityTable<Budget, 'id'>;
     goals: EntityTable<Goal, 'id'>;
+    loans: EntityTable<Loan, 'id'>;
     categories: EntityTable<Category, 'id'>;
     recurringPayments: EntityTable<RecurringPayment, 'id'>;
 };
@@ -204,6 +219,16 @@ db.version(11).stores({
     return tx.table('expenses').toCollection().modify((expense: Expense) => {
         if (expense.itemAutoTrack === undefined) expense.itemAutoTrack = true;
     });
+});
+
+db.version(12).stores({
+    expenses: '++id, parentId, isNested, goalId, loanId, date, category, isRecurring, type, itemAutoTrack',
+    items: '++id, expenseId, name, date',
+    budgets: '++id, category, timelineType, recurringInterval',
+    goals: '++id, createdAt',
+    loans: '++id, createdAt, type, person',
+    categories: '++id, &name, isDefault',
+    recurringPayments: '++id, title, nextDueDate, category, type'
 });
 
 export { db };

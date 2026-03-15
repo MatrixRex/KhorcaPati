@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { DatePicker } from '@/components/ui/date-picker';
+import { format, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -124,7 +126,19 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
 
             <div className="space-y-2">
                 <Label htmlFor="deadline">{t('deadline')} ({t('optional')})</Label>
-                <Input id="deadline" type="date" {...form.register('deadline')} />
+                <Controller
+                    control={form.control}
+                    name="deadline"
+                    render={({ field }) => (
+                        <DatePicker
+                            date={field.value ? parseISO(field.value) : undefined}
+                            setDate={(date) => {
+                                field.onChange(date ? format(date, 'yyyy-MM-dd') : '');
+                            }}
+                            className="h-10 rounded-md border-input bg-background"
+                        />
+                    )}
+                />
             </div>
 
             <div className="space-y-2">

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { type Expense, type RecurringPayment, type Budget, type Goal } from '@/db/schema';
+import { type Expense, type RecurringPayment, type Budget, type Goal, type Loan } from '@/db/schema';
 
 export type Theme = 'light' | 'dark' | 'system';
 
@@ -20,11 +20,18 @@ interface UIState {
     goalForProgress?: Goal;
     isGoalRecordsSheetOpen: boolean;
     goalForRecords?: Goal;
+    isLoanSheetOpen: boolean;
+    editingLoan?: Loan;
+    isLoanProgressSheetOpen: boolean;
+    loanForProgress?: Loan;
+    isLoanRecordsSheetOpen: boolean;
+    loanForRecords?: Loan;
     isBudgetRecordsSheetOpen: boolean;
     budgetForRecords?: Budget;
     isRecurringPaymentsListOpen: boolean;
     isBudgetsListOpen: boolean;
     isGoalsListOpen: boolean;
+    isLoansListOpen: boolean;
     isCategoryManagementOpen: boolean;
     isBalanceEditDrawerOpen: boolean;
     selectedInventoryItem: string | null;
@@ -49,6 +56,13 @@ interface UIState {
     closeGoalProgressSheet: () => void;
     openGoalRecords: (goal: Goal) => void;
     closeGoalRecordsSheet: () => void;
+    openAddLoan: () => void;
+    openEditLoan: (loan: Loan) => void;
+    closeLoanSheet: () => void;
+    openAddLoanProgress: (loan: Loan) => void;
+    closeLoanProgressSheet: () => void;
+    openLoanRecords: (loan: Loan) => void;
+    closeLoanRecordsSheet: () => void;
     openBudgetRecords: (budget: Budget) => void;
     closeBudgetRecordsSheet: () => void;
     openRecurringPaymentsList: () => void;
@@ -57,6 +71,8 @@ interface UIState {
     closeBudgetsList: () => void;
     openGoalsList: () => void;
     closeGoalsList: () => void;
+    openLoansList: () => void;
+    closeLoansList: () => void;
     openCategoryManagement: () => void;
     closeCategoryManagement: () => void;
     openBalanceEdit: () => void;
@@ -89,11 +105,18 @@ export const useUIStore = create<UIState>()(
             goalForProgress: undefined,
             isGoalRecordsSheetOpen: false,
             goalForRecords: undefined,
+            isLoanSheetOpen: false,
+            editingLoan: undefined,
+            isLoanProgressSheetOpen: false,
+            loanForProgress: undefined,
+            isLoanRecordsSheetOpen: false,
+            loanForRecords: undefined,
             isBudgetRecordsSheetOpen: false,
             budgetForRecords: undefined,
             isRecurringPaymentsListOpen: false,
             isBudgetsListOpen: false,
             isGoalsListOpen: false,
+            isLoansListOpen: false,
             isCategoryManagementOpen: false,
             isBalanceEditDrawerOpen: false,
             selectedInventoryItem: null,
@@ -112,6 +135,9 @@ export const useUIStore = create<UIState>()(
                        state.isGoalSheetOpen ||
                        state.isGoalProgressSheetOpen ||
                        state.isGoalRecordsSheetOpen ||
+                       state.isLoanSheetOpen ||
+                       state.isLoanProgressSheetOpen ||
+                       state.isLoanRecordsSheetOpen ||
                         state.isBudgetRecordsSheetOpen || 
                         state.isRecurringPaymentsListOpen ||
                         state.isBudgetsListOpen ||
@@ -235,6 +261,42 @@ export const useUIStore = create<UIState>()(
                 isBudgetRecordsSheetOpen: false,
                 budgetForRecords: undefined
             }),
+
+            openAddLoan: () => set({
+                isLoanSheetOpen: true,
+                editingLoan: undefined
+            }),
+
+            openEditLoan: (loan) => set({
+                isLoanSheetOpen: true,
+                editingLoan: loan
+            }),
+
+            closeLoanSheet: () => set({
+                isLoanSheetOpen: false,
+                editingLoan: undefined
+            }),
+
+            openAddLoanProgress: (loan: Loan) => set({
+                isLoanProgressSheetOpen: true,
+                loanForProgress: loan
+            }),
+
+            closeLoanProgressSheet: () => set({
+                isLoanProgressSheetOpen: false,
+                loanForProgress: undefined
+            }),
+
+            openLoanRecords: (loan: Loan) => set({
+                isLoanRecordsSheetOpen: true,
+                loanForRecords: loan
+            }),
+
+            closeLoanRecordsSheet: () => set({
+                isLoanRecordsSheetOpen: false,
+                loanForRecords: undefined
+            }),
+
             openRecurringPaymentsList: () => set({
                 isRecurringPaymentsListOpen: true
             }),
@@ -257,6 +319,14 @@ export const useUIStore = create<UIState>()(
 
             closeGoalsList: () => set({
                 isGoalsListOpen: false
+            }),
+
+            openLoansList: () => set({
+                isLoansListOpen: true
+            }),
+
+            closeLoansList: () => set({
+                isLoansListOpen: false
             }),
             openCategoryManagement: () => set({
                 isCategoryManagementOpen: true

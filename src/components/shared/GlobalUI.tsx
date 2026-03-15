@@ -14,6 +14,10 @@ import { GoalForm } from '@/components/goals/GoalForm';
 import { GoalLinker } from '@/components/goals/GoalLinker';
 import { GoalRecordsList } from '@/components/goals/GoalRecordsList';
 import { GoalsListDrawer } from '@/components/goals/GoalsListDrawer';
+import { LoanForm } from '@/components/loans/LoanForm';
+import { LoanLinker } from '@/components/loans/LoanLinker';
+import { LoanRecordsList } from '@/components/loans/LoanRecordsList';
+import { LoansListDrawer } from '@/components/loans/LoansListDrawer';
 import { CategoryManagementDrawer } from '@/components/shared/CategoryManagementDrawer';
 import { useUIStore } from '@/stores/uiStore';
 import { useCategoryStore } from '@/stores/categoryStore';
@@ -32,10 +36,14 @@ export function GlobalUI() {
         isGoalSheetOpen, editingGoal, closeGoalSheet,
         isGoalProgressSheetOpen, goalForProgress, closeGoalProgressSheet,
         isGoalRecordsSheetOpen, goalForRecords, closeGoalRecordsSheet,
-        openEditGoal, openEditBudget,
+        isLoanSheetOpen, editingLoan, closeLoanSheet,
+        isLoanProgressSheetOpen, loanForProgress, closeLoanProgressSheet,
+        isLoanRecordsSheetOpen, loanForRecords, closeLoanRecordsSheet,
+        openEditGoal, openEditBudget, openEditLoan,
         isRecurringPaymentsListOpen,
         isBudgetsListOpen,
         isGoalsListOpen,
+        isLoansListOpen,
         isCategoryManagementOpen,
         theme, expenseSessionId, subSessionId
     } = useUIStore();
@@ -80,7 +88,7 @@ export function GlobalUI() {
     // Add beforeunload listener to prevent accidental reload/close when editing
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isBudgetRecordsSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isRecurringPaymentsListOpen || isBudgetsListOpen || isGoalsListOpen || isCategoryManagementOpen) {
+            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isBudgetRecordsSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isLoanSheetOpen || isLoanProgressSheetOpen || isLoanRecordsSheetOpen || isRecurringPaymentsListOpen || isBudgetsListOpen || isGoalsListOpen || isLoansListOpen || isCategoryManagementOpen) {
                 e.preventDefault();
                 e.returnValue = ''; // Required for some browsers
                 return '';
@@ -89,7 +97,7 @@ export function GlobalUI() {
 
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isBudgetRecordsSheetOpen, isGoalSheetOpen, isGoalProgressSheetOpen, isGoalRecordsSheetOpen, isRecurringPaymentsListOpen, isBudgetsListOpen, isGoalsListOpen, isCategoryManagementOpen]);
+    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isBudgetRecordsSheetOpen, isGoalSheetOpen, isGoalProgressSheetOpen, isGoalRecordsSheetOpen, isLoanSheetOpen, isLoanProgressSheetOpen, isLoanRecordsSheetOpen, isRecurringPaymentsListOpen, isBudgetsListOpen, isGoalsListOpen, isLoansListOpen, isCategoryManagementOpen]);
 
     useEffect(() => {
         const init = async () => {
@@ -116,6 +124,7 @@ export function GlobalUI() {
             <RecurringPaymentsListDrawer />
             <BudgetsListDrawer />
             <GoalsListDrawer />
+            <LoansListDrawer />
             <CategoryManagementDrawer />
 
             {/* Main Expense Sheet */}
@@ -290,6 +299,77 @@ export function GlobalUI() {
                         <div className="mt-6">
                             {budgetForRecords && (
                                 <BudgetRecordsList budget={budgetForRecords} />
+                            )}
+                        </div>
+                    </div>
+                </SheetContent>
+            </Sheet>
+
+            {/* Loan Sheet */}
+            <Sheet open={isLoanSheetOpen} onOpenChange={(open) => !open && closeLoanSheet()}>
+                <SheetContent side="bottom" className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
+                    <div className="p-6 mb-8 text-foreground">
+                        <SheetHeader className="mb-6 text-left border-b pb-4">
+                            <SheetTitle className="text-xl font-black">{editingLoan ? t('editLoan') : t('addLoan')}</SheetTitle>
+                        </SheetHeader>
+                        <LoanForm
+                            initialData={editingLoan}
+                            onSuccess={closeLoanSheet}
+                            onCancel={closeLoanSheet}
+                        />
+                    </div>
+                </SheetContent>
+            </Sheet>
+
+            {/* Loan Linker Sheet */}
+            <Sheet open={isLoanProgressSheetOpen} onOpenChange={(open) => !open && closeLoanProgressSheet()}>
+                <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
+                    <div className="p-6 pb-12 text-foreground">
+                        <SheetHeader className="mb-6 text-left">
+                            <SheetTitle className="text-xl font-black">{t('linkToLoan')}</SheetTitle>
+                        </SheetHeader>
+                        {loanForProgress && (
+                            <LoanLinker
+                                loan={loanForProgress}
+                                onSuccess={closeLoanProgressSheet}
+                            />
+                        )}
+                    </div>
+                </SheetContent>
+            </Sheet>
+
+            {/* Loan Records Sheet */}
+            <Sheet open={isLoanRecordsSheetOpen} onOpenChange={(open) => !open && closeLoanRecordsSheet()}>
+                <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
+                    <div className="p-6 pb-12 text-foreground">
+                        <SheetHeader className="mb-6 text-left border-b pb-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex flex-col">
+                                    <span className="text-[10px] font-black uppercase tracking-tight text-primary">
+                                        {loanForRecords?.type === 'taken' ? t('borrowedFrom') : t('lentTo')}: {loanForRecords?.person}
+                                    </span>
+                                    <SheetTitle className="text-2xl font-black">{loanForRecords?.title}</SheetTitle>
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-10 w-10 rounded-full hover:bg-primary/10 text-primary transition-all"
+                                    onClick={() => {
+                                        if (loanForRecords) {
+                                            openEditLoan(loanForRecords);
+                                            closeLoanRecordsSheet();
+                                        }
+                                    }}
+                                >
+                                    <Edit2 className="w-5 h-5" />
+                                </Button>
+                            </div>
+                        </SheetHeader>
+                        <div className="mt-6">
+                            {loanForRecords && (
+                                <LoanRecordsList loan={loanForRecords} />
                             )}
                         </div>
                     </div>

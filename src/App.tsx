@@ -12,6 +12,7 @@ import Expenses from '@/pages/Expenses';
 import Items from '@/pages/Items';
 import Budgets from '@/pages/Budgets';
 import Goals from '@/pages/Goals';
+import Loans from '@/pages/Loans';
 import Reports from '@/pages/Reports';
 import Settings from '@/pages/Settings';
 
@@ -68,6 +69,7 @@ function App() {
             <Route path="/items" element={<Items />} />
             <Route path="/budgets" element={<Budgets />} />
             <Route path="/goals" element={<Goals />} />
+            <Route path="/loans" element={<Loans />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="/" replace />} />

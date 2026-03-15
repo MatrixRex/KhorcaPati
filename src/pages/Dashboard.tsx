@@ -5,6 +5,7 @@ import { format, parseISO, differenceInCalendarDays } from 'date-fns';
 import { ExpenseCard } from '@/components/expenses/ExpenseCard';
 import { RecurringPaymentCard } from '@/components/recurring/RecurringPaymentCard';
 import { GoalCard } from '@/components/goals/GoalCard';
+import { LoanCard } from '@/components/loans/LoanCard';
 import { BudgetCard } from '@/components/budgets/BudgetCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,7 @@ export default function Dashboard() {
         openRecurringPaymentsList,
         openBudgetsList,
         openGoalsList,
+        openLoansList,
         openBalanceEdit
     } = useUIStore();
     const { initialBalance } = useSettingsStore();
@@ -67,6 +69,11 @@ export default function Dashboard() {
     const activeGoals = useLiveQuery(async () => {
         const all = await db.goals.orderBy('createdAt').reverse().toArray();
         return all.filter(g => g.currentAmount < g.targetAmount).slice(0, 2);
+    });
+
+    const activeLoans = useLiveQuery(async () => {
+        const all = await db.loans.orderBy('createdAt').reverse().toArray();
+        return all.filter(l => l.currentAmount < l.totalAmount).slice(0, 2);
     });
 
     const totalSpent = expensesThisMonth?.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0) || 0;
@@ -206,6 +213,30 @@ export default function Dashboard() {
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {activeGoals.map(goal => (
                             <GoalCard key={goal.id} goal={goal} />
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Active Loans */}
+            <div className="mb-6">
+                <div className="flex items-center justify-between mb-3 px-1">
+                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">{t('loans')}</h2>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        onClick={openLoansList}
+                    >
+                        <Settings2 className="w-4 h-4" />
+                    </Button>
+                </div>
+                {!activeLoans || activeLoans.length === 0 ? (
+                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">{t('noLoans')}</p>
+                ) : (
+                    <div className="flex flex-col gap-[var(--item-gap)]">
+                        {activeLoans.map(loan => (
+                            <LoanCard key={loan.id} loan={loan} />
                         ))}
                     </div>
                 )}

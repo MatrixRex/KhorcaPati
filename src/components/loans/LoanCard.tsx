@@ -92,7 +92,7 @@ export function LoanCard({ loan, onClick }: LoanCardProps) {
                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mt-1">
                         <div className="flex items-center gap-1.5 overflow-hidden">
                             <span className="text-muted-foreground/60 shrink-0">
-                                {isTaken ? t('paidBack') : t('receivedBack')}: {Math.round(percentage)}%
+                                {t('percentDone', { percent: Math.round(percentage) })}
                             </span>
                             {loan.dueDate && (
                                 <span className="text-muted-foreground/30">•</span>
@@ -104,7 +104,7 @@ export function LoanCard({ loan, onClick }: LoanCardProps) {
                             )}
                         </div>
                         <div className="text-[10px] font-black text-muted-foreground/40">
-                             {isTaken ? t('remainingDebt') : t('remainingToReceive')}: ৳{formatAmount(loan.totalAmount - loan.currentAmount)}
+                             {t('remaining')}: ৳{formatAmount(loan.totalAmount - loan.currentAmount)}
                         </div>
                     </div>
                 </div>

@@ -25,7 +25,7 @@ export function formatRelativeDate(dateStr: string | Date, includeYear = false):
     return new Intl.DateTimeFormat(i18next.language, {
         month: 'short',
         day: 'numeric',
-        year: includeYear ? 'numeric' : undefined
+        year: includeYear ? '2-digit' : undefined
     }).format(date);
 }
 

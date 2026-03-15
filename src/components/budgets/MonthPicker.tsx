@@ -36,7 +36,7 @@ export function MonthPicker({ value, onChange }: MonthPickerProps) {
         setOpen(false);
     };
 
-    const displayLabel = format(parsed, 'MMMM yyyy');
+    const displayLabel = format(parsed, 'MMMM yy');
 
     return (
         <div className="relative">

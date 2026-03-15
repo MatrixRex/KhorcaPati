@@ -87,7 +87,7 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
                                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-bold uppercase tracking-tight">
                                     <span>{exp.category}</span>
                                     <span>•</span>
-                                    <span>{format(parseISO(exp.date), 'dd MMM yyyy')}</span>
+                                        <span>{format(parseISO(exp.date), 'dd MMM yy')}</span>
                                 </div>
                             </div>
                         </div>

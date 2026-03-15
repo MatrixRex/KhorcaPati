@@ -97,7 +97,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                                     {exp.note || exp.category}
                                 </span>
                                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-bold uppercase tracking-tight">
-                                    <span>{format(parseISO(exp.date), 'dd MMM yyyy')}</span>
+                                    <span>{format(parseISO(exp.date), 'dd MMM yy')}</span>
                                     {exp.isNested && (
                                         <>
                                             <span>•</span>

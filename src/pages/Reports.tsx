@@ -39,7 +39,7 @@ const SankeyNode = ({ x, y, width, height, index, payload, containerWidth }: any
                 fontSize={Math.round(11 * (payload.fontScale || 1))}
                 fontWeight="700"
                 fill="currentColor"
-                className="fill-foreground/80 uppercase tracking-tighter"
+                className="fill-foreground uppercase tracking-tighter"
             >
                 {payload.name}
             </text>
@@ -155,11 +155,11 @@ export default function Reports() {
                 {/* 1. Expense Flow: Sankey Diagram */}
                 <Card className="border-none shadow-sm bg-muted/30 rounded-3xl overflow-hidden">
                     <CardHeader className="pb-0 pt-6 px-6">
-                        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t('expenseFlow')}</CardTitle>
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('expenseFlow')}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-6 h-[260px]">
                         {totalIncome === 0 && totalExpense === 0 ? (
-                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic opacity-50">{t('noFlowData')}</div>
+                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic font-bold">{t('noFlowData')}</div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
                                 <Sankey
@@ -197,7 +197,7 @@ export default function Reports() {
                 {/* 2. Spending by Category: Horizontal Bars */}
                 <Card className="border-none shadow-sm bg-muted/30 rounded-3xl overflow-hidden">
                     <CardHeader className="pb-0 pt-6 px-6">
-                        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t('spendingByCategory')}</CardTitle>
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('spendingByCategory')}</CardTitle>
                     </CardHeader>
                     <CardContent
                         className="px-4 pt-6 pb-2"
@@ -220,7 +220,7 @@ export default function Reports() {
                                         tickLine={false}
                                         axisLine={false}
                                         width={Math.round(80 * fontScale)}
-                                        className="font-bold text-muted-foreground uppercase tracking-tighter"
+                                        className="font-black text-foreground uppercase tracking-tighter"
                                     />
                                     <Tooltip
                                         cursor={{ fill: 'transparent' }}
@@ -237,7 +237,7 @@ export default function Reports() {
                                             fontSize={10}
                                             fontWeight={800}
                                             formatter={(v: any) => `৳${formatAmount(Number(v))}`}
-                                            className="fill-foreground/70"
+                                            className="fill-foreground"
                                         />
                                     </Bar>
                                 </BarChart>
@@ -249,11 +249,11 @@ export default function Reports() {
                 {/* 3. Timeline: Line Chart */}
                 <Card className="border-none shadow-sm bg-muted/30 rounded-3xl overflow-hidden">
                     <CardHeader className="pb-0 pt-6 px-6">
-                        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t('balanceGrowthTimeline')}</CardTitle>
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('balanceGrowthTimeline')}</CardTitle>
                     </CardHeader>
                     <CardContent className="px-2 pt-6 pb-4 h-[350px]">
                         {timelineData.length === 0 ? (
-                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic opacity-50">{t('noTimelineData')}</div>
+                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic font-bold">{t('noTimelineData')}</div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={timelineData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
@@ -277,7 +277,7 @@ export default function Reports() {
                                         tickLine={false}
                                         axisLine={false}
                                         tickFormatter={(v) => `৳${formatAmount(v)}`}
-                                        className="font-bold opacity-60"
+                                        className="font-black text-foreground opacity-80"
                                         width={Math.round(65 * fontScale)}
                                     />
                                     <Tooltip

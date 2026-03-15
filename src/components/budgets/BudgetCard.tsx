@@ -127,8 +127,8 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
     return (
         <Card
             className={cn(
-                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group/card relative",
-                isOverBudget && "border-destructive/30 bg-destructive/5"
+                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border shadow-sm rounded-2xl overflow-hidden group/card relative",
+                isOverBudget && "border-destructive/30 bg-destructive/10"
             )}
             style={{ 
                 background: `linear-gradient(to right, ${catColor}15, transparent)`
@@ -147,7 +147,7 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{timelineLabel(budget, t)}</p>
                     </div>
                     <span className="text-xs text-muted-foreground font-black uppercase text-right shrink-0 ml-2 bg-muted px-1.5 py-0.5 rounded-md">
-                        ৳{formatAmount(spent)} <span className="opacity-40">/</span> ৳{formatAmount(budget.limitAmount)}
+                        ৳{formatAmount(spent)} <span className="opacity-60">/</span> ৳{formatAmount(budget.limitAmount)}
                     </span>
                 </div>
 
@@ -155,11 +155,11 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
 
                 <div className="flex items-center justify-between mt-1">
                     <div className="flex items-center gap-1.5 overflow-hidden">
-                        <span className={cn("text-[10px] font-black uppercase tracking-widest shrink-0", percentage >= 100 ? "text-destructive" : "text-muted-foreground/60")}>
+                        <span className={cn("text-[10px] font-black uppercase tracking-widest shrink-0", percentage >= 100 ? "text-destructive" : "text-muted-foreground")}>
                             {t('utilized', { count: Math.round(percentage) })}
                         </span>
                         {isOverBudget && overspentInfo && (
-                            <span className="text-[10px] font-black text-destructive/50 whitespace-nowrap overflow-hidden text-ellipsis">
+                            <span className="text-[10px] font-black text-destructive/80 whitespace-nowrap overflow-hidden text-ellipsis">
                                 • {overspentInfo.daysAgo === 0 ? t('today') : t('daysAgo', { count: overspentInfo.daysAgo })}
                             </span>
                         )}

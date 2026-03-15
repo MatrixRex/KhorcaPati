@@ -128,11 +128,11 @@ export default function Dashboard() {
             {/* Recent Expenses */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">{t('recentExpenses')}</h2>
+                    <h2 className="text-sm font-black text-foreground uppercase tracking-widest">{t('recentExpenses')}</h2>
                     <Link to="/expenses" className="text-xs text-primary font-bold hover:underline uppercase">{t('viewAll')}</Link>
                 </div>
                 {!recentExpenses || recentExpenses.length === 0 ? (
-                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">{t('noExpenses')}</p>
+                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed border-border rounded-2xl bg-muted/30 text-foreground/70">{t('noExpenses')}</p>
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {recentExpenses.map(exp => (
@@ -145,7 +145,7 @@ export default function Dashboard() {
             {/* Recurring Payments */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">{t('recurring')}</h2>
+                    <h2 className="text-sm font-black text-foreground uppercase tracking-widest">{t('recurring')}</h2>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -156,7 +156,7 @@ export default function Dashboard() {
                     </Button>
                 </div>
                 {!recurringPayments || recurringPayments.length === 0 ? (
-                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">{t('noRecurring')}</p>
+                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed border-border rounded-2xl bg-muted/30 text-foreground/70">{t('noRecurring')}</p>
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {recurringPayments.map(payment => (
@@ -173,7 +173,7 @@ export default function Dashboard() {
             {/* Budget Overview */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">{t('budgets')}</h2>
+                    <h2 className="text-sm font-black text-foreground uppercase tracking-widest">{t('budgets')}</h2>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -184,7 +184,7 @@ export default function Dashboard() {
                     </Button>
                 </div>
                 {!budgets || budgets.length === 0 ? (
-                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">{t('noBudgets')}</p>
+                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed border-border rounded-2xl bg-muted/30 text-foreground/70">{t('noBudgets')}</p>
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {budgets.map(budget => (
@@ -197,7 +197,7 @@ export default function Dashboard() {
             {/* Active Goals */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">{t('activeGoals')}</h2>
+                    <h2 className="text-sm font-black text-foreground uppercase tracking-widest">{t('activeGoals')}</h2>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -208,7 +208,7 @@ export default function Dashboard() {
                     </Button>
                 </div>
                 {!activeGoals || activeGoals.length === 0 ? (
-                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">{t('noGoals')}</p>
+                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed border-border rounded-2xl bg-muted/30 text-foreground/70">{t('noGoals')}</p>
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {activeGoals.map(goal => (
@@ -221,7 +221,7 @@ export default function Dashboard() {
             {/* Active Loans */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-bold text-foreground/90 uppercase tracking-widest">{t('loans')}</h2>
+                    <h2 className="text-sm font-black text-foreground uppercase tracking-widest">{t('loans')}</h2>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -232,7 +232,7 @@ export default function Dashboard() {
                     </Button>
                 </div>
                 {!activeLoans || activeLoans.length === 0 ? (
-                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed rounded-2xl bg-muted/20 text-foreground/50">{t('noLoans')}</p>
+                    <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed border-border rounded-2xl bg-muted/30 text-foreground/70">{t('noLoans')}</p>
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {activeLoans.map(loan => (

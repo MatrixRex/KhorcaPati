@@ -191,7 +191,7 @@ export default function Settings() {
                         <Button
                             variant="outline"
                             onClick={() => useUIStore.getState().openCategoryManagement()}
-                            className="h-auto py-4 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            className="h-auto py-4 justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
                         >
                             <div className="flex items-center gap-4 flex-1 min-w-0">
                                 <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform shrink-0">
@@ -210,7 +210,7 @@ export default function Settings() {
                         <Button
                             variant="outline"
                             onClick={() => useUIStore.getState().openRecurringPaymentsList()}
-                            className="h-auto py-4 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            className="h-auto py-4 justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
                         >
                             <div className="flex items-center gap-4 flex-1 min-w-0">
                                 <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500 group-hover:scale-110 transition-transform shrink-0">
@@ -229,7 +229,7 @@ export default function Settings() {
                         <Button
                             variant="outline"
                             onClick={() => useUIStore.getState().openBudgetsList()}
-                            className="h-auto py-4 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            className="h-auto py-4 justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
                         >
                             <div className="flex items-center gap-4 flex-1 min-w-0">
                                 <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform shrink-0">
@@ -248,7 +248,7 @@ export default function Settings() {
                         <Button
                             variant="outline"
                             onClick={() => useUIStore.getState().openGoalsList()}
-                            className="h-auto py-4 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            className="h-auto py-4 justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
                         >
                             <div className="flex items-center gap-4 flex-1 min-w-0">
                                 <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform shrink-0">
@@ -267,7 +267,7 @@ export default function Settings() {
                         <Button
                             variant="outline"
                             onClick={() => useUIStore.getState().openLoansList()}
-                            className="h-auto py-4 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            className="h-auto py-4 justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
                         >
                             <div className="flex items-center gap-4 flex-1 min-w-0">
                                 <div className="p-2.5 rounded-xl bg-destructive/10 text-destructive group-hover:scale-110 transition-transform shrink-0">
@@ -291,7 +291,7 @@ export default function Settings() {
                         <Button
                             variant="outline"
                             onClick={handleExport}
-                            className="h-auto py-4 justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            className="h-auto py-4 justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
                         >
                             <div className="flex items-center gap-4 w-full">
                                 <div className="p-2.5 rounded-xl bg-green-500/10 text-green-500 group-hover:scale-110 transition-transform shrink-0">
@@ -313,7 +313,7 @@ export default function Settings() {
                             />
                             <Button
                                 variant="outline"
-                                className="h-auto py-4 w-full justify-between px-6 rounded-2xl border-muted/50 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                                className="h-auto py-4 w-full justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
                             >
                                 <div className="flex items-center gap-4 w-full">
                                     <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform shrink-0">
@@ -399,8 +399,8 @@ export default function Settings() {
                 </AlertDialog>
 
                 <section className="pt-6 border-t">
-                    <h2 className="text-sm font-medium text-destructive mb-3 px-1">{t('dangerZone')}</h2>
-                    <div className="bg-destructive/5 p-6 rounded-3xl border border-destructive/20 space-y-4">
+                    <h2 className="text-sm font-black text-destructive mb-3 px-1 uppercase tracking-widest">{t('dangerZone')}</h2>
+                    <div className="bg-destructive/10 p-6 rounded-3xl border border-destructive/30 space-y-4">
                         <div className="flex flex-col gap-1">
                             <h3 className="text-sm font-bold text-destructive">{t('resetApp')}</h3>
                             <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">

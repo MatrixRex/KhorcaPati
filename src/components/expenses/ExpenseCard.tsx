@@ -39,7 +39,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
         <div className="flex flex-col gap-1">
             <Card
                 className={cn(
-                    "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-2xl overflow-hidden group relative",
+                    "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border shadow-sm rounded-2xl overflow-hidden group relative",
                     isExpanded && "bg-muted/10 border-primary/20",
                     expense.isNested && !isExpanded && "bg-primary/5 border-primary/10"
                 )}
@@ -73,9 +73,9 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                                 </div>
                             )}
                         </div>
-                        <div className="flex items-center text-xs font-medium text-muted-foreground/70 gap-2">
+                        <div className="flex items-center text-xs font-bold text-muted-foreground gap-2">
                             <span>{formatRelativeDate(expense.date, true)}</span>
-                            <span className="opacity-30">•</span>
+                            <span className="opacity-50">•</span>
                             <span className="truncate uppercase tracking-tighter">{expense.category}</span>
                         </div>
                     </div>
@@ -115,14 +115,14 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                     {subExpenses.map(sub => (
                         <div
                             key={sub.id}
-                            className="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border/30 hover:bg-muted/30 transition-all cursor-pointer group/sub"
+                            className="flex items-center justify-between p-3 rounded-xl bg-muted/40 border border-border/60 hover:bg-muted/50 transition-all cursor-pointer group/sub"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 openEditExpense(sub);
                             }}
                         >
                             <div className="flex items-center gap-3 overflow-hidden">
-                                <CornerDownRight className="w-3.5 h-3.5 text-muted-foreground/40 shrink-0" />
+                                <CornerDownRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                                 <div className="flex flex-col overflow-hidden">
                                     <span className="text-xs font-bold truncate capitalize group-hover/sub:text-primary transition-colors">
                                         {sub.note || t(sub.type)}
@@ -141,7 +141,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
 
                     ))}
                     {subExpenses.length === 0 && (
-                        <div className="ml-7 p-3 text-[10px] text-muted-foreground italic border border-dashed rounded-xl border-border/40 text-center">
+                        <div className="ml-7 p-3 text-[10px] text-muted-foreground italic border border-dashed rounded-xl border-border/60 text-center font-bold">
                             {t('emptyCollection')}
                         </div>
                     )}

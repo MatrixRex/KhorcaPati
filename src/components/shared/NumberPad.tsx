@@ -164,14 +164,14 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
             {/* Click-away area - transparent, blur is scoped to the panel below */}
             <div className="fixed inset-0 pointer-events-auto" onClick={onClose} />
             
-            <div className="bg-background/80 backdrop-blur-md border-t border-white/5 rounded-t-[32px] p-4 pb-8 shadow-[0_-15px_40px_rgba(0,0,0,0.3)] max-w-md mx-auto pointer-events-auto relative ring-1 ring-white/5">
+            <div className="bg-background/80 backdrop-blur-md border-t border-border/40 rounded-t-[32px] p-4 pb-8 shadow-[0_-15px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-15px_40px_rgba(0,0,0,0.3)] max-w-md mx-auto pointer-events-auto relative ring-1 ring-border/20">
                 {/* Compact Indicator */}
-                <div className="w-12 h-1 bg-muted/30 rounded-full mx-auto mb-3" />
+                <div className="w-12 h-1 bg-muted/40 rounded-full mx-auto mb-3" />
                 
                 {/* Compact Header (Formula Only) */}
                 <div className="mb-4 px-2">
                     <div className="flex flex-col overflow-hidden">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-primary/70 mb-1">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-primary mb-1">
                             {label || t('inputAmount')}
                         </span>
                         <div className="text-2xl font-bold text-foreground overflow-hidden whitespace-nowrap overflow-ellipsis">
@@ -234,8 +234,8 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
                                 variant={isOperator ? "default" : "outline"}
                                 className={cn(
                                     `${colSpanClass} h-12 rounded-xl text-lg font-bold transition-all active:scale-95 shadow-sm`,
-                                    isOperator ? "bg-primary/10 text-primary border-none hover:bg-primary/20" :
-                                        "bg-card border-border/5 border hover:bg-muted/50"
+                                    isOperator ? "bg-primary/20 text-primary border-none hover:bg-primary/30" :
+                                        "bg-card border-border border hover:bg-muted"
                                 )}
                                 onClick={() => handlePress(key)}
                             >

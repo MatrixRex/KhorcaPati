@@ -43,7 +43,7 @@ export function BottomNav() {
                                     </div>
                                     <span className={cn(
                                         "text-[10px] font-bold tracking-tight transition-all duration-300 relative z-10",
-                                        isActive ? "opacity-100 translate-y-0" : "opacity-70 group-hover:opacity-100"
+                                        isActive ? "opacity-100 translate-y-0" : "opacity-90 group-hover:opacity-100"
                                     )}>
                                         {item.label}
                                     </span>

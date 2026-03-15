@@ -25,7 +25,7 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
         <Card
             onClick={onClick || (() => openGoalRecords(goal))}
             className={cn(
-                "group relative overflow-hidden transition-all duration-300 border-border/40 hover:border-primary/20 cursor-pointer shadow-sm active:scale-[0.98] transition-all rounded-2xl",
+                "group relative overflow-hidden transition-all duration-300 border-border hover:border-primary/20 cursor-pointer shadow-sm active:scale-[0.98] transition-all rounded-2xl",
                 isCompleted && "border-primary/30"
             )}
             style={{ 
@@ -49,14 +49,14 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
                                 </span>
                             )}
                         </div>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider line-clamp-1 opacity-60">
+                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider line-clamp-1">
                             {goal.note || t('noNotes')}
                         </p>
                     </div>
 
                     <div className="flex items-center gap-2 ml-2">
                         <span className="text-xs text-muted-foreground font-black uppercase text-right shrink-0 bg-muted px-1.5 py-0.5 rounded-md">
-                            ৳{formatAmount(goal.currentAmount)} <span className="opacity-40">/</span> ৳{formatAmount(goal.targetAmount)}
+                            ৳{formatAmount(goal.currentAmount)} <span className="opacity-60">/</span> ৳{formatAmount(goal.targetAmount)}
                         </span>
                         <Button
                             size="icon"
@@ -86,14 +86,14 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
 
                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mt-1">
                         <div className="flex items-center gap-1.5 overflow-hidden">
-                            <span className="text-muted-foreground/60 shrink-0">
+                            <span className="text-muted-foreground shrink-0">
                                 {t('savedPercent', { count: Math.round(percentage) })}
                             </span>
                             {goal.deadline && (
-                                <span className="text-muted-foreground/30">•</span>
+                                <span className="text-muted-foreground/50">•</span>
                             )}
                             {goal.deadline && (
-                                <span className="text-muted-foreground/60 truncate">
+                                <span className="text-muted-foreground truncate">
                                     {formatRelativeDate(goal.deadline, true)}
                                 </span>
                             )}

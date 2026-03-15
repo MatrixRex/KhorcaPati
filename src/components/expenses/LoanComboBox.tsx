@@ -22,8 +22,10 @@ export const LoanComboBox = React.forwardRef<HTMLInputElement, LoanComboBoxProps
         const loans = useLiveQuery(() => db.loans.toArray()) || [];
 
         const loanNames = React.useMemo(() => {
-            return loans.map(l => `${l.title} (${l.person})`);
-        }, [loans]);
+            return loans
+                .filter(l => l.id === value || l.currentAmount < l.totalAmount)
+                .map(l => `${l.title} (${l.person})`);
+        }, [loans, value]);
 
         const selectedLoan = React.useMemo(() => {
             return loans.find(l => l.id === value);

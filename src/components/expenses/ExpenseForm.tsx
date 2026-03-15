@@ -21,7 +21,6 @@ import { useCategoryStore } from '@/stores/categoryStore';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useUIStore } from '@/stores/uiStore';
 import { ChevronRight, Plus, Layers, Trash2, Calculator, Edit2 } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
 import { NumberPad } from '@/components/shared/NumberPad';
 
 import { SuggestionInput } from './SuggestionInput';
@@ -124,22 +123,42 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
         loanId ? db.expenses.where('loanId').equals(loanId).toArray() : []
     , [loanId]) || [];
 
+    const currentAmount = form.watch('amount');
+    const recordType = form.watch('type');
+
     const loanProgress = useMemo(() => {
         if (!selectedLoanInDb) return null;
-        const totalRepayments = loanLinkedExpenses
+        
+        // Baseline: What's already in DB, excluding the current record we're editing
+        const baselineRepayments = loanLinkedExpenses
             .filter(e => (selectedLoanInDb.type === 'taken' ? e.type === 'expense' : e.type === 'income'))
+            .filter(e => e.id !== currentId)
             .reduce((s, e) => s + e.amount, 0);
             
-        const totalAdditionalAmount = loanLinkedExpenses
+        const baselineAdditional = loanLinkedExpenses
             .filter(e => (selectedLoanInDb.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
+            .filter(e => e.id !== currentId)
             .reduce((s, e) => s + e.amount, 0);
 
-        const totalGrossAmount = selectedLoanInDb.totalAmount + totalAdditionalAmount;
-        const remainingAmount = Math.max(0, totalGrossAmount - totalRepayments);
-        const percentage = Math.min((totalRepayments / totalGrossAmount) * 100, 100);
+        const totalGrossAmount = selectedLoanInDb.totalAmount + baselineAdditional;
+        const currentPercentage = totalGrossAmount > 0 ? Math.min((baselineRepayments / totalGrossAmount) * 100, 100) : 0;
         
-        return { percentage, remainingAmount, totalGrossAmount };
-    }, [selectedLoanInDb, loanLinkedExpenses]);
+        // Check if current action decreases debt (Repayment)
+        const isRepayment = (selectedLoanInDb.type === 'taken' && recordType === 'expense') || 
+                          (selectedLoanInDb.type === 'given' && recordType === 'income');
+        
+        const projectedRepayments = baselineRepayments + (isRepayment ? currentAmount : 0);
+        const projectedPercentage = totalGrossAmount > 0 ? Math.min((projectedRepayments / totalGrossAmount) * 100, 100) : 0;
+        const remainingAmount = Math.max(0, totalGrossAmount - baselineRepayments);
+        
+        return { 
+            percentage: currentPercentage, 
+            projectedPercentage, 
+            remainingAmount, 
+            totalGrossAmount,
+            isRepayment
+        };
+    }, [selectedLoanInDb, loanLinkedExpenses, currentAmount, recordType, currentId]);
 
     useEffect(() => {
         if (mode === 'debt') {
@@ -159,6 +178,16 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             if (currentId) form.handleSubmit(performSave)();
         }
     }, [mode, selectedLoanInDb, initialData, currentId]);
+
+    // Reactive restriction for overpayment
+    useEffect(() => {
+        if (mode === 'debt' && loanProgress?.isRepayment && loanId) {
+            const currentAmount = form.getValues('amount');
+            if (currentAmount > loanProgress.remainingAmount) {
+                form.setValue('amount', loanProgress.remainingAmount);
+            }
+        }
+    }, [loanId, recordType, mode, loanProgress?.remainingAmount, loanProgress?.isRepayment]);
 
 
     const isNested = form.watch('isNested');
@@ -399,17 +428,27 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         </span>
                                     </div>
                                     <span className="text-[10px] font-black text-muted-foreground/60">
-                                        {Math.round(loanProgress.percentage)}%
+                                        {Math.round(loanProgress.projectedPercentage)}%
                                     </span>
                                 </div>
-                                <Progress
-                                    value={loanProgress.percentage}
-                                    className="h-2"
-                                    indicatorClassName={cn(
-                                        "transition-all duration-1000 ease-out",
-                                        selectedLoanInDb?.type === 'taken' ? "bg-red-500" : "bg-green-500"
-                                    )}
-                                />
+                                <div className="relative h-2 w-full bg-muted/40 rounded-full overflow-hidden">
+                                    {/* Projected Progress Bar (Shadow) */}
+                                    <div 
+                                        className={cn(
+                                            "absolute inset-y-0 left-0 transition-all duration-500 ease-out opacity-40",
+                                            selectedLoanInDb?.type === 'taken' ? "bg-red-400" : "bg-green-400"
+                                        )}
+                                        style={{ width: `${loanProgress.projectedPercentage}%` }}
+                                    />
+                                    {/* Current Progress Bar */}
+                                    <div 
+                                        className={cn(
+                                            "absolute inset-y-0 left-0 transition-all duration-1000 ease-out",
+                                            selectedLoanInDb?.type === 'taken' ? "bg-red-600 shadow-[0_0_8px_rgba(220,38,38,0.4)]" : "bg-green-600 shadow-[0_0_8px_rgba(22,163,74,0.4)]"
+                                        )}
+                                        style={{ width: `${loanProgress.percentage}%` }}
+                                    />
+                                </div>
                             </div>
                         )}
 
@@ -885,8 +924,12 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                     value={String(form.getValues('amount'))}
                     label={form.watch('type') === 'expense' ? `${t('expenseLabel')} ${t('amount')}` : `${t('incomeLabel')} ${t('amount')}`}
                     onChange={(val) => {
-                        const num = parseFloat(val);
+                        let num = parseFloat(val);
                         if (!isNaN(num)) {
+                            // Restrict overpay in debt mode for repayments
+                            if (mode === 'debt' && loanProgress?.isRepayment && loanProgress.remainingAmount > 0 && num > loanProgress.remainingAmount) {
+                                num = loanProgress.remainingAmount;
+                            }
                             form.setValue('amount', num);
                             setWasAmountEdited(true);
                         }

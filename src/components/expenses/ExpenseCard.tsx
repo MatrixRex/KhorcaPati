@@ -84,7 +84,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                         <div className="flex flex-col items-end">
                             <span className={cn(
                                 "text-sm font-black tabular-nums",
-                                expense.type === 'income' ? "text-green-600" : "text-red-600"
+                                expense.type === 'income' ? "text-success" : "text-destructive"
                             )}>
                                 {expense.type === 'income' ? '+' : '-'}৳{formatAmount(expense.amount)}
                             </span>
@@ -132,7 +132,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                             </div>
                             <span className={cn(
                                 "text-xs font-black",
-                                sub.type === 'income' ? "text-green-600" : "text-red-600"
+                                sub.type === 'income' ? "text-success" : "text-destructive"
                             )}>
                                 ৳{formatAmount(sub.amount)}
                             </span>

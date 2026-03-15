@@ -15,7 +15,7 @@ export function BottomNav() {
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-t border-border/40 h-[var(--bottom-nav-height)] pointer-events-auto shadow-[0_-4px_12px_rgba(0,0,0,0.03)] dark:shadow-[0_-4px_12px_rgba(0,0,0,0.2)]">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t-0 h-nav pointer-events-auto shadow-2xl shadow-black/10">
             <ul className="flex items-center justify-around h-full max-w-md mx-auto">
                 {navItems.map((item) => (
                     <li key={item.path} className="flex-1">
@@ -32,7 +32,7 @@ export function BottomNav() {
                                 <>
                                     {/* Active Tab Mountain Glow */}
                                     {isActive && (
-                                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-16 bg-primary/30 blur-[32px] rounded-[100%] -z-10 animate-in fade-in slide-in-from-bottom-4 duration-700 pointer-events-none" />
+                                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-16 bg-primary/30 blur-[32px] rounded-[100%] -z-10 animate-reveal pointer-events-none" />
                                     )}
                                     
                                     <div className={cn(

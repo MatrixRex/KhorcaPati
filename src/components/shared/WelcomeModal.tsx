@@ -65,8 +65,8 @@ export function WelcomeModal() {
             <div className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" />
 
             {/* Sheet — slides up from bottom like the rest of the app */}
-            <div className="fixed inset-x-0 bottom-0 z-[201] flex justify-center animate-in slide-in-from-bottom-8 fade-in duration-300">
-                <div className="w-full max-w-md rounded-t-[32px] bg-background border-t border-border/30 shadow-2xl pb-safe">
+            <div className="fixed inset-x-0 bottom-0 z-[201] flex justify-center animate-reveal">
+                <div className="w-full max-w-md rounded-t-3xl glass shadow-2xl pb-safe">
 
                     {/* Drag handle */}
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-1" />
@@ -75,7 +75,7 @@ export function WelcomeModal() {
 
                         {/* Header */}
                         <div>
-                            <h2 className="text-2xl font-black">{t('appTitle')} 👋</h2>
+                            <h2 className="text-2xl font-black text-gradient">{t('appTitle')} 👋</h2>
                             <p className="text-sm text-muted-foreground font-medium mt-0.5">
                                 {t('selectLanguage')} & {t('appearance')}
                             </p>

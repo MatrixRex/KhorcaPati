@@ -139,12 +139,12 @@ export function GlobalUI() {
             <Sheet open={isGoalRecordsSheetOpen} onOpenChange={(open) => !open && closeGoalRecordsSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-50"
+                    className="max-h-[92dvh] h-auto rounded-t-[32px] p-0 border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-50 flex flex-col"
                     style={{ background: 'linear-gradient(to bottom, hsl(var(--primary))08, transparent)' }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-10 blur-3xl pointer-events-none bg-primary" />
-                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10" />
-                    <div className="px-6 pt-2 pb-12 text-foreground relative z-10">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10 shrink-0" />
+                    <div className="flex-1 overflow-y-auto px-6 pb-12 text-foreground relative z-10" data-scroll-container>
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col min-w-0 flex-1">
@@ -192,12 +192,12 @@ export function GlobalUI() {
             <Sheet open={isBudgetRecordsSheetOpen} onOpenChange={(open) => !open && closeBudgetRecordsSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-50"
+                    className="max-h-[92dvh] h-auto rounded-t-[32px] p-0 border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-50 flex flex-col"
                     style={{ background: `linear-gradient(to bottom, ${budgetColor}12, transparent)` }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-15 blur-3xl pointer-events-none" style={{ backgroundColor: budgetColor }} />
-                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10" />
-                    <div className="px-6 pt-2 pb-12 text-foreground relative z-10">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10 shrink-0" />
+                    <div className="flex-1 overflow-y-auto px-6 pb-12 text-foreground relative z-10" data-scroll-container>
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col min-w-0 flex-1">
@@ -243,12 +243,12 @@ export function GlobalUI() {
             <Sheet open={isLoanRecordsSheetOpen} onOpenChange={(open) => !open && closeLoanRecordsSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-50"
+                    className="max-h-[92dvh] h-auto rounded-t-[32px] p-0 border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-50 flex flex-col"
                     style={{ background: `linear-gradient(to bottom, ${loanColor}12, transparent)` }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-15 blur-3xl pointer-events-none" style={{ backgroundColor: loanColor }} />
-                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10" />
-                    <div className="px-6 pt-2 pb-12 text-foreground relative z-10">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10 shrink-0" />
+                    <div className="flex-1 overflow-y-auto px-6 pb-12 text-foreground relative z-10" data-scroll-container>
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col min-w-0 flex-1">
@@ -309,14 +309,14 @@ export function GlobalUI() {
             <Sheet open={isExpenseSheetOpen} onOpenChange={(open) => !open && handleCloseExpense()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto rounded-t-[32px] p-0 border-t border-white/10 bg-background/60 backdrop-blur-xl overflow-hidden z-[60]"
+                    className="max-h-[92dvh] h-auto rounded-t-[32px] p-0 border-t border-white/10 bg-background/60 backdrop-blur-xl overflow-hidden z-[60] flex flex-col"
                     style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
-                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="px-6 pb-6 overflow-y-auto pt-2">
-                        <SheetHeader className="mb-6 text-left">
-                            <SheetTitle>{editingExpense ? t('editRecord') : t('addRecord')}</SheetTitle>
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
+                    <div className="flex-1 overflow-y-auto px-6 pb-6 pt-2" data-scroll-container>
+                        <SheetHeader className="mb-4 text-left p-0">
+                            <SheetTitle className="text-xl font-black">{editingExpense ? t('editRecord') : t('addRecord')}</SheetTitle>
                         </SheetHeader>
                         <ExpenseForm
                             key={editingExpense?.id || `new-parent-${expenseSessionId}`}
@@ -333,14 +333,14 @@ export function GlobalUI() {
             <Sheet open={isSubRecordSheetOpen} onOpenChange={(open) => !open && handleCloseSubRecord()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[85dvh] h-auto rounded-t-[32px] p-0 border-t border-white/10 bg-background/60 backdrop-blur-xl z-[70] overflow-hidden"
+                    className="max-h-[85dvh] h-auto rounded-t-[32px] p-0 border-t border-white/10 bg-background/60 backdrop-blur-xl z-[70] overflow-hidden flex flex-col"
                     style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
-                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="px-6 pb-6 overflow-y-auto pt-2">
-                        <SheetHeader className="mb-6 text-left">
-                            <SheetTitle>{editingSubRecord ? t('editSubRecord') : t('addSubRecord')}</SheetTitle>
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
+                    <div className="flex-1 overflow-y-auto px-6 pb-6 pt-2" data-scroll-container>
+                        <SheetHeader className="mb-4 text-left p-0">
+                            <SheetTitle className="text-xl font-black">{editingSubRecord ? t('editSubRecord') : t('addSubRecord')}</SheetTitle>
                         </SheetHeader>
                         <ExpenseForm
                             key={editingSubRecord?.id || `new-sub-${subSessionId}`}
@@ -354,18 +354,18 @@ export function GlobalUI() {
                 </SheetContent>
             </Sheet>
 
-
             {/* Recurring Payment Sheet */}
             <Sheet open={isRecurringPaymentSheetOpen} onOpenChange={(open) => !open && closeRecurringPaymentSheet()}>
                 <SheetContent
                     side="bottom"
-                    className="max-h-[90dvh] h-auto sm:h-auto rounded-t-xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto bg-background/60 backdrop-blur-xl border-t border-white/10 overflow-hidden z-[60]"
+                    className="max-h-[90dvh] h-auto rounded-t-[32px] p-0 w-full max-w-md mx-auto pointer-events-auto bg-background/60 backdrop-blur-xl border-t border-white/10 overflow-hidden z-[60] flex flex-col"
                     style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
-                    <div className="px-6 pt-2 mb-8">
-                        <SheetHeader className="mb-4 text-left">
-                            <SheetTitle>{editingRecurringPayment ? t('editRecurring') : t('addRecurring')}</SheetTitle>
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
+                    <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8" data-scroll-container>
+                        <SheetHeader className="mb-4 text-left p-0">
+                            <SheetTitle className="text-xl font-black">{editingRecurringPayment ? t('editRecurring') : t('addRecurring')}</SheetTitle>
                         </SheetHeader>
                         <RecurringPaymentForm
                             initialData={editingRecurringPayment}
@@ -380,12 +380,13 @@ export function GlobalUI() {
             <Sheet open={isBudgetSheetOpen} onOpenChange={(open) => !open && closeBudgetSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[60]"
+                    className="max-h-[90dvh] h-auto rounded-t-[32px] p-0 w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[60] flex flex-col"
                     style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
-                    <div className="px-6 pt-2 mb-8 text-foreground">
-                        <SheetHeader className="mb-6 text-left border-b pb-4">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
+                    <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8 text-foreground" data-scroll-container>
+                        <SheetHeader className="mb-4 text-left p-0">
                             <SheetTitle className="text-xl font-black">{editingBudget ? t('editBudget') : t('newBudgetLimit')}</SheetTitle>
                         </SheetHeader>
                         <BudgetForm
@@ -402,12 +403,13 @@ export function GlobalUI() {
             <Sheet open={isGoalSheetOpen} onOpenChange={(open) => !open && closeGoalSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[60]"
+                    className="max-h-[90dvh] h-auto rounded-t-[32px] p-0 w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[60] flex flex-col"
                     style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
-                    <div className="px-6 pt-2 mb-8 text-foreground">
-                        <SheetHeader className="mb-6 text-left border-b pb-4">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
+                    <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8 text-foreground" data-scroll-container>
+                        <SheetHeader className="mb-4 text-left p-0">
                             <SheetTitle className="text-xl font-black">{editingGoal ? t('editSavingGoal') : t('addSavingGoal')}</SheetTitle>
                         </SheetHeader>
                         <GoalForm
@@ -423,13 +425,13 @@ export function GlobalUI() {
             <Sheet open={isGoalProgressSheetOpen} onOpenChange={(open) => !open && closeGoalProgressSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[60]"
+                    className="max-h-[92dvh] h-auto rounded-t-[32px] p-0 w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[60] flex flex-col"
                     style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
-                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="px-6 pt-2 pb-12 text-foreground">
-                        <SheetHeader className="mb-6 text-left">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
+                    <div className="flex-1 overflow-y-auto px-6 pt-2 pb-12 text-foreground" data-scroll-container>
+                        <SheetHeader className="mb-4 text-left p-0">
                             <SheetTitle className="text-xl font-black">{t('linkRecordsToGoal')}</SheetTitle>
                         </SheetHeader>
                         {goalForProgress && (
@@ -446,12 +448,13 @@ export function GlobalUI() {
             <Sheet open={isLoanSheetOpen} onOpenChange={(open) => !open && closeLoanSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[60]"
+                    className="max-h-[90dvh] h-auto rounded-t-[32px] p-0 w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[60] flex flex-col"
                     style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
-                    <div className="px-6 pt-2 mb-8 text-foreground">
-                        <SheetHeader className="mb-6 text-left border-b pb-4">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
+                    <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8 text-foreground" data-scroll-container>
+                        <SheetHeader className="mb-4 text-left p-0">
                             <SheetTitle className="text-xl font-black">{editingLoan ? t('editLoan') : t('addLoan')}</SheetTitle>
                         </SheetHeader>
                         <LoanForm
@@ -467,13 +470,13 @@ export function GlobalUI() {
             <Sheet open={isLoanProgressSheetOpen} onOpenChange={(open) => !open && closeLoanProgressSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[60]"
+                    className="max-h-[92dvh] h-auto rounded-t-[32px] p-0 w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[60] flex flex-col"
                     style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
-                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="px-6 pt-2 pb-12 text-foreground">
-                        <SheetHeader className="mb-6 text-left">
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
+                    <div className="flex-1 overflow-y-auto px-6 pt-2 pb-12 text-foreground" data-scroll-container>
+                        <SheetHeader className="mb-4 text-left p-0">
                             <SheetTitle className="text-xl font-black">{t('linkToLoan')}</SheetTitle>
                         </SheetHeader>
                         {loanForProgress && (

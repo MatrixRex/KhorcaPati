@@ -101,7 +101,12 @@ export function CategoryManagementDrawer() {
 
     return (
         <Sheet open={isCategoryManagementOpen} onOpenChange={(open) => !open && closeCategoryManagement()}>
-            <SheetContent side="bottom" className="h-[90vh] rounded-t-[40px] p-0 border-none overflow-hidden flex flex-col">
+            <SheetContent 
+                side="bottom" 
+                className="h-[90vh] rounded-t-[32px] p-0 border-t border-white/10 overflow-hidden flex flex-col bg-background/60 backdrop-blur-xl"
+                style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
+            >
+                <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
                 <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mt-4 mb-2 shrink-0" />
                 
                 <SheetHeader className="px-6 py-4 shrink-0">

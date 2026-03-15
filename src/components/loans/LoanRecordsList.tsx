@@ -39,11 +39,13 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
         .filter(e => (loan.type === 'taken' ? e.type === 'expense' : e.type === 'income'))
         .reduce((s, e) => s + e.amount, 0);
         
-    const totalAdditional = loan.totalAmount + linkedExpenses
+    const totalAdditionalAmount = linkedExpenses
         .filter(e => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
         .reduce((s, e) => s + e.amount, 0);
 
-    const percentage = Math.min((loan.currentAmount / loan.totalAmount) * 100, 100);
+    const totalGrossAmount = loan.totalAmount + totalAdditionalAmount;
+    const remainingAmount = Math.max(0, totalGrossAmount - totalRepayments);
+    const percentage = Math.min((totalRepayments / totalGrossAmount) * 100, 100);
     const isTaken = loan.type === 'taken';
 
     if (sortedExpenses.length === 0) {
@@ -96,8 +98,8 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
                     />
                 </div>
                 <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">
-                    <span>৳{formatAmount(loan.currentAmount)} {t('done')}</span>
-                    <span>৳{formatAmount(loan.totalAmount - loan.currentAmount)} {t('remaining')}</span>
+                    <span>৳{formatAmount(totalRepayments)} {t('done')}</span>
+                    <span>৳{formatAmount(remainingAmount)} {t('remaining')}</span>
                 </div>
             </div>
 
@@ -121,7 +123,7 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
                         </span>
                     </div>
                     <div className="text-xl font-black">
-                        ৳{formatAmount(totalAdditional)}
+                        ৳{formatAmount(totalGrossAmount)}
                     </div>
                 </div>
             </div>

@@ -47,7 +47,7 @@ export function GlobalUI() {
         isCategoryManagementOpen,
         theme, expenseSessionId, subSessionId
     } = useUIStore();
-    const { ensureDefaultCategory, loadCategories } = useCategoryStore();
+    const { categories, ensureDefaultCategory, loadCategories } = useCategoryStore();
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -79,6 +79,9 @@ export function GlobalUI() {
             navigate(path);
         }
     }, [returnPath, closeExpenseSheet, navigate]);
+
+    const budgetColor = budgetForRecords ? (categories.find(c => c.name.toLowerCase() === budgetForRecords.category.toLowerCase())?.color || '#3b82f6') : '#3b82f6';
+    const loanColor = loanForRecords?.type === 'taken' ? '#ef4444' : '#3b82f6';
 
     const handleCloseSubRecord = React.useCallback(() => {
         closeSubRecordSheet();
@@ -129,7 +132,12 @@ export function GlobalUI() {
 
             {/* Main Expense Sheet */}
             <Sheet open={isExpenseSheetOpen} onOpenChange={(open) => !open && handleCloseExpense()}>
-                <SheetContent side="bottom" className="max-h-[92dvh] h-auto rounded-t-[32px] p-0 border-none bg-background">
+                <SheetContent 
+                    side="bottom" 
+                    className="max-h-[92dvh] h-auto rounded-t-[32px] p-0 border-t border-white/10 bg-background/60 backdrop-blur-xl overflow-hidden"
+                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
+                >
+                    <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
                     <div className="px-6 pb-6 overflow-y-auto pt-2">
                         <SheetHeader className="mb-6 text-left">
@@ -148,7 +156,12 @@ export function GlobalUI() {
 
             {/* Sub-Record Sheet */}
             <Sheet open={isSubRecordSheetOpen} onOpenChange={(open) => !open && handleCloseSubRecord()}>
-                <SheetContent side="bottom" className="max-h-[85dvh] h-auto rounded-t-[32px] p-0 border-none bg-background z-[60]">
+                <SheetContent 
+                    side="bottom" 
+                    className="max-h-[85dvh] h-auto rounded-t-[32px] p-0 border-t border-white/10 bg-background/60 backdrop-blur-xl z-[60] overflow-hidden"
+                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
+                >
+                    <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
                     <div className="px-6 pb-6 overflow-y-auto pt-2">
                         <SheetHeader className="mb-6 text-left">
@@ -171,8 +184,10 @@ export function GlobalUI() {
             <Sheet open={isRecurringPaymentSheetOpen} onOpenChange={(open) => !open && closeRecurringPaymentSheet()}>
                 <SheetContent
                     side="bottom"
-                    className="max-h-[90dvh] h-auto sm:h-auto rounded-t-xl p-0 overflow-y-auto w-full max-w-md mx-auto z-50 pointer-events-auto"
+                    className="max-h-[90dvh] h-auto sm:h-auto rounded-t-xl p-0 overflow-y-auto w-full max-w-md mx-auto z-50 pointer-events-auto bg-background/60 backdrop-blur-xl border-t border-white/10 overflow-hidden"
+                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
                 >
+                    <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
                     <div className="px-6 pt-2 mb-8">
                         <SheetHeader className="mb-4 text-left">
                             <SheetTitle>{editingRecurringPayment ? t('editRecurring') : t('addRecurring')}</SheetTitle>
@@ -188,7 +203,12 @@ export function GlobalUI() {
 
             {/* Budget Sheet */}
             <Sheet open={isBudgetSheetOpen} onOpenChange={(open) => !open && closeBudgetSheet()}>
-                <SheetContent side="bottom" className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
+                <SheetContent 
+                    side="bottom" 
+                    className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden"
+                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
+                >
+                    <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
                     <div className="px-6 pt-2 mb-8 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <SheetTitle className="text-xl font-black">{editingBudget ? t('editBudget') : t('newBudgetLimit')}</SheetTitle>
@@ -205,7 +225,12 @@ export function GlobalUI() {
 
             {/* Goal Sheet */}
             <Sheet open={isGoalSheetOpen} onOpenChange={(open) => !open && closeGoalSheet()}>
-                <SheetContent side="bottom" className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
+                <SheetContent 
+                    side="bottom" 
+                    className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl overflow-hidden"
+                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
+                >
+                    <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
                     <div className="px-6 pt-2 mb-8 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <SheetTitle className="text-xl font-black">{editingGoal ? t('editSavingGoal') : t('addSavingGoal')}</SheetTitle>
@@ -220,7 +245,12 @@ export function GlobalUI() {
             </Sheet>
             {/* Goal Linker Sheet (repurposed from Progress) */}
             <Sheet open={isGoalProgressSheetOpen} onOpenChange={(open) => !open && closeGoalProgressSheet()}>
-                <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
+                <SheetContent 
+                    side="bottom" 
+                    className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden"
+                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
+                >
+                    <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
                     <div className="px-6 pt-2 pb-12 text-foreground">
                         <SheetHeader className="mb-6 text-left">
@@ -238,9 +268,14 @@ export function GlobalUI() {
 
             {/* Goal Records Sheet */}
             <Sheet open={isGoalRecordsSheetOpen} onOpenChange={(open) => !open && closeGoalRecordsSheet()}>
-                <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
-                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="px-6 pt-2 pb-12 text-foreground">
+                <SheetContent 
+                    side="bottom" 
+                    className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden"
+                    style={{ background: 'linear-gradient(to bottom, hsl(var(--primary))08, transparent)' }}
+                >
+                    <div className="absolute top-0 left-0 right-0 h-32 opacity-10 blur-3xl pointer-events-none bg-primary" />
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10" />
+                    <div className="px-6 pt-2 pb-12 text-foreground relative z-10">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col">
@@ -272,9 +307,14 @@ export function GlobalUI() {
             </Sheet>
             {/* Budget Records Sheet */}
             <Sheet open={isBudgetRecordsSheetOpen} onOpenChange={(open) => !open && closeBudgetRecordsSheet()}>
-                <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
-                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="px-6 pt-2 pb-12 text-foreground">
+                <SheetContent 
+                    side="bottom" 
+                    className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden"
+                    style={{ background: `linear-gradient(to bottom, ${budgetColor}12, transparent)` }}
+                >
+                    <div className="absolute top-0 left-0 right-0 h-32 opacity-15 blur-3xl pointer-events-none" style={{ backgroundColor: budgetColor }} />
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10" />
+                    <div className="px-6 pt-2 pb-12 text-foreground relative z-10">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col">
@@ -307,7 +347,12 @@ export function GlobalUI() {
 
             {/* Loan Sheet */}
             <Sheet open={isLoanSheetOpen} onOpenChange={(open) => !open && closeLoanSheet()}>
-                <SheetContent side="bottom" className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl">
+                <SheetContent 
+                    side="bottom" 
+                    className="max-h-[90dvh] h-auto sm:h-auto rounded-t-3xl p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden"
+                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
+                >
+                    <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
                     <div className="px-6 pt-2 mb-8 text-foreground">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <SheetTitle className="text-xl font-black">{editingLoan ? t('editLoan') : t('addLoan')}</SheetTitle>
@@ -323,7 +368,12 @@ export function GlobalUI() {
 
             {/* Loan Linker Sheet */}
             <Sheet open={isLoanProgressSheetOpen} onOpenChange={(open) => !open && closeLoanProgressSheet()}>
-                <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
+                <SheetContent 
+                    side="bottom" 
+                    className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden"
+                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
+                >
+                    <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
                     <div className="px-6 pt-2 pb-12 text-foreground">
                         <SheetHeader className="mb-6 text-left">
@@ -341,9 +391,14 @@ export function GlobalUI() {
 
             {/* Loan Records Sheet */}
             <Sheet open={isLoanRecordsSheetOpen} onOpenChange={(open) => !open && closeLoanRecordsSheet()}>
-                <SheetContent side="bottom" className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-none shadow-2xl bg-background">
-                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
-                    <div className="px-6 pt-2 pb-12 text-foreground">
+                <SheetContent 
+                    side="bottom" 
+                    className="max-h-[92dvh] h-auto sm:h-auto rounded-t-[32px] p-0 overflow-y-auto w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden"
+                    style={{ background: `linear-gradient(to bottom, ${loanColor}12, transparent)` }}
+                >
+                    <div className="absolute top-0 left-0 right-0 h-32 opacity-15 blur-3xl pointer-events-none" style={{ backgroundColor: loanColor }} />
+                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10" />
+                    <div className="px-6 pt-2 pb-12 text-foreground relative z-10">
                         <SheetHeader className="mb-6 text-left border-b pb-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col">

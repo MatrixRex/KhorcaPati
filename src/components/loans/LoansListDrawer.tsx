@@ -17,7 +17,12 @@ export function LoansListDrawer() {
 
     return (
         <Sheet open={isLoansListOpen} onOpenChange={(open) => !open && closeLoansList()}>
-            <SheetContent side="bottom" className="h-[92vh] rounded-t-[32px] p-0 overflow-hidden border-none bg-background">
+            <SheetContent 
+                side="bottom" 
+                className="h-[92vh] rounded-t-[32px] p-0 overflow-hidden border-t border-white/10 bg-background/60 backdrop-blur-xl"
+                style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
+            >
+                <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
                 <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2" />
                 <div className="px-6 pb-6 h-full flex flex-col pt-2">
                     <SheetHeader className="px-0 py-4 shrink-0">

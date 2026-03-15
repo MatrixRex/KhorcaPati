@@ -81,6 +81,7 @@ export interface Category {
     color: string;                // hex color
     icon: string;                 // lucide icon name
     isDefault: boolean;
+    isSystem: boolean;
 }
 
 export interface RecurringPayment {

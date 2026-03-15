@@ -151,166 +151,192 @@ export function CategoryManagementDrawer() {
                     )}
 
                     {/* Category List */}
+                    {/* Category List */}
                     <div className="space-y-3">
-                        {categories.map((cat) => {
-                            const isEditing = editingCategory?.id === cat.id;
+                        {(() => {
+                            const userCats = categories
+                                .filter(c => !(c.isDefault || c.isSystem))
+                                .sort((a, b) => a.name.localeCompare(b.name));
                             
-                            return (
-                                <div key={cat.id} className="group">
-                                    <div 
-                                        className={cn(
-                                            "flex flex-col transition-all duration-300 border rounded-[28px] overflow-hidden bg-card",
-                                            isEditing ? "border-primary ring-4 ring-primary/5 shadow-xl" : "border-border/40 hover:border-primary/30"
-                                        )}
-                                    >
+                            const systemCats = categories
+                                .filter(c => (c.isDefault || c.isSystem))
+                                .sort((a, b) => a.name.localeCompare(b.name));
+
+                            const renderCategory = (cat: Category) => {
+                                const isEditing = editingCategory?.id === cat.id;
+                                const isSystem = !!(cat.isDefault || cat.isSystem);
+                                
+                                return (
+                                    <div key={cat.id} className="group">
                                         <div 
-                                            className="flex items-center justify-between p-4 cursor-pointer"
-                                            onClick={() => {
-                                                if (isEditing) {
-                                                    setEditingCategory(null);
-                                                    setShowColorPicker(false);
-                                                } else {
-                                                    setEditingCategory({ ...cat });
-                                                    setShowColorPicker(false);
-                                                }
-                                            }}
+                                            className={cn(
+                                                "flex flex-col transition-all duration-300 border rounded-[28px] overflow-hidden bg-card",
+                                                isEditing ? "border-primary ring-4 ring-primary/5 shadow-xl" : "border-border/40 hover:border-primary/30"
+                                            )}
                                         >
-                                            <div className="flex items-center gap-4">
-                                                <div 
-                                                    className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-black/5"
-                                                    style={{ backgroundColor: isEditing && editingCategory ? editingCategory.color : cat.color }}
-                                                >
-                                                    <Tag className="w-5 h-5" />
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    {isEditing ? (
-                                                        <input 
-                                                            className="text-base font-black bg-transparent border-none p-0 focus:ring-0 w-32"
-                                                            value={editingCategory?.name || ''}
-                                                            onChange={(e) => editingCategory && setEditingCategory({ ...editingCategory, name: e.target.value })}
-                                                            autoFocus
-                                                            onClick={(e) => e.stopPropagation()}
-                                                            onKeyDown={(e) => e.key === 'Enter' && handleUpdate()}
-                                                        />
-                                                    ) : (
-                                                        <span className="text-base font-black tracking-tight">{cat.name}</span>
-                                                    )}
-                                                    <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground opacity-60">
-                                                        {cat.isDefault ? t('systemDefault') : `${t('categoryId')}: ${cat.id}`}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            
-                                            <div className="flex items-center gap-2">
-                                                {isEditing ? (
-                                                    <div className="flex items-center gap-1">
-                                                        <Button 
-                                                            size="icon" 
-                                                            variant="ghost" 
-                                                            className="h-9 w-9 rounded-full text-green-600 hover:bg-green-50"
-                                                            onClick={(e) => { e.stopPropagation(); handleUpdate(); }}
-                                                        >
-                                                            <Check className="w-5 h-5" />
-                                                        </Button>
-                                                        <Button 
-                                                            size="icon" 
-                                                            variant="ghost" 
-                                                            className="h-9 w-9 rounded-full text-destructive hover:bg-destructive/5"
-                                                            onClick={(e) => { 
-                                                                e.stopPropagation(); 
-                                                                if (!cat.isDefault) setDeletingCategory(cat); 
-                                                            }}
-                                                            disabled={cat.isDefault}
-                                                        >
-                                                            <Trash2 className="w-5 h-5" />
-                                                        </Button>
+                                            <div 
+                                                className="flex items-center justify-between p-4 cursor-pointer"
+                                                onClick={() => {
+                                                    if (isEditing) {
+                                                        setEditingCategory(null);
+                                                        setShowColorPicker(false);
+                                                    } else {
+                                                        setEditingCategory({ ...cat });
+                                                        setShowColorPicker(false);
+                                                    }
+                                                }}
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div 
+                                                        className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-black/5"
+                                                        style={{ backgroundColor: isEditing && editingCategory ? editingCategory.color : cat.color }}
+                                                    >
+                                                        <Tag className="w-5 h-5" />
                                                     </div>
-                                                ) : (
-                                                    <ChevronRight className={cn(
-                                                        "w-5 h-5 text-muted-foreground transition-all duration-300",
-                                                        isEditing ? "rotate-90 text-primary" : "opacity-30 group-hover:opacity-100 group-hover:translate-x-0.5"
-                                                    )} />
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Edit Details Section */}
-                                        {isEditing && (
-                                            <div className="px-5 pb-6 pt-2 border-t border-dashed bg-muted/5 animate-in fade-in slide-in-from-top-2 duration-300">
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <div className="flex items-center justify-between mb-3">
-                                                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{t('chooseColor')}</Label>
-                                                            <button 
-                                                                onClick={() => setShowColorPicker(!showColorPicker)}
-                                                                className={cn(
-                                                                    "text-[10px] font-bold uppercase py-1 px-3 rounded-full transition-all",
-                                                                    showColorPicker ? "bg-primary text-white" : "bg-muted text-muted-foreground"
-                                                                )}
+                                                    <div className="flex flex-col">
+                                                        {isEditing ? (
+                                                            <input 
+                                                                className="text-base font-black bg-transparent border-none p-0 focus:ring-0 w-32"
+                                                                value={editingCategory?.name || ''}
+                                                                onChange={(e) => editingCategory && setEditingCategory({ ...editingCategory, name: e.target.value })}
+                                                                autoFocus
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                onKeyDown={(e) => e.key === 'Enter' && handleUpdate()}
+                                                            />
+                                                        ) : (
+                                                            <span className="text-base font-black tracking-tight">{cat.name}</span>
+                                                        )}
+                                                        <span className="text-[10px] font-bold uppercase tracking-tighter text-muted-foreground opacity-60">
+                                                            {isSystem ? t('systemDefault') : `${t('categoryId')}: ${cat.id}`}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex items-center gap-2">
+                                                    {isEditing ? (
+                                                        !isSystem && (
+                                                            <Button 
+                                                                size="icon" 
+                                                                variant="ghost" 
+                                                                className="h-9 w-9 rounded-full text-destructive hover:bg-destructive/5"
+                                                                onClick={(e) => { 
+                                                                    e.stopPropagation(); 
+                                                                    setDeletingCategory(cat); 
+                                                                }}
                                                             >
-                                                                {showColorPicker ? t('presets') : t('custom')}
-                                                            </button>
-                                                        </div>
+                                                                <Trash2 className="w-5 h-5" />
+                                                            </Button>
+                                                        )
+                                                    ) : (
+                                                        <ChevronRight className={cn(
+                                                            "w-5 h-5 text-muted-foreground transition-all duration-300",
+                                                            "opacity-30 group-hover:opacity-100 group-hover:translate-x-0.5"
+                                                        )} />
+                                                    )}
+                                                </div>
+                                            </div>
 
-                                                        {showColorPicker ? (
-                                                            <div className="space-y-4 animate-in fade-in zoom-in-95 duration-200">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div 
-                                                                        className="w-14 h-14 rounded-2xl shadow-inner border-2 border-white shrink-0"
-                                                                        style={{ backgroundColor: customColor }}
-                                                                    />
-                                                                    <div className="flex-1 space-y-2">
-                                                                        <div className="flex justify-between">
-                                                                             <span className="text-[10px] font-bold text-muted-foreground">{t('adjustHue')}</span>
-                                                                             <span className="text-[10px] font-black text-primary uppercase">{customColor}</span>
-                                                                        </div>
-                                                                        <input 
-                                                                            type="range" 
-                                                                            min="0" 
-                                                                            max="360" 
-                                                                            value={hue}
-                                                                            onChange={handleHueChange}
-                                                                            className="w-full h-2 rounded-full appearance-none cursor-pointer"
-                                                                            style={{ 
-                                                                                background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)' 
-                                                                            }}
+                                            {/* Edit Details Section */}
+                                            {isEditing && (
+                                                <div className="px-5 pb-6 pt-2 border-t border-dashed bg-muted/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                    <div className="space-y-4">
+                                                        <div>
+                                                            <div className="flex items-center justify-between mb-3">
+                                                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">{t('chooseColor')}</Label>
+                                                                <button 
+                                                                    onClick={() => setShowColorPicker(!showColorPicker)}
+                                                                    className={cn(
+                                                                        "text-[10px] font-bold uppercase py-1 px-3 rounded-full transition-all",
+                                                                        showColorPicker ? "bg-primary text-white" : "bg-muted text-muted-foreground"
+                                                                    )}
+                                                                >
+                                                                    {showColorPicker ? t('presets') : t('custom')}
+                                                                </button>
+                                                            </div>
+
+                                                            {showColorPicker ? (
+                                                                <div className="space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div 
+                                                                            className="w-14 h-14 rounded-2xl shadow-inner border-2 border-white shrink-0"
+                                                                            style={{ backgroundColor: customColor }}
                                                                         />
+                                                                        <div className="flex-1 space-y-2">
+                                                                            <div className="flex justify-between">
+                                                                                 <span className="text-[10px] font-bold text-muted-foreground">{t('adjustHue')}</span>
+                                                                                 <span className="text-[10px] font-black text-primary uppercase">{customColor}</span>
+                                                                            </div>
+                                                                            <input 
+                                                                                type="range" 
+                                                                                min="0" 
+                                                                                max="360" 
+                                                                                value={hue}
+                                                                                onChange={handleHueChange}
+                                                                                className="w-full h-2 rounded-full appearance-none cursor-pointer"
+                                                                                style={{ 
+                                                                                    background: 'linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)' 
+                                                                                }}
+                                                                            />
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="grid grid-cols-8 gap-2">
-                                                                {CATEGORY_COLORS.map((color) => (
-                                                                    <button
-                                                                        key={color}
-                                                                        type="button"
-                                                                        onClick={() => handleColorSelect(color)}
-                                                                        className={cn(
-                                                                            "w-full aspect-square rounded-lg transition-transform active:scale-90 relative",
-                                                                            editingCategory?.color === color && "ring-2 ring-primary ring-offset-2 ring-offset-background scale-110 z-10"
-                                                                        )}
-                                                                        style={{ backgroundColor: color }}
-                                                                    >
-                                                                        {editingCategory?.color === color && <Check className="w-3 h-3 text-white absolute inset-0 m-auto" />}
-                                                                    </button>
-                                                                ))}
-                                                            </div>
-                                                        )}
+                                                            ) : (
+                                                                <div className="grid grid-cols-8 gap-2">
+                                                                    {CATEGORY_COLORS.map((color) => (
+                                                                        <button
+                                                                            key={color}
+                                                                            type="button"
+                                                                            onClick={() => handleColorSelect(color)}
+                                                                            className={cn(
+                                                                                "w-full aspect-square rounded-lg transition-transform active:scale-90 relative",
+                                                                                editingCategory?.color === color && "ring-2 ring-primary ring-offset-2 ring-offset-background scale-110 z-10"
+                                                                            )}
+                                                                            style={{ backgroundColor: color }}
+                                                                        >
+                                                                            {editingCategory?.color === color && <Check className="w-3 h-3 text-white absolute inset-0 m-auto" />}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        <Button 
+                                                            className="w-full h-12 rounded-2xl font-black text-sm uppercase tracking-widest gap-2 shadow-lg shadow-primary/10"
+                                                            onClick={handleUpdate}
+                                                        >
+                                                            {t('saveChanges')}
+                                                        </Button>
                                                     </div>
-                                                    
-                                                    <Button 
-                                                        className="w-full h-12 rounded-2xl font-black text-sm uppercase tracking-widest gap-2 shadow-lg shadow-primary/10"
-                                                        onClick={handleUpdate}
-                                                    >
-                                                        {t('saveChanges')}
-                                                    </Button>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
+                                );
+                            };
+
+                            return (
+                                <>
+                                    {userCats.length > 0 ? (
+                                        userCats.map(renderCategory)
+                                    ) : (
+                                        <div className="py-8 px-4 border border-dashed border-border/40 rounded-[28px] bg-muted/5 flex flex-col items-center justify-center text-center">
+                                            <Tag className="w-8 h-8 text-muted-foreground/20 mb-2" />
+                                            <span className="text-xs font-bold text-muted-foreground/40 uppercase tracking-wider">
+                                                {t('noCustomCategories')}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    <div className="py-4 px-2 flex items-center gap-4 opacity-20">
+                                        <div className="h-[1px] flex-1 bg-foreground" />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">{t('systemDefault')}</span>
+                                        <div className="h-[1px] flex-1 bg-foreground" />
+                                    </div>
+
+                                    {systemCats.map(renderCategory)}
+                                </>
                             );
-                        })}
+                        })()}
                     </div>
                 </div>
             </SheetContent>

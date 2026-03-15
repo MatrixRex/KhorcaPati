@@ -303,6 +303,7 @@ const resources = {
       "expenseNoteOnlyPlaceholder": "e.g. Lunch at office",
       "categoryPlaceholder": "Choose or create category",
       "autoSetFromLoan": "Auto set from loan",
+      "noCustomCategories": "No custom categories found",
 
       "endsToday": "Ends today",
       "dayRemaining": "1 day remaining",
@@ -612,6 +613,7 @@ const resources = {
       "expenseNoteOnlyPlaceholder": "যেমন: অফিসে দুপুরের খাবার",
       "categoryPlaceholder": "ক্যাটাগরি বেছে নিন অথবা নতুন যোগ করুন",
       "autoSetFromLoan": "লোন থেকে অটো সেট হবে",
+      "noCustomCategories": "কোনো কাস্টম ক্যাটাগরি পাওয়া যায়নি",
 
       "endsToday": "আজ শেষ হবে",
       "dayRemaining": "১ দিন বাকি",

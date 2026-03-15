@@ -62,15 +62,40 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
 
             if (!defaultCat) {
                 console.log('No default found, creating "Unlisted"...');
-                // If no default exists, create 'Unlisted' as the new default
                 await db.categories.add({
                     name: 'Unlisted',
                     color: '#6b7280',
                     icon: 'Tag',
-                    isDefault: true
+                    isDefault: true,
+                    isSystem: true
                 });
-            } else {
-                console.log('Default category exists:', defaultCat.name);
+            }
+
+            // Ensure Lent and Borrowed categories exist
+            const lentCat = allCats.find(c => c.name === 'Lent');
+            if (!lentCat) {
+                await db.categories.add({
+                    name: 'Lent',
+                    color: '#10b981', // Emerald
+                    icon: 'ArrowUpRight',
+                    isDefault: false,
+                    isSystem: true
+                });
+            } else if (!lentCat.isSystem) {
+                await db.categories.update(lentCat.id!, { isSystem: true });
+            }
+
+            const borrowedCat = allCats.find(c => c.name === 'Borrowed');
+            if (!borrowedCat) {
+                await db.categories.add({
+                    name: 'Borrowed',
+                    color: '#ef4444', // Red
+                    icon: 'ArrowDownLeft',
+                    isDefault: false,
+                    isSystem: true
+                });
+            } else if (!borrowedCat.isSystem) {
+                await db.categories.update(borrowedCat.id!, { isSystem: true });
             }
         } catch (e) {
             console.warn('Category initialization conflict or error:', e);
@@ -97,7 +122,8 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
             name: capitalizedName,
             color: finalColor,
             icon,
-            isDefault: false
+            isDefault: false,
+            isSystem: false
         });
         await get().loadCategories();
         return id as number;
@@ -136,7 +162,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     deleteCategory: async (id, migrateToId) => {
         const category = await db.categories.get(id);
         if (!category) return;
-        if (category.isDefault) return;
+        if (category.isDefault || category.isSystem) return;
 
         await db.transaction('rw', [db.categories, db.expenses, db.budgets], async () => {
             let targetName = 'Unlisted';

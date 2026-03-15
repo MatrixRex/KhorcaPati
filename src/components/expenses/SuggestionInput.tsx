@@ -22,13 +22,14 @@ interface SuggestionInputProps {
         onClick: () => void;
     };
     disabled?: boolean;
+    getItemIcon?: (suggestion: string) => React.ReactNode;
 }
 
 
 const STRIP_HEIGHT = 44; // px — height of the chip row
 
 export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInputProps>(
-    ({ value, onChange, onBlur, onEnter, id, placeholder, className, type = 'note', customSuggestions, isMulti = true, disableSuggestions = false, onSelectSuggestion, action, disabled }, ref) => {
+    ({ value, onChange, onBlur, onEnter, id, placeholder, className, type = 'note', customSuggestions, isMulti = true, disableSuggestions = false, onSelectSuggestion, action, disabled, getItemIcon }, ref) => {
 
         const [isFocused, setIsFocused] = useState(false);
         const [cursorPos, setCursorPos] = useState(0);
@@ -248,7 +249,9 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
                                             : 'bg-muted/50 text-foreground border-transparent hover:bg-primary/10 hover:text-primary hover:border-primary/20'
                                     )}
                                 >
-                                    <span className="text-xs">{icon}</span>
+                                     <span className="text-xs">
+                                        {getItemIcon ? getItemIcon(suggestion) : icon}
+                                    </span>
                                     <span className="text-xs font-bold capitalize">{suggestion}</span>
                                 </button>
                             ))}

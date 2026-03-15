@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { cn, formatNumber } from '@/lib/utils';
 import { Delete, Check } from 'lucide-react';
@@ -158,12 +159,12 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
         { key: '0', span: 1 }, { key: '.', span: 1 }, { key: 'DONE', span: 2 }
     ];
 
-    return (
+    return ReactDOM.createPortal(
         <div ref={rootRef} className="fixed inset-x-0 bottom-0 z-[100] animate-in slide-in-from-bottom duration-300 pointer-events-none">
-            {/* Click-away area (transparent) */}
+            {/* Click-away area - transparent, blur is scoped to the panel below */}
             <div className="fixed inset-0 pointer-events-auto" onClick={onClose} />
             
-            <div className="bg-background/95 backdrop-blur-2xl border-t border-white/5 rounded-t-[32px] p-4 pb-8 shadow-[0_-15px_40px_rgba(0,0,0,0.3)] max-w-md mx-auto pointer-events-auto relative ring-1 ring-white/5">
+            <div className="bg-background/80 backdrop-blur-md border-t border-white/5 rounded-t-[32px] p-4 pb-8 shadow-[0_-15px_40px_rgba(0,0,0,0.3)] max-w-md mx-auto pointer-events-auto relative ring-1 ring-white/5">
                 {/* Compact Indicator */}
                 <div className="w-12 h-1 bg-muted/30 rounded-full mx-auto mb-3" />
                 
@@ -244,6 +245,7 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
                     })}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

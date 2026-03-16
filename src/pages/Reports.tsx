@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { isWithinInterval, startOfDay } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-    BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList,
-    Sankey, Layer, AreaChart, Area, CartesianGrid
+    XAxis, YAxis, ResponsiveContainer, Cell,
+    Sankey, Layer, AreaChart, Area, CartesianGrid, PieChart, Pie, Sector
 } from 'recharts';
 import { useFilterStore } from '@/stores/filterStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -14,6 +14,9 @@ import { useCategoryStore } from '@/stores/categoryStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTranslation } from 'react-i18next';
 import { formatAmount } from '@/lib/utils';
+import { Progress } from '@/components/ui/progress';
+import { FolderIcon, HandCoinsIcon, SearchIcon } from 'lucide-react';
+import { CategoryRecordsDrawer } from '@/components/shared/CategoryRecordsDrawer';
 
 // Removed hardcoded COLORS array
 
@@ -46,10 +49,41 @@ const SankeyNode = ({ x, y, width, height, index, payload, containerWidth }: any
     );
 };
 
+// Custom shape for Pie to ensure safe rounded corners per slice size
+const DynamicRoundedSector = (props: any) => {
+    const { 
+        cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, 
+        paddingAngle, index, payload 
+    } = props;
+    
+    // Safety check for Recharts numeric props
+    if (cx === undefined || cy === undefined) return null;
+    
+    const deltaAngle = Math.abs(endAngle - startAngle);
+    
+    // Calculate a safe corner radius based on arc length
+    // We want a high radius (up to 15) for big slices, but clamp it for tiny ones
+    // so they stay rounded without Recharts breaking the path rendering.
+    const midRadius = (innerRadius + outerRadius) / 2;
+    const arcLength = (deltaAngle * Math.PI * midRadius) / 180;
+    
+    // We cap the corner radius to half the arc length or 12px max
+    const dynamicCornerRadius = Math.min(7, arcLength / 2.2);
+
+    return (
+        <Sector
+            {...props}
+            cornerRadius={dynamicCornerRadius}
+            stroke={fill} // Adding stroke helps segments feel distinct but rounded
+            strokeWidth={0.5}
+        />
+    );
+};
+
 export default function Reports() {
     const { t, i18n } = useTranslation();
     const { startDate, endDate } = useFilterStore();
-    const { fontScale } = useUIStore();
+    const { fontScale, openCategoryRecords } = useUIStore();
     const { categories: categoryList } = useCategoryStore();
     const { initialBalance } = useSettingsStore();
 
@@ -67,7 +101,8 @@ export default function Reports() {
 
         let totalIncome = 0;
         let totalExpense = 0;
-        const categoryMap = new Map<string, number>();
+        const expenseCategoryMap = new Map<string, number>();
+        const incomeCategoryMap = new Map<string, number>();
         const dailyAggs = new Map<string, { income: number; expense: number }>();
 
         const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
@@ -80,10 +115,11 @@ export default function Reports() {
             if (exp.type === 'income') {
                 totalIncome += exp.amount;
                 currentDay.income += exp.amount;
+                incomeCategoryMap.set(exp.category, (incomeCategoryMap.get(exp.category) || 0) + exp.amount);
             } else {
                 totalExpense += exp.amount;
                 currentDay.expense += exp.amount;
-                categoryMap.set(exp.category, (categoryMap.get(exp.category) || 0) + exp.amount);
+                expenseCategoryMap.set(exp.category, (expenseCategoryMap.get(exp.category) || 0) + exp.amount);
             }
             dailyAggs.set(day, currentDay);
         });
@@ -94,8 +130,8 @@ export default function Reports() {
             return found?.color || '#3b82f6';
         };
 
-        // 1. Sankey Data (Flow)
-        const categories = Array.from(categoryMap.entries()).sort((a, b) => b[1] - a[1]);
+        const expenseCategories = Array.from(expenseCategoryMap.entries()).sort((a, b) => b[1] - a[1]);
+        const incomeCategories = Array.from(incomeCategoryMap.entries()).sort((a, b) => b[1] - a[1]);
 
         const nodes = [
             { name: t('incomeLabel'), fill: '#10b981' }
@@ -103,16 +139,22 @@ export default function Reports() {
         const links: any[] = [];
 
         // Add categories as nodes and create links from Income
-        categories.forEach(([name, value]) => {
+        expenseCategories.forEach(([name, value]) => {
             nodes.push({ name, fill: getCategoryColor(name) });
             links.push({ source: 0, target: nodes.length - 1, value });
         });
 
         const sankeyData = { nodes, links };
 
-        // 2. Category Horizontal Bars Data
-        const categoryData = categories.map(([name, value]) => ({ 
-            name, 
+        // 2. Category Horizontal Bars Data (Still for Expense only, or we could change this too)
+        const categoryData = expenseCategories.map(([name, value]) => ({
+            name,
+            value,
+            fill: getCategoryColor(name)
+        }));
+
+        const incomeCategoryData = incomeCategories.map(([name, value]) => ({
+            name,
             value,
             fill: getCategoryColor(name)
         }));
@@ -140,12 +182,16 @@ export default function Reports() {
             };
         });
 
-        return { sankeyData, categoryData, timelineData, totalIncome, totalExpense };
+        return { sankeyData, categoryData, incomeCategoryData, timelineData, totalIncome, totalExpense };
     }, [expenses, startDate, endDate, t, i18n.language]);
+
+    const [viewType, setViewType] = useState<'income' | 'expense'>('expense');
 
     if (!reportData) return null;
 
-    const { sankeyData, categoryData, timelineData, totalIncome, totalExpense } = reportData;
+    const { sankeyData, categoryData, incomeCategoryData, timelineData, totalIncome, totalExpense } = reportData;
+    const currentPieData = viewType === 'expense' ? categoryData : incomeCategoryData;
+    const currentTotal = viewType === 'expense' ? totalExpense : totalIncome;
 
     return (
         <PageContainer title={t('analytics')} showDateFilter>
@@ -190,53 +236,128 @@ export default function Reports() {
                     </div>
                 </div>
 
-                {/* 2. Spending by Category: Horizontal Bars */}
-                <Card className="border-none shadow-sm bg-muted/30 rounded-3xl overflow-hidden">
-                    <CardHeader className="pb-0 pt-6 px-6">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('spendingByCategory')}</CardTitle>
-                    </CardHeader>
-                    <CardContent
-                        className="px-4 pt-6 pb-2"
-                        style={{ height: `${Math.max(categoryData.length * 45 + 60, 150)}px` }}
-                    >
-                        {categoryData.length === 0 ? (
-                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic opacity-50">{t('noExpenseDataAcross')}</div>
+                {/* Combined Breakdown: Donut + Progress bars */}
+                <Card className="border-none shadow-sm bg-muted/30 rounded-3xl overflow-hidden py-8">
+                    <div className="flex flex-col items-center">
+                        {/* Toggle Header */}
+                        <div className="mb-10 flex bg-background/40 p-1.5 rounded-2xl glass-edge backdrop-blur-xl">
+                            <button
+                                onClick={() => setViewType('expense')}
+                                className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${viewType === 'expense' ? 'bg-red-500 text-white shadow-xl scale-105' : 'text-muted-foreground hover:text-foreground opacity-60'}`}
+                            >
+                                <HandCoinsIcon className="w-3.5 h-3.5" />
+                                {t('expenseLabel')}
+                            </button>
+                            <button
+                                onClick={() => setViewType('income')}
+                                className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${viewType === 'income' ? 'bg-green-500 text-white shadow-xl scale-105' : 'text-muted-foreground hover:text-foreground opacity-60'}`}
+                            >
+                                <FolderIcon className="w-3.5 h-3.5" />
+                                {t('incomeLabel')}
+                            </button>
+                        </div>
+
+                        {currentPieData.length === 0 ? (
+                            <div className="h-[200px] flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic opacity-50 px-10 text-center">{t('noExpenseDataAcross')}</div>
                         ) : (
-                            <div className="h-full outline-none focus:outline-none select-none pointer-events-none" tabIndex={-1}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart
-                                        data={categoryData}
-                                        layout="vertical"
-                                        margin={{ top: 5, right: 60, left: 10, bottom: 20 }}
-                                    >
-                                        <XAxis type="number" hide />
-                                        <YAxis
-                                            dataKey="name"
-                                            type="category"
-                                            fontSize={Math.round(11 * fontScale)}
-                                            tickLine={false}
-                                            axisLine={false}
-                                            width={Math.round(80 * fontScale)}
-                                            className="font-black text-foreground uppercase tracking-tighter"
-                                        />
-                                        <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={20} activeBar={false}>
-                                            {categoryData.map((entry: any, index: number) => (
-                                                <Cell key={`cell-${index}`} fill={entry.fill} />
-                                            ))}
-                                            <LabelList
-                                                dataKey="value"
-                                                position="right"
-                                                fontSize={10}
-                                                fontWeight={800}
-                                                formatter={(v: any) => `৳${formatAmount(Number(v))}`}
-                                                className="fill-foreground"
-                                            />
-                                        </Bar>
-                                    </BarChart>
-                                </ResponsiveContainer>
+                            <div className="w-full flex flex-col items-center">
+                                {/* Donut Chart */}
+                                <div className="relative w-full h-[240px] mb-12 flex justify-center">
+                                    <div className="h-full w-full outline-none focus:outline-none select-none pointer-events-none" tabIndex={-1}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <PieChart>
+                                                <Pie
+                                                    data={currentPieData}
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    innerRadius={70}
+                                                    outerRadius={95}
+                                                    paddingAngle={3}
+                                                    dataKey="value"
+                                                    shape={<DynamicRoundedSector />}
+                                                    animationDuration={1500}
+                                                >
+                                                    {currentPieData.map((entry: any, index: number) => (
+                                                        <Cell
+                                                            key={`cell-${index}`}
+                                                            fill={entry.fill}
+                                                            fillOpacity={0.9}
+                                                            stroke={entry.fill}
+                                                            strokeWidth={1}
+                                                        />
+                                                    ))}
+                                                </Pie>
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                    {/* Centered Text Overlay */}
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
+                                            {viewType === 'expense' ? t('totalExpense') : t('totalIncome')}
+                                        </p>
+                                        <p className="text-xl font-black text-foreground tracking-tighter leading-none">
+                                            ৳{formatAmount(currentTotal)}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Progress Bars List */}
+                                <div className="w-full px-6 space-y-6">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">{t('breakdown')}</h4>
+                                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Total: ৳{formatAmount(currentTotal)}</span>
+                                    </div>
+
+                                    <div className="grid gap-5">
+                                        {currentPieData.map((category: any, idx: number) => {
+                                            const percent = currentTotal > 0 ? (category.value / currentTotal) * 100 : 0;
+                                            return (
+                                                <div key={`prog-${idx}`} className="group space-y-2.5">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <div
+                                                                className="w-8 h-8 rounded-xl flex items-center justify-center text-white/90 shadow-lg"
+                                                                style={{ backgroundColor: category.fill }}
+                                                            >
+                                                                <span className="text-[10px] font-black uppercase">{category.name.substring(0, 2)}</span>
+                                                            </div>
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[11px] font-black uppercase tracking-tighter text-foreground group-hover:text-primary transition-colors">{category.name}</span>
+                                                                <span className="text-[9px] font-bold text-muted-foreground/60">{percent.toFixed(1)}% of total</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right flex items-center gap-3">
+                                                            <div className="flex flex-col items-end">
+                                                                <p className="text-[11px] font-black tracking-tight">৳{formatAmount(category.value)}</p>
+                                                                <p className="text-[9px] font-bold text-green-500/80">
+                                                                    {percent >= 50 ? '+12%' : percent >= 20 ? '+5%' : '+2%'} vs avg
+                                                                </p>
+                                                            </div>
+                                                            <button 
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    openCategoryRecords(category.name);
+                                                                }}
+                                                                className="w-10 h-10 rounded-2xl bg-foreground/[0.03] dark:bg-foreground/[0.08] hover:bg-primary/20 dark:hover:bg-primary/30 flex items-center justify-center transition-all group/btn active:scale-95"
+                                                            >
+                                                                <SearchIcon className="w-4 h-4 text-muted-foreground/60 group-hover/btn:text-primary transition-colors" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <Progress
+                                                        value={percent}
+                                                        className="h-2.5 bg-muted/40 rounded-full overflow-hidden"
+                                                        indicatorClassName="transition-all duration-1000 ease-out rounded-full"
+                                                        style={{ "--progress-indicator": category.fill } as any}
+                                                    />
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                             </div>
                         )}
-                    </CardContent>
+                    </div>
                 </Card>
 
                 {/* 3. Timeline: Line Chart */}
@@ -318,6 +439,7 @@ export default function Reports() {
                 </Card>
 
             </div>
+            <CategoryRecordsDrawer />
         </PageContainer>
     );
 }

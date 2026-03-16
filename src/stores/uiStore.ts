@@ -34,6 +34,8 @@ interface UIState {
     isLoansListOpen: boolean;
     isCategoryManagementOpen: boolean;
     isBalanceEditDrawerOpen: boolean;
+    isCategoryRecordsOpen: boolean;
+    categoryForRecords?: string;
     selectedInventoryItem: string | null;
     returnPath: string | null;
     theme: Theme;
@@ -80,6 +82,8 @@ interface UIState {
     openAddBudget: () => void;
     openEditBudget: (budget: Budget) => void;
     closeBudgetSheet: () => void;
+    openCategoryRecords: (category: string) => void;
+    closeCategoryRecords: () => void;
     setSelectedInventoryItem: (name: string | null) => void;
     setReturnPath: (path: string | null) => void;
     setTheme: (theme: Theme) => void;
@@ -119,6 +123,7 @@ export const useUIStore = create<UIState>()(
             isLoansListOpen: false,
             isCategoryManagementOpen: false,
             isBalanceEditDrawerOpen: false,
+            isCategoryRecordsOpen: false,
             selectedInventoryItem: null,
             returnPath: null,
             theme: 'system',
@@ -143,7 +148,8 @@ export const useUIStore = create<UIState>()(
                         state.isBudgetsListOpen ||
                         state.isGoalsListOpen ||
                         state.isCategoryManagementOpen ||
-                        state.isBalanceEditDrawerOpen;
+                        state.isBalanceEditDrawerOpen ||
+                        state.isCategoryRecordsOpen;
             },
 
             openAddExpense: (parentId) => set({
@@ -339,6 +345,16 @@ export const useUIStore = create<UIState>()(
             }),
             closeBalanceEdit: () => set({
                 isBalanceEditDrawerOpen: false
+            }),
+            
+            openCategoryRecords: (category) => set({
+                isCategoryRecordsOpen: true,
+                categoryForRecords: category
+            }),
+
+            closeCategoryRecords: () => set({
+                isCategoryRecordsOpen: false,
+                categoryForRecords: undefined
             }),
 
             setSelectedInventoryItem: (name) => set({

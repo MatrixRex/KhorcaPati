@@ -39,9 +39,9 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
         <div className="flex flex-col gap-1">
             <Card
                 className={cn(
-                    "cursor-pointer active:scale-[0.98] transition-all border-border shadow-sm rounded-xl overflow-hidden group relative",
+                    "cursor-pointer active:scale-[0.98] transition-all border-border shadow-sm rounded-xl group relative",
                     isExpanded && "bg-muted/10 border-primary/20",
-                    expense.isNested && !isExpanded && "bg-primary/5 border-primary/10"
+                    expense.isNested && !isExpanded && "bg-primary/5 border-primary/10 stacked-card-effect"
                 )}
                 style={{
                     background: `linear-gradient(to right, ${catColor}1F, transparent)`

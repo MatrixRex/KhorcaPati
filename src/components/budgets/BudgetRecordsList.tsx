@@ -132,7 +132,10 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                 {filteredExpenses.map((exp) => (
                     <div
                         key={exp.id}
-                        className="record-item-glass"
+                        className={cn(
+                            "record-item-glass",
+                            exp.isNested && "stacked-card-effect"
+                        )}
                     >
                         <div className="flex items-center gap-4 overflow-hidden">
                             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-muted/50 text-muted-foreground font-black text-xs">

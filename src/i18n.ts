@@ -317,7 +317,8 @@ const resources = {
       "noLoans": "No active loans.",
       "invalidDate": "Invalid date",
       "totalIncome": "Total Income",
-      "totalExpense": "Total Expense"
+      "totalExpense": "Total Expense",
+      "savings": "Savings"
     }
   },
   bn: {
@@ -633,7 +634,8 @@ const resources = {
       "noLoans": "কোনো সক্রিয় ঋণ নেই",
       "invalidDate": "ভুল তারিখ",
       "totalIncome": "মোট আয়",
-      "totalExpense": "মোট ব্যয়"
+      "totalExpense": "মোট ব্যয়",
+      "savings": "সঞ্চয়"
     }
   }
 };

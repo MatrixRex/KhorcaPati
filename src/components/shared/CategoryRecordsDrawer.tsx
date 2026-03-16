@@ -8,7 +8,7 @@ import { Search } from 'lucide-react';
 
 export function CategoryRecordsDrawer() {
     const { isCategoryRecordsOpen, closeCategoryRecords, categoryForRecords, openEditExpense } = useUIStore();
-    const { setCategory, selectedCategory } = useFilterStore();
+    const { setCategory } = useFilterStore();
     const { t } = useTranslation();
 
     // When the category in UI store changes, update the filter store

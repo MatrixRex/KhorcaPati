@@ -76,10 +76,6 @@ export const useLoanStore = create<LoanState>(() => ({
                 const totalRepayments = linkedExpenses
                     .filter(e => (loan.type === 'taken' ? e.type === 'expense' : e.type === 'income'))
                     .reduce((s, e) => s + e.amount, 0);
-                    
-                const totalAdditionalAmount = linkedExpenses
-                    .filter(e => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
-                    .reduce((s, e) => s + e.amount, 0);
 
                 // Note: The UI calculates percentage as totalRepayments / (loan.totalAmount + totalAdditionalAmount)
                 // We update currentAmount to store the repayments progress

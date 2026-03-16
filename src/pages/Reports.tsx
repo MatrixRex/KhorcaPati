@@ -50,8 +50,7 @@ const SankeyNode = ({ x, y, width, height, index, payload, containerWidth }: any
 // Custom shape for Pie to ensure safe rounded corners per slice size
 const DynamicRoundedSector = (props: any) => {
     const { 
-        cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill, 
-        paddingAngle, index, payload 
+        cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill
     } = props;
     
     // Safety check for Recharts numeric props

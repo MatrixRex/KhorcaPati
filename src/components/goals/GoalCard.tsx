@@ -2,8 +2,6 @@ import { type Goal } from '@/db/schema';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { formatRelativeDate } from '@/utils/date';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 
 import { cn, formatAmount } from '@/lib/utils';
@@ -17,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 export function GoalCard({ goal, onClick }: GoalCardProps) {
     const { t } = useTranslation();
-    const { openAddGoalProgress, openGoalRecords } = useUIStore();
+    const { openGoalRecords } = useUIStore();
     const percentage = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
     const isCompleted = goal.currentAmount >= goal.targetAmount;
 
@@ -56,31 +54,16 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
                         <span className="text-xs text-muted-foreground font-black uppercase text-right shrink-0 bg-muted px-1.5 py-0.5 rounded-md">
                             ৳{formatAmount(goal.currentAmount)} <span className="opacity-60">/</span> ৳{formatAmount(goal.targetAmount)}
                         </span>
-                        <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-9 w-9 rounded-full border-2 border-primary text-primary active:scale-[0.95] transition-all bg-transparent shrink-0"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                openAddGoalProgress(goal);
-                            }}
-                        >
-                            <Plus className="w-5 h-5 stroke-[3]" />
-                        </Button>
                     </div>
                 </div>
 
                 <div className="space-y-2">
-                    <div className="relative h-2 w-full bg-muted/40 rounded-full overflow-hidden">
-                        <Progress
-                            value={percentage}
-                            className="h-full bg-transparent"
-                            indicatorClassName={cn(
-                                "transition-all duration-1000 ease-out",
-                                isCompleted ? "bg-primary" : "bg-primary"
-                            )}
-                        />
-                    </div>
+                    <Progress
+                        value={percentage}
+                        className="h-2.5 bg-foreground/[0.07] dark:bg-foreground/[0.12] rounded-full overflow-hidden"
+                        indicatorClassName="transition-all duration-1000 ease-out rounded-full"
+                        style={{ "--progress-indicator": "var(--primary)" } as any}
+                    />
 
                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mt-1">
                         <div className="flex items-center gap-1.5 overflow-hidden">
@@ -102,4 +85,3 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
         </Card>
     );
 }
-

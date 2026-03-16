@@ -3,8 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { formatRelativeDate } from '@/utils/date';
-import { Button } from '@/components/ui/button';
-import { Plus, ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { cn, formatAmount } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +15,7 @@ interface LoanCardProps {
 
 export function LoanCard({ loan, onClick }: LoanCardProps) {
     const { t } = useTranslation();
-    const { openAddLoanProgress, openLoanRecords } = useUIStore();
+    const { openLoanRecords } = useUIStore();
 
     // Query linked expenses in real-time to ensure progress is always accurate
     const linkedExpenses = useLiveQuery(() => 
@@ -79,34 +78,16 @@ export function LoanCard({ loan, onClick }: LoanCardProps) {
                         <span className="text-xs text-muted-foreground font-black uppercase text-right shrink-0 bg-muted px-1.5 py-0.5 rounded-md">
                             ৳{formatAmount(currentProgress)} <span className="opacity-60">/</span> ৳{formatAmount(totalGrossAmount)}
                         </span>
-                        <Button
-                            size="icon"
-                            variant="outline"
-                            className={cn(
-                                "h-9 w-9 rounded-full border-2 text-primary active:scale-[0.95] transition-all bg-transparent shrink-0",
-                                isTaken ? "border-destructive text-destructive" : "border-primary text-primary"
-                            )}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                openAddLoanProgress(loan);
-                            }}
-                        >
-                            <Plus className="w-5 h-5 stroke-[3]" />
-                        </Button>
                     </div>
                 </div>
 
                 <div className="space-y-2">
-                    <div className="relative h-2 w-full bg-muted/40 rounded-full overflow-hidden">
-                        <Progress
-                            value={percentage}
-                            className="h-full bg-transparent"
-                            indicatorClassName={cn(
-                                "transition-all duration-1000 ease-out",
-                                isTaken ? "bg-destructive" : "bg-primary"
-                            )}
-                        />
-                    </div>
+                    <Progress
+                        value={percentage}
+                        className="h-2.5 bg-foreground/[0.07] dark:bg-foreground/[0.12] rounded-full overflow-hidden"
+                        indicatorClassName="transition-all duration-1000 ease-out rounded-full"
+                        style={{ "--progress-indicator": isTaken ? "var(--destructive)" : "var(--primary)" } as any}
+                    />
 
                     <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mt-1">
                         <div className="flex items-center gap-1.5 overflow-hidden">

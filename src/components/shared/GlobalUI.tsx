@@ -16,7 +16,6 @@ import { GoalLinker } from '@/components/goals/GoalLinker';
 import { GoalRecordsList } from '@/components/goals/GoalRecordsList';
 import { GoalsListDrawer } from '@/components/goals/GoalsListDrawer';
 import { LoanForm } from '@/components/loans/LoanForm';
-import { LoanLinker } from '@/components/loans/LoanLinker';
 import { LoanRecordsList } from '@/components/loans/LoanRecordsList';
 import { LoansListDrawer } from '@/components/loans/LoansListDrawer';
 import { CategoryManagementDrawer } from '@/components/shared/CategoryManagementDrawer';
@@ -29,7 +28,7 @@ export function GlobalUI() {
     const location = useLocation();
     const navigate = useNavigate();
     const {
-        isExpenseSheetOpen, editingExpense, initialParentId, returnPath, openAddExpense, closeExpenseSheet,
+        isExpenseSheetOpen, editingExpense, initialParentId, initialLoanId, returnPath, openAddExpense, closeExpenseSheet,
         isSubRecordSheetOpen, editingSubRecord, closeSubRecordSheet,
         isRecurringPaymentSheetOpen, editingRecurringPayment, closeRecurringPaymentSheet,
         isBudgetSheetOpen, editingBudget, closeBudgetSheet,
@@ -38,10 +37,9 @@ export function GlobalUI() {
         isGoalProgressSheetOpen, goalForProgress, closeGoalProgressSheet,
         isGoalRecordsSheetOpen, goalForRecords, closeGoalRecordsSheet,
         isLoanSheetOpen, editingLoan, closeLoanSheet,
-        isLoanProgressSheetOpen, loanForProgress, closeLoanProgressSheet,
         isLoanRecordsSheetOpen, loanForRecords, closeLoanRecordsSheet,
         openEditGoal, openEditBudget, openEditLoan,
-        openAddGoalProgress, openAddLoanProgress,
+        openAddGoalProgress,
         isRecurringPaymentsListOpen,
         isBudgetsListOpen,
         isGoalsListOpen,
@@ -93,7 +91,7 @@ export function GlobalUI() {
     // Add beforeunload listener to prevent accidental reload/close when editing
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isBudgetRecordsSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isLoanSheetOpen || isLoanProgressSheetOpen || isLoanRecordsSheetOpen || isRecurringPaymentsListOpen || isBudgetsListOpen || isGoalsListOpen || isLoansListOpen || isCategoryManagementOpen) {
+            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isBudgetRecordsSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isLoanSheetOpen || isLoanRecordsSheetOpen || isRecurringPaymentsListOpen || isBudgetsListOpen || isGoalsListOpen || isLoansListOpen || isCategoryManagementOpen) {
                 e.preventDefault();
                 e.returnValue = ''; // Required for some browsers
                 return '';
@@ -102,7 +100,7 @@ export function GlobalUI() {
 
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isBudgetRecordsSheetOpen, isGoalSheetOpen, isGoalProgressSheetOpen, isGoalRecordsSheetOpen, isLoanSheetOpen, isLoanProgressSheetOpen, isLoanRecordsSheetOpen, isRecurringPaymentsListOpen, isBudgetsListOpen, isGoalsListOpen, isLoansListOpen, isCategoryManagementOpen]);
+    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isBudgetRecordsSheetOpen, isGoalSheetOpen, isGoalProgressSheetOpen, isGoalRecordsSheetOpen, isLoanSheetOpen, isLoanRecordsSheetOpen, isRecurringPaymentsListOpen, isBudgetsListOpen, isGoalsListOpen, isLoansListOpen, isCategoryManagementOpen]);
 
     useEffect(() => {
         const init = async () => {
@@ -285,7 +283,7 @@ export function GlobalUI() {
                                     )}
                                     onClick={() => {
                                         if (loanForRecords) {
-                                            openAddLoanProgress(loanForRecords);
+                                            openAddExpense(null, loanForRecords.id);
                                         }
                                     }}
                                 >
@@ -317,6 +315,7 @@ export function GlobalUI() {
                             key={editingExpense?.id || `new-parent-${expenseSessionId}`}
                             initialData={editingExpense}
                             parentId={editingExpense ? undefined : (isSubRecordSheetOpen ? null : initialParentId)}
+                            initialLoanId={editingExpense ? undefined : initialLoanId}
                             onSuccess={handleCloseExpense}
                             onCancel={handleCloseExpense}
                         />
@@ -449,28 +448,7 @@ export function GlobalUI() {
                 </SheetContent>
             </Sheet>
 
-            {/* Loan Linker Sheet */}
-            <Sheet open={isLoanProgressSheetOpen} onOpenChange={(open) => !open && closeLoanProgressSheet()}>
-                <SheetContent 
-                    side="bottom" 
-                    className="max-h-[92dvh] h-auto rounded-t-[32px] p-0 w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[60] flex flex-col"
-                    style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
-                >
-                    <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
-                    <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
-                    <div className="flex-1 overflow-y-auto px-6 pt-2 pb-12 text-foreground" data-scroll-container>
-                        <SheetHeader className="mb-4 text-left p-0">
-                            <SheetTitle className="text-xl font-black">{t('linkToLoan')}</SheetTitle>
-                        </SheetHeader>
-                        {loanForProgress && (
-                            <LoanLinker
-                                loan={loanForProgress}
-                                onSuccess={closeLoanProgressSheet}
-                            />
-                        )}
-                    </div>
-                </SheetContent>
-            </Sheet>
+            {/* Loan Linker Sheet removed */}
         </>
     );
 }

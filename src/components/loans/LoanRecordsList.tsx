@@ -87,16 +87,12 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
                         </div>
                     )}
                 </div>
-                <div className="relative h-3 w-full bg-muted/40 rounded-full overflow-hidden border border-border/10">
-                    <Progress
-                        value={percentage}
-                        className="h-full bg-transparent"
-                        indicatorClassName={cn(
-                            "transition-all duration-1000 ease-out",
-                            isTaken ? "bg-destructive shadow-[0_0_12px_rgba(239,68,68,0.3)]" : "bg-primary shadow-[0_0_12px_rgba(59,130,246,0.3)]"
-                        )}
-                    />
-                </div>
+                <Progress
+                    value={percentage}
+                    className="h-2.5 bg-foreground/[0.07] dark:bg-foreground/[0.12] rounded-full overflow-hidden"
+                    indicatorClassName="transition-all duration-1000 ease-out rounded-full"
+                    style={{ "--progress-indicator": isTaken ? "var(--destructive)" : "var(--primary)" } as any}
+                />
                 <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">
                     <span>৳{formatAmount(totalRepayments)} {t('done')}</span>
                     <span>৳{formatAmount(remainingAmount)} {t('remaining')}</span>

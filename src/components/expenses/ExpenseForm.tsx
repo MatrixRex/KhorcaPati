@@ -61,9 +61,10 @@ interface ExpenseFormProps {
     onSuccess?: () => void;
     onCancel?: () => void;
     hideCollectionToggle?: boolean;
+    initialLoanId?: number | null;
 }
 
-export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, onCancel, hideCollectionToggle }: ExpenseFormProps) {
+export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, onCancel, hideCollectionToggle, initialLoanId }: ExpenseFormProps) {
     const { t } = useTranslation();
 
     const [fixedParentId] = useState<number | null>(() => {
@@ -79,7 +80,11 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
     const [wasAmountEdited, setWasAmountEdited] = useState(false);
     const categoryRef = useRef<HTMLInputElement>(null);
     const noteRef = useRef<HTMLInputElement>(null);
-    const [mode, setMode] = useState<'regular' | 'debt'>(initialData?.loanId ? 'debt' : 'regular');
+    const [mode, setMode] = useState<'regular' | 'debt'>(() => {
+        if (initialData?.loanId) return 'debt';
+        if (initialLoanId) return 'debt';
+        return 'regular';
+    });
 
 
     useEffect(() => {
@@ -105,7 +110,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             type: initialData?.type || 'expense',
             category: initialData?.category || (mode === 'debt' ? 'Debt' : ''),
             goalId: initialData?.goalId || null,
-            loanId: initialData?.loanId || null,
+            loanId: initialData?.loanId || initialLoanId || null,
             date: initialData?.date || format(new Date(), 'yyyy-MM-dd'),
             note: initialData?.note || '',
             isRecurring: initialData?.isRecurring || false,

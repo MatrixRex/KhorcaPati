@@ -105,12 +105,6 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
     const isAlertThresholdReached = (spent / budget.limitAmount) >= budget.alertThreshold;
     const isOverBudget = spent > budget.limitAmount;
 
-    let progressColor = 'bg-primary';
-    if (isOverBudget) {
-        progressColor = 'bg-destructive';
-    } else if (isAlertThresholdReached) {
-        progressColor = 'bg-orange-500';
-    }
 
     const handleClick = () => {
         if (onClick) {
@@ -151,7 +145,18 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
                     </span>
                 </div>
 
-                <Progress value={percentage} className="h-2 bg-muted/50" indicatorClassName={cn("transition-all duration-500", progressColor)} />
+                <Progress 
+                    value={percentage} 
+                    className="h-2.5 bg-foreground/[0.07] dark:bg-foreground/[0.12] rounded-full overflow-hidden" 
+                    indicatorClassName="transition-all duration-1000 ease-out rounded-full"
+                    style={{ 
+                        "--progress-indicator": isOverBudget 
+                            ? "var(--destructive)" 
+                            : isAlertThresholdReached 
+                                ? "var(--warning, #f97316)" 
+                                : "var(--primary)" 
+                    } as any}
+                />
 
                 <div className="flex items-center justify-between mt-1">
                     <div className="flex items-center gap-1.5 overflow-hidden">

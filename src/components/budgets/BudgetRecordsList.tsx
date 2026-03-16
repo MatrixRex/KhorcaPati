@@ -85,16 +85,12 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                         </div>
                     )}
                 </div>
-                <div className="relative h-3 w-full bg-muted/40 rounded-full overflow-hidden border border-border/10">
-                    <Progress
-                        value={percentage}
-                        className="h-full bg-transparent"
-                        indicatorClassName={cn(
-                            "transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(59,130,246,0.3)]",
-                            isOver ? "bg-destructive" : "bg-primary"
-                        )}
-                    />
-                </div>
+                <Progress
+                    value={percentage}
+                    className="h-2.5 bg-foreground/[0.07] dark:bg-foreground/[0.12] rounded-full overflow-hidden"
+                    indicatorClassName="transition-all duration-1000 ease-out rounded-full"
+                    style={{ "--progress-indicator": isOver ? "var(--destructive)" : "var(--primary)" } as any}
+                />
                 <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">
                     <span>৳{formatAmount(totalSpent)} {t('spent')}</span>
                     <span>৳{formatAmount(remaining)} {t('remaining')}</span>

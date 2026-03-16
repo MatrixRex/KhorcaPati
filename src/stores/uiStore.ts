@@ -8,6 +8,7 @@ interface UIState {
     isExpenseSheetOpen: boolean;
     editingExpense?: Expense;
     initialParentId?: number | null;
+    initialLoanId?: number | null;
     isSubRecordSheetOpen: boolean;
     editingSubRecord?: Expense;
     isRecurringPaymentSheetOpen: boolean;
@@ -22,8 +23,6 @@ interface UIState {
     goalForRecords?: Goal;
     isLoanSheetOpen: boolean;
     editingLoan?: Loan;
-    isLoanProgressSheetOpen: boolean;
-    loanForProgress?: Loan;
     isLoanRecordsSheetOpen: boolean;
     loanForRecords?: Loan;
     isBudgetRecordsSheetOpen: boolean;
@@ -42,7 +41,7 @@ interface UIState {
     fontScale: number;
     expenseSessionId: string;
     subSessionId: string;
-    openAddExpense: (parentId?: number | null) => void;
+    openAddExpense: (parentId?: number | null, loanId?: number | null) => void;
     openEditExpense: (expense: Expense, returnPath?: string) => void;
     closeExpenseSheet: () => void;
     openAddSubRecord: (parentId: number) => void;
@@ -61,8 +60,6 @@ interface UIState {
     openAddLoan: () => void;
     openEditLoan: (loan: Loan) => void;
     closeLoanSheet: () => void;
-    openAddLoanProgress: (loan: Loan) => void;
-    closeLoanProgressSheet: () => void;
     openLoanRecords: (loan: Loan) => void;
     closeLoanRecordsSheet: () => void;
     openBudgetRecords: (budget: Budget) => void;
@@ -97,6 +94,7 @@ export const useUIStore = create<UIState>()(
             isExpenseSheetOpen: false,
             editingExpense: undefined,
             initialParentId: null,
+            initialLoanId: null,
             isSubRecordSheetOpen: false,
             editingSubRecord: undefined,
             isRecurringPaymentSheetOpen: false,
@@ -111,8 +109,6 @@ export const useUIStore = create<UIState>()(
             goalForRecords: undefined,
             isLoanSheetOpen: false,
             editingLoan: undefined,
-            isLoanProgressSheetOpen: false,
-            loanForProgress: undefined,
             isLoanRecordsSheetOpen: false,
             loanForRecords: undefined,
             isBudgetRecordsSheetOpen: false,
@@ -141,21 +137,22 @@ export const useUIStore = create<UIState>()(
                        state.isGoalProgressSheetOpen ||
                        state.isGoalRecordsSheetOpen ||
                        state.isLoanSheetOpen ||
-                       state.isLoanProgressSheetOpen ||
-                       state.isLoanRecordsSheetOpen ||
+                        state.isLoanRecordsSheetOpen ||
                         state.isBudgetRecordsSheetOpen || 
                         state.isRecurringPaymentsListOpen ||
                         state.isBudgetsListOpen ||
                         state.isGoalsListOpen ||
+                        state.isLoansListOpen ||
                         state.isCategoryManagementOpen ||
                         state.isBalanceEditDrawerOpen ||
                         state.isCategoryRecordsOpen;
             },
 
-            openAddExpense: (parentId) => set({
+            openAddExpense: (parentId, loanId) => set({
                 isExpenseSheetOpen: true,
                 editingExpense: undefined,
                 initialParentId: parentId ?? null,
+                initialLoanId: loanId ?? null,
                 expenseSessionId: Math.random().toString(36).substring(7)
             }),
 
@@ -163,6 +160,7 @@ export const useUIStore = create<UIState>()(
                 isExpenseSheetOpen: true,
                 editingExpense: expense,
                 initialParentId: null,
+                initialLoanId: expense.loanId ?? null,
                 returnPath: returnPath ?? null
             }),
 
@@ -170,6 +168,7 @@ export const useUIStore = create<UIState>()(
                 isExpenseSheetOpen: false,
                 editingExpense: undefined,
                 initialParentId: null,
+                initialLoanId: null,
                 returnPath: null
             }),
 
@@ -281,16 +280,6 @@ export const useUIStore = create<UIState>()(
             closeLoanSheet: () => set({
                 isLoanSheetOpen: false,
                 editingLoan: undefined
-            }),
-
-            openAddLoanProgress: (loan: Loan) => set({
-                isLoanProgressSheetOpen: true,
-                loanForProgress: loan
-            }),
-
-            closeLoanProgressSheet: () => set({
-                isLoanProgressSheetOpen: false,
-                loanForProgress: undefined
             }),
 
             openLoanRecords: (loan: Loan) => set({

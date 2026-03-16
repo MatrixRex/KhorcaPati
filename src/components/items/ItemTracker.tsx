@@ -3,7 +3,7 @@ import { db, type Item } from '@/db/schema';
 import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { useState } from 'react';
-import { ChevronRight, Package, ExternalLink, History, Trash2 } from 'lucide-react';
+import { ChevronRight, Package, ExternalLink, Trash2 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useNavigate } from 'react-router-dom';
 import { useCloseWatcher } from '@/hooks/use-close-watcher';
@@ -273,8 +273,8 @@ export function ItemTracker() {
             >
                 <SheetContent 
                     side="bottom" 
-                    className="h-[92dvh] rounded-t-[32px] p-0 border-t border-white/10 bg-background/60 backdrop-blur-xl overflow-hidden flex flex-col"
-                    style={{ background: `linear-gradient(to bottom, ${drawerColor}10, transparent)` }}
+                    className="h-[92dvh] rounded-t-[32px] p-0 glass overflow-hidden flex flex-col border-t border-white/10"
+                    style={{ background: `linear-gradient(to bottom, ${drawerColor}12, transparent)` }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-15 blur-3xl pointer-events-none" style={{ backgroundColor: drawerColor }} />
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0 relative z-10" />
@@ -285,18 +285,18 @@ export function ItemTracker() {
                             <div className="px-6 pb-6 pt-2 shrink-0 border-b border-border/40">
                                 <SheetHeader className="text-left mb-6 p-0">
                                     <div className="flex items-center justify-between w-full">
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-4">
                                             <div 
-                                                className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform"
+                                                className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform shadow-sm border border-foreground/5"
                                                 style={{ backgroundColor: `${drawerColor}15`, color: drawerColor }}
                                             >
-                                                <Package size={20} />
+                                                <Package size={22} />
                                             </div>
                                             <div>
-                                                <SheetTitle className="text-xl font-black capitalize leading-tight">
+                                                <SheetTitle className="text-2xl font-black capitalize leading-tight tracking-tighter">
                                                 {selectedGroup.name}
                                                 </SheetTitle>
-                                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                                <p className="label-caption !tracking-[0.15em] !text-muted-foreground/80">
                                                     {t('itemDetails')}
                                                 </p>
                                             </div>
@@ -311,31 +311,27 @@ export function ItemTracker() {
                                     </div>
                                 </SheetHeader>
 
-                                <div className="flex items-center justify-between gap-4 bg-muted/30 p-4 rounded-2xl border border-border/50">
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.1em]">{t('totalStock')}</span>
-                                        <div className="flex items-baseline gap-1.5 mt-0.5">
-                                            <span className="text-2xl font-black text-primary leading-none">
+                                <div className="flex items-center justify-between gap-4 bg-muted/30 p-5 rounded-[2rem] border border-foreground/5 shadow-sm">
+                                    <div className="flex items-center justify-between w-full pr-1">
+                                        <span className="text-xs font-black uppercase tracking-[0.1em] text-foreground/40 leading-none">{t('totalStock')}</span>
+                                        <div className="flex items-baseline gap-2">
+                                            <span className="text-3xl font-black text-foreground leading-none">
                                                 {formatNumber(groupedItems[selectedInventoryItem.toLowerCase().trim()].totalQty)}
                                             </span>
-                                            <span className="text-xs font-bold text-muted-foreground uppercase">
+                                            <span className="text-xs font-black text-muted-foreground/80 uppercase">
                                                 {groupedItems[selectedInventoryItem.toLowerCase().trim()].unit}
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col items-end">
-                                        <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center border shadow-sm">
-                                            <History size={18} className="text-muted-foreground/60" />
-                                        </div>
-                                    </div>
+
                                 </div>
                             </div>
 
                             {/* Entry History List */}
                             <div className="flex-1 overflow-auto px-6 py-6 flex flex-col gap-3 pb-24">
-                                <div className="flex items-center justify-between mb-1">
-                                    <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">{t('transactionHistory')}</h4>
-                                    <div className="h-px bg-border flex-1 ml-4" />
+                                <div className="flex items-center justify-between mb-2">
+                                    <h4 className="label-caption tracking-[0.2em] !opacity-40">{t('transactionHistory')}</h4>
+                                    <div className="h-px bg-foreground/5 flex-1 ml-4" />
                                 </div>
 
                                 {groupedItems[selectedInventoryItem.toLowerCase().trim()].records
@@ -367,7 +363,7 @@ export function ItemTracker() {
                                                     <CardContent className="p-4 flex items-center justify-between">
                                                         <div className="flex items-center gap-4 min-w-0 flex-1">
                                                             <div 
-                                                                className="w-10 h-10 rounded-xl bg-background border flex flex-col items-center justify-center shrink-0 shadow-sm"
+                                                                className="w-10 h-10 rounded-xl bg-background/40 flex flex-col items-center justify-center shrink-0 shadow-sm backdrop-blur-sm"
                                                                 style={{ borderColor: `${color}40` }}
                                                             >
                                                                 <span className="text-[10px] font-semibold text-muted-foreground uppercase leading-none mb-0.5 opacity-60">
@@ -377,24 +373,24 @@ export function ItemTracker() {
                                                                     {formatNumber(format(new Date(record.date), 'dd'))}
                                                                 </span>
                                                             </div>
-
+ 
                                                             <div className="flex flex-col min-w-0">
-                                                                <div className="flex items-baseline gap-1.5 leading-none">
-                                                                    <span className="text-base font-bold" style={{ color }}>+{formatNumber(record.qty)}</span>
-                                                                    <span className="text-[11px] font-semibold text-muted-foreground uppercase opacity-70">{record.unit}</span>
+                                                                <div className="flex items-baseline gap-2 leading-none">
+                                                                    <span className="text-lg font-black text-primary">+{formatNumber(record.qty)}</span>
+                                                                    <span className="label-caption !opacity-60">{record.unit}</span>
                                                                 </div>
-
-                                                                <div className="flex items-center gap-1.5 mt-1.5">
+ 
+                                                                <div className="flex items-center gap-1.5 mt-2">
                                                                     {record.rawInput && record.rawInput.toLowerCase() !== record.name.toLowerCase() && (
-                                                                        <p className="text-[11px] text-muted-foreground italic truncate leading-tight opacity-60">
+                                                                        <p className="label-caption italic truncate opacity-50">
                                                                             "{record.rawInput}"
                                                                         </p>
                                                                     )}
                                                                     {record.rawInput && record.rawInput.toLowerCase() !== record.name.toLowerCase() && category && (
-                                                                        <span className="text-[11px] text-muted-foreground/30">•</span>
+                                                                        <span className="opacity-20">•</span>
                                                                     )}
                                                                     {category && (
-                                                                        <span className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-tight truncate">
+                                                                        <span className="text-[10px] font-black text-foreground/50 uppercase tracking-tighter truncate">
                                                                             {category}
                                                                         </span>
                                                                     )}
@@ -412,7 +408,7 @@ export function ItemTracker() {
                                                             >
                                                                 <Trash2 size={14} />
                                                             </button>
-                                                            <div className="w-8 h-8 rounded-full bg-primary/5 group-hover/record:bg-primary/20 flex items-center justify-center text-primary transition-colors">
+                                                            <div className="w-8 h-8 rounded-full bg-primary/10 group-hover/record:bg-primary/30 flex items-center justify-center text-primary transition-colors">
                                                                 <ExternalLink size={14} />
                                                             </div>
                                                         </div>

@@ -292,11 +292,11 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-2">
-                    <Button type="submit" className="flex-1">
+                    <Button type="submit" className="flex-1 btn-premium">
                         {initialData ? t('updateBudget') : t('addBudget')}
                     </Button>
                     {onCancel && (
-                        <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+                        <Button type="button" variant="outline" onClick={onCancel} className="flex-1 btn-secondary-premium">
                             {t('cancel')}
                         </Button>
                     )}
@@ -306,7 +306,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                     <Button
                         type="button"
                         variant="ghost"
-                        className="w-full text-rose-500/80 hover:bg-rose-500/5 font-bold uppercase tracking-widest text-[10px]"
+                        className="w-full btn-destructive-premium"
                         onClick={() => setShowDeleteDialog(true)}
                     >
                         {t('deleteBudget')}
@@ -323,10 +323,10 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-row gap-2 mt-4">
-                        <AlertDialogCancel className="flex-1 mt-0">{t('cancel')}</AlertDialogCancel>
+                        <AlertDialogCancel className="flex-1 mt-0 btn-secondary-premium !h-10">{t('cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
-                            className="flex-1 bg-rose-500 text-white hover:bg-rose-600 rounded-xl"
+                            className="flex-1 btn-destructive-premium !h-10"
                         >
                             {t('deleteRecord')}
                         </AlertDialogAction>

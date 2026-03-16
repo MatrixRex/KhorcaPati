@@ -131,6 +131,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                 )}
             </div>
 
+
             <div className="space-y-2">
                 <Label htmlFor="deadline">{t('deadline')} ({t('optional')})</Label>
                 <Controller
@@ -162,11 +163,11 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
             </div>
 
             <div className="flex gap-2 pt-4">
-                <Button type="submit" className="flex-1">
+                <Button type="submit" className="flex-1 btn-premium">
                     {initialData ? t('updateGoal') : t('addGoal')}
                 </Button>
                 {onCancel && (
-                    <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+                    <Button type="button" variant="outline" onClick={onCancel} className="flex-1 btn-secondary-premium">
                         {t('cancel')}
                     </Button>
                 )}

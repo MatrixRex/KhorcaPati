@@ -173,11 +173,11 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
             </div>
 
             <div className="flex gap-2 pt-4">
-                <Button type="submit" className="flex-1 h-12 rounded-2xl font-bold shadow-sm active:scale-95 transition-all">
+                <Button type="submit" className="flex-1 btn-premium">
                     {initialData ? t('editLoan') : t('addLoan')}
                 </Button>
                 {onCancel && (
-                    <Button type="button" variant="outline" onClick={onCancel} className="flex-1 h-12 rounded-2xl font-bold border-muted active:scale-95 transition-all">
+                    <Button type="button" variant="outline" onClick={onCancel} className="flex-1 btn-secondary-premium">
                         {t('cancel')}
                     </Button>
                 )}

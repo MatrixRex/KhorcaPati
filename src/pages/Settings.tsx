@@ -405,7 +405,7 @@ export default function Settings() {
                             <AlertDialogTrigger asChild>
                                 <Button
                                     variant="destructive"
-                                    className="w-full h-11 rounded-xl font-bold shadow-sm active:scale-95 transition-all"
+                                    className="w-full btn-destructive-premium"
                                 >
                                     {t('deleteAllData')}
                                 </Button>
@@ -421,13 +421,13 @@ export default function Settings() {
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter className="flex-col gap-3 mt-8">
-                                    <AlertDialogAction
-                                        onClick={handleReset}
-                                        className="h-12 rounded-2xl bg-destructive text-destructive-foreground font-bold text-sm shadow-lg shadow-destructive/20 active:scale-95 transition-all w-full"
-                                    >
-                                        {t('yesDelete')}
-                                    </AlertDialogAction>
-                                    <AlertDialogCancel className="h-12 rounded-2xl border-none bg-secondary/50 font-bold text-sm active:scale-95 transition-all w-full mt-0">
+                                        <AlertDialogAction
+                                            onClick={handleReset}
+                                            className="h-12 w-full btn-destructive-premium"
+                                        >
+                                            {t('yesDelete')}
+                                        </AlertDialogAction>
+                                    <AlertDialogCancel className="w-full mt-0 btn-secondary-premium">
                                         {t('waitGoBack')}
                                     </AlertDialogCancel>
                                 </AlertDialogFooter>

@@ -36,22 +36,22 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
                 <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                            <h3 className="font-black text-sm uppercase tracking-tight truncate transition-colors">
+                            <h3 className="label-header truncate transition-colors">
                                 {goal.title}
                             </h3>
                             {isCompleted && (
-                                <span className="flex-shrink-0 text-[10px] font-black uppercase tracking-widest bg-primary text-primary-foreground px-1.5 py-0.5 rounded-md shadow-sm">
+                                <span className="flex-shrink-0 label-caption !text-[8px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-md shadow-sm">
                                     {t('done')}
                                 </span>
                             )}
                         </div>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider line-clamp-1">
+                        <p className="label-caption text-muted-foreground line-clamp-1">
                             {goal.note || t('noNotes')}
                         </p>
                     </div>
 
                     <div className="flex items-center gap-2 ml-2">
-                        <span className="text-xs text-muted-foreground font-black uppercase text-right shrink-0 bg-muted px-1.5 py-0.5 rounded-md">
+                        <span className="label-caption text-muted-foreground font-black uppercase text-right shrink-0 bg-muted px-1.5 py-0.5 rounded-md">
                             ৳{formatAmount(goal.currentAmount)} <span className="opacity-60">/</span> ৳{formatAmount(goal.targetAmount)}
                         </span>
                     </div>
@@ -65,16 +65,16 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
                         style={{ "--progress-indicator": "var(--primary)" } as any}
                     />
 
-                    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest mt-1">
+                    <div className="flex justify-between items-center label-caption mt-1">
                         <div className="flex items-center gap-1.5 overflow-hidden">
-                            <span className="text-muted-foreground shrink-0">
+                            <span className="text-muted-foreground shrink-0 uppercase">
                                 {t('savedPercent', { count: Math.round(percentage) })}
                             </span>
                             {goal.deadline && (
                                 <span className="text-muted-foreground/50">•</span>
                             )}
                             {goal.deadline && (
-                                <span className="text-muted-foreground truncate">
+                                <span className="text-muted-foreground truncate uppercase">
                                     {formatRelativeDate(goal.deadline, true)}
                                 </span>
                             )}

@@ -142,8 +142,8 @@ export function CategoryManagementDrawer() {
                                     autoFocus
                                     onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
                                 />
-                                <Button onClick={handleAdd} className="h-11 px-4 rounded-xl font-bold">{t('add')}</Button>
-                                <Button variant="ghost" size="icon" onClick={() => setIsAddingMode(false)} className="h-11 w-11 rounded-xl text-muted-foreground">
+                                <Button onClick={handleAdd} className="h-11 px-4 btn-premium">{t('add')}</Button>
+                                <Button variant="ghost" size="icon" onClick={() => setIsAddingMode(false)} className="h-11 w-11 rounded-2xl text-muted-foreground btn-secondary-premium">
                                     <X className="w-4 h-4" />
                                 </Button>
                             </div>
@@ -303,7 +303,7 @@ export function CategoryManagementDrawer() {
                                                         </div>
                                                         
                                                         <Button 
-                                                            className="w-full h-12 rounded-2xl font-black text-sm uppercase tracking-widest gap-2 shadow-lg shadow-primary/10"
+                                                            className="w-full btn-premium"
                                                             onClick={handleUpdate}
                                                         >
                                                             {t('saveChanges')}
@@ -389,10 +389,10 @@ export function CategoryManagementDrawer() {
                     </div>
 
                     <AlertDialogFooter className="flex-col gap-3">
-                        <AlertDialogAction onClick={handleDelete} className="h-12 rounded-2xl bg-destructive text-destructive-foreground font-bold text-sm shadow-lg shadow-destructive/20 active:scale-95 transition-all w-full">
+                        <AlertDialogAction onClick={handleDelete} className="w-full btn-destructive-premium">
                             {t('confirmDeletion')}
                         </AlertDialogAction>
-                        <AlertDialogCancel className="h-12 rounded-2xl border-none bg-secondary/50 font-bold text-sm active:scale-95 transition-all w-full mt-0">
+                        <AlertDialogCancel className="w-full mt-0 btn-secondary-premium">
                             {t('cancel')}
                         </AlertDialogCancel>
                     </AlertDialogFooter>

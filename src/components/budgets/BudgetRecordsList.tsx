@@ -49,8 +49,8 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                 <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
                     <Receipt className="w-8 h-8 text-muted-foreground/20" />
                 </div>
-                <h4 className="text-sm font-black uppercase tracking-widest text-muted-foreground">{t('noRecords')}</h4>
-                <p className="text-[10px] text-muted-foreground/60 mt-2 font-bold uppercase">
+                <h4 className="label-header !text-muted-foreground">{t('noRecords')}</h4>
+                <p className="label-caption text-muted-foreground/60 mt-2">
                     {t('recordsInPeriod', { category: budget.category })}
                 </p>
             </div>
@@ -66,11 +66,11 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
             <div className="space-y-3 px-1">
                 <div className="flex justify-between items-end mb-1">
                     <div className="flex flex-col">
-                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+                        <span className="label-header">
                             {t('budgetProgress')}
                         </span>
                         <span className={cn(
-                            "text-lg font-black",
+                            "text-value-md",
                             isOver ? "text-destructive" : "text-primary"
                         )}>
                             {t('percentDone', { percent: Math.round(percentage) })}
@@ -79,7 +79,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                     {window?.end && (
                         <div className="flex items-center gap-1.5 bg-muted/50 px-2 py-1 rounded-lg border border-border/20">
                             <Calendar className="w-3 h-3 text-muted-foreground" />
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                            <span className="label-caption !text-[8px] text-muted-foreground">
                                 {formatRelativeDate(window.end, true)}
                             </span>
                         </div>
@@ -91,36 +91,36 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                     indicatorClassName="premium-progress-indicator"
                     style={{ "--progress-indicator": isOver ? "var(--destructive)" : "var(--primary)" } as any}
                 />
-                <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">
+                <div className="flex justify-between items-center label-caption text-muted-foreground/40 mt-1">
                     <span>৳{formatAmount(totalSpent)} {t('spent')}</span>
                     <span>৳{formatAmount(remaining)} {t('remaining')}</span>
                 </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-6">
-                <div className="bg-destructive/5 p-4 rounded-3xl border border-destructive/10">
+                <div className="stats-card-destructive">
                     <div className="flex items-center gap-2 mb-1">
                         <TrendingDown className="w-3 h-3 text-destructive" />
-                        <span className="text-[9px] font-black uppercase tracking-widest text-destructive/60">{t('spent')}</span>
+                        <span className="label-caption text-destructive/60">{t('spent')}</span>
                     </div>
-                    <div className="text-xl font-black">
+                    <div className="text-value-lg">
                         ৳{formatAmount(totalSpent)}
                     </div>
                 </div>
-                <div className="bg-primary/5 p-4 rounded-3xl border border-primary/10">
+                <div className="stats-card-primary">
                     <div className="flex items-center gap-2 mb-1">
                         <div className="w-3 h-3 rounded-full bg-primary/20 flex items-center justify-center">
                             <div className="w-1 h-1 rounded-full bg-primary" />
                         </div>
-                        <span className="text-[9px] font-black uppercase tracking-widest text-primary/60">{t('remaining')}</span>
+                        <span className="label-caption text-primary/60">{t('remaining')}</span>
                     </div>
-                    <div className="text-xl font-black">
+                    <div className="text-value-lg">
                         ৳{formatAmount(remaining)}
                     </div>
                 </div>
             </div>
 
-            <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4 ml-1">
+            <div className="label-header !text-muted-foreground mb-4 ml-1">
                 {t('recordsForCategory', { category: budget.category })}
             </div>
 
@@ -141,12 +141,12 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                                 <span className="text-sm font-black truncate capitalize leading-tight">
                                     {exp.note || exp.category}
                                 </span>
-                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-bold uppercase tracking-tight mt-0.5">
+                                <div className="flex items-center gap-1.5 label-caption text-muted-foreground/60 mt-0.5">
                                     <span>{format(parseISO(exp.date), 'dd MMM yy')}</span>
                                     {exp.isNested && (
                                         <>
                                             <span>•</span>
-                                            <span className="text-primary/60">{t('nestedRecord')}</span>
+                                            <span className="text-primary/60 lowercase first-letter:uppercase">{t('nestedRecord')}</span>
                                         </>
                                     )}
                                 </div>

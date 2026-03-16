@@ -137,10 +137,10 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
             <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h3 className="font-bold text-sm tracking-tight truncate capitalize">{budget.category}</h3>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">{timelineLabel(budget, t)}</p>
+                        <h3 className="label-header truncate capitalize">{budget.category}</h3>
+                        <p className="label-caption text-muted-foreground uppercase mt-0.5">{timelineLabel(budget, t)}</p>
                     </div>
-                    <span className="text-xs text-muted-foreground font-black uppercase text-right shrink-0 ml-2 bg-muted px-1.5 py-0.5 rounded-md">
+                    <span className="label-caption text-muted-foreground font-black uppercase text-right shrink-0 ml-2 bg-muted px-1.5 py-0.5 rounded-md">
                         ৳{formatAmount(spent)} <span className="opacity-60">/</span> ৳{formatAmount(budget.limitAmount)}
                     </span>
                 </div>
@@ -154,17 +154,17 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
 
                 <div className="flex items-center justify-between mt-1">
                     <div className="flex items-center gap-1.5 overflow-hidden">
-                        <span className={cn("text-[10px] font-black uppercase tracking-widest shrink-0", percentage >= 100 ? "text-destructive" : "text-muted-foreground")}>
+                        <span className={cn("label-caption font-black uppercase shrink-0", percentage >= 100 ? "text-destructive" : "text-muted-foreground")}>
                             {t('utilized', { count: Math.round(percentage) })}
                         </span>
                         {isOverBudget && overspentInfo && (
-                            <span className="text-[10px] font-black text-destructive/80 whitespace-nowrap overflow-hidden text-ellipsis">
+                            <span className="label-caption font-black text-destructive/80 whitespace-nowrap overflow-hidden text-ellipsis">
                                 • {overspentInfo.daysAgo === 0 ? t('today') : t('daysAgo', { count: overspentInfo.daysAgo })}
                             </span>
                         )}
                     </div>
                     {isOverBudget && (
-                        <p className="text-xs text-destructive font-black uppercase tracking-tighter shrink-0 ml-2 animate-pulse">
+                        <p className="label-caption text-destructive font-black uppercase shrink-0 ml-2 animate-pulse">
                             -৳{formatAmount(spent - budget.limitAmount)}
                         </p>
                     )}

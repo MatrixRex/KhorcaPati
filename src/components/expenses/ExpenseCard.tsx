@@ -56,7 +56,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                 <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex flex-col flex-1 overflow-hidden pr-2">
                         <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-bold text-sm tracking-tight truncate transition-colors capitalize">
+                            <h3 className="label-header truncate transition-colors capitalize">
                                 {expense.note || t(expense.type)}
                             </h3>
                             {expense.isRecurring && (
@@ -70,23 +70,23 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                                 </div>
                             )}
                         </div>
-                        <div className="flex items-center text-xs font-bold text-muted-foreground gap-2">
+                        <div className="flex items-center label-caption text-muted-foreground gap-2">
                             <span>{formatRelativeDate(expense.date, true)}</span>
                             <span className="opacity-50">•</span>
-                            <span className="truncate uppercase tracking-tighter">{expense.category}</span>
+                            <span className="truncate uppercase">{expense.category}</span>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0">
                         <div className="flex flex-col items-end">
                             <span className={cn(
-                                "text-sm font-black tabular-nums",
+                                "text-value-md tabular-nums",
                                 expense.type === 'income' ? "text-success" : "text-destructive"
                             )}>
                                 {expense.type === 'income' ? '+' : '-'}৳{formatAmount(expense.amount)}
                             </span>
                             {expense.parentId && (
-                                <Badge variant="outline" className="text-[10px] font-black uppercase border-primary/20 text-primary px-1 h-3.5 mt-0.5">
+                                <Badge variant="outline" className="label-caption border-primary/20 text-primary px-1 h-3.5 mt-0.5">
                                     {t('sub')}
                                 </Badge>
                             )}
@@ -121,14 +121,14 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                             <div className="flex items-center gap-3 overflow-hidden">
                                 <CornerDownRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                                 <div className="flex flex-col overflow-hidden">
-                                    <span className="text-xs font-bold truncate capitalize transition-colors">
+                                    <span className="label-header !text-[11px] truncate capitalize transition-colors">
                                         {sub.note || t(sub.type)}
                                     </span>
-                                    <span className="text-[10px] text-muted-foreground uppercase">{sub.category}</span>
+                                    <span className="label-caption !text-[8px] text-muted-foreground uppercase">{sub.category}</span>
                                 </div>
                             </div>
                             <span className={cn(
-                                "text-xs font-black",
+                                "text-value-md !text-xs",
                                 sub.type === 'income' ? "text-success" : "text-destructive"
                             )}>
                                 ৳{formatAmount(sub.amount)}
@@ -138,7 +138,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
 
                     ))}
                     {subExpenses.length === 0 && (
-                        <div className="ml-7 p-3 text-[10px] text-muted-foreground italic border border-dashed rounded-xl border-border/60 text-center font-bold">
+                        <div className="ml-7 p-3 label-caption text-muted-foreground/60 italic border border-dashed rounded-xl border-border/60 text-center">
                             {t('emptyCollection')}
                         </div>
                     )}

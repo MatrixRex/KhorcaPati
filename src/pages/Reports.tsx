@@ -13,12 +13,10 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTranslation } from 'react-i18next';
-import { formatAmount } from '@/lib/utils';
+import { formatAmount, cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { FolderIcon, HandCoinsIcon, SearchIcon } from 'lucide-react';
 import { CategoryRecordsDrawer } from '@/components/shared/CategoryRecordsDrawer';
-
-// Removed hardcoded COLORS array
 
 // Custom node for Sankey to make it look premium
 const SankeyNode = ({ x, y, width, height, index, payload, containerWidth }: any) => {
@@ -199,13 +197,13 @@ export default function Reports() {
 
                 {/* Summary Mini Cards */}
                 <div className="grid grid-cols-2 gap-4 px-1">
-                    <div className="bg-green-500/10 p-4 rounded-2xl border border-green-500/20 dark:border-green-500/10 ring-1 ring-inset ring-white/10">
-                        <p className="text-[9px] font-bold uppercase text-green-600 tracking-widest mb-1">{t('totalIncome')}</p>
-                        <p className="text-xl font-black text-green-600">৳{formatAmount(totalIncome)}</p>
+                    <div className="stats-card-primary !bg-green-500/10 !border-green-500/20 dark:!border-green-500/10">
+                        <p className="label-caption text-green-600 mb-1">{t('totalIncome')}</p>
+                        <p className="text-value-lg text-green-600">৳{formatAmount(totalIncome)}</p>
                     </div>
-                    <div className="bg-red-500/10 p-4 rounded-2xl border border-red-500/20 dark:border-red-500/10 ring-1 ring-inset ring-white/10">
-                        <p className="text-[9px] font-bold uppercase text-red-600 tracking-widest mb-1">{t('totalExpense')}</p>
-                        <p className="text-xl font-black text-red-600">৳{formatAmount(totalExpense)}</p>
+                    <div className="stats-card-destructive !bg-red-500/10 !border-red-500/20 dark:!border-red-500/10">
+                        <p className="label-caption text-red-600 mb-1">{t('totalExpense')}</p>
+                        <p className="text-value-lg text-red-600">৳{formatAmount(totalExpense)}</p>
                     </div>
                 </div>
 
@@ -213,17 +211,23 @@ export default function Reports() {
                 <Card className="report-card-container py-8">
                     <div className="flex flex-col items-center">
                         {/* Toggle Header */}
-                        <div className="mb-10 flex bg-background/40 p-1.5 rounded-2xl glass-edge backdrop-blur-xl">
+                        <div className="mb-10 segmented-control-container !w-auto min-w-[300px] backdrop-blur-xl">
                             <button
                                 onClick={() => setViewType('expense')}
-                                className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${viewType === 'expense' ? 'bg-red-500 text-white shadow-xl scale-105' : 'text-muted-foreground hover:text-foreground opacity-60'}`}
+                                className={cn(
+                                    "segmented-control-item !py-3 flex items-center justify-center gap-2",
+                                    viewType === 'expense' && "segmented-control-item-active !bg-red-500 !scale-105"
+                                )}
                             >
                                 <HandCoinsIcon className="w-3.5 h-3.5" />
                                 {t('expenseLabel')}
                             </button>
                             <button
                                 onClick={() => setViewType('income')}
-                                className={`px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center gap-2 ${viewType === 'income' ? 'bg-green-500 text-white shadow-xl scale-105' : 'text-muted-foreground hover:text-foreground opacity-60'}`}
+                                className={cn(
+                                    "segmented-control-item !py-3 flex items-center justify-center gap-2",
+                                    viewType === 'income' && "segmented-control-item-active !bg-green-500 !scale-105"
+                                )}
                             >
                                 <FolderIcon className="w-3.5 h-3.5" />
                                 {t('incomeLabel')}
@@ -231,7 +235,7 @@ export default function Reports() {
                         </div>
 
                         {currentPieData.length === 0 ? (
-                            <div className="h-[200px] flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic opacity-50 px-10 text-center">{t('noExpenseDataAcross')}</div>
+                            <div className="h-[200px] flex items-center justify-center label-header !text-muted-foreground/40 italic px-10 text-center">{t('noExpenseDataAcross')}</div>
                         ) : (
                             <div className="w-full flex flex-col items-center">
                                 {/* Donut Chart */}
@@ -265,10 +269,10 @@ export default function Reports() {
                                     </div>
                                     {/* Centered Text Overlay */}
                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 mb-1">
+                                        <p className="label-header mb-1">
                                             {viewType === 'expense' ? t('totalExpense') : t('totalIncome')}
                                         </p>
-                                        <p className="text-xl font-black text-foreground tracking-tighter leading-none">
+                                        <p className="text-value-lg tracking-tighter leading-none">
                                             ৳{formatAmount(currentTotal)}
                                         </p>
                                     </div>
@@ -277,8 +281,8 @@ export default function Reports() {
                                 {/* Progress Bars List */}
                                 <div className="w-full px-6 space-y-6">
                                     <div className="flex justify-between items-center mb-2">
-                                        <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70">{t('breakdown')}</h4>
-                                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Total: ৳{formatAmount(currentTotal)}</span>
+                                        <h4 className="label-header !text-primary/70">{t('breakdown')}</h4>
+                                        <span className="label-caption text-muted-foreground/60 uppercase">Total: ৳{formatAmount(currentTotal)}</span>
                                     </div>
 
                                     <div className="grid gap-5">
@@ -296,7 +300,7 @@ export default function Reports() {
                                                             </div>
                                                             <div className="flex flex-col">
                                                                 <span className="text-[11px] font-black uppercase tracking-tighter text-foreground group-hover:text-primary transition-colors">{category.name}</span>
-                                                                <span className="text-[9px] font-bold text-muted-foreground/60">{percent.toFixed(1)}% of total</span>
+                                                                <span className="label-caption !text-[8px] text-muted-foreground/60">{percent.toFixed(1)}% of total</span>
                                                             </div>
                                                         </div>
                                                         <div className="text-right flex items-center gap-3">
@@ -336,11 +340,11 @@ export default function Reports() {
                 {/* Money Distribution: Sankey Diagram */}
                 <Card className="report-card-container">
                     <CardHeader className="pb-0 pt-6 px-6">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('moneyDistribution')}</CardTitle>
+                        <CardTitle className="label-header text-primary">{t('moneyDistribution')}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-6 h-[260px]">
                         {totalIncome === 0 && totalExpense === 0 ? (
-                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic font-bold">{t('noFlowData')}</div>
+                            <div className="h-full flex items-center justify-center label-header !text-muted-foreground/60 italic font-bold">{t('noFlowData')}</div>
                         ) : (
                             <div className="h-full outline-none focus:outline-none select-none pointer-events-none" tabIndex={-1}>
                                 <ResponsiveContainer width="100%" height="100%">
@@ -363,11 +367,11 @@ export default function Reports() {
                 {/* 3. Timeline: Line Chart */}
                 <Card className="report-card-container">
                     <CardHeader className="pb-0 pt-6 px-6">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('balanceGrowthTimeline')}</CardTitle>
+                        <CardTitle className="label-header text-primary">{t('balanceGrowthTimeline')}</CardTitle>
                     </CardHeader>
                     <CardContent className="px-2 pt-6 pb-4 h-[350px]">
                         {timelineData.length === 0 ? (
-                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic font-bold">{t('noTimelineData')}</div>
+                            <div className="h-full flex items-center justify-center label-header !text-muted-foreground/60 italic font-bold">{t('noTimelineData')}</div>
                         ) : (
                             <div className="h-full outline-none focus:outline-none select-none pointer-events-none" tabIndex={-1}>
                                 <ResponsiveContainer width="100%" height="100%">
@@ -428,11 +432,11 @@ export default function Reports() {
                         <div className="mt-6 flex justify-center gap-6">
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm" />
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">{t('incomeDay')}</span>
+                                <span className="label-caption text-muted-foreground">{t('incomeDay')}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm" />
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">{t('expenseDay')}</span>
+                                <span className="label-caption text-muted-foreground">{t('expenseDay')}</span>
                             </div>
                         </div>
                     </CardContent>

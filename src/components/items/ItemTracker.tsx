@@ -448,10 +448,10 @@ export function ItemTracker() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-row gap-2 mt-4">
-                        <AlertDialogCancel className="flex-1 mt-0 rounded-xl">{t('cancel')}</AlertDialogCancel>
+                        <AlertDialogCancel className="flex-1 mt-0 btn-secondary-premium !h-10">{t('cancel')}</AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={() => itemToDelete && handleDeleteItem(itemToDelete)} 
-                            className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+                            className="flex-1 btn-destructive-premium !h-10"
                         >
                             {t('done')}
                         </AlertDialogAction>
@@ -482,10 +482,10 @@ export function ItemTracker() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-row gap-2 mt-4">
-                        <AlertDialogCancel className="flex-1 mt-0 rounded-xl">{t('cancel')}</AlertDialogCancel>
+                        <AlertDialogCancel className="flex-1 mt-0 btn-secondary-premium !h-10">{t('cancel')}</AlertDialogCancel>
                         <AlertDialogAction 
                             onClick={() => selectedInventoryItem && handleDeleteWholeItem(selectedInventoryItem)} 
-                            className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+                            className="flex-1 btn-destructive-premium !h-10"
                         >
                             {t('done')}
                         </AlertDialogAction>

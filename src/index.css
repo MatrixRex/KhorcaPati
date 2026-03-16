@@ -393,6 +393,85 @@
     box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.1);
   }
 
+
+  /* --- Typography Utilities --- */
+  .label-header {
+    @apply text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 leading-none;
+  }
+
+  .label-caption {
+    @apply text-[9px] font-black uppercase tracking-widest leading-none;
+  }
+
+  .form-error {
+    @apply text-rose-600 text-[11px] font-black uppercase tracking-wider antialiased mt-1 ml-1;
+  }
+
+  .text-value-lg {
+    @apply text-xl font-black leading-tight;
+  }
+
+  .text-value-md {
+    @apply text-lg font-black leading-tight;
+  }
+
+  /* --- Form Utilities --- */
+  .input-glass {
+    @apply h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50 transition-all;
+  }
+
+  /* --- Button Utilities --- */
+  .btn-premium {
+    @apply h-12 rounded-2xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground shadow-lg shadow-primary/20 active:scale-95 transition-all flex items-center justify-center;
+  }
+
+  .btn-secondary-premium {
+    @apply h-12 rounded-2xl font-black uppercase tracking-widest text-[11px] border-muted active:scale-95 transition-all flex items-center justify-center hover:bg-muted/50;
+  }
+
+  .btn-destructive-premium {
+    @apply h-12 rounded-2xl font-black uppercase tracking-widest text-[11px] bg-rose-500/10 text-rose-600 active:scale-95 transition-all flex items-center justify-center border border-rose-500/10 hover:bg-rose-500/20 antialiased;
+  }
+
+  .btn-success-premium {
+    @apply h-12 rounded-2xl font-black uppercase tracking-widest text-[11px] bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center hover:bg-emerald-600;
+  }
+
+  /* --- Segmented Control --- */
+  .segmented-control-container {
+    @apply flex bg-muted/60 p-1.5 rounded-2xl w-full gap-1;
+  }
+
+  .segmented-control-item {
+    @apply flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all text-muted-foreground hover:text-foreground;
+  }
+
+  .segmented-control-item-active {
+    @apply bg-primary text-primary-foreground shadow-sm !text-primary-foreground;
+  }
+
+  /* --- Stats Cards --- */
+  .stats-card-destructive {
+    @apply bg-destructive/5 p-4 rounded-3xl border border-destructive/10;
+  }
+
+  .stats-card-primary {
+    @apply bg-primary/5 p-4 rounded-3xl border border-primary/10;
+  }
+
+  /* --- Premium Component Wrappers --- */
+  .card-premium {
+    @apply border-border shadow-sm rounded-xl overflow-hidden relative transition-all duration-300;
+  }
+
+  .card-interactive {
+    @apply cursor-pointer active:scale-[0.98] hover:shadow-md transition-all duration-200;
+  }
+
+  .badge-premium {
+    @apply text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md shadow-xs;
+  }
+
   /* Disable chart selection outlines */
   .recharts-wrapper, .recharts-surface {
     outline: none !important;

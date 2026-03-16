@@ -137,11 +137,11 @@ export function CategoryManager() {
                         </p>
                     </div>
 
-                    <AlertDialogFooter className="flex-row gap-2">
-                        <AlertDialogCancel className="flex-1 mt-0">Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete} className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    <AlertDialogFooter className="flex-col gap-2">
+                        <AlertDialogAction onClick={handleDelete} className="w-full btn-destructive-premium">
                             Remove
                         </AlertDialogAction>
+                        <AlertDialogCancel className="w-full mt-0 btn-secondary-premium">Cancel</AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

@@ -858,7 +858,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                     {onCancel && (
                         <Button
                             type="button"
-                            variant="outline"
+                            variant="default"
                             onClick={async () => {
                                 const values = form.getValues();
                                 if (!values.isNested && values.amount <= 0) {
@@ -876,7 +876,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                 await form.handleSubmit(performSave)();
                                 onSuccess ? onSuccess() : (onCancel && onCancel());
                             }}
-                            className="w-full h-11 rounded-xl font-bold"
+                            className="w-full btn-premium"
                         >
                             {t('done')}
                         </Button>
@@ -886,7 +886,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             type="button"
                             variant="ghost"
                             onClick={() => setShowDeleteDialog(true)}
-                            className="w-full text-rose-600 hover:bg-rose-500/10 h-11 rounded-xl font-black uppercase tracking-widest text-[11px] antialiased"
+                            className="w-full btn-destructive-premium"
                         >
                             <Trash2 className="w-4 h-4 mr-2" />
                             {t('deleteRecord')}
@@ -905,7 +905,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-row gap-2 mt-4">
                         <AlertDialogCancel className="flex-1 mt-0 rounded-xl">{t('cancel')}</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete} className="flex-1 bg-rose-500 text-white hover:bg-rose-600 rounded-xl">
+                        <AlertDialogAction onClick={handleDelete} className="flex-1 btn-destructive-premium !h-10">
                             {t('deleteRecord')}
                         </AlertDialogAction>
                     </AlertDialogFooter>

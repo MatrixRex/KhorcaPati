@@ -205,7 +205,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
         <>
             <form className="space-y-4 pb-24">
                 <div className="flex justify-between items-center mb-2">
-                    <div className="flex bg-muted p-1 rounded-xl w-full">
+                    <div className="segmented-control-container">
                         <button
                             type="button"
                             onClick={() => {
@@ -213,10 +213,8 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 form.handleSubmit(performSave)();
                             }}
                             className={cn(
-                                "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
-                                form.watch('type') === 'expense'
-                                    ? "bg-primary text-primary-foreground shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground"
+                                "segmented-control-item",
+                                form.watch('type') === 'expense' && "segmented-control-item-active"
                             )}
                         >
                             {t('expenseLabel')}
@@ -228,10 +226,8 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 form.handleSubmit(performSave)();
                             }}
                             className={cn(
-                                "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
-                                form.watch('type') === 'income'
-                                    ? "bg-emerald-500 text-white shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground"
+                                "segmented-control-item",
+                                form.watch('type') === 'income' && "segmented-control-item-active !bg-emerald-500"
                             )}
                         >
                             {t('incomeLabel')}
@@ -239,7 +235,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                     </div>
                 </div>
                 <div className="flex items-center">
-                    <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                    <div className="label-header">
                         {saveStatus === 'saving' && t('saving')}
                         {saveStatus === 'saved' && t('allChangesSaved')}
                         {saveStatus === 'error' && <span className="text-rose-500/90">{t('errorSaving')}</span>}
@@ -251,13 +247,13 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                     <Input
                         id="title"
                         placeholder={t('recurringTitlePlaceholder')}
-                        className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                        className="input-glass"
                         {...form.register('title', {
                             onBlur: handleBlur
                         })}
                     />
                     {form.formState.errors.title && (
-                        <p className="text-rose-600 text-[11px] font-black uppercase tracking-wider">{t('titleRequired')}</p>
+                        <p className="form-error">{t('titleRequired')}</p>
                     )}
                 </div>
 
@@ -271,13 +267,13 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 readOnly
                                 value={form.watch('amount') || ''}
                                 onClick={() => setShowNumberPad(true)}
-                                className="pr-10 cursor-pointer caret-transparent h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                                className="pr-10 cursor-pointer caret-transparent input-glass"
                                 placeholder="0"
                             />
                             <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                         </div>
                         {form.formState.errors.amount && (
-                            <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.amount.message}</p>
+                            <p className="form-error mt-1 ml-1 !tracking-tight !leading-none lowercase first-letter:uppercase">{form.formState.errors.amount.message}</p>
                         )}
                         {showNumberPad && (
                             <NumberPad
@@ -312,7 +308,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                             form.handleSubmit(performSave)();
                                         }
                                     }}
-                                    className="h-12 rounded-xl bg-background/50 border-border"
+                                    className="input-glass"
                                 />
                             )}
                         />
@@ -328,7 +324,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 form.setValue('category', val, { shouldDirty: true });
                             }}
                             onBlur={() => form.handleSubmit(performSave)()}
-                            className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                            className="input-glass"
                         />
                     </div>
                     <div className="space-y-2">
@@ -340,7 +336,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 form.handleSubmit(performSave)();
                             }}
                         >
-                            <SelectTrigger className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50">
+                            <SelectTrigger className="input-glass">
                                 <SelectValue placeholder={t('selectInterval')} />
                             </SelectTrigger>
                             <SelectContent>
@@ -362,21 +358,21 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                         autoCorrect="off"
                         autoCapitalize="none"
                         spellCheck={true}
-                        className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                        className="input-glass"
                         {...form.register('note', {
                             onBlur: handleBlur
                         })}
                     />
                 </div>
 
-                <div className="pt-4 space-y-2">
+                <div className="pt-6 space-y-3">
                     {initialData && (
-                        <div className="grid grid-cols-2 gap-2 mb-4">
+                        <div className="grid grid-cols-2 gap-3 mb-2">
                             <Button
                                 type="button"
                                 variant="default"
                                 onClick={handleConfirm}
-                                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white h-12 rounded-xl font-bold"
+                                className="w-full btn-premium"
                             >
                                 {t('confirmPayment')}
                             </Button>
@@ -384,16 +380,17 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 type="button"
                                 variant="outline"
                                 onClick={handleSkip}
-                                className="w-full"
+                                className="w-full btn-secondary-premium"
                             >
                                 {t('skipNext')}
                             </Button>
                         </div>
                     )}
+                    
                     {onCancel && !initialData && (
                         <Button
                             type="button"
-                            variant="outline"
+                            variant="default"
                             onClick={async () => {
                                 const values = form.getValues();
                                 if (values.amount <= 0) {
@@ -410,21 +407,22 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 await form.handleSubmit(performSave)();
                                 onCancel();
                             }}
-                            className="w-full h-11 rounded-xl font-bold"
+                            className="w-full btn-premium"
                         >
                             {t('done')}
                         </Button>
                     )}
+
                     {(currentId || initialData) && (
                         <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="w-full text-rose-600 hover:bg-rose-500/10 h-11 rounded-xl font-black uppercase tracking-widest text-[11px] antialiased"
-                >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    {t('deleteRecord')}
-                </Button>
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setShowDeleteDialog(true)}
+                            className="w-full btn-destructive-premium"
+                        >
+                            <Trash2 className="w-3.5 h-3.5 mr-2" />
+                            {t('deleteRecord')}
+                        </Button>
                     )}
                 </div>
             </form>
@@ -437,11 +435,11 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                             {t('deleteBudgetDescription').replace('{{category}}', form.getValues('title'))}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter className="flex-row gap-2 mt-4">
-                        <AlertDialogCancel className="flex-1 mt-0">{t('cancel')}</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete} className="flex-1 bg-rose-600 text-white hover:bg-rose-700 rounded-xl">
+                    <AlertDialogFooter className="flex-col gap-2 mt-4">
+                        <AlertDialogAction onClick={handleDelete} className="w-full btn-destructive-premium">
                             {t('deleteRecord')}
                         </AlertDialogAction>
+                        <AlertDialogCancel className="w-full mt-0 btn-secondary-premium">{t('cancel')}</AlertDialogCancel>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

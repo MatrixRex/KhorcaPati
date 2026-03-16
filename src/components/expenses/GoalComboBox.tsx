@@ -37,7 +37,7 @@ export const GoalComboBox = React.forwardRef<HTMLInputElement, GoalComboBoxProps
         return (
             <SuggestionInput
                 ref={ref}
-                type="category" // reusing category icon for now or we can add "goal" to SuggestionInput
+                type="goal"
                 isMulti={false}
                 value={selectedGoal?.title || ""}
                 customSuggestions={goalNames}

@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { db } from '@/db/schema';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Input } from '@/components/ui/input';
+import { Tag, Package, Target } from 'lucide-react';
 
 interface SuggestionInputProps {
     value: string;
@@ -12,7 +13,7 @@ interface SuggestionInputProps {
     id?: string;
     placeholder?: string;
     className?: string;
-    type?: 'note' | 'category';
+    type?: 'note' | 'category' | 'goal';
     customSuggestions?: string[];
     isMulti?: boolean;
     disableSuggestions?: boolean;
@@ -141,7 +142,13 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
             }, 0);
         };
 
-        const icon = type === 'category' ? '🏷️' : '📦';
+        const icon = (() => {
+            switch (type) {
+                case 'category': return <Tag className="w-3.5 h-3.5" />;
+                case 'goal': return <Target className="w-3.5 h-3.5" />;
+                default: return <Package className="w-3.5 h-3.5" />;
+            }
+        })();
 
         return (
             // Outer div: full-width column flow — input wrapper + spacer stacked vertically
@@ -249,7 +256,7 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
                                             : 'bg-muted/50 text-foreground border-transparent hover:bg-primary/10 hover:text-primary hover:border-primary/20'
                                     )}
                                 >
-                                     <span className="text-xs">
+                                     <span className="flex items-center justify-center">
                                         {getItemIcon ? getItemIcon(suggestion) : icon}
                                     </span>
                                     <span className="text-xs font-bold capitalize">{suggestion}</span>

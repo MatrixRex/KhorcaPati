@@ -15,7 +15,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useTranslation } from 'react-i18next';
 import { formatAmount, cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
-import { FolderIcon, HandCoinsIcon, SearchIcon } from 'lucide-react';
+import { TrendingUp, TrendingDown, SearchIcon } from 'lucide-react';
 import { CategoryRecordsDrawer } from '@/components/shared/CategoryRecordsDrawer';
 
 // Custom node for Sankey to make it look premium
@@ -197,13 +197,13 @@ export default function Reports() {
 
                 {/* Summary Mini Cards */}
                 <div className="grid grid-cols-2 gap-4 px-1">
-                    <div className="stats-card-primary !bg-green-500/10 !border-green-500/20 dark:!border-green-500/10">
-                        <p className="label-caption text-green-600 mb-1">{t('totalIncome')}</p>
-                        <p className="text-value-lg text-green-600">৳{formatAmount(totalIncome)}</p>
+                    <div className="stats-card-primary !bg-success/10 !border-success/20 dark:!border-success/10">
+                        <p className="label-caption text-success mb-1">{t('totalIncome')}</p>
+                        <p className="text-value-lg text-success">৳{formatAmount(totalIncome)}</p>
                     </div>
-                    <div className="stats-card-destructive !bg-red-500/10 !border-red-500/20 dark:!border-red-500/10">
-                        <p className="label-caption text-red-600 mb-1">{t('totalExpense')}</p>
-                        <p className="text-value-lg text-red-600">৳{formatAmount(totalExpense)}</p>
+                    <div className="stats-card-destructive !bg-destructive/10 !border-destructive/20 dark:!border-destructive/10">
+                        <p className="label-caption text-destructive mb-1">{t('totalExpense')}</p>
+                        <p className="text-value-lg text-destructive">৳{formatAmount(totalExpense)}</p>
                     </div>
                 </div>
 
@@ -216,20 +216,20 @@ export default function Reports() {
                                 onClick={() => setViewType('expense')}
                                 className={cn(
                                     "segmented-control-item !py-3 flex items-center justify-center gap-2",
-                                    viewType === 'expense' && "segmented-control-item-active !bg-red-500 !scale-105"
+                                    viewType === 'expense' && "segmented-control-item-active !bg-rose-600/60 dark:!bg-destructive/10 !text-rose-700 dark:!text-rose-400 border border-destructive/20 dark:border-destructive/20 !shadow-none !scale-105"
                                 )}
                             >
-                                <HandCoinsIcon className="w-3.5 h-3.5" />
+                                <TrendingDown className="w-3.5 h-3.5" />
                                 {t('expenseLabel')}
                             </button>
                             <button
                                 onClick={() => setViewType('income')}
                                 className={cn(
                                     "segmented-control-item !py-3 flex items-center justify-center gap-2",
-                                    viewType === 'income' && "segmented-control-item-active !bg-green-500 !scale-105"
+                                    viewType === 'income' && "segmented-control-item-active !bg-emerald-700/80 dark:!bg-success/10 !text-emerald-700 dark:!text-emerald-400 border border-success/20 dark:border-success/20 !shadow-none !scale-105"
                                 )}
                             >
-                                <FolderIcon className="w-3.5 h-3.5" />
+                                <TrendingUp className="w-3.5 h-3.5" />
                                 {t('incomeLabel')}
                             </button>
                         </div>
@@ -306,7 +306,7 @@ export default function Reports() {
                                                         <div className="text-right flex items-center gap-3">
                                                             <div className="flex flex-col items-end">
                                                                 <p className="text-[11px] font-black tracking-tight">৳{formatAmount(category.value)}</p>
-                                                                <p className="text-[9px] font-bold text-green-500/80">
+                                                                <p className="text-[9px] font-bold text-success/80">
                                                                     {percent >= 50 ? '+12%' : percent >= 20 ? '+5%' : '+2%'} vs avg
                                                                 </p>
                                                             </div>
@@ -431,11 +431,11 @@ export default function Reports() {
                         )}
                         <div className="mt-6 flex justify-center gap-6">
                             <div className="flex items-center gap-1.5">
-                                <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-sm" />
+                                <div className="w-2.5 h-2.5 rounded-full bg-success shadow-sm" />
                                 <span className="label-caption text-muted-foreground">{t('incomeDay')}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
-                                <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm" />
+                                <div className="w-2.5 h-2.5 rounded-full bg-destructive shadow-sm" />
                                 <span className="label-caption text-muted-foreground">{t('expenseDay')}</span>
                             </div>
                         </div>

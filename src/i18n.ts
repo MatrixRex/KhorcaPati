@@ -112,7 +112,7 @@ const resources = {
       "inputAmount": "Input Amount",
       "clearAll": "Clear All",
       "confirmAmount": "Confirm Amount",
-      "analytics": "Analytics",
+      "analytics": "Reports",
       "inventory": "Inventory",
       "moneyDistribution": "Money Distribution",
       "noFlowData": "No flow data",

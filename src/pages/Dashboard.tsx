@@ -123,7 +123,7 @@ export default function Dashboard() {
                             <div className="w-px h-8 bg-foreground/5" />
                             <div className="flex flex-col gap-0.5">
                                 <span className="text-[11px] font-black uppercase text-foreground/30 tracking-[0.15em] shrink-0">{t('expenses')}</span>
-                                <span className="text-base font-black text-rose-500 dark:text-rose-400">৳{formatAmount(totalSpent)}</span>
+                                <span className="text-base font-black text-destructive">৳{formatAmount(totalSpent)}</span>
                             </div>
                         </div>
                     </CardContent>

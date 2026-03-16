@@ -43,7 +43,7 @@ export function DateRangeFilter() {
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 gap-1 px-2 text-xs font-medium hover:bg-accent/50 group"
+                    className="h-8 gap-1 px-2 text-xs font-medium active:bg-accent/50 group"
                 >
                     <CalendarIcon className="h-3.5 w-3.5 opacity-60" />
                     <span>{label}</span>

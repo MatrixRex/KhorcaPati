@@ -293,7 +293,13 @@
   }
 
   .interactive {
-    @apply active:scale-95 hover:brightness-110 transition-all duration-200 cursor-pointer;
+    @apply active:scale-95 transition-all duration-200 cursor-pointer;
+  }
+
+  @media (hover: hover) {
+    .interactive:hover {
+      @apply brightness-110;
+    }
   }
 
   /* --- Design System Glows --- */
@@ -328,5 +334,11 @@
   .setting-item-glass:active {
     @apply scale-[0.98] brightness-95 opacity-90;
     box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Disable chart selection outlines */
+  .recharts-wrapper, .recharts-surface {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
   }
 }

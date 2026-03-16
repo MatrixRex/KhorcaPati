@@ -5,12 +5,11 @@ import { isWithinInterval, startOfDay } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList,
-    Tooltip, Sankey, Layer, AreaChart, Area, CartesianGrid
+    Sankey, Layer, AreaChart, Area, CartesianGrid
 } from 'recharts';
 import { useFilterStore } from '@/stores/filterStore';
 import { useUIStore } from '@/stores/uiStore';
 import { PageContainer } from '@/components/shared/PageContainer';
-
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTranslation } from 'react-i18next';
@@ -161,23 +160,20 @@ export default function Reports() {
                         {totalIncome === 0 && totalExpense === 0 ? (
                             <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic font-bold">{t('noFlowData')}</div>
                         ) : (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <Sankey
-                                    data={{
-                                        ...sankeyData,
-                                        nodes: sankeyData.nodes.map(n => ({ ...n, fontScale }))
-                                    }}
-                                    node={<SankeyNode containerWidth={300} />}
-                                    link={{ stroke: '#8884d844' }}
-                                    margin={{ top: 10, left: 40, right: 40, bottom: 10 }}
-                                    nodePadding={10}
-                                >
-                                    <Tooltip
-                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                        formatter={(value) => `৳${formatAmount(Number(value))}`}
+                            <div className="h-full outline-none focus:outline-none select-none pointer-events-none" tabIndex={-1}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <Sankey
+                                        data={{
+                                            ...sankeyData,
+                                            nodes: sankeyData.nodes.map(n => ({ ...n, fontScale }))
+                                        }}
+                                        node={<SankeyNode containerWidth={300} />}
+                                        link={{ stroke: '#8884d844' }}
+                                        margin={{ top: 10, left: 40, right: 40, bottom: 10 }}
+                                        nodePadding={10}
                                     />
-                                </Sankey>
-                            </ResponsiveContainer>
+                                </ResponsiveContainer>
+                            </div>
                         )}
                     </CardContent>
                 </Card>
@@ -206,42 +202,39 @@ export default function Reports() {
                         {categoryData.length === 0 ? (
                             <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic opacity-50">{t('noExpenseDataAcross')}</div>
                         ) : (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart
-                                    data={categoryData}
-                                    layout="vertical"
-                                    margin={{ top: 5, right: 60, left: 10, bottom: 20 }}
-                                >
-                                    <XAxis type="number" hide />
-                                    <YAxis
-                                        dataKey="name"
-                                        type="category"
-                                        fontSize={Math.round(11 * fontScale)}
-                                        tickLine={false}
-                                        axisLine={false}
-                                        width={Math.round(80 * fontScale)}
-                                        className="font-black text-foreground uppercase tracking-tighter"
-                                    />
-                                    <Tooltip
-                                        cursor={{ fill: 'transparent' }}
-                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                        formatter={(value) => `৳${formatAmount(Number(value))}`}
-                                    />
-                                    <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={20}>
-                                        {categoryData.map((entry: any, index: number) => (
-                                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                                        ))}
-                                        <LabelList
-                                            dataKey="value"
-                                            position="right"
-                                            fontSize={10}
-                                            fontWeight={800}
-                                            formatter={(v: any) => `৳${formatAmount(Number(v))}`}
-                                            className="fill-foreground"
+                            <div className="h-full outline-none focus:outline-none select-none pointer-events-none" tabIndex={-1}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart
+                                        data={categoryData}
+                                        layout="vertical"
+                                        margin={{ top: 5, right: 60, left: 10, bottom: 20 }}
+                                    >
+                                        <XAxis type="number" hide />
+                                        <YAxis
+                                            dataKey="name"
+                                            type="category"
+                                            fontSize={Math.round(11 * fontScale)}
+                                            tickLine={false}
+                                            axisLine={false}
+                                            width={Math.round(80 * fontScale)}
+                                            className="font-black text-foreground uppercase tracking-tighter"
                                         />
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
+                                        <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={20} activeBar={false}>
+                                            {categoryData.map((entry: any, index: number) => (
+                                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                                            ))}
+                                            <LabelList
+                                                dataKey="value"
+                                                position="right"
+                                                fontSize={10}
+                                                fontWeight={800}
+                                                formatter={(v: any) => `৳${formatAmount(Number(v))}`}
+                                                className="fill-foreground"
+                                            />
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
                         )}
                     </CardContent>
                 </Card>
@@ -255,83 +248,61 @@ export default function Reports() {
                         {timelineData.length === 0 ? (
                             <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic font-bold">{t('noTimelineData')}</div>
                         ) : (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={timelineData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
-                                    <defs>
-                                        <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.1} />
-                                    <XAxis
-                                        dataKey="date"
-                                        fontSize={Math.round(10 * fontScale)}
-                                        tickLine={false}
-                                        axisLine={false}
-                                        className="font-bold text-muted-foreground italic"
-                                        dy={10}
-                                    />
-                                    <YAxis
-                                        fontSize={Math.round(10 * fontScale)}
-                                        tickLine={false}
-                                        axisLine={false}
-                                        tickFormatter={(v) => `৳${formatAmount(v)}`}
-                                        className="font-black text-foreground opacity-80"
-                                        width={Math.round(65 * fontScale)}
-                                    />
-                                    <Tooltip
-                                        content={({ active, payload, label }: any) => {
-                                            if (active && payload && payload.length) {
-                                                const data = payload[0].payload;
+                            <div className="h-full outline-none focus:outline-none select-none pointer-events-none" tabIndex={-1}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={timelineData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
+                                        <defs>
+                                            <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.1} />
+                                        <XAxis
+                                            dataKey="date"
+                                            fontSize={Math.round(10 * fontScale)}
+                                            tickLine={false}
+                                            axisLine={false}
+                                            className="font-bold text-muted-foreground italic"
+                                            dy={10}
+                                        />
+                                        <YAxis
+                                            fontSize={Math.round(10 * fontScale)}
+                                            tickLine={false}
+                                            axisLine={false}
+                                            tickFormatter={(v) => `৳${formatAmount(v)}`}
+                                            className="font-black text-foreground opacity-80"
+                                            width={Math.round(65 * fontScale)}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="runningBalance"
+                                            stroke="#3b82f6"
+                                            strokeWidth={3}
+                                            fillOpacity={1}
+                                            fill="url(#colorBalance)"
+                                            dot={(props: any) => {
+                                                const { cx, cy, payload } = props;
+                                                if (cx === undefined || cy === undefined) return <></>;
+                                                const color = payload.change >= 0 ? '#22c55e' : '#ef4444';
                                                 return (
-                                                    <div className="bg-background/95 backdrop-blur-md p-3 border border-border rounded-2xl shadow-xl">
-                                                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{label}</p>
-                                                        <p className="text-sm font-black flex items-center gap-2">
-                                                            {t('balance')}: ৳{formatAmount(data.runningBalance)}
-                                                        </p>
-                                                        <div className="flex gap-3 mt-1">
-                                                            {data.income > 0 && (
-                                                                <p className="text-[9px] font-black text-green-500 uppercase tracking-tighter">+৳{formatAmount(data.income)}</p>
-                                                            )}
-                                                            {data.expense > 0 && (
-                                                                <p className="text-[9px] font-black text-red-500 uppercase tracking-tighter">-৳{formatAmount(data.expense)}</p>
-                                                            )}
-                                                        </div>
-                                                    </div>
+                                                    <circle
+                                                        key={`dot-${payload.date}`}
+                                                        cx={cx}
+                                                        cy={cy}
+                                                        r={4}
+                                                        fill={color}
+                                                        stroke="white"
+                                                        strokeWidth={2}
+                                                        className="drop-shadow-sm"
+                                                    />
                                                 );
-                                            }
-                                            return null;
-                                        }}
-                                    />
-                                    <Area
-                                        type="monotone"
-                                        dataKey="runningBalance"
-                                        stroke="#3b82f6"
-                                        strokeWidth={3}
-                                        fillOpacity={1}
-                                        fill="url(#colorBalance)"
-                                        dot={(props: any) => {
-                                            const { cx, cy, payload } = props;
-                                            if (cx === undefined || cy === undefined) return <></>;
-                                            const color = payload.change >= 0 ? '#22c55e' : '#ef4444';
-                                            return (
-                                                <circle
-                                                    key={`dot-${payload.date}`}
-                                                    cx={cx}
-                                                    cy={cy}
-                                                    r={4}
-                                                    fill={color}
-                                                    stroke="white"
-                                                    strokeWidth={2}
-                                                    className="drop-shadow-sm"
-                                                />
-                                            );
-                                        }}
-                                        activeDot={{ r: 6, strokeWidth: 0 }}
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
+                                            }}
+                                            activeDot={false}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
                         )}
                         <div className="mt-6 flex justify-center gap-6">
                             <div className="flex items-center gap-1.5">

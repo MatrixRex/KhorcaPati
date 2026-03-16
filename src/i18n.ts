@@ -90,9 +90,11 @@ const resources = {
       "autoTrackDescription": "Items separated by commas or new lines will be auto-tracked.",
       "subRecords": "Sub Records",
       "individualExpenses": "Individual expenses in this collection",
-      "thisCollectionIsEmpty": "This collection is empty.",
+      "thisCollectionIsEmpty": "This collection is empty",
+      "emptyCollection": "This collection is empty",
       "addFirstRecord": "Add first record",
       "done": "Done",
+      "confirm": "Confirm",
       "regular": "Regular",
       "debt": "Debt",
     "lentOut": "Lent (Money Out)",
@@ -142,6 +144,7 @@ const resources = {
       "trackFixedWindow": "Track spending within a fixed window",
       "budgetLimit": "Budget Limit",
       "alertAt": "Alert at",
+      "addBudget": "Add Budget",
       "updateBudget": "Update Budget",
       "deleteBudget": "Delete Budget",
       "deleteBudgetQuestion": "Delete this budget?",
@@ -310,7 +313,11 @@ const resources = {
       "daysRemaining": "{{count}} days remaining",
       "utilized": "{{count}}% Utilized",
       "savedPercent": "{{count}}% Saved",
-      "noNotes": "No notes added"
+      "noNotes": "No notes added",
+      "noLoans": "No active loans.",
+      "invalidDate": "Invalid date",
+      "totalIncome": "Total Income",
+      "totalExpense": "Total Expense"
     }
   },
   bn: {
@@ -403,6 +410,7 @@ const resources = {
       "thisCollectionIsEmpty": "কালেকশনটি খালি।",
       "addFirstRecord": "প্রথম হিসাব যোগ করুন",
       "done": "সম্পন্ন",
+      "confirm": "নিশ্চিত করুন",
       "regular": "সাধারণ",
       "debt": "ঋণ",
     "lentOut": "ধার দিয়েছি (টাকা আউট)",
@@ -441,6 +449,7 @@ const resources = {
       "optional": "ঐচ্ছিক",
       "personalGoalExample": "ব্যক্তিগত লক্ষ্য...",
       "updateGoal": "লক্ষ্য আপডেট করুন",
+      "addBudget": "বাজেট যোগ করুন",
       "addGoal": "লক্ষ্য যোগ করুন",
       "daily": "দৈনিক",
       "weekly": "সাপ্তাহিক",
@@ -620,7 +629,11 @@ const resources = {
       "daysRemaining": "{{count}} দিন বাকি",
       "utilized": "{{count}}% ব্যয় হয়েছে",
       "savedPercent": "{{count}}% জমানো হয়েছে",
-      "noNotes": "কোনো নোট নেই"
+      "noNotes": "কোনো নোট নেই",
+      "noLoans": "কোনো সক্রিয় ঋণ নেই",
+      "invalidDate": "ভুল তারিখ",
+      "totalIncome": "মোট আয়",
+      "totalExpense": "মোট ব্যয়"
     }
   }
 };

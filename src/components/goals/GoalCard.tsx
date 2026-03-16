@@ -25,7 +25,7 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
         <Card
             onClick={onClick || (() => openGoalRecords(goal))}
             className={cn(
-                "group relative overflow-hidden transition-all duration-300 border-border hover:border-primary/20 cursor-pointer shadow-sm active:scale-[0.98] transition-all rounded-xl",
+                "group relative overflow-hidden border-border cursor-pointer shadow-sm active:scale-[0.98] transition-all rounded-xl",
                 isCompleted && "border-primary/30"
             )}
             style={{ 
@@ -38,7 +38,7 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
                 <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                            <h3 className="font-black text-sm uppercase tracking-tight truncate group-hover:text-primary transition-colors">
+                            <h3 className="font-black text-sm uppercase tracking-tight truncate transition-colors">
                                 {goal.title}
                             </h3>
                             {isCompleted && (
@@ -59,7 +59,7 @@ export function GoalCard({ goal, onClick }: GoalCardProps) {
                         <Button
                             size="icon"
                             variant="outline"
-                            className="h-9 w-9 rounded-full border-2 border-primary text-primary hover:bg-primary/10 hover:scale-[1.05] active:scale-[0.95] transition-all bg-transparent shrink-0"
+                            className="h-9 w-9 rounded-full border-2 border-primary text-primary active:scale-[0.95] transition-all bg-transparent shrink-0"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 openAddGoalProgress(goal);

@@ -351,7 +351,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             form.setValue('loanId', null, { shouldDirty: true });
                         }}
                         className={cn(
-                            "px-3 py-1 text-[10px] font-black uppercase tracking-tight rounded-md transition-all",
+                            "px-3 py-1 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all",
                             mode === 'regular' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                         )}
                     >
@@ -365,7 +365,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             form.setValue('goalId', null, { shouldDirty: true });
                         }}
                         className={cn(
-                            "px-3 py-1 text-[10px] font-black uppercase tracking-tight rounded-md transition-all",
+                            "px-3 py-1 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all",
                             mode === 'debt' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                         )}
                     >
@@ -463,7 +463,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         if (currentId) form.handleSubmit(performSave)();
                                     }}
                                     className={cn(
-                                        "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
+                                        "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all",
                                         form.watch('type') === 'expense'
                                             ? "bg-rose-500 text-white shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"
@@ -478,7 +478,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         if (currentId) form.handleSubmit(performSave)();
                                     }}
                                     className={cn(
-                                        "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
+                                        "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all",
                                         form.watch('type') === 'income'
                                             ? "bg-emerald-500 text-white shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"
@@ -593,7 +593,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         if (currentId) form.handleSubmit(performSave)();
                                     }}
                                     className={cn(
-                                        "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
+                                        "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all",
                                         form.watch('type') === 'expense'
                                             ? "bg-rose-500 text-white shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"
@@ -608,7 +608,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         if (currentId) form.handleSubmit(performSave)();
                                     }}
                                     className={cn(
-                                        "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all",
+                                        "flex-1 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-xl transition-all",
                                         form.watch('type') === 'income'
                                             ? "bg-emerald-500 text-white shadow-sm"
                                             : "text-muted-foreground hover:text-foreground"
@@ -744,7 +744,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                 noteRef.current?.focus();
                                             }}
                                             className={cn(
-                                                "px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-md transition-all",
+                                                "px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-lg transition-all",
                                                 form.watch('itemAutoTrack') ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
                                             )}
                                         >
@@ -759,7 +759,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                 noteRef.current?.focus();
                                             }}
                                             className={cn(
-                                                "px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-md transition-all",
+                                                "px-2 py-0.5 text-[9px] font-black uppercase tracking-tight rounded-lg transition-all",
                                                 !form.watch('itemAutoTrack') ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground"
                                             )}
                                         >

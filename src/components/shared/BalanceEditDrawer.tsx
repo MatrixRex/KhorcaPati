@@ -127,7 +127,7 @@ export function BalanceEditDrawer() {
                         </div>
 
                         {/* Toggle */}
-                        <div className="bg-primary/5 border border-primary/10 rounded-2xl p-5 flex items-center justify-between transition-all hover:bg-primary/[0.08]">
+                        <div className="bg-primary/5 border border-primary/10 rounded-2xl p-5 flex items-center justify-between transition-all">
                             <div className="flex flex-col gap-0.5">
                                 <span className="text-sm font-black tracking-tight text-primary font-heading">{t('createAdjustmentRecord')}</span>
                                 <span className="text-[10px] text-primary/50 font-bold leading-relaxed">{t('adjustmentDescription')}</span>
@@ -156,7 +156,7 @@ export function BalanceEditDrawer() {
                     {/* Actions */}
                     <div className="space-y-3 pt-6">
                         <Button 
-                            className="w-full h-14 rounded-2xl font-black text-sm uppercase tracking-widest gap-3 shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all bg-primary text-primary-foreground font-heading border-none"
+                            className="w-full h-14 rounded-2xl font-black text-sm uppercase tracking-widest gap-3 shadow-2xl shadow-primary/20 active:scale-[0.98] transition-all bg-primary text-primary-foreground font-heading border-none"
                             onClick={handleSave}
                         >
                             <Check className="w-5 h-5 stroke-[4]" />
@@ -164,7 +164,7 @@ export function BalanceEditDrawer() {
                         </Button>
                         <Button 
                             variant="ghost"
-                            className="w-full h-12 rounded-xl font-black text-[10px] uppercase tracking-widest text-muted-foreground/50 hover:text-foreground hover:bg-foreground/5 transition-all"
+                            className="w-full h-12 rounded-xl font-black text-[10px] uppercase tracking-widest text-muted-foreground/50 transition-all"
                             onClick={closeBalanceEdit}
                         >
                             {t('cancel')}

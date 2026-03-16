@@ -95,7 +95,7 @@ export default function Dashboard() {
             {/* At A Glance - Compact Premium Glassmorphic Card */}
             <div className="relative mb-6 group">
                 {/* Dynamic Background Glow */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-emerald-500/20 to-teal-500/30 rounded-[1.5rem] blur-xl opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-emerald-500/20 to-teal-500/30 rounded-[1.5rem] blur-xl opacity-60 transition duration-1000" />
                 
                 <Card 
                     className="relative border border-white/20 dark:border-white/10 bg-white/5 dark:bg-black/20 backdrop-blur-3xl shadow-2xl rounded-[1.5rem] overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-500 ring-1 ring-inset ring-white/20 dark:ring-white/5"
@@ -103,7 +103,7 @@ export default function Dashboard() {
                 >
                     <CardContent className="p-6 relative z-10">
                         {/* Decorative Background Symbol - Blurred for depth */}
-                        <div className="absolute -top-12 -right-12 p-8 opacity-10 dark:opacity-20 blur-[4px] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-700 select-none pointer-events-none">
+                        <div className="absolute -top-12 -right-12 p-8 opacity-10 dark:opacity-20 blur-[4px] transition-transform duration-700 select-none pointer-events-none">
                             <div className="text-[14rem] font-black italic text-foreground/50">৳</div>
                         </div>
                         
@@ -134,7 +134,7 @@ export default function Dashboard() {
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
                     <h2 className="text-sm font-black text-foreground font-heading uppercase tracking-widest">{t('recentExpenses')}</h2>
-                    <Link to="/expenses" className="text-xs text-primary font-bold hover:underline uppercase">{t('viewAll')}</Link>
+                    <Link to="/expenses" className="text-xs text-primary font-bold uppercase">{t('viewAll')}</Link>
                 </div>
                 {!recentExpenses || recentExpenses.length === 0 ? (
                     <p className="text-sm text-muted-foreground p-6 text-center border-2 border-dashed border-border rounded-2xl bg-muted/30 text-foreground/70">{t('noExpenses')}</p>
@@ -154,7 +154,7 @@ export default function Dashboard() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        className="h-8 w-8 rounded-full text-muted-foreground transition-colors"
                         onClick={openRecurringPaymentsList}
                     >
                         <Settings2 className="w-4 h-4" />
@@ -182,7 +182,7 @@ export default function Dashboard() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        className="h-8 w-8 rounded-full text-muted-foreground transition-colors"
                         onClick={openBudgetsList}
                     >
                         <Settings2 className="w-4 h-4" />
@@ -206,7 +206,7 @@ export default function Dashboard() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        className="h-8 w-8 rounded-full text-muted-foreground transition-colors"
                         onClick={openGoalsList}
                     >
                         <Settings2 className="w-4 h-4" />
@@ -230,7 +230,7 @@ export default function Dashboard() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                        className="h-8 w-8 rounded-full text-muted-foreground transition-colors"
                         onClick={openLoansList}
                     >
                         <Settings2 className="w-4 h-4" />

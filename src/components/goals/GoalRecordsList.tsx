@@ -2,13 +2,13 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Goal } from '@/db/schema';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
-import { Trash2, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
-import { useGoalStore } from '@/stores/goalStore';
+import { Edit2, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { formatRelativeDate } from '@/utils/date';
 import { formatAmount } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import { useUIStore } from '@/stores/uiStore';
 
 interface GoalRecordsListProps {
     goal: Goal;
@@ -16,7 +16,7 @@ interface GoalRecordsListProps {
 
 export function GoalRecordsList({ goal }: GoalRecordsListProps) {
     const { t } = useTranslation();
-    const linkExpenseToGoal = useGoalStore((state) => state.linkExpenseToGoal);
+    const openEditExpense = useUIStore((state) => state.openEditExpense);
 
     const linkedExpenses = useLiveQuery(() => 
         db.expenses
@@ -99,51 +99,46 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
                 </div>
             </div>
 
-            <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-4 ml-1">
-                {t('recentContributions')}
-            </div>
-
-            <div className="space-y-2">
+            <div className="divide-y divide-border/20">
                 {sortedExpenses.map((exp) => (
                     <div
                         key={exp.id}
-                        className="flex items-center justify-between p-4 rounded-2xl bg-muted/20 border border-border/20 group hover:border-primary/20 transition-all"
+                        className="flex items-center justify-between py-4 transition-all px-2 -mx-2 rounded-xl"
                     >
-                        <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="flex items-center gap-4 overflow-hidden">
                             <div className={cn(
-                                "w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm",
+                                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm font-black text-xs",
                                 exp.type === 'income' ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-500" : "bg-primary/10 text-primary"
                             )}>
                                 {exp.type === 'income' ? '💰' : '💸'}
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <span className="text-sm font-black truncate capitalize">
+                                <span className="text-sm font-black truncate capitalize leading-tight">
                                     {exp.note || exp.category}
                                 </span>
-                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-bold uppercase tracking-tight">
-                                    <span>{exp.category}</span>
+                                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-bold uppercase tracking-tight mt-0.5">
+                                    <span className="text-primary/60">{exp.category}</span>
                                     <span>•</span>
-                                        <span>{format(parseISO(exp.date), 'dd MMM yy')}</span>
+                                    <span>{format(parseISO(exp.date), 'dd MMM yy')}</span>
                                 </div>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="text-right">
                                 <span className={cn(
-                                    "text-sm font-black tabular-nums",
+                                    "text-base font-black tabular-nums",
                                     exp.type === 'income' ? "text-green-600" : "text-red-600"
                                 )}>
                                     {exp.type === 'income' ? '-' : '+'}৳{formatAmount(exp.amount)}
                                 </span>
-
                             </div>
                             <Button
                                 size="icon"
                                 variant="ghost"
-                                className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 text-destructive hover:bg-destructive/10 transition-all"
-                                onClick={() => linkExpenseToGoal(exp.id!, null)}
+                                className="h-9 w-9 rounded-xl text-primary bg-primary/5 transition-all"
+                                onClick={() => openEditExpense(exp)}
                             >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <Edit2 className="w-4 h-4" />
                             </Button>
                         </div>
                     </div>

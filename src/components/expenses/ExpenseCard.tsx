@@ -39,7 +39,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
         <div className="flex flex-col gap-1">
             <Card
                 className={cn(
-                    "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border shadow-sm rounded-xl overflow-hidden group relative",
+                    "cursor-pointer active:scale-[0.98] transition-all border-border shadow-sm rounded-xl overflow-hidden group relative",
                     isExpanded && "bg-muted/10 border-primary/20",
                     expense.isNested && !isExpanded && "bg-primary/5 border-primary/10"
                 )}
@@ -56,7 +56,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                 <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex flex-col flex-1 overflow-hidden pr-2">
                         <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-bold text-sm tracking-tight truncate group-hover:text-primary transition-colors capitalize">
+                            <h3 className="font-bold text-sm tracking-tight truncate transition-colors capitalize">
                                 {expense.note || t(expense.type)}
                             </h3>
                             {expense.isRecurring && (
@@ -96,7 +96,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                             <button
                                 onClick={handleToggleExpand}
                                 className={cn(
-                                    "p-2 rounded-full hover:bg-primary/10 transition-all",
+                                    "p-2 rounded-full transition-all",
                                     isExpanded ? "text-primary rotate-180" : "text-muted-foreground"
                                 )}
                             >
@@ -112,7 +112,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                     {subExpenses.map(sub => (
                         <div
                             key={sub.id}
-                            className="flex items-center justify-between p-3 rounded-xl bg-muted/40 border border-border/60 hover:bg-muted/50 transition-all cursor-pointer group/sub"
+                            className="flex items-center justify-between p-3 rounded-xl bg-muted/40 border border-border/60 transition-all cursor-pointer group/sub"
                             onClick={(e) => {
                                 e.stopPropagation();
                                 openEditExpense(sub);
@@ -121,7 +121,7 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
                             <div className="flex items-center gap-3 overflow-hidden">
                                 <CornerDownRight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                                 <div className="flex flex-col overflow-hidden">
-                                    <span className="text-xs font-bold truncate capitalize group-hover/sub:text-primary transition-colors">
+                                    <span className="text-xs font-bold truncate capitalize transition-colors">
                                         {sub.note || t(sub.type)}
                                     </span>
                                     <span className="text-[10px] text-muted-foreground uppercase">{sub.category}</span>

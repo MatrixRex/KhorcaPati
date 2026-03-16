@@ -42,7 +42,7 @@ export function LoanCard({ loan, onClick }: LoanCardProps) {
         <Card
             onClick={onClick || (() => openLoanRecords(loan))}
             className={cn(
-                "group relative overflow-hidden transition-all duration-300 border-border hover:border-primary/20 cursor-pointer shadow-sm active:scale-[0.98] transition-all rounded-xl",
+                "group relative overflow-hidden border-border cursor-pointer shadow-sm active:scale-[0.98] transition-all rounded-xl",
                 isCompleted && "border-primary/30"
             )}
             style={{ 
@@ -60,7 +60,7 @@ export function LoanCard({ loan, onClick }: LoanCardProps) {
                 <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                            <h3 className="font-black text-sm uppercase tracking-tight truncate group-hover:text-primary transition-colors">
+                            <h3 className="font-black text-sm uppercase tracking-tight truncate transition-colors">
                                 {loan.title}
                             </h3>
                             {isCompleted && (
@@ -83,8 +83,8 @@ export function LoanCard({ loan, onClick }: LoanCardProps) {
                             size="icon"
                             variant="outline"
                             className={cn(
-                                "h-9 w-9 rounded-full border-2 text-primary hover:bg-primary/10 hover:scale-[1.05] active:scale-[0.95] transition-all bg-transparent shrink-0",
-                                isTaken ? "border-destructive text-destructive hover:bg-destructive/10" : "border-primary text-primary"
+                                "h-9 w-9 rounded-full border-2 text-primary active:scale-[0.95] transition-all bg-transparent shrink-0",
+                                isTaken ? "border-destructive text-destructive" : "border-primary text-primary"
                             )}
                             onClick={(e) => {
                                 e.stopPropagation();

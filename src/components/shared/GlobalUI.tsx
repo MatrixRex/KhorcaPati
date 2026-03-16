@@ -119,7 +119,7 @@ export function GlobalUI() {
         <>
             {showFAB && (
                 <Button
-                    className="fixed bottom-20 right-4 h-14 w-14 rounded-full z-50 bg-primary text-primary-foreground shadow-2xl shadow-primary/40 hover:scale-[1.1] active:scale-[0.9] transition-all duration-300 border-4 border-background"
+                    className="fixed bottom-20 right-4 h-14 w-14 rounded-full z-50 bg-primary text-primary-foreground shadow-2xl shadow-primary/40 active:scale-[0.9] transition-all duration-300 border-4 border-background"
                     onClick={() => openAddExpense()}
                 >
                     <Plus className="w-7 h-7 stroke-[3]" />
@@ -154,7 +154,7 @@ export function GlobalUI() {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 rounded-full hover:bg-primary/10 text-primary transition-all shrink-0"
+                                            className="h-8 w-8 rounded-full text-primary transition-all shrink-0"
                                             onClick={() => {
                                                 if (goalForRecords) {
                                                     openEditGoal(goalForRecords);
@@ -168,7 +168,7 @@ export function GlobalUI() {
                                 <Button
                                     size="icon"
                                     variant="outline"
-                                    className="h-10 w-10 rounded-full border-2 border-primary text-primary hover:bg-primary/10 hover:scale-[1.05] active:scale-[0.95] transition-all bg-transparent shrink-0"
+                                    className="h-10 w-10 rounded-full border-2 border-primary text-primary active:scale-[0.95] transition-all bg-transparent shrink-0"
                                     onClick={() => {
                                         if (goalForRecords) {
                                             openAddGoalProgress(goalForRecords);
@@ -207,7 +207,7 @@ export function GlobalUI() {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 rounded-full hover:bg-primary/10 text-primary transition-all shrink-0 mb-0.5"
+                                            className="h-8 w-8 rounded-full text-primary transition-all shrink-0 mb-0.5"
                                             onClick={() => {
                                                 if (budgetForRecords) {
                                                     openEditBudget(budgetForRecords);
@@ -221,7 +221,7 @@ export function GlobalUI() {
                                 <Button
                                     size="icon"
                                     variant="outline"
-                                    className="h-10 w-10 rounded-full border-2 border-primary text-primary hover:bg-primary/10 hover:scale-[1.05] active:scale-[0.95] transition-all bg-transparent shrink-0"
+                                    className="h-10 w-10 rounded-full border-2 border-primary text-primary active:scale-[0.95] transition-all bg-transparent shrink-0"
                                     onClick={() => {
                                         openAddExpense(null);
                                     }}
@@ -260,7 +260,7 @@ export function GlobalUI() {
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            className="h-8 w-8 rounded-full hover:bg-primary/10 text-primary transition-all shrink-0 mb-0.5"
+                                            className="h-8 w-8 rounded-full text-primary transition-all shrink-0 mb-0.5"
                                             onClick={() => {
                                                 if (loanForRecords) {
                                                     openEditLoan(loanForRecords);
@@ -280,8 +280,8 @@ export function GlobalUI() {
                                     size="icon"
                                     variant="outline"
                                     className={cn(
-                                        "h-10 w-10 rounded-full border-2 text-primary hover:bg-primary/10 hover:scale-[1.05] active:scale-[0.95] transition-all bg-transparent shrink-0",
-                                        loanForRecords?.type === 'taken' ? "border-rose-600/50 text-rose-600 hover:bg-rose-600/10" : "border-primary text-primary"
+                                        "h-10 w-10 rounded-full border-2 text-primary active:scale-[0.95] transition-all bg-transparent shrink-0",
+                                        loanForRecords?.type === 'taken' ? "border-rose-600/50 text-rose-600" : "border-primary text-primary"
                                     )}
                                     onClick={() => {
                                         if (loanForRecords) {

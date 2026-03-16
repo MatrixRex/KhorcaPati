@@ -127,7 +127,7 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
     return (
         <Card
             className={cn(
-                "cursor-pointer hover:bg-muted/30 active:scale-[0.98] transition-all border-border shadow-sm rounded-xl overflow-hidden group/card relative",
+                "cursor-pointer active:scale-[0.98] transition-all border-border shadow-sm rounded-xl overflow-hidden group/card relative",
                 isOverBudget && "border-destructive/30 bg-destructive/10"
             )}
             style={{ 

@@ -190,54 +190,27 @@ export default function Reports() {
     if (!reportData) return null;
 
     const { sankeyData, categoryData, incomeCategoryData, timelineData, totalIncome, totalExpense } = reportData;
-    const currentPieData = viewType === 'expense' ? categoryData : incomeCategoryData;
     const currentTotal = viewType === 'expense' ? totalExpense : totalIncome;
+    const currentPieData = viewType === 'expense' ? categoryData : incomeCategoryData;
 
     return (
         <PageContainer title={t('analytics')} showDateFilter>
             <div className="space-y-8 pb-10">
 
-                {/* 1. Expense Flow: Sankey Diagram */}
-                <Card className="border-none shadow-sm bg-muted/30 rounded-3xl overflow-hidden">
-                    <CardHeader className="pb-0 pt-6 px-6">
-                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('expenseFlow')}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-6 h-[260px]">
-                        {totalIncome === 0 && totalExpense === 0 ? (
-                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic font-bold">{t('noFlowData')}</div>
-                        ) : (
-                            <div className="h-full outline-none focus:outline-none select-none pointer-events-none" tabIndex={-1}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <Sankey
-                                        data={{
-                                            ...sankeyData,
-                                            nodes: sankeyData.nodes.map(n => ({ ...n, fontScale }))
-                                        }}
-                                        node={<SankeyNode containerWidth={300} />}
-                                        link={{ stroke: '#8884d844' }}
-                                        margin={{ top: 10, left: 40, right: 40, bottom: 10 }}
-                                        nodePadding={10}
-                                    />
-                                </ResponsiveContainer>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-
                 {/* Summary Mini Cards */}
                 <div className="grid grid-cols-2 gap-4 px-1">
-                    <div className="bg-green-500/10 p-4 rounded-2xl border border-green-500/20">
+                    <div className="bg-green-500/10 p-4 rounded-2xl border border-green-500/20 dark:border-green-500/10 ring-1 ring-inset ring-white/10">
                         <p className="text-[9px] font-bold uppercase text-green-600 tracking-widest mb-1">{t('totalIncome')}</p>
                         <p className="text-xl font-black text-green-600">৳{formatAmount(totalIncome)}</p>
                     </div>
-                    <div className="bg-red-500/10 p-4 rounded-2xl border border-red-500/20">
+                    <div className="bg-red-500/10 p-4 rounded-2xl border border-red-500/20 dark:border-red-500/10 ring-1 ring-inset ring-white/10">
                         <p className="text-[9px] font-bold uppercase text-red-600 tracking-widest mb-1">{t('totalExpense')}</p>
                         <p className="text-xl font-black text-red-600">৳{formatAmount(totalExpense)}</p>
                     </div>
                 </div>
 
                 {/* Combined Breakdown: Donut + Progress bars */}
-                <Card className="border-none shadow-sm bg-muted/30 rounded-3xl overflow-hidden py-8">
+                <Card className="report-card-container py-8">
                     <div className="flex flex-col items-center">
                         {/* Toggle Header */}
                         <div className="mb-10 flex bg-background/40 p-1.5 rounded-2xl glass-edge backdrop-blur-xl">
@@ -333,7 +306,7 @@ export default function Reports() {
                                                                     {percent >= 50 ? '+12%' : percent >= 20 ? '+5%' : '+2%'} vs avg
                                                                 </p>
                                                             </div>
-                                                            <button 
+                                                            <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     openCategoryRecords(category.name);
@@ -346,7 +319,7 @@ export default function Reports() {
                                                     </div>
                                                     <Progress
                                                         value={percent}
-                                                        className="h-2.5 bg-muted/40 rounded-full overflow-hidden"
+                                                        className="h-2.5 bg-foreground/[0.07] dark:bg-foreground/[0.12] rounded-full overflow-hidden"
                                                         indicatorClassName="transition-all duration-1000 ease-out rounded-full"
                                                         style={{ "--progress-indicator": category.fill } as any}
                                                     />
@@ -360,8 +333,35 @@ export default function Reports() {
                     </div>
                 </Card>
 
+                {/* Money Distribution: Sankey Diagram */}
+                <Card className="report-card-container">
+                    <CardHeader className="pb-0 pt-6 px-6">
+                        <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('moneyDistribution')}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6 h-[260px]">
+                        {totalIncome === 0 && totalExpense === 0 ? (
+                            <div className="h-full flex items-center justify-center text-muted-foreground text-[11px] uppercase tracking-widest italic font-bold">{t('noFlowData')}</div>
+                        ) : (
+                            <div className="h-full outline-none focus:outline-none select-none pointer-events-none" tabIndex={-1}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <Sankey
+                                        data={{
+                                            ...sankeyData,
+                                            nodes: sankeyData.nodes.map(n => ({ ...n, fontScale }))
+                                        }}
+                                        node={<SankeyNode containerWidth={300} />}
+                                        link={{ stroke: '#8884d844' }}
+                                        margin={{ top: 10, left: 40, right: 40, bottom: 10 }}
+                                        nodePadding={10}
+                                    />
+                                </ResponsiveContainer>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
                 {/* 3. Timeline: Line Chart */}
-                <Card className="border-none shadow-sm bg-muted/30 rounded-3xl overflow-hidden">
+                <Card className="report-card-container">
                     <CardHeader className="pb-0 pt-6 px-6">
                         <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t('balanceGrowthTimeline')}</CardTitle>
                     </CardHeader>

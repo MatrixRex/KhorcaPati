@@ -156,7 +156,7 @@ export default function Settings() {
                             {t('reset')}
                         </button>
                     </div>
-                    <div className="bg-muted/30 p-6 rounded-3xl border border-muted/50">
+                    <div className="report-card-container p-6">
                         <div className="flex items-center justify-between mb-6">
                             <span className="text-xs font-bold uppercase tracking-wider opacity-60">{t('scaleMultiplier')}</span>
                             <span className="text-lg font-black text-primary">{(fontScale * 100).toFixed(0)}%</span>

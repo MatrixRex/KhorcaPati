@@ -307,6 +307,10 @@
     @apply absolute -left-6 -top-4 -bottom-4 w-24 opacity-20 blur-3xl pointer-events-none;
   }
 
+  .report-card-container {
+    @apply border border-foreground/[0.06] dark:border-white/[0.08] shadow-sm bg-muted/20 dark:bg-muted/10 rounded-3xl overflow-hidden;
+  }
+
   .stacked-card-effect {
     position: relative !important;
     overflow: visible !important;

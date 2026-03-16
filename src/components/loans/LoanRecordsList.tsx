@@ -128,14 +128,14 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
                 </div>
             </div>
 
-            <div className="divide-y divide-border/20">
+            <div className="space-y-3">
                 {sortedExpenses.map((exp) => {
                      const isPrimary = (loan.type === 'taken' && exp.type === 'expense') || (loan.type === 'given' && exp.type === 'income');
                      
                      return (
                         <div
                             key={exp.id}
-                            className="flex items-center justify-between py-4 transition-all px-2 -mx-2 rounded-xl"
+                            className="record-item-glass"
                         >
                             <div className="flex items-center gap-4 overflow-hidden">
                                 <div className={cn(

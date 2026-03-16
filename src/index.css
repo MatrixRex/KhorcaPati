@@ -6,9 +6,9 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* --- Monochrome Palette (Black & White) --- */
-  --primary: oklch(0.15 0 0);            /* True Black/Dark */
-  --primary-foreground: oklch(1 0 0);    /* Pure White */
+  /* --- Design System Primary (Dark Emerald) --- */
+  --primary: oklch(26.398% 0.04514 178.226);
+  --primary-foreground: oklch(0.98 0 0);
   
   --secondary: oklch(0.95 0 0);
   --secondary-foreground: oklch(0.15 0 0);
@@ -81,7 +81,7 @@
 
 .dark {
   --background: oklch(0.12 0 0);        /* Deep Black */
-  --foreground: oklch(0.98 0 0);        /* Pure White */
+  --foreground: oklch(93.383% 0.00301 264.781);        /* Pure White */
 
   --card: oklch(0.16 0 0);
   --card-foreground: oklch(0.98 0 0);
@@ -89,8 +89,8 @@
   --popover: oklch(0.16 0 0);
   --popover-foreground: oklch(0.98 0 0);
 
-  --primary: oklch(1 0 0);              /* White Primary */
-  --primary-foreground: oklch(0.12 0 0);
+  --primary: oklch(94.09% 0.01655 157.24);      /* Almost White */
+  --primary-foreground: oklch(0.15 0.05 160);
 
   --secondary: oklch(0.22 0 0);
   --secondary-foreground: oklch(0.98 0 0);
@@ -291,5 +291,19 @@
   /* --- Design System Glows --- */
   .card-glow {
     @apply absolute -left-6 -top-4 -bottom-4 w-24 opacity-20 blur-3xl pointer-events-none;
+  }
+
+  .record-item-glass {
+    @apply flex items-center justify-between p-4 transition-all rounded-2xl border border-foreground/5 bg-foreground/5;
+  }
+
+  .overdue-glow {
+    @apply shadow-[0_0_20px_-5px_rgba(239,68,68,0.4)];
+    animation: overdue-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes overdue-pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.02); }
   }
 }

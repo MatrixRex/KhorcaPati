@@ -30,7 +30,8 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
         <Card
             className={cn(
                 "cursor-pointer active:scale-[0.98] transition-all border-border/40 shadow-sm rounded-xl overflow-hidden group relative",
-                isOverdue ? "bg-destructive/5" : isUpcoming ? "bg-amber-500/5" : "bg-green-500/5 shadow-none opacity-80"
+                isUpcoming ? "bg-amber-500/5" : "bg-green-500/5 shadow-none opacity-80",
+                isOverdue && "bg-destructive/10 border-destructive/20"
             )}
             style={{ 
                 background: `linear-gradient(to right, ${catColor}1F, transparent)`
@@ -39,33 +40,38 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
         >
             {/* Categorical Glow (Standardized) */}
             <div 
-                className="card-glow"
+                className={cn(
+                    "card-glow",
+                    isOverdue && "overdue-glow"
+                )}
                 style={{ backgroundColor: isOverdue ? 'oklch(var(--destructive))' : isUpcoming ? 'oklch(var(--warning))' : catColor }}
             />
             <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex flex-col flex-1 overflow-hidden pr-2">
-                    <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-bold text-sm tracking-tight truncate transition-colors">
+                    <div className="flex flex-col mb-1.5">
+                        <h3 className="font-bold text-base tracking-tight truncate leading-tight mb-1">
                             {payment.title}
                         </h3>
-                        <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 font-bold uppercase tracking-wider flex items-center">
-                            <Clock className="w-2 h-2 mr-1" /> {t(payment.interval.toLowerCase())}
-                        </Badge>
-                        {isUpcoming && !isOverdue && (
-                            <span className="text-[9px] font-black uppercase text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
-                                {t('inDaysShort', { count: diffInDays })}
-                            </span>
-                        )}
-                        {isOverdue && (
-                            <Badge variant="destructive" className="text-[9px] px-1.5 py-0 h-4 uppercase font-black tracking-widest animate-pulse">
-                                {t('overdue')}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 font-bold uppercase tracking-wider flex items-center">
+                                <Clock className="w-2 h-2 mr-1" /> {t(payment.interval.toLowerCase())}
                             </Badge>
-                        )}
-                        {!isOverdue && !isUpcoming && (
-                            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 uppercase font-bold tracking-tight bg-green-100 text-green-700">
-                                {t('paidScheduled')}
-                            </Badge>
-                        )}
+                            {isUpcoming && !isOverdue && (
+                                <span className="text-[9px] font-black uppercase text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
+                                    {t('inDaysShort', { count: diffInDays })}
+                                </span>
+                            )}
+                            {isOverdue && (
+                                <Badge variant="destructive" className="text-[9px] px-1.5 py-0 h-4 uppercase font-black tracking-widest animate-pulse">
+                                    {t('overdue')}
+                                </Badge>
+                            )}
+                            {!isOverdue && !isUpcoming && (
+                                <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 uppercase font-bold tracking-tight bg-green-100 text-green-700">
+                                    {t('paidScheduled')}
+                                </Badge>
+                            )}
+                        </div>
                     </div>
                     <div className="flex items-center text-[11px] font-medium gap-2">
                         {isOverdue ? (

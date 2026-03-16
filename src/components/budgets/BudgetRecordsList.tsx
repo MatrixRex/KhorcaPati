@@ -128,11 +128,11 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                 {t('recordsForCategory', { category: budget.category })}
             </div>
 
-            <div className="divide-y divide-border/20">
+            <div className="space-y-3">
                 {filteredExpenses.map((exp) => (
                     <div
                         key={exp.id}
-                        className="flex items-center justify-between py-4 transition-all px-2 -mx-2 rounded-xl"
+                        className="record-item-glass"
                     >
                         <div className="flex items-center gap-4 overflow-hidden">
                             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-muted/50 text-muted-foreground font-black text-xs">

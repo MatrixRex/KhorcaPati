@@ -41,7 +41,7 @@
   --ring: oklch(0.15 0 0 / 20%);
 
   /* --- Glassmorphism Tokens --- */
-  --glass-background: oklch(1 0 0 / 75%);
+  --glass-background: oklch(1 0 0 / 45%);
   --glass-border: oklch(0 0 0 / 10%);
   --glass-blur: 16px;
 
@@ -69,6 +69,12 @@
   --sidebar-accent-foreground: var(--accent-foreground);
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
+
+  /* --- Mesh Gradients (Emerald/Teal Aesthetic) --- */
+  --mesh-1: oklch(0.6 0.14 160 / 60%);   /* Emerald */
+  --mesh-2: oklch(0.55 0.12 180 / 60%);  /* Teal */
+  --mesh-3: oklch(0.5 0.1 200 / 60%);    /* Deep Ocean */
+  --mesh-4: oklch(0.65 0.15 170 / 60%);  /* Bright Emerald */
 }
 
 .dark {
@@ -103,11 +109,17 @@
   --input: oklch(0.24 0 0);
   --ring: oklch(1 0 0 / 20%);
 
-  --glass-background: oklch(0.16 0 0 / 75%);
+  --glass-background: oklch(0.16 0 0 / 45%);
   --glass-border: oklch(1 0 0 / 10%);
 
   --sidebar: oklch(0.14 0 0);
   --sidebar-foreground: oklch(0.98 0 0);
+
+  /* --- Mesh Gradients (Dark Emerald Aesthetic) --- */
+  --mesh-1: oklch(0.35 0.08 160 / 40%);
+  --mesh-2: oklch(0.3 0.07 180 / 40%);
+  --mesh-3: oklch(0.25 0.06 200 / 40%);
+  --mesh-4: oklch(0.4 0.09 170 / 40%);
 }
 
 @theme inline {
@@ -200,6 +212,10 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
   }
+
+  /* --- Font Families --- */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Outfit", var(--font-sans);
 }
 
 @layer base {
@@ -213,7 +229,19 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20;
+    @apply text-foreground antialiased selection:bg-primary/20 bg-background;
+    font-family: var(--font-sans);
+    background-image: 
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='4' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E"),
+      radial-gradient(at 0% 0%, var(--mesh-1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, var(--mesh-2) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, var(--mesh-3) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, var(--mesh-4) 0px, transparent 50%),
+      linear-gradient(135deg, oklch(0.15 0.05 160) 0%, oklch(0.1 0.04 180) 100%);
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-blend-mode: overlay, normal, normal, normal, normal, normal;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }

@@ -34,7 +34,7 @@ export function PageContainer({
     return (
         <div className={cn("flex flex-col h-full w-full", className)}>
             {/* Consistent Header */}
-            <header className="flex items-center justify-between px-container h-header shrink-0 glass sticky top-0 z-30 border-t-0 border-x-0">
+            <header className="flex items-center justify-between px-container h-header shrink-0 glass sticky top-0 z-40 border-b-0 shadow-2xl shadow-black/5">
                 <div className="flex items-center gap-2 overflow-hidden">
                     {showBackButton && (
                         <Button
@@ -46,7 +46,7 @@ export function PageContainer({
                             <ArrowLeft className="w-5 h-5" />
                         </Button>
                     )}
-                    <h1 className="text-xl font-bold tracking-tight text-foreground/90 truncate">{title}</h1>
+                    <h1 className="text-xl font-black tracking-tight text-foreground font-heading truncate">{title}</h1>
                 </div>
                 <div className="flex items-center gap-2">
                     {headerAction}

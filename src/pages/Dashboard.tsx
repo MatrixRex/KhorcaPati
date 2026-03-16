@@ -106,8 +106,8 @@ export default function Dashboard() {
                     </div>
                     
                     <p className="text-white/60 text-xs font-bold uppercase tracking-[0.2em] mb-1 relative z-10">{t('currentBalance')}</p>
-                    <div className="flex items-baseline gap-1 mb-4 relative z-10">
-                        <span className="text-xl font-bold text-white/40 decoration-white/20 underline decoration-2 underline-offset-4">৳</span>
+                    <div className="flex items-baseline gap-1 mb-4 relative z-10 font-heading">
+                        <span className="text-xl font-black text-white/40 decoration-white/20 underline decoration-2 underline-offset-4">৳</span>
                         <h2 className="text-4xl font-black tracking-tight text-white">{formatAmount(totalBalance)}</h2>
                     </div>
 
@@ -128,7 +128,7 @@ export default function Dashboard() {
             {/* Recent Expenses */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-black text-foreground uppercase tracking-widest">{t('recentExpenses')}</h2>
+                    <h2 className="text-sm font-black text-foreground font-heading uppercase tracking-widest">{t('recentExpenses')}</h2>
                     <Link to="/expenses" className="text-xs text-primary font-bold hover:underline uppercase">{t('viewAll')}</Link>
                 </div>
                 {!recentExpenses || recentExpenses.length === 0 ? (
@@ -145,7 +145,7 @@ export default function Dashboard() {
             {/* Recurring Payments */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-black text-foreground uppercase tracking-widest">{t('recurring')}</h2>
+                    <h2 className="text-sm font-black text-foreground font-heading uppercase tracking-widest">{t('recurring')}</h2>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -173,7 +173,7 @@ export default function Dashboard() {
             {/* Budget Overview */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-black text-foreground uppercase tracking-widest">{t('budgets')}</h2>
+                    <h2 className="text-sm font-black text-foreground font-heading uppercase tracking-widest">{t('budgets')}</h2>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -197,7 +197,7 @@ export default function Dashboard() {
             {/* Active Goals */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-black text-foreground uppercase tracking-widest">{t('activeGoals')}</h2>
+                    <h2 className="text-sm font-black text-foreground font-heading uppercase tracking-widest">{t('activeGoals')}</h2>
                     <Button
                         variant="ghost"
                         size="icon"
@@ -221,7 +221,7 @@ export default function Dashboard() {
             {/* Active Loans */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-3 px-1">
-                    <h2 className="text-sm font-black text-foreground uppercase tracking-widest">{t('loans')}</h2>
+                    <h2 className="text-sm font-black text-foreground font-heading uppercase tracking-widest">{t('loans')}</h2>
                     <Button
                         variant="ghost"
                         size="icon"

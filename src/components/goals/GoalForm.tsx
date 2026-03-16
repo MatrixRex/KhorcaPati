@@ -94,6 +94,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                             onClick={() => setActiveField('target')}
                             className="pr-10 cursor-pointer caret-transparent h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                         />
+                        <input type="hidden" {...form.register('targetAmount', { valueAsNumber: true })} />
                         <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                     </div>
                 </div>
@@ -109,6 +110,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                             onClick={() => setActiveField('current')}
                             className="pr-10 cursor-pointer caret-transparent h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                         />
+                        <input type="hidden" {...form.register('currentAmount', { valueAsNumber: true })} />
                         <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                     </div>
                 </div>

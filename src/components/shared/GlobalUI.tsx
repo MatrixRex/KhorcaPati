@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { useEffect } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@/db/schema';
 import { Plus, Edit2, Link2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -80,8 +82,12 @@ export function GlobalUI() {
         }
     }, [returnPath, closeExpenseSheet, navigate]);
 
-    const budgetColor = budgetForRecords ? (categories.find(c => c.name.toLowerCase() === budgetForRecords.category.toLowerCase())?.color || '#3b82f6') : '#3b82f6';
-    const loanColor = loanForRecords?.type === 'taken' ? '#ef4444' : '#3b82f6';
+    const liveGoal = useLiveQuery(async () => goalForRecords?.id ? await db.goals.get(goalForRecords.id) : null, [goalForRecords?.id]) || goalForRecords;
+    const liveBudget = useLiveQuery(async () => budgetForRecords?.id ? await db.budgets.get(budgetForRecords.id) : null, [budgetForRecords?.id]) || budgetForRecords;
+    const liveLoan = useLiveQuery(async () => loanForRecords?.id ? await db.loans.get(loanForRecords.id) : null, [loanForRecords?.id]) || loanForRecords;
+
+    const budgetColor = liveBudget ? (categories.find(c => c.name.toLowerCase() === liveBudget.category.toLowerCase())?.color || '#3b82f6') : '#3b82f6';
+    const loanColor = liveLoan?.type === 'taken' ? '#ef4444' : '#3b82f6';
 
     const handleCloseSubRecord = React.useCallback(() => {
         closeSubRecordSheet();
@@ -148,23 +154,23 @@ export function GlobalUI() {
                                 <div className="flex flex-col min-w-0 flex-1">
                                     <span className="text-[10px] font-black uppercase tracking-tight text-primary mb-0.5">{t('goalSavingsDetail')}</span>
                                     <div className="flex items-end gap-1">
-                                        <SheetTitle className="text-2xl font-black truncate leading-tight">{goalForRecords?.title}</SheetTitle>
+                                        <SheetTitle className="text-2xl font-black truncate leading-tight">{liveGoal?.title}</SheetTitle>
                                         <Button
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8 rounded-full text-primary transition-all shrink-0"
                                             onClick={() => {
-                                                if (goalForRecords) {
-                                                    openEditGoal(goalForRecords);
+                                                if (liveGoal) {
+                                                    openEditGoal(liveGoal);
                                                 }
                                             }}
                                         >
                                             <Edit2 className="w-4 h-4" />
                                         </Button>
                                     </div>
-                                    {goalForRecords?.note && (
+                                    {liveGoal?.note && (
                                         <p className="text-[11px] font-medium text-muted-foreground mt-1.5 opacity-80 italic border-l-2 border-primary/20 pl-2 py-0.5">
-                                            {goalForRecords.note}
+                                            {liveGoal.note}
                                         </p>
                                     )}
                                 </div>
@@ -173,8 +179,8 @@ export function GlobalUI() {
                                     variant="outline"
                                     className="h-10 w-10 rounded-full border-2 border-primary text-primary active:scale-[0.95] transition-all bg-transparent shrink-0"
                                     onClick={() => {
-                                        if (goalForRecords) {
-                                            openAddGoalProgress(goalForRecords);
+                                        if (liveGoal) {
+                                            openAddGoalProgress(liveGoal);
                                         }
                                     }}
                                 >
@@ -183,8 +189,8 @@ export function GlobalUI() {
                             </div>
                         </SheetHeader>
                         <div className="mt-6">
-                            {goalForRecords && (
-                                <GoalRecordsList goal={goalForRecords} />
+                            {liveGoal && (
+                                <GoalRecordsList goal={liveGoal} />
                             )}
                         </div>
                     </div>
@@ -206,14 +212,14 @@ export function GlobalUI() {
                                 <div className="flex flex-col min-w-0 flex-1">
                                     <span className="text-[10px] font-black uppercase tracking-tight text-primary mb-0.5">{t('budgetUsageDetail')}</span>
                                     <div className="flex items-end gap-1">
-                                        <SheetTitle className="text-2xl font-black capitalize truncate leading-tight">{budgetForRecords?.category}</SheetTitle>
+                                        <SheetTitle className="text-2xl font-black capitalize truncate leading-tight">{liveBudget?.category}</SheetTitle>
                                         <Button
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8 rounded-full text-primary transition-all shrink-0 mb-0.5"
                                             onClick={() => {
-                                                if (budgetForRecords) {
-                                                    openEditBudget(budgetForRecords);
+                                                if (liveBudget) {
+                                                    openEditBudget(liveBudget);
                                                 }
                                             }}
                                         >
@@ -234,8 +240,8 @@ export function GlobalUI() {
                             </div>
                         </SheetHeader>
                         <div className="mt-6">
-                            {budgetForRecords && (
-                                <BudgetRecordsList budget={budgetForRecords} />
+                            {liveBudget && (
+                                <BudgetRecordsList budget={liveBudget} />
                             )}
                         </div>
                     </div>
@@ -256,26 +262,26 @@ export function GlobalUI() {
                             <div className="flex items-center justify-between">
                                 <div className="flex flex-col min-w-0 flex-1">
                                     <span className="text-[10px] font-black uppercase tracking-tight text-primary mb-0.5">
-                                        {loanForRecords?.type === 'taken' ? t('borrowedFrom') : t('lentTo')}: {loanForRecords?.person}
+                                        {liveLoan?.type === 'taken' ? t('borrowedFrom') : t('lentTo')}: {liveLoan?.person}
                                     </span>
                                     <div className="flex items-end gap-1">
-                                        <SheetTitle className="text-2xl font-black truncate leading-tight">{loanForRecords?.title}</SheetTitle>
+                                        <SheetTitle className="text-2xl font-black truncate leading-tight">{liveLoan?.title}</SheetTitle>
                                         <Button
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8 rounded-full text-primary transition-all shrink-0 mb-0.5"
                                             onClick={() => {
-                                                if (loanForRecords) {
-                                                    openEditLoan(loanForRecords);
+                                                if (liveLoan) {
+                                                    openEditLoan(liveLoan);
                                                 }
                                             }}
                                         >
                                             <Edit2 className="w-4 h-4" />
                                         </Button>
                                     </div>
-                                    {loanForRecords?.note && (
+                                    {liveLoan?.note && (
                                         <p className="text-[11px] font-medium text-muted-foreground mt-1.5 opacity-80 italic border-l-2 border-primary/20 pl-2 py-0.5">
-                                            {loanForRecords.note}
+                                            {liveLoan.note}
                                         </p>
                                     )}
                                 </div>
@@ -284,11 +290,11 @@ export function GlobalUI() {
                                     variant="outline"
                                     className={cn(
                                         "h-10 w-10 rounded-full border-2 text-primary active:scale-[0.95] transition-all bg-transparent shrink-0",
-                                        loanForRecords?.type === 'taken' ? "border-rose-600/50 text-rose-600" : "border-primary text-primary"
+                                        liveLoan?.type === 'taken' ? "border-rose-600/50 text-rose-600" : "border-primary text-primary"
                                     )}
                                     onClick={() => {
-                                        if (loanForRecords) {
-                                            openAddExpense(null, loanForRecords.id);
+                                        if (liveLoan) {
+                                            openAddExpense(null, liveLoan.id);
                                         }
                                     }}
                                 >
@@ -297,8 +303,8 @@ export function GlobalUI() {
                             </div>
                         </SheetHeader>
                         <div className="mt-6">
-                            {loanForRecords && (
-                                <LoanRecordsList loan={loanForRecords} />
+                            {liveLoan && (
+                                <LoanRecordsList loan={liveLoan} />
                             )}
                         </div>
                     </div>
@@ -361,6 +367,7 @@ export function GlobalUI() {
                             <SheetTitle className="text-xl font-black">{editingRecurringPayment ? t('editRecurring') : t('addRecurring')}</SheetTitle>
                         </SheetHeader>
                         <RecurringPaymentForm
+                            key={editingRecurringPayment?.id ?? 'new-recurring'}
                             initialData={editingRecurringPayment}
                             onSuccess={closeRecurringPaymentSheet}
                             onCancel={closeRecurringPaymentSheet}
@@ -402,6 +409,7 @@ export function GlobalUI() {
                             <SheetTitle className="text-xl font-black">{editingGoal ? t('editSavingGoal') : t('addSavingGoal')}</SheetTitle>
                         </SheetHeader>
                         <GoalForm
+                            key={editingGoal?.id ?? 'new-goal'}
                             initialData={editingGoal}
                             onSuccess={closeGoalSheet}
                             onCancel={closeGoalSheet}
@@ -445,6 +453,7 @@ export function GlobalUI() {
                             <SheetTitle className="text-xl font-black">{editingLoan ? t('editLoan') : t('addLoan')}</SheetTitle>
                         </SheetHeader>
                         <LoanForm
+                            key={editingLoan?.id ?? 'new-loan'}
                             initialData={editingLoan}
                             onSuccess={closeLoanSheet}
                             onCancel={closeLoanSheet}

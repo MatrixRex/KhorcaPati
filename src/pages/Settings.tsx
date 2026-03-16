@@ -187,7 +187,7 @@ export default function Settings() {
 
                 <section>
                     <h2 className="label-header mb-3 px-1">{t('management')}</h2>
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 gap-2">
                         <button
                             onClick={() => useUIStore.getState().openCategoryManagement()}
                             className="setting-item-glass group"
@@ -282,7 +282,7 @@ export default function Settings() {
 
                 <section>
                     <h2 className="label-header mb-3 px-1">{t('dataManagement')}</h2>
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-1 gap-2">
                         <button
                             onClick={handleExport}
                             className="setting-item-glass group"

@@ -154,7 +154,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="text-right">
-                                <span className="text-base font-semibold tabular-nums text-destructive">
+                                <span className="text-base font-bold tabular-nums text-destructive">
                                     ৳{formatAmount(exp.amount)}
                                 </span>
                             </div>

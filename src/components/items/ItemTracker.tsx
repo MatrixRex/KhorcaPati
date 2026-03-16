@@ -380,7 +380,7 @@ export function ItemTracker() {
 
                                                             <div className="flex flex-col min-w-0">
                                                                 <div className="flex items-baseline gap-1.5 leading-none">
-                                                                    <span className="text-base font-semibold" style={{ color }}>+{formatNumber(record.qty)}</span>
+                                                                    <span className="text-base font-bold" style={{ color }}>+{formatNumber(record.qty)}</span>
                                                                     <span className="text-[11px] font-semibold text-muted-foreground uppercase opacity-70">{record.unit}</span>
                                                                 </div>
 

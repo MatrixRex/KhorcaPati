@@ -131,7 +131,7 @@ export default function Dashboard() {
             </div>
 
             {/* Recent Expenses */}
-            <div className="mb-6">
+            <div className="mb-4">
                 <div className="flex items-center justify-between mb-3 px-1">
                     <h2 className="text-sm font-black text-foreground font-heading uppercase tracking-widest">{t('recentExpenses')}</h2>
                     <Link to="/expenses" className="text-xs text-primary font-bold uppercase">{t('viewAll')}</Link>

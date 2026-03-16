@@ -32,7 +32,7 @@
   --destructive: oklch(0.6 0.18 20);      
   --destructive-foreground: oklch(1 0 0);
 
-  --success: oklch(0.65 0 0);            /* Monochrome success can be a bold gray or keep minimal color */
+  --success: oklch(0.62 0.17 145);            /* Vibrant Green */
   --success-foreground: oklch(1 0 0);
 
   /* --- Borders & Inputs --- */
@@ -51,7 +51,7 @@
   --container-padding: 1.5rem;
   --header-height: 4.5rem;
   --bottom-nav-height: 5rem;
-  --item-gap: 1rem;
+  --item-gap: 0.6rem;
   --font-scale: 1;
 
   /* --- Chart Colors (Neutral) --- */
@@ -105,7 +105,7 @@
   --destructive: oklch(0.55 0.18 20);
   --destructive-foreground: oklch(0.98 0 0);
 
-  --success: oklch(0.75 0 0);
+  --success: oklch(0.78 0.17 145);
   --success-foreground: oklch(0.12 0 0);
 
   --border: oklch(0.24 0 0);
@@ -396,7 +396,7 @@
 
   /* --- Typography Utilities --- */
   .label-header {
-    @apply text-sm font-semibold tracking-tight text-muted-foreground/80 leading-snug;
+    @apply text-sm font-semibold tracking-tight text-foreground leading-snug;
   }
 
   .label-caption {
@@ -408,11 +408,11 @@
   }
 
   .text-value-lg {
-    @apply text-xl font-semibold leading-tight tracking-tight;
+    @apply text-xl font-bold leading-tight tracking-tight;
   }
 
   .text-value-md {
-    @apply text-base font-semibold leading-tight tracking-tight;
+    @apply text-base font-bold leading-tight tracking-tight;
   }
 
   /* --- Form Utilities --- */

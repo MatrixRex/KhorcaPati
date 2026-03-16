@@ -158,7 +158,7 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
                             <div className="flex items-center gap-3">
                                 <div className="text-right">
                                     <span className={cn(
-                                        "text-base font-semibold tabular-nums",
+                                        "text-base font-bold tabular-nums",
                                         exp.type === 'income' ? "text-green-600" : "text-red-600"
                                     )}>
                                         {exp.type === 'income' ? '+' : '-'}৳{formatAmount(exp.amount)}

@@ -4,13 +4,15 @@ import { parseItemInput } from './itemParser';
 describe('Smart Item Parser', () => {
     it('parses typical items with volume units', () => {
         expect(parseItemInput('Oil 1L')).toEqual({ name: 'oil', qty: 1, unit: 'L' });
-        expect(parseItemInput('Milk 500ml')).toEqual({ name: 'milk', qty: 500, unit: 'ml' });
+        expect(parseItemInput('Milk 500ml')).toEqual({ name: 'milk', qty: 0.5, unit: 'L' });
         expect(parseItemInput('Water 2.5 liter')).toEqual({ name: 'water', qty: 2.5, unit: 'L' });
     });
 
     it('parses items with weight units', () => {
         expect(parseItemInput('rice 2kg')).toEqual({ name: 'rice', qty: 2, unit: 'kg' });
-        expect(parseItemInput('Sugar 500g')).toEqual({ name: 'sugar', qty: 500, unit: 'g' });
+        expect(parseItemInput('Sugar 500g')).toEqual({ name: 'sugar', qty: 0.5, unit: 'kg' });
+        expect(parseItemInput('Rice 250 gm')).toEqual({ name: 'rice', qty: 0.25, unit: 'kg' });
+        expect(parseItemInput('Salt 100gms')).toEqual({ name: 'salt', qty: 0.1, unit: 'kg' });
         expect(parseItemInput('Flour 1.5 lb')).toEqual({ name: 'flour', qty: 1.5, unit: 'lb' });
     });
 

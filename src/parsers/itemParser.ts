@@ -19,7 +19,7 @@ const KNOWN_UNITS: Record<string, string> = {
 
     // Weight
     kg: 'kg', kilogram: 'kg', kilograms: 'kg',
-    g: 'g', gram: 'g', grams: 'g',
+    g: 'g', gram: 'g', grams: 'g', gm: 'g', gms: 'g',
     lb: 'lb', pound: 'lb', pounds: 'lb',
     oz: 'oz', ounce: 'oz', ounces: 'oz',
 
@@ -144,6 +144,15 @@ export function parseItemInput(input: string): ParsedItem {
         if (singularName) {
             rawName = singularName;
         }
+    }
+
+    // Auto-convert smaller units to standard ones
+    if (unit === 'g') {
+        qty = qty / 1000;
+        unit = 'kg';
+    } else if (unit === 'ml') {
+        qty = qty / 1000;
+        unit = 'L';
     }
 
     return { name: rawName, qty, unit };

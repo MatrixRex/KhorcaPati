@@ -472,6 +472,23 @@
     @apply text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md shadow-xs;
   }
 
+  /* Force calendar selection color - Custom Primary Shades */
+  .calendar-selected {
+    background-color: color-mix(in oklch, var(--primary), transparent 50%) !important;
+    color: rgb(255, 255, 255) !important;
+    font-weight: 800 !important;
+    border-radius: 24px !important;
+    box-shadow: 0 4px 12px -2px color-mix(in oklch, var(--primary), transparent 60%) !important;
+  }
+
+  .calendar-day-today {
+    background-color: color-mix(in oklch, var(--primary), transparent 90%) !important;
+    color: var(--primary) !important;
+    font-weight: 700 !important;
+    border: 1px solid color-mix(in oklch, var(--primary), transparent 70%) !important;
+    border-radius: 24px !important;
+  }
+
   /* Disable chart selection outlines */
   .recharts-wrapper, .recharts-surface {
     outline: none !important;

@@ -92,38 +92,43 @@ export default function Dashboard() {
         <PageContainer
             title={t('appTitle')}
         >
-            {/* At A Glance - Premium Gradient Card */}
-            <Card 
-                className="mb-6 border-none shadow-xl rounded-xl overflow-hidden group relative cursor-pointer active:scale-[0.98] transition-all"
-                onClick={openBalanceEdit}
-            >
-                {/* Clean Premium Gradient Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#1e293b] via-[#334155] to-[#0f172a] transition-transform duration-500 group-hover:scale-105" />
+            {/* At A Glance - Compact Premium Glassmorphic Card */}
+            <div className="relative mb-6 group">
+                {/* Dynamic Background Glow */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-emerald-500/20 to-teal-500/30 rounded-[1.5rem] blur-xl opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
                 
-                <CardContent className="p-6 relative z-10">
-                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                        <div className="text-8xl font-black italic select-none text-white">৳</div>
-                    </div>
-                    
-                    <p className="text-white/60 text-xs font-bold uppercase tracking-[0.2em] mb-1 relative z-10">{t('currentBalance')}</p>
-                    <div className="flex items-baseline gap-1 mb-4 relative z-10 font-heading">
-                        <span className="text-xl font-black text-white/40 decoration-white/20 underline decoration-2 underline-offset-4">৳</span>
-                        <h2 className="text-4xl font-black tracking-tight text-white">{formatAmount(totalBalance)}</h2>
-                    </div>
+                <Card 
+                    className="relative border border-white/20 dark:border-white/10 bg-white/5 dark:bg-black/20 backdrop-blur-3xl shadow-2xl rounded-[1.5rem] overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-500 ring-1 ring-inset ring-white/20 dark:ring-white/5"
+                    onClick={openBalanceEdit}
+                >
+                    <CardContent className="p-6 relative z-10">
+                        {/* Decorative Background Symbol - Blurred for depth */}
+                        <div className="absolute -top-12 -right-12 p-8 opacity-10 dark:opacity-20 blur-[4px] group-hover:scale-110 group-hover:rotate-12 transition-transform duration-700 select-none pointer-events-none">
+                            <div className="text-[14rem] font-black italic text-foreground/50">৳</div>
+                        </div>
+                        
+                        <div className="flex flex-col gap-0.5 relative z-10">
+                            <p className="text-foreground/40 text-[9px] font-black uppercase tracking-[0.3em] ml-1">{t('currentBalance')}</p>
+                            <div className="flex items-baseline gap-2 font-heading">
+                                <span className="text-xl font-black text-primary/40 decoration-primary/20 underline underline-offset-8">৳</span>
+                                <h2 className="text-4xl font-black tracking-tighter text-foreground leading-tight">{formatAmount(totalBalance)}</h2>
+                            </div>
+                        </div>
 
-                    <div className="flex items-center gap-4 relative z-10 mt-2 border-t border-white/10 pt-4">
-                        <div className="flex flex-col">
-                            <span className="text-[10px] font-bold uppercase text-white/40 tracking-wider">{t('income')}</span>
-                            <span className="text-sm font-black text-[#5ed16c]">৳{formatAmount(totalIncome)}</span>
+                        <div className="flex items-center gap-6 relative z-10 mt-6 pt-5 border-t border-foreground/5 font-heading">
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-[9px] font-black uppercase text-foreground/30 tracking-[0.2em]">{t('income')}</span>
+                                <span className="text-base font-black text-emerald-500 dark:text-emerald-400">৳{formatAmount(totalIncome)}</span>
+                            </div>
+                            <div className="w-px h-8 bg-foreground/5" />
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-[9px] font-black uppercase text-foreground/30 tracking-[0.2em]">{t('expenses')}</span>
+                                <span className="text-base font-black text-rose-500 dark:text-rose-400">৳{formatAmount(totalSpent)}</span>
+                            </div>
                         </div>
-                        <div className="w-px h-6 bg-white/10" />
-                        <div className="flex flex-col">
-                            <span className="text-[10px] font-bold uppercase text-white/40 tracking-wider">{t('expenses')}</span>
-                            <span className="text-sm font-black text-[#ff5252]">৳{formatAmount(totalSpent)}</span>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* Recent Expenses */}
             <div className="mb-6">

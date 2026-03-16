@@ -89,7 +89,11 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
     useEffect(() => {
         if (!initialData && !propParentId && !hideCollectionToggle) {
-            setShowNumberPad(true);
+            // Delay the numpad opening slightly to let the drawer animation finish smoothly
+            const timer = setTimeout(() => {
+                setShowNumberPad(true);
+            }, 300);
+            return () => clearTimeout(timer);
         }
     }, []);
 
@@ -507,6 +511,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         onClick={() => setShowNumberPad(true)}
                                         className={cn(
                                             "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl transition-all border-border bg-background/50 shadow-sm focus:bg-background/80 focus:border-primary/50",
+                                            showNumberPad && "ring-2 ring-primary/50 border-primary bg-primary/5",
                                             wasAmountEdited && form.getValues('amount') <= 0 && "border-destructive ring-2 ring-destructive/20"
                                         )}
                                         placeholder="৳০"
@@ -667,6 +672,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         className={cn(
                                             "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl transition-all",
                                             isNested ? "bg-muted border-dashed opacity-70" : "bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50",
+                                            !isNested && showNumberPad && "ring-2 ring-primary/50 border-primary bg-primary/5",
                                             !isNested && wasAmountEdited && form.getValues('amount') <= 0 && "border-destructive ring-2 ring-destructive/20"
                                         )}
                                         placeholder="৳০"

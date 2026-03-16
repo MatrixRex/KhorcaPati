@@ -267,7 +267,10 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 readOnly
                                 value={form.watch('amount') || ''}
                                 onClick={() => setShowNumberPad(true)}
-                                className="pr-10 cursor-pointer caret-transparent input-glass"
+                                className={cn(
+                                    "pr-10 cursor-pointer caret-transparent input-glass",
+                                    showNumberPad && "ring-2 ring-primary/50 border-primary bg-primary/5"
+                                )}
                                 placeholder="0"
                             />
                             <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />

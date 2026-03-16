@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -92,7 +93,10 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                             readOnly
                             value={form.watch('targetAmount')}
                             onClick={() => setActiveField('target')}
-                            className="pr-10 cursor-pointer caret-transparent h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                            className={cn(
+                                "pr-10 cursor-pointer caret-transparent h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50",
+                                activeField === 'target' && "ring-2 ring-primary/50 border-primary bg-primary/5"
+                            )}
                         />
                         <input type="hidden" {...form.register('targetAmount', { valueAsNumber: true })} />
                         <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -108,7 +112,10 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                             readOnly
                             value={form.watch('currentAmount')}
                             onClick={() => setActiveField('current')}
-                            className="pr-10 cursor-pointer caret-transparent h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                            className={cn(
+                                "pr-10 cursor-pointer caret-transparent h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50",
+                                activeField === 'current' && "ring-2 ring-primary/50 border-primary bg-primary/5"
+                            )}
                         />
                         <input type="hidden" {...form.register('currentAmount', { valueAsNumber: true })} />
                         <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
@@ -119,6 +126,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                     <NumberPad
                         value={String(form.getValues(activeField === 'target' ? 'targetAmount' : 'currentAmount'))}
                         label={activeField === 'target' ? t('targetGoalLabel') : t('savedAmountLabel')}
+                        inputId={activeField === 'target' ? 'targetAmount' : 'currentAmount'}
                         onChange={(val) => {
                             const num = parseFloat(val);
                             if (!isNaN(num)) {

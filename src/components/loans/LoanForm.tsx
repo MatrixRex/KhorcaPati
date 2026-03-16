@@ -121,7 +121,10 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
                         readOnly
                         value={form.watch('totalAmount') ? `৳${form.watch('totalAmount')}` : '৳০'}
                         onClick={() => setActiveField('total')}
-                        className="pr-10 cursor-pointer caret-transparent font-bold text-lg h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                        className={cn(
+                            "pr-10 cursor-pointer caret-transparent font-bold text-lg h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50",
+                            activeField === 'total' && "ring-2 ring-primary/50 border-primary bg-primary/5"
+                        )}
                     />
                     <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
                 </div>
@@ -131,6 +134,7 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
                 <NumberPad
                     value={String(form.getValues('totalAmount'))}
                     label={t('totalLoanAmount')}
+                    inputId="totalAmount"
                     onChange={(val) => {
                         const num = parseFloat(val);
                         if (!isNaN(num)) {

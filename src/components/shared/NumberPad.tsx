@@ -9,12 +9,13 @@ import { useTranslation } from 'react-i18next';
 interface NumberPadProps {
     value: string;
     label?: string;
+    inputId?: string;
     onChange: (value: string) => void;
     onDone: () => void;
     onClose: () => void;
 }
 
-export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPadProps) {
+export function NumberPad({ value, label, inputId = 'amount', onChange, onDone, onClose }: NumberPadProps) {
     const { t } = useTranslation();
     useCloseWatcher(true, onClose);
     const [display, setDisplay] = useState(value || '0');
@@ -38,28 +39,51 @@ export function NumberPad({ value, label, onChange, onDone, onClose }: NumberPad
         const rootNode = rootRef.current;
         if (!rootNode) return;
 
-        // Find the sheet content since NumberPad is rendered inside it
-        const container = rootNode.closest('.overflow-y-auto') as HTMLElement;
+        // Since NumberPad is rendered via portal to document.body, rootNode has no sheet ancestors.
+        // So we look for the active input element directly to find the scrollable container.
+        const inputEl = document.getElementById(inputId);
+        if (!inputEl) return;
+
+        const container = inputEl.closest('.overflow-y-auto') as HTMLElement;
         if (!container) return;
 
         const originalPadding = container.style.paddingBottom;
 
-        // Add aggressive padding to the sheet content
-        container.style.paddingBottom = '500px';
-
+        // Add robust padding equal to approx key pad height, so we actually have scroll room
         const timer = setTimeout(() => {
-            const el = document.getElementById('amount') || rootNode.parentElement;
-            if (el) {
-                // Scroll the element up so it sits snugly above the keyboard
-                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Fine tune it: move it down slightly so it's not jammed against the very top edge of the drawer
-                container.scrollBy({ top: 30, behavior: 'smooth' });
-            }
-        }, 150);
+            // The pad panel is the actual floating UI (last child of root)
+            const padPanel = rootNode.lastElementChild as HTMLElement;
+            // Get measured height or fallback to around 420px
+            const padHeight = padPanel?.offsetHeight || 420;
+            const extraPadding = `${padHeight + 40}px`;
+
+            container.style.paddingBottom = extraPadding;
+
+            // Give the browser layout engine a moment before calculating coordinates
+            requestAnimationFrame(() => {
+                const inputRect = inputEl.getBoundingClientRect();
+                const padTop = window.innerHeight - padHeight;
+                const idealMargin = 20;
+
+                // How much does the input's bottom dip below our ideal Y-coordinate?
+                const overdrawn = inputRect.bottom - (padTop - idealMargin);
+
+                if (overdrawn > 0) {
+                    // Input is covered by pad (or too close), scroll it up by exact overlap
+                    container.scrollBy({ top: overdrawn, behavior: 'smooth' });
+                } else if (inputRect.top < idealMargin) {
+                    // It's scrolled too far up past the visible top of the drawer!
+                    container.scrollBy({ top: inputRect.top - idealMargin, behavior: 'smooth' });
+                }
+            });
+        }, 50); // very small delay letting layout init happen
 
         return () => {
             clearTimeout(timer);
-            container.style.paddingBottom = originalPadding;
+            // Restore padding with a slight delay when closing to prevent abrupt jumps out
+            setTimeout(() => {
+                if (container) container.style.paddingBottom = originalPadding;
+            }, 300); // 300ms matches exit animation
         };
     }, []);
 

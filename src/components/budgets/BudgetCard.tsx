@@ -101,7 +101,7 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
 
     const overspentInfo = findOverspentInfo(budget, budgetExpenses);
 
-    const percentage = Math.min((spent / budget.limitAmount) * 100, 100);
+    const percentage = (spent / budget.limitAmount) * 100;
     const isAlertThresholdReached = (spent / budget.limitAmount) >= budget.alertThreshold;
     const isOverBudget = spent > budget.limitAmount;
 
@@ -146,16 +146,10 @@ export function BudgetCard({ budget, onClick }: BudgetCardProps) {
                 </div>
 
                 <Progress 
-                    value={percentage} 
-                    className="h-2.5 bg-foreground/[0.07] dark:bg-foreground/[0.12] rounded-full overflow-hidden" 
-                    indicatorClassName="transition-all duration-1000 ease-out rounded-full"
-                    style={{ 
-                        "--progress-indicator": isOverBudget 
-                            ? "var(--destructive)" 
-                            : isAlertThresholdReached 
-                                ? "var(--warning, #f97316)" 
-                                : "var(--primary)" 
-                    } as any}
+                    value={Math.min(percentage, 100)} 
+                    className="premium-progress" 
+                    indicatorClassName="premium-progress-indicator" 
+                    style={{ "--progress-indicator": isOverBudget ? "var(--destructive)" : isAlertThresholdReached ? "oklch(0.65 0.25 60)" : "var(--primary)" } as any}
                 />
 
                 <div className="flex items-center justify-between mt-1">

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import { Plus, Edit2 } from 'lucide-react';
+import { Plus, Edit2, Link2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -162,6 +162,11 @@ export function GlobalUI() {
                                             <Edit2 className="w-4 h-4" />
                                         </Button>
                                     </div>
+                                    {goalForRecords?.note && (
+                                        <p className="text-[11px] font-medium text-muted-foreground mt-1.5 opacity-80 italic border-l-2 border-primary/20 pl-2 py-0.5">
+                                            {goalForRecords.note}
+                                        </p>
+                                    )}
                                 </div>
                                 <Button
                                     size="icon"
@@ -173,7 +178,7 @@ export function GlobalUI() {
                                         }
                                     }}
                                 >
-                                    <Plus className="w-5 h-5 stroke-[3]" />
+                                    <Link2 className="w-5 h-5 stroke-[3]" />
                                 </Button>
                             </div>
                         </SheetHeader>
@@ -269,8 +274,8 @@ export function GlobalUI() {
                                         </Button>
                                     </div>
                                     {loanForRecords?.note && (
-                                        <p className="text-[11px] font-medium text-muted-foreground mt-1 opacity-70 italic line-clamp-1">
-                                            "{loanForRecords.note}"
+                                        <p className="text-[11px] font-medium text-muted-foreground mt-1.5 opacity-80 italic border-l-2 border-primary/20 pl-2 py-0.5">
+                                            {loanForRecords.note}
                                         </p>
                                     )}
                                 </div>

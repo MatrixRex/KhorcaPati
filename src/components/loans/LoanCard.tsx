@@ -84,8 +84,8 @@ export function LoanCard({ loan, onClick }: LoanCardProps) {
                 <div className="space-y-2">
                     <Progress
                         value={percentage}
-                        className="h-2.5 bg-foreground/[0.07] dark:bg-foreground/[0.12] rounded-full overflow-hidden"
-                        indicatorClassName="transition-all duration-1000 ease-out rounded-full"
+                        className="premium-progress"
+                        indicatorClassName="premium-progress-indicator"
                         style={{ "--progress-indicator": isTaken ? "var(--destructive)" : "var(--primary)" } as any}
                     />
 

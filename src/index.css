@@ -311,6 +311,16 @@
     @apply border border-foreground/[0.06] dark:border-white/[0.08] shadow-sm bg-muted/20 dark:bg-muted/10 rounded-3xl overflow-hidden;
   }
 
+  /* --- Premium Progress Styles --- */
+  .premium-progress {
+    @apply h-2.5 bg-foreground/[0.07] dark:bg-foreground/[0.12] rounded-full overflow-hidden;
+  }
+
+  .premium-progress-indicator {
+    @apply transition-all duration-1000 ease-out rounded-full;
+    box-shadow: 0 0 10px -2px var(--progress-indicator);
+  }
+
   .stacked-card-effect {
     position: relative !important;
     overflow: visible !important;

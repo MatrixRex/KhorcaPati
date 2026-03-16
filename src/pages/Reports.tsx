@@ -319,8 +319,8 @@ export default function Reports() {
                                                     </div>
                                                     <Progress
                                                         value={percent}
-                                                        className="h-2.5 bg-foreground/[0.07] dark:bg-foreground/[0.12] rounded-full overflow-hidden"
-                                                        indicatorClassName="transition-all duration-1000 ease-out rounded-full"
+                                                        className="premium-progress"
+                                                        indicatorClassName="premium-progress-indicator"
                                                         style={{ "--progress-indicator": category.fill } as any}
                                                     />
                                                 </div>

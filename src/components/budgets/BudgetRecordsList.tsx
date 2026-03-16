@@ -57,7 +57,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
         );
     }
 
-    const percentage = Math.min((totalSpent / budget.limitAmount) * 100, 100);
+    const percentage = (totalSpent / budget.limitAmount) * 100;
     const isOver = totalSpent > budget.limitAmount;
 
     return (
@@ -86,9 +86,9 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                     )}
                 </div>
                 <Progress
-                    value={percentage}
-                    className="h-2.5 bg-foreground/[0.07] dark:bg-foreground/[0.12] rounded-full overflow-hidden"
-                    indicatorClassName="transition-all duration-1000 ease-out rounded-full"
+                    value={Math.min(percentage, 100)}
+                    className="premium-progress"
+                    indicatorClassName="premium-progress-indicator"
                     style={{ "--progress-indicator": isOver ? "var(--destructive)" : "var(--primary)" } as any}
                 />
                 <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">
@@ -134,8 +134,8 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                         )}
                     >
                         <div className="flex items-center gap-4 overflow-hidden">
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-muted/50 text-muted-foreground font-black text-xs">
-                                {exp.category.charAt(0).toUpperCase()}
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm bg-primary/10 text-primary font-black text-xs">
+                                <Receipt className="w-5 h-5" />
                             </div>
                             <div className="flex flex-col min-w-0">
                                 <span className="text-sm font-black truncate capitalize leading-tight">

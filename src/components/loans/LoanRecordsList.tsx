@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Loan } from '@/db/schema';
 import { cn } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
-import { Edit2, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import { Edit2, TrendingUp, TrendingDown, Calendar, Check, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { formatRelativeDate } from '@/utils/date';
@@ -89,8 +89,8 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
                 </div>
                 <Progress
                     value={percentage}
-                    className="h-2.5 bg-foreground/[0.07] dark:bg-foreground/[0.12] rounded-full overflow-hidden"
-                    indicatorClassName="transition-all duration-1000 ease-out rounded-full"
+                    className="premium-progress"
+                    indicatorClassName="premium-progress-indicator"
                     style={{ "--progress-indicator": isTaken ? "var(--destructive)" : "var(--primary)" } as any}
                 />
                 <div className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-muted-foreground/40 mt-1">
@@ -136,17 +136,21 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
                             <div className="flex items-center gap-4 overflow-hidden">
                                 <div className={cn(
                                     "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm font-black text-xs",
-                                    isPrimary ? "bg-primary/10 text-primary" : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-500"
+                                    isPrimary ? "bg-primary/10 text-primary" : "bg-green-600/10 text-green-600 dark:bg-green-900/30 dark:text-green-500"
                                 )}>
-                                    {isPrimary ? '✅' : (exp.type === 'income' ? '💰' : '💸')}
+                                    {isPrimary ? (
+                                        <Check className="w-5 h-5 stroke-[3]" />
+                                    ) : (
+                                        exp.type === 'income' ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />
+                                    )}
                                 </div>
                                 <div className="flex flex-col min-w-0">
                                     <span className="text-sm font-black truncate capitalize leading-tight">
                                         {exp.note || exp.category}
                                     </span>
                                     <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-bold uppercase tracking-tight mt-0.5">
-                                        <span className="text-primary/60">{exp.category}</span>
-                                        <span>•</span>
+                                        {exp.note && <span className="text-primary/60">{exp.category}</span>}
+                                        {exp.note && <span>•</span>}
                                         <span>{format(parseISO(exp.date), 'dd MMM yy')}</span>
                                     </div>
                                 </div>

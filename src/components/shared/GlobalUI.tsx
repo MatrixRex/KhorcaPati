@@ -119,7 +119,7 @@ export function GlobalUI() {
         <>
             {showFAB && (
                 <Button
-                    className="fixed bottom-20 right-4 h-14 w-14 rounded-full z-50 bg-primary text-primary-foreground shadow-2xl shadow-primary/40 active:scale-[0.9] transition-all duration-300 border-4 border-background"
+                    className="fixed bottom-20 right-4 h-14 w-14 rounded-full z-50 bg-primary text-primary-foreground shadow-2xl shadow-primary/40 active:scale-[0.9] transition-all duration-300 border-2 border-foreground/20"
                     onClick={() => openAddExpense()}
                 >
                     <Plus className="w-7 h-7 stroke-[3]" />

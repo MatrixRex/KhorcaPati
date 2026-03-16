@@ -188,13 +188,12 @@ export default function Settings() {
                 <section>
                     <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">{t('management')}</h2>
                     <div className="grid grid-cols-1 gap-3">
-                        <Button
-                            variant="outline"
+                        <button
                             onClick={() => useUIStore.getState().openCategoryManagement()}
-                            className="h-auto py-4 justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            className="setting-item-glass group"
                         >
                             <div className="flex items-center gap-4 flex-1 min-w-0">
-                                <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform shrink-0">
+                                <div className="p-3 rounded-xl bg-primary/20 text-primary shadow-sm group-hover:scale-110 group-hover:shadow-primary/20 transition-all duration-300 shrink-0 border border-primary/10">
                                     <Check className="w-5 h-5" />
                                 </div>
                                 <div className="flex flex-col items-start min-w-0">
@@ -205,15 +204,14 @@ export default function Settings() {
                             <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                                 <Monitor className="w-4 h-4 rotate-[-90deg]" />
                             </div>
-                        </Button>
+                        </button>
 
-                        <Button
-                            variant="outline"
+                        <button
                             onClick={() => useUIStore.getState().openRecurringPaymentsList()}
-                            className="h-auto py-4 justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            className="setting-item-glass group"
                         >
                             <div className="flex items-center gap-4 flex-1 min-w-0">
-                                <div className="p-2.5 rounded-xl bg-orange-500/10 text-orange-500 group-hover:scale-110 transition-transform shrink-0">
+                                <div className="p-3 rounded-xl bg-orange-500/20 text-orange-600 shadow-sm group-hover:scale-110 group-hover:shadow-orange-500/20 transition-all duration-300 shrink-0 border border-orange-500/10">
                                     <Bell className="w-5 h-5" />
                                 </div>
                                 <div className="flex flex-col items-start min-w-0">
@@ -224,15 +222,14 @@ export default function Settings() {
                             <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                                 <Monitor className="w-4 h-4 rotate-[-90deg]" />
                             </div>
-                        </Button>
+                        </button>
 
-                        <Button
-                            variant="outline"
+                        <button
                             onClick={() => useUIStore.getState().openBudgetsList()}
-                            className="h-auto py-4 justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            className="setting-item-glass group"
                         >
                             <div className="flex items-center gap-4 flex-1 min-w-0">
-                                <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform shrink-0">
+                                <div className="p-3 rounded-xl bg-blue-500/20 text-blue-600 shadow-sm group-hover:scale-110 group-hover:shadow-blue-500/20 transition-all duration-300 shrink-0 border border-blue-500/10">
                                     <Wallet className="w-5 h-5" />
                                 </div>
                                 <div className="flex flex-col items-start min-w-0">
@@ -243,15 +240,14 @@ export default function Settings() {
                             <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                                 <Monitor className="w-4 h-4 rotate-[-90deg]" />
                             </div>
-                        </Button>
+                        </button>
 
-                        <Button
-                            variant="outline"
+                        <button
                             onClick={() => useUIStore.getState().openGoalsList()}
-                            className="h-auto py-4 justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            className="setting-item-glass group"
                         >
                             <div className="flex items-center gap-4 flex-1 min-w-0">
-                                <div className="p-2.5 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform shrink-0">
+                                <div className="p-3 rounded-xl bg-primary/20 text-primary shadow-sm group-hover:scale-110 group-hover:shadow-primary/20 transition-all duration-300 shrink-0 border border-primary/10">
                                     <Target className="w-5 h-5" />
                                 </div>
                                 <div className="flex flex-col items-start min-w-0">
@@ -262,15 +258,14 @@ export default function Settings() {
                             <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                                 <Monitor className="w-4 h-4 rotate-[-90deg]" />
                             </div>
-                        </Button>
+                        </button>
 
-                        <Button
-                            variant="outline"
+                        <button
                             onClick={() => useUIStore.getState().openLoansList()}
-                            className="h-auto py-4 justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            className="setting-item-glass group"
                         >
                             <div className="flex items-center gap-4 flex-1 min-w-0">
-                                <div className="p-2.5 rounded-xl bg-destructive/10 text-destructive group-hover:scale-110 transition-transform shrink-0">
+                                <div className="p-3 rounded-xl bg-destructive/20 text-destructive shadow-sm group-hover:scale-110 group-hover:shadow-destructive/20 transition-all duration-300 shrink-0 border border-destructive/10">
                                     <TrendingUp className="w-5 h-5 rotate-[-45deg]" />
                                 </div>
                                 <div className="flex flex-col items-start min-w-0">
@@ -281,20 +276,19 @@ export default function Settings() {
                             <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
                                 <Monitor className="w-4 h-4 rotate-[-90deg]" />
                             </div>
-                        </Button>
+                        </button>
                     </div>
                 </section>
 
                 <section>
                     <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">{t('dataManagement')}</h2>
                     <div className="grid grid-cols-1 gap-3">
-                        <Button
-                            variant="outline"
+                        <button
                             onClick={handleExport}
-                            className="h-auto py-4 justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            className="setting-item-glass group"
                         >
                             <div className="flex items-center gap-4 w-full">
-                                <div className="p-2.5 rounded-xl bg-green-500/10 text-green-500 group-hover:scale-110 transition-transform shrink-0">
+                                <div className="p-3 rounded-xl bg-green-500/20 text-green-600 shadow-sm group-hover:scale-110 group-hover:shadow-green-500/20 transition-all duration-300 shrink-0 border border-green-500/10">
                                     <Download className="w-5 h-5" />
                                 </div>
                                 <div className="flex flex-col items-start flex-1 min-w-0">
@@ -302,7 +296,7 @@ export default function Settings() {
                                     <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight leading-tight">{t('exportDescription')}</span>
                                 </div>
                             </div>
-                        </Button>
+                        </button>
 
                         <div className="relative">
                             <input
@@ -311,12 +305,11 @@ export default function Settings() {
                                 onChange={handleFileChange}
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             />
-                            <Button
-                                variant="outline"
-                                className="h-auto py-4 w-full justify-between px-6 rounded-2xl border-border/80 hover:border-primary/50 hover:bg-primary/5 transition-all group whitespace-normal text-left"
+                            <button
+                                className="setting-item-glass group w-full"
                             >
                                 <div className="flex items-center gap-4 w-full">
-                                    <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform shrink-0">
+                                    <div className="p-3 rounded-xl bg-purple-500/20 text-purple-600 shadow-sm group-hover:scale-110 group-hover:shadow-purple-500/20 transition-all duration-300 shrink-0 border border-purple-500/10">
                                         <Upload className="w-5 h-5" />
                                     </div>
                                     <div className="flex flex-col items-start flex-1 min-w-0">
@@ -324,7 +317,7 @@ export default function Settings() {
                                         <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight leading-tight">{t('importDescription')}</span>
                                     </div>
                                 </div>
-                            </Button>
+                            </button>
                         </div>
                     </div>
                 </section>

@@ -74,7 +74,7 @@ export function SharedCard({ children, className, ...props }: React.ComponentPro
     return (
         <div
             className={cn(
-                "rounded-2xl bg-card border border-border/40 shadow-sm overflow-hidden p-4",
+                "glass-card p-4",
                 className
             )}
             {...props}

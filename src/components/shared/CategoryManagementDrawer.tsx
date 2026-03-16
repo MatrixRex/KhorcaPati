@@ -103,13 +103,13 @@ export function CategoryManagementDrawer() {
         <Sheet open={isCategoryManagementOpen} onOpenChange={(open) => !open && closeCategoryManagement()}>
             <SheetContent 
                 side="bottom" 
-                className="h-[90vh] rounded-t-[32px] p-0 border-t border-white/10 overflow-hidden flex flex-col bg-background/60 backdrop-blur-xl"
-                style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
+                className="max-h-[92dvh] h-auto rounded-t-xl p-0 glass overflow-hidden z-[60] flex flex-col"
             >
-                <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
-                <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mt-4 mb-2 shrink-0" />
+                <div className="absolute top-0 left-0 right-0 h-32 opacity-10 blur-3xl pointer-events-none bg-primary" />
+                <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10 shrink-0" />
+                <div className="flex-1 overflow-y-auto px-6 pb-12 relative z-10" data-scroll-container>
                 
-                <SheetHeader className="px-6 py-4 shrink-0">
+                <SheetHeader className="px-0 py-4 shrink-0 border-b mb-6">
                     <div className="flex items-center justify-between">
                         <div>
                             <SheetTitle className="text-2xl font-black tracking-tight">{t('categories')}</SheetTitle>
@@ -128,7 +128,7 @@ export function CategoryManagementDrawer() {
                     </div>
                 </SheetHeader>
 
-                <div className="flex-1 overflow-y-auto px-6 pb-10">
+                <div className="space-y-3">
                     {/* Add Mode */}
                     {isAddingMode && (
                         <div className="mb-6 p-4 rounded-3xl bg-primary/5 border border-primary/20 animate-in fade-in slide-in-from-top-4 duration-300">
@@ -170,8 +170,10 @@ export function CategoryManagementDrawer() {
                                     <div key={cat.id} className="group">
                                         <div 
                                             className={cn(
-                                                "flex flex-col transition-all duration-300 border rounded-[28px] overflow-hidden bg-card",
-                                                isEditing ? "border-primary ring-4 ring-primary/5 shadow-xl" : "border-border/40 hover:border-primary/30"
+                                                "flex flex-col transition-all duration-300 border rounded-2xl overflow-hidden relative backdrop-blur-md",
+                                                isEditing 
+                                                    ? "glass ring-4 ring-primary/10 shadow-2xl border-primary z-10" 
+                                                    : "bg-foreground/[0.04] border-foreground/[0.08] hover:border-primary/30"
                                             )}
                                         >
                                             <div 
@@ -188,7 +190,7 @@ export function CategoryManagementDrawer() {
                                             >
                                                 <div className="flex items-center gap-4">
                                                     <div 
-                                                        className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-black/5"
+                                                        className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg shadow-black/10 transition-transform group-hover:scale-105"
                                                         style={{ backgroundColor: isEditing && editingCategory ? editingCategory.color : cat.color }}
                                                     >
                                                         <Tag className="w-5 h-5" />
@@ -238,7 +240,7 @@ export function CategoryManagementDrawer() {
 
                                             {/* Edit Details Section */}
                                             {isEditing && (
-                                                <div className="px-5 pb-6 pt-2 border-t border-dashed bg-muted/5 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                <div className="px-5 pb-6 pt-2 border-t border-foreground/5 bg-foreground/[0.02] animate-in fade-in slide-in-from-top-2 duration-300">
                                                     <div className="space-y-4">
                                                         <div>
                                                             <div className="flex items-center justify-between mb-3">
@@ -337,6 +339,7 @@ export function CategoryManagementDrawer() {
                                 </>
                             );
                         })()}
+                    </div>
                     </div>
                 </div>
             </SheetContent>

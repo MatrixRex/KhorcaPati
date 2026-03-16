@@ -86,7 +86,7 @@ export default function Settings() {
         <PageContainer title={t('settings')}>
             <div className="space-y-6 pt-2 pb-10">
                 <section>
-                    <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">{t('language')}</h2>
+                    <h2 className="label-header mb-3 px-1">{t('language')}</h2>
                     <div className="grid grid-cols-2 gap-2">
                         {languages.map((l) => {
                             const isActive = language === l.id;
@@ -116,7 +116,7 @@ export default function Settings() {
                 </section>
 
                 <section>
-                    <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">{t('appearance')}</h2>
+                    <h2 className="label-header mb-3 px-1">{t('appearance')}</h2>
                     <div className="grid grid-cols-3 gap-2">
                         {themes.map((t) => {
                             const Icon = t.icon;
@@ -186,7 +186,7 @@ export default function Settings() {
                 </section>
 
                 <section>
-                    <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">{t('management')}</h2>
+                    <h2 className="label-header mb-3 px-1">{t('management')}</h2>
                     <div className="grid grid-cols-1 gap-3">
                         <button
                             onClick={() => useUIStore.getState().openCategoryManagement()}
@@ -281,7 +281,7 @@ export default function Settings() {
                 </section>
 
                 <section>
-                    <h2 className="text-sm font-medium text-muted-foreground mb-3 px-1">{t('dataManagement')}</h2>
+                    <h2 className="label-header mb-3 px-1">{t('dataManagement')}</h2>
                     <div className="grid grid-cols-1 gap-3">
                         <button
                             onClick={handleExport}

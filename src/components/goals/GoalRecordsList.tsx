@@ -106,13 +106,13 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
                     >
                         <div className="flex items-center gap-4 overflow-hidden">
                             <div className={cn(
-                                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm font-black text-xs",
+                                "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm font-semibold text-xs",
                                 exp.type === 'income' ? "bg-green-600/10 text-green-600 dark:bg-green-900/30 dark:text-green-500" : "bg-primary/10 text-primary"
                             )}>
                                 {exp.type === 'income' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <span className="text-sm font-black truncate capitalize leading-tight">
+                                <span className="text-sm font-semibold truncate leading-tight">
                                     {exp.note || exp.category}
                                 </span>
                                 <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-bold uppercase tracking-tight mt-0.5">
@@ -125,7 +125,7 @@ export function GoalRecordsList({ goal }: GoalRecordsListProps) {
                         <div className="flex items-center gap-3">
                             <div className="text-right">
                                 <span className={cn(
-                                    "text-base font-black tabular-nums",
+                                    "text-base font-semibold tabular-nums",
                                     exp.type === 'income' ? "text-green-600" : "text-red-600"
                                 )}>
                                     {exp.type === 'income' ? '-' : '+'}৳{formatAmount(exp.amount)}

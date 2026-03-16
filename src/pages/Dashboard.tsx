@@ -108,7 +108,7 @@ export default function Dashboard() {
                         </div>
                         
                         <div className="flex flex-col gap-0.5 relative z-10">
-                            <p className="text-foreground/40 text-[9px] font-black uppercase tracking-[0.3em] ml-1">{t('currentBalance')}</p>
+                            <p className="text-foreground/40 text-[11px] font-black uppercase tracking-[0.2em] ml-1">{t('currentBalance')}</p>
                             <div className="flex items-baseline gap-2 font-heading">
                                 <span className="text-xl font-black text-primary/40 decoration-primary/20 underline underline-offset-8">৳</span>
                                 <h2 className="text-4xl font-black tracking-tighter text-foreground leading-tight">{formatAmount(totalBalance)}</h2>
@@ -117,12 +117,12 @@ export default function Dashboard() {
 
                         <div className="flex items-center gap-6 relative z-10 mt-6 pt-5 border-t border-foreground/5 font-heading">
                             <div className="flex flex-col gap-0.5">
-                                <span className="text-[9px] font-black uppercase text-foreground/30 tracking-[0.2em]">{t('income')}</span>
+                                <span className="text-[11px] font-black uppercase text-foreground/30 tracking-[0.15em] shrink-0">{t('income')}</span>
                                 <span className="text-base font-black text-emerald-500 dark:text-emerald-400">৳{formatAmount(totalIncome)}</span>
                             </div>
                             <div className="w-px h-8 bg-foreground/5" />
                             <div className="flex flex-col gap-0.5">
-                                <span className="text-[9px] font-black uppercase text-foreground/30 tracking-[0.2em]">{t('expenses')}</span>
+                                <span className="text-[11px] font-black uppercase text-foreground/30 tracking-[0.15em] shrink-0">{t('expenses')}</span>
                                 <span className="text-base font-black text-rose-500 dark:text-rose-400">৳{formatAmount(totalSpent)}</span>
                             </div>
                         </div>

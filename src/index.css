@@ -396,23 +396,23 @@
 
   /* --- Typography Utilities --- */
   .label-header {
-    @apply text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 leading-none;
+    @apply text-sm font-semibold tracking-tight text-muted-foreground/80 leading-snug;
   }
 
   .label-caption {
-    @apply text-[9px] font-black uppercase tracking-widest leading-none;
+    @apply text-[11px] font-medium leading-normal opacity-70;
   }
 
   .form-error {
-    @apply text-rose-600 text-[11px] font-black uppercase tracking-wider antialiased mt-1 ml-1;
+    @apply text-rose-600 text-[11px] font-semibold antialiased mt-1 ml-1;
   }
 
   .text-value-lg {
-    @apply text-xl font-black leading-tight;
+    @apply text-xl font-semibold leading-tight tracking-tight;
   }
 
   .text-value-md {
-    @apply text-lg font-black leading-tight;
+    @apply text-base font-semibold leading-tight tracking-tight;
   }
 
   /* --- Form Utilities --- */

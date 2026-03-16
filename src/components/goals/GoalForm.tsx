@@ -78,7 +78,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                     {...form.register('title')} 
                 />
                 {form.formState.errors.title && (
-                    <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.title.message}</p>
+                    <p className="text-rose-60- text-xs font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.title.message}</p>
                 )}
             </div>
 
@@ -100,7 +100,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                 </div>
 
                 <div className="space-y-2 relative">
-                    <Label htmlFor="currentAmount">{t('saved')} (৳)</Label>
+                    <Label htmlFor="currentAmount" className="label-header">{t('saved')} (৳)</Label>
                     <div className="relative">
                         <Input
                             id="currentAmount"
@@ -133,7 +133,7 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
 
 
             <div className="space-y-2">
-                <Label htmlFor="deadline">{t('deadline')} ({t('optional')})</Label>
+                <Label htmlFor="deadline" className="label-header">{t('deadline')} ({t('optional')})</Label>
                 <Controller
                     control={form.control}
                     name="deadline"

@@ -53,21 +53,21 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
                             {payment.title}
                         </h3>
                         <div className="flex items-center gap-1.5 flex-wrap">
-                            <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 font-bold uppercase tracking-wider flex items-center">
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-bold uppercase tracking-wider flex items-center shrink-0">
                                 <Clock className="w-2 h-2 mr-1" /> {t(payment.interval.toLowerCase())}
                             </Badge>
                             {isUpcoming && !isOverdue && (
-                                <span className="text-[9px] font-black uppercase text-amber-600 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
+                                <Badge variant="secondary" className="text-[10px] px-2 py-0 h-4 font-black uppercase text-amber-600 bg-amber-500/10 border-amber-500/20">
                                     {t('inDaysShort', { count: diffInDays })}
-                                </span>
+                                </Badge>
                             )}
                             {isOverdue && (
-                                <Badge variant="destructive" className="text-[9px] px-1.5 py-0 h-4 uppercase font-black tracking-widest animate-pulse">
+                                <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-4 uppercase font-black tracking-widest animate-pulse">
                                     {t('overdue')}
                                 </Badge>
                             )}
                             {!isOverdue && !isUpcoming && (
-                                <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 uppercase font-bold tracking-tight bg-green-100 text-green-700">
+                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 uppercase font-bold tracking-tight bg-green-100 text-green-700 border-green-200">
                                     {t('paidScheduled')}
                                 </Badge>
                             )}
@@ -99,7 +99,7 @@ export function RecurringPaymentCard({ payment, onClick }: RecurringPaymentCardP
                         {payment.type === 'income' ? '+' : ''}৳{formatAmount(payment.amount)}
                     </span>
                     {payment.note && (
-                        <span className="text-[9px] text-muted-foreground/60 truncate max-w-[80px] font-medium italic mt-0.5">
+                        <span className="text-[10px] text-muted-foreground/60 truncate max-w-[100px] font-medium italic mt-1 text-right">
                             {payment.note}
                         </span>
                     )}

@@ -385,7 +385,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                     <>
                         {/* 1. Loan Selection */}
                         <div className="space-y-2">
-                            <Label htmlFor="loan" className="text-[11px] font-bold uppercase">{t('loans')}</Label>
+                            <Label htmlFor="loan" className="label-header">{t('loans')}</Label>
                             <div className="flex gap-2">
                                 <div className="flex-1">
                                     <Controller
@@ -423,17 +423,17 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                             <div className="bg-muted/30 p-4 rounded-2xl border border-border/10 space-y-3">
                                 <div className="flex justify-between items-end mb-1">
                                     <div className="flex flex-col">
-                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+                                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">
                                             {selectedLoanInDb?.type === 'given' ? t('collectionProgress') : t('loanProgress')}
                                         </span>
                                         <span className={cn(
-                                            "text-sm font-black",
+                                            "text-sm font-semibold",
                                             selectedLoanInDb?.type === 'taken' ? "text-red-600" : "text-green-600"
                                         )}>
                                             ৳{formatAmount(loanProgress.remainingAmount)} {t('remaining')}
                                         </span>
                                     </div>
-                                    <span className="text-[10px] font-black text-muted-foreground/60">
+                                    <span className="text-[11px] font-semibold text-muted-foreground/60">
                                         {Math.round(loanProgress.projectedPercentage)}%
                                     </span>
                                 </div>
@@ -518,7 +518,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                 )}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="date" className="text-[11px] font-bold uppercase">{t('date')}</Label>
+                                <Label htmlFor="date" className="label-header">{t('date')}</Label>
                                 <Controller
                                     control={form.control}
                                     name="date"
@@ -541,7 +541,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
                         {/* 5. Note */}
                         <div className="space-y-2">
-                            <Label htmlFor="note" className="text-[11px] font-bold uppercase">{t('note')}</Label>
+                            <Label htmlFor="note" className="label-header">{t('note')}</Label>
                             <Controller
                                 control={form.control}
                                 name="note"
@@ -717,7 +717,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="goal" className="text-[11px] font-bold uppercase">{t('linkToGoal')}</Label>
+                            <Label htmlFor="goal" className="label-header">{t('linkToGoal')}</Label>
                             <div className="w-full">
                                 <Controller
                                     control={form.control}

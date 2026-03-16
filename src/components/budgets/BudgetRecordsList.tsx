@@ -138,7 +138,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                                 <Receipt className="w-5 h-5" />
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <span className="text-sm font-black truncate capitalize leading-tight">
+                                <span className="text-sm font-semibold truncate capitalize leading-tight">
                                     {exp.note || exp.category}
                                 </span>
                                 <div className="flex items-center gap-1.5 label-caption text-muted-foreground/60 mt-0.5">
@@ -154,7 +154,7 @@ export function BudgetRecordsList({ budget }: BudgetRecordsListProps) {
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="text-right">
-                                <span className="text-base font-black tabular-nums text-destructive">
+                                <span className="text-base font-semibold tabular-nums text-destructive">
                                     ৳{formatAmount(exp.amount)}
                                 </span>
                             </div>

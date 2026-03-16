@@ -145,7 +145,7 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
                                     )}
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                    <span className="text-sm font-black truncate capitalize leading-tight">
+                                    <span className="text-sm font-semibold truncate capitalize leading-tight">
                                         {exp.note || exp.category}
                                     </span>
                                     <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-bold uppercase tracking-tight mt-0.5">
@@ -158,7 +158,7 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
                             <div className="flex items-center gap-3">
                                 <div className="text-right">
                                     <span className={cn(
-                                        "text-base font-black tabular-nums",
+                                        "text-base font-semibold tabular-nums",
                                         exp.type === 'income' ? "text-green-600" : "text-red-600"
                                     )}>
                                         {exp.type === 'income' ? '+' : '-'}৳{formatAmount(exp.amount)}

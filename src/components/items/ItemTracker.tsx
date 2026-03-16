@@ -370,31 +370,31 @@ export function ItemTracker() {
                                                                 className="w-10 h-10 rounded-xl bg-background border flex flex-col items-center justify-center shrink-0 shadow-sm"
                                                                 style={{ borderColor: `${color}40` }}
                                                             >
-                                                                <span className="text-[8px] font-black text-muted-foreground uppercase leading-none mb-0.5">
+                                                                <span className="text-[10px] font-semibold text-muted-foreground uppercase leading-none mb-0.5 opacity-60">
                                                                     {format(new Date(record.date), 'MMM')}
                                                                 </span>
-                                                                <span className="text-sm font-black leading-none">
+                                                                <span className="text-sm font-semibold leading-none">
                                                                     {formatNumber(format(new Date(record.date), 'dd'))}
                                                                 </span>
                                                             </div>
 
                                                             <div className="flex flex-col min-w-0">
                                                                 <div className="flex items-baseline gap-1.5 leading-none">
-                                                                    <span className="text-base font-black" style={{ color }}>+{formatNumber(record.qty)}</span>
-                                                                    <span className="text-[10px] font-black text-muted-foreground uppercase">{record.unit}</span>
+                                                                    <span className="text-base font-semibold" style={{ color }}>+{formatNumber(record.qty)}</span>
+                                                                    <span className="text-[11px] font-semibold text-muted-foreground uppercase opacity-70">{record.unit}</span>
                                                                 </div>
 
-                                                                <div className="flex items-center gap-1.5 mt-1">
+                                                                <div className="flex items-center gap-1.5 mt-1.5">
                                                                     {record.rawInput && record.rawInput.toLowerCase() !== record.name.toLowerCase() && (
-                                                                        <p className="text-[10px] text-muted-foreground italic truncate leading-tight opacity-70">
+                                                                        <p className="text-[11px] text-muted-foreground italic truncate leading-tight opacity-60">
                                                                             "{record.rawInput}"
                                                                         </p>
                                                                     )}
                                                                     {record.rawInput && record.rawInput.toLowerCase() !== record.name.toLowerCase() && category && (
-                                                                        <span className="text-[10px] text-muted-foreground/30">•</span>
+                                                                        <span className="text-[11px] text-muted-foreground/30">•</span>
                                                                     )}
                                                                     {category && (
-                                                                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tighter truncate">
+                                                                        <span className="text-[11px] font-medium text-muted-foreground/50 uppercase tracking-tight truncate">
                                                                             {category}
                                                                         </span>
                                                                     )}

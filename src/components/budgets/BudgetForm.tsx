@@ -138,7 +138,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
 
                 {/* Category */}
                 <div className="space-y-2">
-                    <Label>{t('category')}</Label>
+                    <Label className="label-header">{t('category')}</Label>
                     <CategoryComboBox
                         value={form.watch('category')}
                         onChange={(val) => {
@@ -148,13 +148,13 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                         className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
                     />
                     {form.formState.errors.category && (
-                        <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.category.message}</p>
+                        <p className="form-error">{form.formState.errors.category.message}</p>
                     )}
                 </div>
 
                 {/* Limit amount */}
                 <div className="space-y-2">
-                    <Label htmlFor="limitAmount">{t('budgetLimit')} (৳)</Label>
+                    <Label htmlFor="limitAmount" className="label-header">{t('budgetLimit')} (৳)</Label>
                     <Input
                         id="limitAmount"
                         type="number"
@@ -173,13 +173,13 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                         })}
                     />
                     {form.formState.errors.limitAmount && (
-                        <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.limitAmount.message}</p>
+                        <p className="form-error">{form.formState.errors.limitAmount.message}</p>
                     )}
                 </div>
 
                 {/* ── Timeline mode toggle ───────────────────────────── */}
                 <div className="space-y-3">
-                    <Label>{t('timeline')}</Label>
+                    <Label className="label-header">{t('timeline')}</Label>
 
                     {/* Segmented control */}
                     <div className="grid grid-cols-2 gap-1 p-1 rounded-lg bg-muted">

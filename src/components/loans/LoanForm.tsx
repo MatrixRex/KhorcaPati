@@ -103,17 +103,17 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="person" className="text-[11px] font-bold uppercase">{t('person')}</Label>
+                    <Label htmlFor="person" className="label-header">{t('person')}</Label>
                     <Input id="person" placeholder={t('personExample')} {...form.register('person')} className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50" />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="title" className="text-[11px] font-bold uppercase">{t('loanTitle')}</Label>
+                    <Label htmlFor="title" className="label-header">{t('loanTitle')}</Label>
                     <Input id="title" placeholder={t('loanExample')} {...form.register('title')} className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50" />
                 </div>
             </div>
 
             <div className="space-y-2 relative">
-                <Label htmlFor="totalAmount" className="text-[11px] font-bold uppercase">{t('totalAmount')} (৳)</Label>
+                <Label htmlFor="totalAmount" className="label-header">{t('totalAmount')} (৳)</Label>
                 <div className="relative">
                     <Input
                         id="totalAmount"
@@ -143,7 +143,7 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
             )}
 
             <div className="space-y-2">
-                <Label htmlFor="dueDate" className="text-[11px] font-bold uppercase">{t('deadline')} ({t('optional')})</Label>
+                <Label htmlFor="dueDate" className="label-header">{t('deadline')} ({t('optional')})</Label>
                 <Controller
                     control={form.control}
                     name="dueDate"

@@ -42,7 +42,12 @@ import { useTranslation } from 'react-i18next';
 
 export function CategoryManagementDrawer() {
     const { t } = useTranslation();
-    const { isCategoryManagementOpen, closeCategoryManagement } = useUIStore();
+    const { 
+        isCategoryManagementOpen, closeCategoryManagement,
+        isGoalRecordsSheetOpen, isBudgetRecordsSheetOpen, isLoanRecordsSheetOpen,
+        isExpenseSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isGoalSheetOpen, isLoanSheetOpen,
+        isSubRecordSheetOpen, isGoalProgressSheetOpen, isBalanceEditDrawerOpen
+    } = useUIStore();
     const { categories, addCategory, updateCategory, deleteCategory } = useCategoryStore();
     
     const [isAddingMode, setIsAddingMode] = useState(false);
@@ -55,6 +60,25 @@ export function CategoryManagementDrawer() {
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [customColor, setCustomColor] = useState('#3b82f6');
     const [hue, setHue] = useState(210); // Default blue hue
+
+    const isAnyDetailOpen = isGoalRecordsSheetOpen || isBudgetRecordsSheetOpen || isLoanRecordsSheetOpen || useUIStore.getState().isCategoryRecordsOpen;
+    const isAnyFormOpen = isExpenseSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen || isLoanSheetOpen || isBalanceEditDrawerOpen;
+    const isAnySpecializedOpen = isSubRecordSheetOpen || isGoalProgressSheetOpen || useUIStore.getState().isLoanLinkerOpen;
+
+    const stackedStyle = cn(
+        "transition-all duration-500 ease-in-out origin-bottom",
+        "data-[stack-level='1']:-translate-y-6 data-[stack-level='1']:scale-[0.97] data-[stack-level='1']:opacity-80 data-[stack-level='1']:brightness-[0.9] data-[stack-level='1']:pointer-events-none",
+        "data-[stack-level='2']:-translate-y-12 data-[stack-level='2']:scale-[0.94] data-[stack-level='2']:opacity-60 data-[stack-level='2']:brightness-[0.8] data-[stack-level='2']:pointer-events-none",
+        "data-[stack-level='3']:-translate-y-18 data-[stack-level='3']:scale-[0.91] data-[stack-level='3']:opacity-40 data-[stack-level='3']:brightness-[0.7] data-[stack-level='3']:pointer-events-none"
+    );
+
+    const getStackLevel = () => {
+        let level = 0;
+        if (isAnySpecializedOpen) level += 1;
+        if (isAnyFormOpen) level += 1;
+        if (isAnyDetailOpen) level += 1;
+        return Math.min(level, 3);
+    };
 
     const handleAdd = async () => {
         if (!newCategoryName.trim()) return;
@@ -103,7 +127,11 @@ export function CategoryManagementDrawer() {
         <Sheet open={isCategoryManagementOpen} onOpenChange={(open) => !open && closeCategoryManagement()}>
             <SheetContent 
                 side="bottom" 
-                className="max-h-[92dvh] h-auto rounded-t-xl p-0 glass overflow-hidden z-[60] flex flex-col"
+                className={cn(
+                    "max-h-[92dvh] h-auto rounded-t-xl p-0 glass overflow-hidden z-[60] flex flex-col",
+                    stackedStyle
+                )}
+                data-stack-level={getStackLevel()}
             >
                 <div className="absolute top-0 left-0 right-0 h-32 opacity-10 blur-3xl pointer-events-none bg-primary" />
                 <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10 shrink-0" />
@@ -150,7 +178,6 @@ export function CategoryManagementDrawer() {
                         </div>
                     )}
 
-                    {/* Category List */}
                     {/* Category List */}
                     <div className="space-y-3">
                         {(() => {

@@ -6,20 +6,36 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { Button } from '@/components/ui/button';
 import { Plus, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/lib/utils';
 
 export function RecurringPaymentsListDrawer() {
-    const { isRecurringPaymentsListOpen, closeRecurringPaymentsList, openAddRecurringPayment, openEditRecurringPayment } = useUIStore();
+    const { 
+        isRecurringPaymentsListOpen, closeRecurringPaymentsList, openAddRecurringPayment, openEditRecurringPayment,
+        isGoalRecordsSheetOpen, isBudgetRecordsSheetOpen, isLoanRecordsSheetOpen,
+        isExpenseSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isGoalSheetOpen, isLoanSheetOpen,
+        isSubRecordSheetOpen, isGoalProgressSheetOpen, isBalanceEditDrawerOpen
+    } = useUIStore();
     const { t } = useTranslation();
 
     const recurringPayments = useLiveQuery(async () => {
         return await db.recurringPayments.orderBy('nextDueDate').toArray();
     });
 
+    const isAnyHigherOpen = isGoalRecordsSheetOpen || isBudgetRecordsSheetOpen || isLoanRecordsSheetOpen || 
+                             isExpenseSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || 
+                             isGoalSheetOpen || isLoanSheetOpen || isSubRecordSheetOpen || isGoalProgressSheetOpen || isBalanceEditDrawerOpen;
+
+    const stackedStyle = "transition-all duration-500 ease-in-out data-[stacked=true]:-translate-y-4 data-[stacked=true]:scale-[0.94] data-[stacked=true]:opacity-40 data-[stacked=true]:pointer-events-none data-[stacked=true]:brightness-50 data-[stacked=true]:blur-[0.5px]";
+
     return (
         <Sheet open={isRecurringPaymentsListOpen} onOpenChange={(open) => !open && closeRecurringPaymentsList()}>
             <SheetContent 
                 side="bottom" 
-                className="max-h-[92dvh] h-auto rounded-t-xl p-0 glass overflow-hidden z-[60] flex flex-col"
+                className={cn(
+                    "max-h-[92dvh] h-auto rounded-t-xl p-0 glass overflow-hidden z-[60] flex flex-col",
+                    stackedStyle
+                )}
+                data-stacked={isAnyHigherOpen}
             >
                 <div className="absolute top-0 left-0 right-0 h-32 opacity-10 blur-3xl pointer-events-none bg-primary" />
                 <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10 shrink-0" />
@@ -57,7 +73,7 @@ export function RecurringPaymentsListDrawer() {
                             </Button>
                         </div>
                     ) : (
-                        <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 pb-8">
+                        <div className="flex-1 pr-1 flex flex-col gap-3 pb-8">
                             <div className="grid grid-cols-1 gap-3">
                                 {recurringPayments.map(payment => (
                                     <RecurringPaymentCard

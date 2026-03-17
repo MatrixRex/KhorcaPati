@@ -35,6 +35,8 @@ interface UIState {
     isBalanceEditDrawerOpen: boolean;
     isCategoryRecordsOpen: boolean;
     categoryForRecords?: string;
+    isLoanLinkerOpen: boolean;
+    setLoanLinkerOpen: (isOpen: boolean) => void;
     selectedInventoryItem: string | null;
     returnPath: string | null;
     theme: Theme;
@@ -120,6 +122,7 @@ export const useUIStore = create<UIState>()(
             isCategoryManagementOpen: false,
             isBalanceEditDrawerOpen: false,
             isCategoryRecordsOpen: false,
+            isLoanLinkerOpen: false,
             selectedInventoryItem: null,
             returnPath: null,
             theme: 'system',
@@ -145,7 +148,8 @@ export const useUIStore = create<UIState>()(
                         state.isLoansListOpen ||
                         state.isCategoryManagementOpen ||
                         state.isBalanceEditDrawerOpen ||
-                        state.isCategoryRecordsOpen;
+                        state.isCategoryRecordsOpen ||
+                        state.isLoanLinkerOpen;
             },
 
             openAddExpense: (parentId, loanId) => set({
@@ -344,6 +348,10 @@ export const useUIStore = create<UIState>()(
             closeCategoryRecords: () => set({
                 isCategoryRecordsOpen: false,
                 categoryForRecords: undefined
+            }),
+
+            setLoanLinkerOpen: (isOpen) => set({
+                isLoanLinkerOpen: isOpen
             }),
 
             setSelectedInventoryItem: (name) => set({

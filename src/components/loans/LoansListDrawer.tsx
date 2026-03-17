@@ -6,21 +6,50 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { Button } from '@/components/ui/button';
 import { Plus, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/lib/utils';
 
 export function LoansListDrawer() {
-    const { isLoansListOpen, closeLoansList, openAddLoan, openEditLoan } = useUIStore();
+    const { 
+        isLoansListOpen, closeLoansList, openAddLoan, openLoanRecords,
+        isGoalRecordsSheetOpen, isBudgetRecordsSheetOpen, isLoanRecordsSheetOpen,
+        isExpenseSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isGoalSheetOpen, isLoanSheetOpen,
+        isSubRecordSheetOpen, isGoalProgressSheetOpen, isBalanceEditDrawerOpen
+    } = useUIStore();
     const { t } = useTranslation();
 
     const loans = useLiveQuery(async () => {
         return await db.loans.orderBy('createdAt').reverse().toArray();
     });
 
+    const isAnyDetailOpen = isGoalRecordsSheetOpen || isBudgetRecordsSheetOpen || isLoanRecordsSheetOpen || useUIStore.getState().isCategoryRecordsOpen;
+    const isAnyFormOpen = isExpenseSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen || isLoanSheetOpen || isBalanceEditDrawerOpen;
+    const isAnySpecializedOpen = isSubRecordSheetOpen || isGoalProgressSheetOpen || useUIStore.getState().isLoanLinkerOpen;
+
+    const stackedStyle = cn(
+        "transition-all duration-500 ease-in-out origin-bottom",
+        "data-[stack-level='1']:-translate-y-6 data-[stack-level='1']:scale-[0.97] data-[stack-level='1']:opacity-80 data-[stack-level='1']:brightness-[0.9] data-[stack-level='1']:pointer-events-none",
+        "data-[stack-level='2']:-translate-y-12 data-[stack-level='2']:scale-[0.94] data-[stack-level='2']:opacity-60 data-[stack-level='2']:brightness-[0.8] data-[stack-level='2']:pointer-events-none",
+        "data-[stack-level='3']:-translate-y-18 data-[stack-level='3']:scale-[0.91] data-[stack-level='3']:opacity-40 data-[stack-level='3']:brightness-[0.7] data-[stack-level='3']:pointer-events-none"
+    );
+
+    const getStackLevel = () => {
+        let level = 0;
+        if (isAnySpecializedOpen) level += 1;
+        if (isAnyFormOpen) level += 1;
+        if (isAnyDetailOpen) level += 1;
+        return Math.min(level, 3);
+    };
+
     return (
         <Sheet open={isLoansListOpen} onOpenChange={(open) => !open && closeLoansList()}>
-            <SheetContent 
-                side="bottom" 
-                className="max-h-[92dvh] h-auto rounded-t-xl p-0 glass overflow-hidden z-[60] flex flex-col"
-            >
+                <SheetContent 
+                    side="bottom" 
+                    className={cn(
+                        "max-h-[92dvh] h-auto rounded-t-xl p-0 glass overflow-hidden z-[60] flex flex-col",
+                        stackedStyle
+                    )}
+                    data-stack-level={getStackLevel()}
+                >
                 <div className="absolute top-0 left-0 right-0 h-32 opacity-10 blur-3xl pointer-events-none bg-primary" />
                 <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10 shrink-0" />
                 <div className="flex-1 overflow-y-auto px-6 pb-12 relative z-10" data-scroll-container>
@@ -57,13 +86,13 @@ export function LoansListDrawer() {
                             </Button>
                         </div>
                     ) : (
-                        <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 pb-8">
+                        <div className="flex-1 pr-1 flex flex-col gap-3 pb-8">
                             <div className="grid grid-cols-1 gap-3">
                                 {loans.map(loan => (
                                     <LoanCard
                                         key={loan.id}
                                         loan={loan}
-                                        onClick={() => openEditLoan(loan)}
+                                        onClick={() => openLoanRecords(loan)}
                                     />
                                 ))}
                             </div>

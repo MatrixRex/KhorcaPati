@@ -358,6 +358,13 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                         onClick={() => {
                             setMode('regular');
                             form.setValue('loanId', null, { shouldDirty: true });
+                            
+                            // Reset category to default if it's currently a debt category
+                            const currentCategory = form.getValues('category');
+                            if (['Lent', 'Borrowed', 'Debt'].includes(currentCategory)) {
+                                const defaultCat = categories.find(c => c.isDefault);
+                                form.setValue('category', defaultCat?.name || 'Unlisted', { shouldDirty: true });
+                            }
                         }}
                         className={cn(
                             "px-3 py-1 text-[10px] font-black uppercase tracking-tight rounded-lg transition-all",

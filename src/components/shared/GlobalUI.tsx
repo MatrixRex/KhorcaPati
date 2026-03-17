@@ -47,9 +47,28 @@ export function GlobalUI() {
         isGoalsListOpen,
         isLoansListOpen,
         isCategoryManagementOpen,
-        theme, expenseSessionId, subSessionId
+        isLoanLinkerOpen,
+        theme, expenseSessionId, subSessionId,
+        isBalanceEditDrawerOpen
     } = useUIStore();
     const { categories, ensureDefaultCategory, loadCategories } = useCategoryStore();
+
+    // DX Refinement: Multi-Level Stacked Drawer Effect Logic
+    const isAnyFormOpen = isExpenseSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen || isLoanSheetOpen || isBalanceEditDrawerOpen;
+    const isAnySpecializedOpen = isSubRecordSheetOpen || isGoalProgressSheetOpen || isLoanLinkerOpen;
+
+    const stackedStyle = cn(
+        "transition-all duration-500 ease-in-out origin-bottom pointer-events-auto",
+        "data-[stack-level='1']:-translate-y-6 data-[stack-level='1']:scale-[0.97] data-[stack-level='1']:opacity-80 data-[stack-level='1']:brightness-[0.9] data-[stack-level='1']:pointer-events-none",
+        "data-[stack-level='2']:-translate-y-12 data-[stack-level='2']:scale-[0.94] data-[stack-level='2']:opacity-60 data-[stack-level='2']:brightness-[0.8] data-[stack-level='2']:pointer-events-none",
+        "data-[stack-level='3']:-translate-y-18 data-[stack-level='3']:scale-[0.91] data-[stack-level='3']:opacity-40 data-[stack-level='3']:brightness-[0.7] data-[stack-level='3']:pointer-events-none"
+    );
+
+    const getFormStackLevel = () => isAnySpecializedOpen ? 1 : 0;
+    const getDetailStackLevel = () => {
+        if (isAnySpecializedOpen) return isAnyFormOpen ? 2 : 1;
+        return isAnyFormOpen ? 1 : 0;
+    };
 
     useEffect(() => {
         const root = window.document.documentElement;
@@ -123,7 +142,7 @@ export function GlobalUI() {
         <>
             {showFAB && (
                 <Button
-                    className="fixed bottom-20 right-4 h-14 w-14 rounded-full z-50 bg-primary text-primary-foreground shadow-2xl shadow-primary/40 active:scale-[0.9] transition-all duration-300 border-2 border-foreground/20"
+                    className="absolute bottom-20 right-4 h-14 w-14 rounded-full z-50 bg-primary text-primary-foreground shadow-2xl shadow-primary/40 active:scale-[0.9] transition-all duration-300 border-2 border-foreground/20"
                     onClick={() => openAddExpense()}
                 >
                     <Plus className="w-7 h-7 stroke-[3]" />
@@ -143,8 +162,12 @@ export function GlobalUI() {
             <Sheet open={isGoalRecordsSheetOpen} onOpenChange={(open) => !open && closeGoalRecordsSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto rounded-t-xl p-0 glass overflow-hidden z-50 flex flex-col"
-                    style={{ background: 'linear-gradient(to bottom, var(--primary)08, transparent)' }}
+                    className={cn(
+                        "max-h-[92dvh] h-auto rounded-t-xl p-0 glass backdrop-blur-xl overflow-hidden z-70 flex flex-col",
+                        stackedStyle
+                    )}
+                    data-stack-level={getDetailStackLevel()}
+                    style={{ background: 'linear-gradient(to bottom, color-mix(in oklch, var(--primary), transparent 95%), transparent)' }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-10 blur-3xl pointer-events-none bg-primary" />
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10 shrink-0" />
@@ -201,8 +224,12 @@ export function GlobalUI() {
             <Sheet open={isBudgetRecordsSheetOpen} onOpenChange={(open) => !open && closeBudgetRecordsSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto rounded-t-xl p-0 glass overflow-hidden z-50 flex flex-col"
-                    style={{ background: `linear-gradient(to bottom, ${budgetColor}12, transparent)` }}
+                    className={cn(
+                        "max-h-[92dvh] h-auto rounded-t-xl p-0 glass backdrop-blur-xl overflow-hidden z-70 flex flex-col",
+                        stackedStyle
+                    )}
+                    data-stack-level={getDetailStackLevel()}
+                    style={{ background: `linear-gradient(to bottom, color-mix(in srgb, ${budgetColor}, transparent 93%), transparent)` }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-15 blur-3xl pointer-events-none" style={{ backgroundColor: budgetColor }} />
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10 shrink-0" />
@@ -252,8 +279,12 @@ export function GlobalUI() {
             <Sheet open={isLoanRecordsSheetOpen} onOpenChange={(open) => !open && closeLoanRecordsSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto rounded-t-xl p-0 glass overflow-hidden z-50 flex flex-col"
-                    style={{ background: `linear-gradient(to bottom, ${loanColor}12, transparent)` }}
+                    className={cn(
+                        "max-h-[92dvh] h-auto rounded-t-xl p-0 glass backdrop-blur-xl overflow-hidden z-70 flex flex-col",
+                        stackedStyle
+                    )}
+                    data-stack-level={getDetailStackLevel()}
+                    style={{ background: `linear-gradient(to bottom, color-mix(in srgb, ${loanColor}, transparent 93%), transparent)` }}
                 >
                     <div className="absolute top-0 left-0 right-0 h-32 opacity-15 blur-3xl pointer-events-none" style={{ backgroundColor: loanColor }} />
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 relative z-10 shrink-0" />
@@ -318,7 +349,11 @@ export function GlobalUI() {
             <Sheet open={isExpenseSheetOpen} onOpenChange={(open) => !open && handleCloseExpense()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto rounded-t-xl p-0 glass z-[60] flex flex-col overflow-hidden"
+                    className={cn(
+                        "max-h-[92dvh] h-auto rounded-t-xl p-0 glass backdrop-blur-xl z-80 flex flex-col overflow-hidden",
+                        stackedStyle
+                    )}
+                    data-stack-level={getFormStackLevel()}
                 >
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
                     <div className="flex-1 overflow-y-auto px-6 pb-6 pt-2" data-scroll-container>
@@ -339,7 +374,7 @@ export function GlobalUI() {
             <Sheet open={isSubRecordSheetOpen} onOpenChange={(open) => !open && handleCloseSubRecord()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[85dvh] h-auto rounded-t-xl p-0 glass z-[70] overflow-hidden flex flex-col"
+                    className="max-h-[85dvh] h-auto rounded-t-xl p-0 w-full max-w-md mx-auto glass backdrop-blur-xl z-[90] overflow-hidden flex flex-col"
                 >
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
                     <div className="flex-1 overflow-y-auto px-6 pb-6 pt-2" data-scroll-container>
@@ -359,7 +394,11 @@ export function GlobalUI() {
             <Sheet open={isRecurringPaymentSheetOpen} onOpenChange={(open) => !open && closeRecurringPaymentSheet()}>
                 <SheetContent
                     side="bottom"
-                    className="max-h-[92dvh] h-auto rounded-t-xl p-0 w-full max-w-md mx-auto glass z-[60] flex flex-col overflow-hidden"
+                    className={cn(
+                        "max-h-[92dvh] h-auto rounded-t-xl p-0 w-full max-w-md mx-auto glass backdrop-blur-xl z-80 flex flex-col overflow-hidden",
+                        stackedStyle
+                    )}
+                    data-stack-level={getFormStackLevel()}
                 >
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
                     <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8" data-scroll-container>
@@ -380,7 +419,11 @@ export function GlobalUI() {
             <Sheet open={isBudgetSheetOpen} onOpenChange={(open) => !open && closeBudgetSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto rounded-t-xl p-0 w-full max-w-md mx-auto glass z-[60] flex flex-col overflow-hidden"
+                    className={cn(
+                        "max-h-[92dvh] h-auto rounded-t-xl p-0 glass backdrop-blur-xl z-80 flex flex-col overflow-hidden",
+                        stackedStyle
+                    )}
+                    data-stack-level={getFormStackLevel()}
                 >
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
                     <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8 text-foreground" data-scroll-container>
@@ -401,7 +444,11 @@ export function GlobalUI() {
             <Sheet open={isGoalSheetOpen} onOpenChange={(open) => !open && closeGoalSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto rounded-t-xl p-0 w-full max-w-md mx-auto glass z-[60] flex flex-col overflow-hidden"
+                    className={cn(
+                        "max-h-[92dvh] h-auto rounded-t-xl p-0 glass backdrop-blur-xl z-80 flex flex-col overflow-hidden",
+                        stackedStyle
+                    )}
+                    data-stack-level={getFormStackLevel()}
                 >
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
                     <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8 text-foreground" data-scroll-container>
@@ -422,10 +469,9 @@ export function GlobalUI() {
             <Sheet open={isGoalProgressSheetOpen} onOpenChange={(open) => !open && closeGoalProgressSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto rounded-t-[32px] p-0 w-full max-w-md mx-auto pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[60] flex flex-col"
+                    className="max-h-[92dvh] h-auto rounded-[32px] p-0 pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[90] flex flex-col"
                     style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
                 >
-                    <div className="absolute top-0 left-0 right-0 h-32 opacity-5 blur-3xl pointer-events-none bg-white" />
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
                     <div className="flex-1 overflow-y-auto px-6 pt-2 pb-12 text-foreground" data-scroll-container>
                         <SheetHeader className="mb-4 text-left p-0">
@@ -445,7 +491,11 @@ export function GlobalUI() {
             <Sheet open={isLoanSheetOpen} onOpenChange={(open) => !open && closeLoanSheet()}>
                 <SheetContent 
                     side="bottom" 
-                    className="max-h-[92dvh] h-auto rounded-t-xl p-0 w-full max-w-md mx-auto glass z-[60] flex flex-col overflow-hidden"
+                    className={cn(
+                        "max-h-[92dvh] h-auto rounded-t-xl p-0 w-full max-w-md mx-auto glass backdrop-blur-xl z-80 flex flex-col overflow-hidden",
+                        stackedStyle
+                    )}
+                    data-stack-level={getFormStackLevel()}
                 >
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
                     <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8 text-foreground" data-scroll-container>

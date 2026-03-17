@@ -31,9 +31,23 @@ export const useLoanStore = create<LoanState>(() => ({
 
     deleteLoan: async (id) => {
         try {
-            await db.transaction('rw', db.loans, db.expenses, async () => {
-                // Unlink all expenses linked to this loan
-                await db.expenses.where('loanId').equals(id).modify({ loanId: null });
+            await db.transaction('rw', [db.loans, db.expenses, db.categories], async () => {
+                // Find the default category name
+                const defaultCat = await db.categories.where('isDefault').equals(1).first();
+                const defaultCategoryName = defaultCat?.name || 'Unlisted';
+
+                // Update category and unlink all expenses linked to this loan
+                // only if the category is one of the system debt categories
+                await db.expenses
+                    .where('loanId')
+                    .equals(id)
+                    .modify((expense) => {
+                        expense.loanId = null;
+                        if (['Lent', 'Borrowed', 'Debt'].includes(expense.category)) {
+                            expense.category = defaultCategoryName;
+                        }
+                    });
+
                 await db.loans.delete(id);
             });
         } catch (error) {

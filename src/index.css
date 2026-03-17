@@ -41,8 +41,8 @@
   --ring: oklch(0.15 0 0 / 20%);
 
   /* --- Glassmorphism Tokens --- */
-  --glass-background: oklch(1 0 0 / 68%);
-  --glass-border: oklch(1 0 0 / 50%);
+  --glass-background: rgba(255, 255, 255, 0.68);
+  --glass-border: rgba(255, 255, 255, 0.5);
   --glass-blur: 32px;
   --glass-inner-glow: rgba(255, 255, 255, 0.5);
 
@@ -112,8 +112,8 @@
   --input: oklch(0.24 0 0);
   --ring: oklch(1 0 0 / 20%);
 
-  --glass-background: oklch(0.16 0 0 / 70%);
-  --glass-border: oklch(1 0 0 / 15%);
+  --glass-background: rgba(15, 23, 42, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
   --glass-inner-glow: rgba(255, 255, 255, 0.1);
 
   --sidebar: oklch(0.14 0 0);
@@ -262,26 +262,21 @@
   }
 
   .glass {
+    @apply backdrop-blur-xl;
     background-color: var(--glass-background) !important;
     border: 1px solid var(--glass-border);
-    backdrop-filter: blur(var(--glass-blur)) saturate(220%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(220%);
-    transform: translateZ(0);
     box-shadow: 
       0 -10px 40px -20px rgba(0, 0, 0, 0.2),
       inset 0 1px 0 0 var(--glass-inner-glow);
   }
 
   .glass-card {
+    @apply backdrop-blur-xl rounded-2xl;
     background-color: var(--glass-background);
     border: 1px solid var(--glass-border);
-    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-    transform: translateZ(0);
     box-shadow: 
       0 12px 40px -12px rgba(0, 0, 0, 0.08),
       inset 0 1px 0 0 var(--glass-inner-glow);
-    @apply rounded-2xl;
   }
 
   .text-balance {

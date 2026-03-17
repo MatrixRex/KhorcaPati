@@ -60,39 +60,41 @@ function AppContent() {
 
   return (
     <div className="flex flex-col h-screen bg-transparent text-foreground overflow-hidden">
-      <main className={cn(
-        "flex-1 w-full max-w-md mx-auto relative overflow-hidden transition-all duration-300",
-        shouldBlur ? "blur-[2px] scale-[0.98] opacity-60" : "blur-0 scale-100 opacity-100"
-      )}>
-        <AnimatePresence mode="popLayout" initial={false}>
-          <motion.div
-            key={location.pathname}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="w-full h-full"
-          >
-            <Routes location={location}>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/expenses" element={<Expenses />} />
-              <Route path="/items" element={<Items />} />
-              <Route path="/budgets" element={<Budgets />} />
-              <Route path="/goals" element={<Goals />} />
-              <Route path="/loans" element={<Loans />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </motion.div>
-        </AnimatePresence>
-      </main>
+      <div className="flex-1 w-full max-w-[480px] mx-auto relative overflow-hidden flex flex-col bg-background/80 shadow-2xl shadow-black/20 border-x border-foreground/5">
+        <main className={cn(
+          "flex-1 w-full relative overflow-hidden transition-all duration-300",
+          shouldBlur ? "blur-[2px] scale-[0.98] opacity-60" : "blur-0 scale-100 opacity-100"
+        )}>
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="w-full h-full"
+            >
+              <Routes location={location}>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/expenses" element={<Expenses />} />
+                <Route path="/items" element={<Items />} />
+                <Route path="/budgets" element={<Budgets />} />
+                <Route path="/goals" element={<Goals />} />
+                <Route path="/loans" element={<Loans />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </motion.div>
+          </AnimatePresence>
+        </main>
 
-      <NotificationManager />
-      <GlobalUI />
-      <ReloadPrompt />
-      <WelcomeModal />
-      <BottomNav />
+        <NotificationManager />
+        <GlobalUI />
+        <ReloadPrompt />
+        <WelcomeModal />
+        <BottomNav />
+      </div>
     </div>
   );
 }

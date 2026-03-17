@@ -13,6 +13,16 @@ import { type Goal } from '@/db/schema';
 import { NumberPad } from '@/components/shared/NumberPad';
 import { Calculator } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const goalSchema = z.object({
     title: z.string().min(1, 'Title is required'),
@@ -34,7 +44,9 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
     const { t } = useTranslation();
     const addGoal = useGoalStore((state) => state.addGoal);
     const updateGoal = useGoalStore((state) => state.updateGoal);
+    const deleteGoal = useGoalStore((state) => state.deleteGoal);
     const [activeField, setActiveField] = useState<'target' | 'current' | null>(null);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
     const form = useForm<GoalFormValues>({
         resolver: zodResolver(goalSchema),
@@ -68,8 +80,20 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
         }
     };
 
+    const handleDelete = async () => {
+        if (!initialData?.id) return;
+        try {
+            await deleteGoal(initialData.id);
+            setShowDeleteDialog(false);
+            onSuccess?.();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     return (
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
                 <Label htmlFor="title">{t('goalTitle')}</Label>
                 <Input 
@@ -180,6 +204,38 @@ export function GoalForm({ initialData, onSuccess, onCancel }: GoalFormProps) {
                     </Button>
                 )}
             </div>
+
+            {initialData?.id && (
+                <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full btn-destructive-premium"
+                    onClick={() => setShowDeleteDialog(true)}
+                >
+                    {t('deleteGoal')}
+                </Button>
+            )}
         </form>
+
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogContent className="w-[90%] rounded-xl">
+                <AlertDialogHeader>
+                    <AlertDialogTitle>{t('deleteGoalQuestion')}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {t('deleteGoalDescription', { title: initialData?.title })}
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex-row gap-2 mt-4">
+                    <AlertDialogCancel className="flex-1 mt-0 btn-secondary-premium !h-10">{t('cancel')}</AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={handleDelete}
+                        className="flex-1 btn-destructive-premium !h-10"
+                    >
+                        {t('deleteRecord')}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        </>
     );
 }

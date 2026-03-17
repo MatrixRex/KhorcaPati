@@ -37,7 +37,7 @@ export function ReloadPrompt() {
     if (!isVisible) return null;
 
     return (
-        <div className="fixed bottom-24 left-4 right-4 z-[100] animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="absolute bottom-24 left-4 right-4 z-[100] animate-in fade-in slide-in-from-bottom-4 duration-300">
             <div className={`bg-card/95 backdrop-blur-md border border-border shadow-2xl rounded-2xl p-4 flex flex-col gap-4 transition-all duration-300 ${isEditing ? 'opacity-90 grayscale-[0.2]' : ''}`}>
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">

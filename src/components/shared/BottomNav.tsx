@@ -15,8 +15,8 @@ export function BottomNav() {
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 glass border-t-0 h-nav pointer-events-auto shadow-2xl shadow-black/10">
-            <ul className="flex items-center justify-around h-full max-w-md mx-auto">
+        <nav className="absolute bottom-0 left-0 right-0 z-50 glass backdrop-blur-xl border-t-0 h-nav pointer-events-auto shadow-2xl shadow-black/10">
+            <ul className="flex items-center justify-around h-full w-full mx-auto">
                 {navItems.map((item) => (
                     <li key={item.path} className="flex-1">
                         <NavLink

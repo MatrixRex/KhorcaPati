@@ -1,8 +1,10 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { GoalCard } from './GoalCard';
+import { useUIStore } from '@/stores/uiStore';
 
 export function GoalList() {
+    const { openGoalRecords } = useUIStore();
     const goals = useLiveQuery(
         () => db.goals.orderBy('createdAt').reverse().toArray()
     );
@@ -27,6 +29,7 @@ export function GoalList() {
                 <GoalCard
                     key={goal.id}
                     goal={goal}
+                    onClick={() => openGoalRecords(goal)}
                 />
             ))}
         </div>

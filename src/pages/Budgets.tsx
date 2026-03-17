@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 
 export default function Budgets() {
     const { t } = useTranslation();
-    const { openAddBudget, openEditBudget } = useUIStore();
+    const { openAddBudget, openBudgetRecords } = useUIStore();
 
     return (
         <PageContainer
@@ -21,7 +21,7 @@ export default function Budgets() {
             }
         >
             <div className="flex-1">
-                <BudgetList onEdit={openEditBudget} />
+                <BudgetList onClick={openBudgetRecords} />
             </div>
         </PageContainer>
     );

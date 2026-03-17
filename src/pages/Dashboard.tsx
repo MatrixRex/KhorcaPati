@@ -28,7 +28,10 @@ export default function Dashboard() {
         openBudgetsList,
         openGoalsList,
         openLoansList,
-        openBalanceEdit
+        openBalanceEdit,
+        openBudgetRecords,
+        openGoalRecords,
+        openLoanRecords
     } = useUIStore();
     const { initialBalance } = useSettingsStore();
 
@@ -193,7 +196,7 @@ export default function Dashboard() {
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {budgets.map(budget => (
-                            <BudgetCard key={budget.id} budget={budget} />
+                            <BudgetCard key={budget.id} budget={budget} onClick={() => openBudgetRecords(budget)} />
                         ))}
                     </div>
                 )}
@@ -217,7 +220,7 @@ export default function Dashboard() {
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {activeGoals.map(goal => (
-                            <GoalCard key={goal.id} goal={goal} />
+                            <GoalCard key={goal.id} goal={goal} onClick={() => openGoalRecords(goal)} />
                         ))}
                     </div>
                 )}
@@ -241,7 +244,7 @@ export default function Dashboard() {
                 ) : (
                     <div className="flex flex-col gap-[var(--item-gap)]">
                         {activeLoans.map(loan => (
-                            <LoanCard key={loan.id} loan={loan} />
+                            <LoanCard key={loan.id} loan={loan} onClick={() => openLoanRecords(loan)} />
                         ))}
                     </div>
                 )}

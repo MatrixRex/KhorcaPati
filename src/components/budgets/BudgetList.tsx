@@ -1,12 +1,14 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Budget } from '@/db/schema';
 import { BudgetCard } from './BudgetCard';
+import { useUIStore } from '@/stores/uiStore';
 
 interface BudgetListProps {
-    onEdit?: (budget: Budget) => void;
+    onClick?: (budget: Budget) => void;
 }
 
-export function BudgetList({ onEdit }: BudgetListProps) {
+export function BudgetList({ onClick }: BudgetListProps) {
+    const { openBudgetRecords } = useUIStore();
     const budgets = useLiveQuery(() => db.budgets.toArray());
 
     if (!budgets) {
@@ -29,7 +31,7 @@ export function BudgetList({ onEdit }: BudgetListProps) {
                 <BudgetCard
                     key={budget.id}
                     budget={budget}
-                    onClick={() => onEdit?.(budget)}
+                    onClick={() => onClick ? onClick(budget) : openBudgetRecords(budget)}
                 />
             ))}
         </div>

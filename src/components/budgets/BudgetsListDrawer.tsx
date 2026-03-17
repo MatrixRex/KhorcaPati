@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 
 export function BudgetsListDrawer() {
     const { 
-        isBudgetsListOpen, closeBudgetsList, openAddBudget, openEditBudget,
+        isBudgetsListOpen, closeBudgetsList, openAddBudget, openBudgetRecords,
         isGoalRecordsSheetOpen, isBudgetRecordsSheetOpen, isLoanRecordsSheetOpen,
         isExpenseSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isGoalSheetOpen, isLoanSheetOpen,
         isSubRecordSheetOpen, isGoalProgressSheetOpen, isBalanceEditDrawerOpen
@@ -92,7 +92,7 @@ export function BudgetsListDrawer() {
                                     <BudgetCard
                                         key={budget.id}
                                         budget={budget}
-                                        onClick={() => openEditBudget(budget)}
+                                        onClick={() => openBudgetRecords(budget)}
                                     />
                                 ))}
                             </div>

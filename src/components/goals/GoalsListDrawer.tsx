@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 
 export function GoalsListDrawer() {
     const { 
-        isGoalsListOpen, closeGoalsList, openAddGoal, openEditGoal,
+        isGoalsListOpen, closeGoalsList, openAddGoal, openGoalRecords,
         isGoalRecordsSheetOpen, isBudgetRecordsSheetOpen, isLoanRecordsSheetOpen,
         isExpenseSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isGoalSheetOpen, isLoanSheetOpen,
         isSubRecordSheetOpen, isGoalProgressSheetOpen, isBalanceEditDrawerOpen
@@ -92,7 +92,7 @@ export function GoalsListDrawer() {
                                     <GoalCard
                                         key={goal.id}
                                         goal={goal}
-                                        onClick={() => openEditGoal(goal)}
+                                        onClick={() => openGoalRecords(goal)}
                                     />
                                 ))}
                             </div>

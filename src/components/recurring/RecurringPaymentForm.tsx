@@ -88,16 +88,22 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
     };
 
     const handleConfirm = async () => {
-        if (!initialData) return;
+        const formData = form.getValues();
+        const id = currentId || initialData?.id;
+        if (!id) return;
 
         try {
+            await performSave(formData);
+            const currentRecord = await db.recurringPayments.get(id);
+            if (!currentRecord) return;
+
             // 1. Create Expense
             await addExpense({
-                amount: initialData.amount,
-                type: initialData.type,
-                category: initialData.category,
+                amount: currentRecord.amount,
+                type: currentRecord.type,
+                category: currentRecord.category,
                 date: format(new Date(), 'yyyy-MM-dd'), // Confirming now
-                note: initialData.note || '',
+                note: currentRecord.note || '',
                 isRecurring: false, // This specific entry isn't recurring
                 recurringInterval: null,
                 recurringNextDue: null,
@@ -110,12 +116,12 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
             });
 
             // 2. Update or Delete Recurring Payment
-            if (initialData.interval === 'one-time') {
-                await deleteRecurringPayment(initialData.id!);
+            if (currentRecord.interval === 'one-time') {
+                await deleteRecurringPayment(id);
             } else {
-                const currentNext = parseISO(initialData.nextDueDate);
-                const nextDate = getNextDueDate(currentNext, initialData.interval);
-                await updateRecurringPayment(initialData.id!, {
+                const currentNext = parseISO(currentRecord.nextDueDate);
+                const nextDate = getNextDueDate(currentNext, currentRecord.interval);
+                await updateRecurringPayment(id, {
                     nextDueDate: format(nextDate, 'yyyy-MM-dd')
                 });
             }
@@ -126,15 +132,21 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
     };
 
     const handleSkip = async () => {
-        if (!initialData) return;
+        const formData = form.getValues();
+        const id = currentId || initialData?.id;
+        if (!id) return;
 
         try {
-            if (initialData.interval === 'one-time') {
-                await deleteRecurringPayment(initialData.id!);
+            await performSave(formData);
+            const currentRecord = await db.recurringPayments.get(id);
+            if (!currentRecord) return;
+
+            if (currentRecord.interval === 'one-time') {
+                await deleteRecurringPayment(id);
             } else {
-                const currentNext = parseISO(initialData.nextDueDate);
-                const nextDate = getNextDueDate(currentNext, initialData.interval);
-                await updateRecurringPayment(initialData.id!, {
+                const currentNext = parseISO(currentRecord.nextDueDate);
+                const nextDate = getNextDueDate(currentNext, currentRecord.interval);
+                await updateRecurringPayment(id, {
                     nextDueDate: format(nextDate, 'yyyy-MM-dd')
                 });
             }
@@ -169,7 +181,13 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
             // Calculate next due date if creating new
             // For now, nextDueDate = startDate
             // When user confirms a payment, we calculate the next one.
-            const nextDueDate = initialData?.nextDueDate || data.startDate;
+            // Calculate next due date
+            // If creating new, nextDueDate = startDate
+            // If editing, we keep nextDueDate UNLESS the user explicitly changed startDate
+            let nextDueDate = initialData?.nextDueDate || data.startDate;
+            if (initialData && data.startDate !== initialData.startDate) {
+                nextDueDate = data.startDate;
+            }
 
             const payload: Omit<RecurringPayment, 'id'> = {
                 ...data,
@@ -339,7 +357,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 form.handleSubmit(performSave)();
                             }}
                         >
-                            <SelectTrigger className="input-glass">
+                            <SelectTrigger className="w-full !h-12 !rounded-xl text-base input-glass">
                                 <SelectValue placeholder={t('selectInterval')} />
                             </SelectTrigger>
                             <SelectContent>

@@ -630,7 +630,7 @@ const resources = {
       "startDate": "শুরুর তারিখ",
       "interval": "বিরতি",
       "confirmPayment": "পেমেন্ট নিশ্চিত করুন",
-      "skipNext": "পরবর্তী",
+      "skipNext": "এড়িয়ে যান",
       "deleteRecurring": "পেমেন্ট মুছে ফেলুন",
       "allChangesSaved": "সব পরিবর্তন সংরক্ষিত হয়েছে",
       "saving": "সংরক্ষণ হচ্ছে...",

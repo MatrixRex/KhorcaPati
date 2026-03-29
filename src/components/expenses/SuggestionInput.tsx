@@ -227,7 +227,7 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
                     {/* Strip: absolute below the input, width escapes the grid column */}
                     <div
                         className={cn(
-                            'absolute top-full z-50 transition-all duration-200 ease-out',
+                            'absolute top-full z-[150] transition-all duration-200 ease-out',
                             showStrip
                                 ? 'opacity-100 translate-y-0 pointer-events-auto'
                                 : 'opacity-0 -translate-y-1 pointer-events-none'

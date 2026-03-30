@@ -26,9 +26,15 @@ export function ExpenseCard({ expense, onClick }: ExpenseCardProps) {
     const catInfo = categories.find(c => c.name.toLowerCase() === expense.category.toLowerCase());
     const catColor = catInfo?.color || '#3b82f6';
 
-    const subExpenses = useLiveQuery(() =>
-        expense.isNested ? db.expenses.where('parentId').equals(expense.id!).toArray() : []
-        , [expense.isNested, expense.id]);
+    const subExpenses = useLiveQuery(async () => {
+        if (!expense.isNested || !expense.id) return [];
+        const result = await db.expenses.where('parentId').equals(expense.id).toArray();
+        return result.sort((a, b) => {
+            const dateCompare = b.date.localeCompare(a.date);
+            if (dateCompare !== 0) return dateCompare;
+            return (b.id ?? 0) - (a.id ?? 0);
+        });
+    }, [expense.isNested, expense.id]);
 
     const handleToggleExpand = (e: React.MouseEvent) => {
         e.stopPropagation();

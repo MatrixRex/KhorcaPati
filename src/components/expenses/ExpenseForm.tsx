@@ -103,9 +103,15 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
     const addItem = useItemStore((state) => state.addItem);
     const categories = useCategoryStore((state) => state.categories);
 
-    const subExpenses = useLiveQuery(() =>
-        currentId ? db.expenses.where('parentId').equals(currentId).toArray() : []
-        , [currentId]);
+    const subExpenses = useLiveQuery(async () => {
+        if (!currentId) return [];
+        const result = await db.expenses.where('parentId').equals(currentId).toArray();
+        return result.sort((a, b) => {
+            const dateCompare = b.date.localeCompare(a.date);
+            if (dateCompare !== 0) return dateCompare;
+            return (b.id ?? 0) - (a.id ?? 0);
+        });
+    }, [currentId]);
 
     const form = useForm<ExpenseFormValues>({
         resolver: zodResolver(expenseSchema),
@@ -119,7 +125,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             note: initialData?.note || '',
             isRecurring: initialData?.isRecurring || false,
             isNested: initialData?.isNested || false,
-            itemAutoTrack: initialData?.itemAutoTrack ?? true,
+            itemAutoTrack: initialData?.itemAutoTrack ?? false,
             recurringInterval: initialData?.recurringInterval || null,
         },
     });
@@ -838,7 +844,10 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                 <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
                                     {subExpenses && subExpenses.length > 0 ? (
                                         subExpenses.map((sub: Expense) => (
-                                            <div key={sub.id} className="flex flex-col gap-1 p-3 rounded-2xl bg-primary/5 border border-primary/10 group active:scale-[0.98] transition-all cursor-pointer">
+                                            <div key={sub.id} 
+                                                onClick={() => useUIStore.getState().openEditSubRecord(sub)}
+                                                className="flex flex-col gap-1 p-3 rounded-2xl bg-primary/5 border border-primary/10 group active:scale-[0.98] transition-all cursor-pointer"
+                                            >
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex flex-col">
                                                         <span className="text-sm font-black">{sub.note || sub.category}</span>

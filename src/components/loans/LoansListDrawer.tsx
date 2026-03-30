@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { Button } from '@/components/ui/button';
 import { Plus, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { cn } from '@/lib/utils';
+import { cn, formatAmount } from '@/lib/utils';
 
 export function LoansListDrawer() {
     const { 
@@ -20,6 +20,8 @@ export function LoansListDrawer() {
     const loans = useLiveQuery(async () => {
         return await db.loans.orderBy('createdAt').reverse().toArray();
     });
+
+    const totalAmountSum = loans?.reduce((sum, loan) => sum + loan.totalAmount, 0) || 0;
 
     const isAnyDetailOpen = isGoalRecordsSheetOpen || isBudgetRecordsSheetOpen || isLoanRecordsSheetOpen || useUIStore.getState().isCategoryRecordsOpen;
     const isAnyFormOpen = isExpenseSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen || isLoanSheetOpen || isBalanceEditDrawerOpen;
@@ -57,9 +59,14 @@ export function LoansListDrawer() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <SheetTitle className="text-2xl font-black tracking-tight">{t('loans')}</SheetTitle>
-                                <SheetDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
-                                    {loans?.length || 0} {t('totalLoans')}
-                                </SheetDescription>
+                                <div className="flex flex-col gap-0.5 mt-1">
+                                    <div className="text-lg font-black text-primary tracking-tight tabular-nums">
+                                        ৳{formatAmount(totalAmountSum)}
+                                    </div>
+                                    <SheetDescription className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 m-0 leading-none">
+                                        {loans?.length || 0} {t('totalLoans')}
+                                    </SheetDescription>
+                                </div>
                             </div>
                             <Button 
                                 variant="outline" 

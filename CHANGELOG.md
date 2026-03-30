@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Loan Amount Summary**: Added total loan amount display in the Loans List drawer header.
+
+### Changed
+- **Default Note Mode**: Changed default "Add Expense" mode from Items to Notes for a cleaner entry experience.
+- **Loan UI Restyling**: Restyled the loan list header to place the total amount prominently on top of the count label with bolder typography.
+
+### Fixed
+- **Query Reactivity**: Improved `useLiveQuery` dependency tracking in `ExpenseCard` for better data consistency.
+
 ## [1.2.0] - 2026-03-13
 
 ### Added

@@ -416,7 +416,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                     field.onChange(val);
                                                     form.handleSubmit(performSave)();
                                                 }}
-                                                className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                                                className="input-glass"
                                             />
                                         )}
                                     />
@@ -523,7 +523,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         value={form.watch('amount') ? `৳${formatAmount(form.watch('amount'))}` : '৳০'}
                                         onClick={() => setShowNumberPad(true)}
                                         className={cn(
-                                            "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl transition-all border-border bg-background/50 shadow-sm focus:bg-background/80 focus:border-primary/50",
+                                            "pr-10 cursor-pointer caret-transparent font-black text-lg input-glass",
                                             showNumberPad && "ring-2 ring-primary/50 border-primary bg-primary/5",
                                             wasAmountEdited && form.getValues('amount') <= 0 && "border-destructive ring-2 ring-destructive/20"
                                         )}
@@ -550,7 +550,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                     form.handleSubmit(performSave)();
                                                 }
                                             }}
-                                            className="h-12 rounded-xl font-medium"
+                                            className="input-glass font-medium"
                                         />
                                     )}
                                 />
@@ -579,7 +579,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                             handleBlur();
                                         }}
                                         onEnter={handleNoteEnter}
-                                        className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                                        className="input-glass"
                                     />
                                 )}
                             />
@@ -599,7 +599,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     }}
                                     onBlur={() => form.handleSubmit(performSave)()}
                                     onEnter={handleCategoryEnter}
-                                    className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                                    className="input-glass"
                                 />
                             </div>
                         </div>
@@ -683,8 +683,8 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         value={form.watch('amount') ? `৳${formatAmount(form.watch('amount'))}` : '৳০'}
                                         onClick={() => !isNested && setShowNumberPad(true)}
                                         className={cn(
-                                            "pr-10 cursor-pointer caret-transparent font-black text-lg h-12 rounded-xl transition-all",
-                                            isNested ? "bg-muted border-dashed opacity-70" : "bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50",
+                                            "pr-10 cursor-pointer caret-transparent font-black text-lg input-glass",
+                                            isNested ? "bg-muted border-dashed opacity-70" : "",
                                             !isNested && showNumberPad && "ring-2 ring-primary/50 border-primary bg-primary/5",
                                             !isNested && wasAmountEdited && form.getValues('amount') <= 0 && "border-destructive ring-2 ring-destructive/20"
                                         )}
@@ -712,14 +712,14 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                     form.handleSubmit(performSave)();
                                                 }
                                             }}
-                                            className="h-12 rounded-xl font-medium bg-background/50 border-border"
+                                            className="input-glass font-medium"
                                         />
-                                    )}
-                                />
+                                        )}
+                                    />
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="space-y-2">
+                            <div className="space-y-2">
                             <Label htmlFor="category" className="text-[11px] font-bold uppercase">{t('category')}</Label>
                             <div className="w-full">
                                 <CategoryComboBox
@@ -730,7 +730,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     }}
                                     onBlur={() => form.handleSubmit(performSave)()}
                                     onEnter={handleCategoryEnter}
-                                    className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                                    className="input-glass"
                                 />
                             </div>
                         </div>
@@ -748,7 +748,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                 field.onChange(val);
                                                 form.handleSubmit(performSave)();
                                             }}
-                                            className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                                            className="input-glass"
                                         />
                                     )}
                                 />
@@ -807,12 +807,8 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                         onChange={(val: string) => {
                                             field.onChange(val);
                                         }}
-                                        onBlur={() => {
-                                            field.onBlur();
-                                            handleBlur();
-                                        }}
                                         onEnter={handleNoteEnter}
-                                        className="h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50"
+                                        className="input-glass"
                                     />
                                 )}
                             />

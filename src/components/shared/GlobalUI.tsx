@@ -24,6 +24,9 @@ import { CategoryManagementDrawer } from '@/components/shared/CategoryManagement
 import { useUIStore } from '@/stores/uiStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
+
+const MotionButton = motion(Button);
 
 export function GlobalUI() {
     const { t } = useTranslation();
@@ -49,7 +52,8 @@ export function GlobalUI() {
         isCategoryManagementOpen,
         isLoanLinkerOpen,
         theme, expenseSessionId, subSessionId,
-        isBalanceEditDrawerOpen
+        isBalanceEditDrawerOpen,
+        fabPosition, setFabPosition
     } = useUIStore();
     const { categories, ensureDefaultCategory, loadCategories } = useCategoryStore();
 
@@ -141,12 +145,43 @@ export function GlobalUI() {
     return (
         <>
             {showFAB && (
-                <Button
-                    className="absolute bottom-20 right-4 h-14 w-14 rounded-full z-50 bg-primary text-primary-foreground shadow-2xl shadow-primary/40 active:scale-[0.9] transition-all duration-300 border-2 border-foreground/20"
-                    onClick={() => openAddExpense()}
+                <MotionButton
+                    drag
+                    dragMomentum={false}
+                    dragElastic={0.2}
+                    onDragEnd={(_e, info) => {
+                        setFabPosition({
+                            x: (fabPosition?.x || 0) + info.offset.x,
+                            y: (fabPosition?.y || 0) + info.offset.y
+                        });
+                    }}
+                    animate={{
+                        x: fabPosition?.x || 0,
+                        y: fabPosition?.y || 0
+                    }}
+                    whileTap={{ scale: 0.9 }}
+                    whileDrag={{
+                        scale: 1.1,
+                        boxShadow: "0 25px 50px rgba(0,0,0,0.4)"
+                    }}
+                    transition={{
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 25,
+                        mass: 1.5
+                    }}
+                    dragTransition={{
+                        power: 0.2,
+                        timeConstant: 400
+                    }}
+                    className="fixed bottom-20 right-4 h-14 w-14 rounded-full z-[51] bg-white/10 dark:bg-black/20 backdrop-blur-sm text-primary shadow-2xl shadow-primary/10 border border-white/40 dark:border-white/10 cursor-grab active:cursor-grabbing touch-none select-none overflow-hidden !transition-none"
+                    onClick={() => {
+                        // Action: open add expense sheet
+                        openAddExpense();
+                    }}
                 >
-                    <Plus className="w-7 h-7 stroke-[3]" />
-                </Button>
+                    <Plus className="w-7 h-7 stroke-[3] pointer-events-none" />
+                </MotionButton>
             )}
 
             {/* --- LAYER 1: Lists (Background) --- */}
@@ -157,11 +192,11 @@ export function GlobalUI() {
             <CategoryManagementDrawer />
 
             {/* --- LAYER 2: Records/Details (Middle) --- */}
-            
+
             {/* Goal Records Sheet */}
             <Sheet open={isGoalRecordsSheetOpen} onOpenChange={(open) => !open && closeGoalRecordsSheet()}>
-                <SheetContent 
-                    side="bottom" 
+                <SheetContent
+                    side="bottom"
                     className={cn(
                         "max-h-[92dvh] h-auto rounded-t-xl p-0 glass backdrop-blur-xl overflow-hidden z-70 flex flex-col",
                         stackedStyle
@@ -222,8 +257,8 @@ export function GlobalUI() {
 
             {/* Budget Records Sheet */}
             <Sheet open={isBudgetRecordsSheetOpen} onOpenChange={(open) => !open && closeBudgetRecordsSheet()}>
-                <SheetContent 
-                    side="bottom" 
+                <SheetContent
+                    side="bottom"
                     className={cn(
                         "max-h-[92dvh] h-auto rounded-t-xl p-0 glass backdrop-blur-xl overflow-hidden z-70 flex flex-col",
                         stackedStyle
@@ -277,8 +312,8 @@ export function GlobalUI() {
 
             {/* Loan Records Sheet */}
             <Sheet open={isLoanRecordsSheetOpen} onOpenChange={(open) => !open && closeLoanRecordsSheet()}>
-                <SheetContent 
-                    side="bottom" 
+                <SheetContent
+                    side="bottom"
                     className={cn(
                         "max-h-[92dvh] h-auto rounded-t-xl p-0 glass backdrop-blur-xl overflow-hidden z-70 flex flex-col",
                         stackedStyle
@@ -347,8 +382,8 @@ export function GlobalUI() {
 
             {/* Main Expense Sheet */}
             <Sheet open={isExpenseSheetOpen} onOpenChange={(open) => !open && handleCloseExpense()}>
-                <SheetContent 
-                    side="bottom" 
+                <SheetContent
+                    side="bottom"
                     className={cn(
                         "max-h-[92dvh] h-auto rounded-t-xl p-0 glass backdrop-blur-xl z-80 flex flex-col overflow-hidden",
                         stackedStyle
@@ -372,8 +407,8 @@ export function GlobalUI() {
 
             {/* Sub-Record Sheet */}
             <Sheet open={isSubRecordSheetOpen} onOpenChange={(open) => !open && handleCloseSubRecord()}>
-                <SheetContent 
-                    side="bottom" 
+                <SheetContent
+                    side="bottom"
                     className="max-h-[85dvh] h-auto rounded-t-xl p-0 w-full max-w-md mx-auto glass backdrop-blur-xl z-[90] overflow-hidden flex flex-col"
                 >
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
@@ -417,8 +452,8 @@ export function GlobalUI() {
 
             {/* Budget Sheet */}
             <Sheet open={isBudgetSheetOpen} onOpenChange={(open) => !open && closeBudgetSheet()}>
-                <SheetContent 
-                    side="bottom" 
+                <SheetContent
+                    side="bottom"
                     className={cn(
                         "max-h-[92dvh] h-auto rounded-t-xl p-0 glass backdrop-blur-xl z-80 flex flex-col overflow-hidden",
                         stackedStyle
@@ -442,8 +477,8 @@ export function GlobalUI() {
 
             {/* Goal Sheet */}
             <Sheet open={isGoalSheetOpen} onOpenChange={(open) => !open && closeGoalSheet()}>
-                <SheetContent 
-                    side="bottom" 
+                <SheetContent
+                    side="bottom"
                     className={cn(
                         "max-h-[92dvh] h-auto rounded-t-xl p-0 glass backdrop-blur-xl z-80 flex flex-col overflow-hidden",
                         stackedStyle
@@ -467,8 +502,8 @@ export function GlobalUI() {
 
             {/* Goal Linker Sheet (repurposed from Progress) */}
             <Sheet open={isGoalProgressSheetOpen} onOpenChange={(open) => !open && closeGoalProgressSheet()}>
-                <SheetContent 
-                    side="bottom" 
+                <SheetContent
+                    side="bottom"
                     className="max-h-[92dvh] h-auto rounded-[32px] p-0 pointer-events-auto border-t border-white/10 shadow-2xl bg-background/60 backdrop-blur-xl overflow-hidden z-[90] flex flex-col"
                     style={{ background: 'linear-gradient(to bottom, rgba(255,255,255,0.05), transparent)' }}
                 >
@@ -489,8 +524,8 @@ export function GlobalUI() {
 
             {/* Loan Sheet */}
             <Sheet open={isLoanSheetOpen} onOpenChange={(open) => !open && closeLoanSheet()}>
-                <SheetContent 
-                    side="bottom" 
+                <SheetContent
+                    side="bottom"
                     className={cn(
                         "max-h-[92dvh] h-auto rounded-t-xl p-0 w-full max-w-md mx-auto glass backdrop-blur-xl z-80 flex flex-col overflow-hidden",
                         stackedStyle

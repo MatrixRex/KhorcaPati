@@ -85,6 +85,8 @@ interface UIState {
     closeCategoryRecords: () => void;
     setSelectedInventoryItem: (name: string | null) => void;
     setReturnPath: (path: string | null) => void;
+    fabPosition: { x: number; y: number } | null;
+    setFabPosition: (position: { x: number; y: number } | null) => void;
     setTheme: (theme: Theme) => void;
     setFontScale: (scale: number) => void;
     isInEditingMode: () => boolean;
@@ -129,6 +131,9 @@ export const useUIStore = create<UIState>()(
             fontScale: 1.1,
             expenseSessionId: '',
             subSessionId: '',
+            fabPosition: null,
+
+            setFabPosition: (position) => set({ fabPosition: position }),
 
             isInEditingMode: () => {
                 const state = get();
@@ -367,7 +372,11 @@ export const useUIStore = create<UIState>()(
         }),
         {
             name: 'khorchapati-ui-store',
-            partialize: (state) => ({ theme: state.theme, fontScale: state.fontScale }), // Persist theme and fontScale
+            partialize: (state) => ({ 
+                theme: state.theme, 
+                fontScale: state.fontScale,
+                fabPosition: state.fabPosition 
+            }), // Persist theme, fontScale and fabPosition
         }
     )
 );

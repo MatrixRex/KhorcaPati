@@ -58,20 +58,52 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
         }, [customSuggestions, disableSuggestions]);
 
         // Gate on disableSuggestions as a final guard regardless of cached query state
-        const suggestionsList = disableSuggestions ? [] : (customSuggestions || dbSuggestions || []);
+        const suggestionsList = useMemo(() => {
+            return disableSuggestions ? [] : (customSuggestions || dbSuggestions || []);
+        }, [disableSuggestions, customSuggestions, dbSuggestions]);
 
         const currentPart = useMemo(() => {
-            if (!isMulti) return value.trim();
-            const parts = value.slice(0, cursorPos).split(/[,\n]/);
+            const safeValue = value || '';
+            if (!isMulti) return safeValue.trim();
+            const parts = safeValue.slice(0, cursorPos).split(/[,\n]/);
             return parts[parts.length - 1].trim();
         }, [value, cursorPos, isMulti]);
 
         const filteredSuggestions = useMemo(() => {
-            if (!currentPart || currentPart.length < 1) return suggestionsList.slice(0, 10);
-            return suggestionsList?.filter(s =>
-                s.toLowerCase().includes(currentPart.toLowerCase()) &&
-                s.toLowerCase().trim() !== currentPart.toLowerCase().trim()
-            ).slice(0, 10) || [];
+            const safeSuggestions = suggestionsList || [];
+            if (!currentPart || currentPart.length < 1) return safeSuggestions.slice(0, 10);
+            
+            const lowerPart = currentPart.toLowerCase();
+            const searchPattern = lowerPart.replace(/\s+/g, '');
+
+            const exactMatches: string[] = [];
+            const fuzzyMatches: string[] = [];
+
+            safeSuggestions.forEach(s => {
+                if (!s) return;
+                const lowerS = s.toLowerCase();
+                
+                if (lowerS.trim() === lowerPart) {
+                    exactMatches.unshift(s);
+                    return;
+                }
+
+                if (lowerS.includes(lowerPart)) {
+                    exactMatches.push(s);
+                } else if (searchPattern.length > 0) {
+                    let pIdx = 0;
+                    for (let i = 0; i < lowerS.length && pIdx < searchPattern.length; i++) {
+                        if (lowerS[i] === searchPattern[pIdx]) {
+                            pIdx++;
+                        }
+                    }
+                    if (pIdx === searchPattern.length) {
+                        fuzzyMatches.push(s);
+                    }
+                }
+            });
+
+            return [...new Set([...exactMatches, ...fuzzyMatches])].slice(0, 10);
         }, [currentPart, suggestionsList]);
 
         const showStrip = isFocused && (filteredSuggestions.length > 0 || !!action);
@@ -111,7 +143,7 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
             };
             window.visualViewport.addEventListener('resize', handleResize);
             return () => window.visualViewport?.removeEventListener('resize', handleResize);
-        }, [computeStripStyle]);
+        }, [computeStripStyle, inputRef]);
 
         const handleSelect = (suggestion: string) => {
             if (onSelectSuggestion) {
@@ -189,8 +221,8 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
                                     e.preventDefault();
                                     action.onClick();
                                 } else {
-                                    const exactMatch = suggestionsList.find(s =>
-                                        s.toLowerCase().trim() === currentPart.toLowerCase().trim()
+                                    const exactMatch = (suggestionsList || []).find(s =>
+                                        s && s.toLowerCase().trim() === currentPart.toLowerCase().trim()
                                     );
                                     if (exactMatch && !isMulti) {
                                         e.preventDefault();

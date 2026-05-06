@@ -12,7 +12,7 @@ interface ExpenseState {
     deleteExpense: (id: number) => Promise<void>;
 }
 
-export const useExpenseStore = create<ExpenseState>((set) => ({
+export const useExpenseStore = create<ExpenseState>((set, get) => ({
     expenses: [],
     isLoading: true,
 
@@ -36,6 +36,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
             if (expense.loanId) {
                 await useLoanStore.getState().recalculateLoanAmount(expense.loanId);
             }
+            await get().loadExpenses();
             return id as number;
         } catch (error) {
             console.error("Failed to add expense", error);
@@ -69,6 +70,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
                 await useLoanStore.getState().recalculateLoanAmount(oldLoanId);
             }
             
+            await get().loadExpenses();
             return id;
         } catch (error) {
             console.error("Failed to update expense", error);
@@ -93,6 +95,7 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
             if (loanId) {
                 await useLoanStore.getState().recalculateLoanAmount(loanId);
             }
+            await get().loadExpenses();
         } catch (error) {
             console.error("Failed to delete expense", error);
             throw error;

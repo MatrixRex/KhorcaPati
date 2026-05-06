@@ -14,6 +14,7 @@ import { useCategoryStore } from '@/stores/categoryStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTranslation } from 'react-i18next';
 import { formatAmount, cn } from '@/lib/utils';
+import { useExpenseStore } from '@/stores/expenseStore';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, TrendingDown, SearchIcon } from 'lucide-react';
 import { CategoryRecordsDrawer } from '@/components/shared/CategoryRecordsDrawer';
@@ -84,9 +85,10 @@ export default function Reports() {
     const { categories: categoryList } = useCategoryStore();
     const { initialBalance } = useSettingsStore();
 
+    const storeExpenses = useExpenseStore(state => state.expenses);
     const expenses = useLiveQuery(async () => {
         return await db.expenses.filter(e => !e.parentId).toArray();
-    });
+    }, [storeExpenses]);
 
     const reportData = useMemo(() => {
         if (!expenses) return null;

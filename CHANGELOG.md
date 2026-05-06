@@ -8,13 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Loan Amount Summary**: Added total loan amount display in the Loans List drawer header.
+- **Loan "Holder" Architecture**: Transitioned the loan system to a purely transactional model where the loan entity acts as a holder for linked records.
+- **Manage via Records**: Added UI feedback in the Loan Form to guide users toward managing loan balances through transactional records rather than manual amount edits.
 
 ### Changed
-- **Default Note Mode**: Changed default "Add Expense" mode from Items to Notes for a cleaner entry experience.
-- **Loan UI Restyling**: Restyled the loan list header to place the total amount prominently on top of the count label with bolder typography.
+- **Loan Total Calculation**: Updated `LoanCard` and `LoanRecordsList` to calculate balances by aggregating linked expenses and income, ignoring redundant database fields.
 
 ### Fixed
+- **Loan Amount Doubling**: Resolved a critical bug where initial loan amounts were being double-counted by both the loan entity and the auto-generated transaction record.
+- **Expense List Reactivity**: Resolved synchronization issues where new expenses didn't automatically appear in the list. Implemented a "Store-Observability Bridge" that forces UI re-renders across Dashboard, Records, and Reports whenever the database is updated.
+- **Loan Form Reactivity**: Integrated `useLiveQuery` into the Loan Form for accurate, real-time total amount display.
+- **i18n Keys**: Added missing localization for `manageVia` and validation messages in English and Bangla.
 - **Query Reactivity**: Improved `useLiveQuery` dependency tracking in `ExpenseCard` for better data consistency.
 
 ## [1.2.0] - 2026-03-13

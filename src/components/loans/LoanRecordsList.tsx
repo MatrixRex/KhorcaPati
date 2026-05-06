@@ -43,7 +43,7 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
         .filter(e => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
         .reduce((s, e) => s + e.amount, 0);
 
-    const totalGrossAmount = loan.totalAmount + totalAdditionalAmount;
+    const totalGrossAmount = totalAdditionalAmount; // Derived from records
     const remainingAmount = Math.max(0, totalGrossAmount - totalRepayments);
     const percentage = Math.min((totalRepayments / totalGrossAmount) * 100, 100);
     const isTaken = loan.type === 'taken';

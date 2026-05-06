@@ -27,11 +27,13 @@ import { useExpenseStore } from '@/stores/expenseStore';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { LoanLinker } from './LoanLinker';
 import { useUIStore } from '@/stores/uiStore';
+import { useLiveQuery } from 'dexie-react-hooks';
+
 
 const loanSchema = z.object({
-    title: z.string().min(1, 'Title is required'),
-    person: z.string().min(1, 'Person is required'),
-    totalAmount: z.number().min(1, 'Amount must be greater than 0'),
+    title: z.string().min(1, t('titleRequired')),
+    person: z.string().min(1, t('personRequired') || 'Person is required'),
+    totalAmount: z.number().min(1, t('amountRequired')),
     currentAmount: z.number().min(0, 'Current amount cannot be negative'),
     type: z.enum(['taken', 'given']),
     dueDate: z.string().optional(),
@@ -64,12 +66,21 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
     const isLinkerOpen = isLoanLinkerOpen;
     const setIsLinkerOpen = setLoanLinkerOpen;
 
+    // Fetch linked records for total amount calculation
+    const linkedRecords = useLiveQuery(() => 
+        initialData?.id ? db.expenses.where('loanId').equals(initialData.id).toArray() : Promise.resolve([])
+    , [initialData?.id]) || [];
+
+    const calculatedTotalAmount = linkedRecords
+        .filter(e => (initialData?.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
+        .reduce((s, e) => s + e.amount, 0);
+
     const form = useForm<LoanFormValues>({
         resolver: zodResolver(loanSchema),
         defaultValues: {
             title: initialData?.title || '',
             person: initialData?.person || '',
-            totalAmount: initialData?.totalAmount || 0,
+            totalAmount: initialData?.id ? calculatedTotalAmount : (initialData?.totalAmount || 0),
             currentAmount: initialData?.currentAmount || 0,
             type: initialData?.type || 'taken',
             dueDate: initialData?.dueDate || '',
@@ -81,6 +92,7 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
         try {
             const payload: Omit<Loan, 'id'> = {
                 ...data,
+                totalAmount: 0, // Always 0, amount is derived from records
                 note: data.note || '',
                 dueDate: data.dueDate || null,
                 createdAt: initialData?.createdAt || new Date().toISOString(),
@@ -191,13 +203,20 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
                         type="text"
                         readOnly
                         value={form.watch('totalAmount') ? `৳${form.watch('totalAmount')}` : '৳০'}
-                        onClick={() => setActiveField('total')}
+                        onClick={() => !initialData && setActiveField('total')}
                         className={cn(
                             "pr-10 cursor-pointer caret-transparent font-bold text-lg h-12 rounded-xl bg-background/50 border-border shadow-sm focus:bg-background/80 focus:border-primary/50",
-                            activeField === 'total' && "ring-2 ring-primary/50 border-primary bg-primary/5"
+                            activeField === 'total' && "ring-2 ring-primary/50 border-primary bg-primary/5",
+                            initialData && "opacity-70 cursor-not-allowed"
                         )}
                     />
-                    <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+                    {!initialData ? (
+                        <Calculator className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+                    ) : (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black uppercase text-muted-foreground/40 leading-none text-right">
+                            {t('manageVia')}<br/>{t('records')}
+                        </div>
+                    )}
                 </div>
             </div>
 

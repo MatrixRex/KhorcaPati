@@ -4,6 +4,7 @@ import { ExpenseCard } from './ExpenseCard';
 import { useFilterStore } from '@/stores/filterStore';
 import { isWithinInterval } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { useExpenseStore } from '@/stores/expenseStore';
 
 interface ExpenseListProps {
     onEdit?: (expense: Expense) => void;
@@ -12,6 +13,7 @@ interface ExpenseListProps {
 export function ExpenseList({ onEdit }: ExpenseListProps) {
     const { t } = useTranslation();
     const { startDate, endDate, selectedCategory, expenseSortBy } = useFilterStore();
+    const storeExpenses = useExpenseStore(state => state.expenses);
 
     const expenses = useLiveQuery(async () => {
         // Only fetch top-level records
@@ -53,7 +55,7 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
         });
 
         return filtered;
-    }, [startDate, endDate, selectedCategory, expenseSortBy]);
+    }, [startDate, endDate, selectedCategory, expenseSortBy, storeExpenses]);
 
 
     if (!expenses) {

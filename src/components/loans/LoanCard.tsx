@@ -30,7 +30,7 @@ export function LoanCard({ loan, onClick }: LoanCardProps) {
         .filter((e: Expense) => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
         .reduce((s: number, e: Expense) => s + e.amount, 0);
 
-    const totalGrossAmount = loan.totalAmount + totalAdditionalAmount;
+    const totalGrossAmount = totalAdditionalAmount; // Derived from records
     const currentProgress = totalRepayments;
     const percentage = totalGrossAmount > 0 ? Math.min((totalRepayments / totalGrossAmount) * 100, 100) : 0;
     

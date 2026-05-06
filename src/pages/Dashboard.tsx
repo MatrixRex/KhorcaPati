@@ -17,6 +17,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { BalanceEditDrawer } from '@/components/shared/BalanceEditDrawer';
 import { useTranslation } from 'react-i18next';
 import { formatAmount } from '@/lib/utils';
+import { useExpenseStore } from '@/stores/expenseStore';
 
 export default function Dashboard() {
     const { t } = useTranslation();
@@ -35,10 +36,11 @@ export default function Dashboard() {
     } = useUIStore();
     const { initialBalance } = useSettingsStore();
 
+    const storeExpenses = useExpenseStore(state => state.expenses);
     const expensesThisMonth = useLiveQuery(async () => {
         const all = await db.expenses.filter(e => !e.parentId).toArray();
         return all.filter(e => e.date.startsWith(currentMonth));
-    }, [currentMonth]);
+    }, [currentMonth, storeExpenses]);
 
     const recentExpenses = useLiveQuery(async () => {
         const topLevel = await db.expenses.filter(e => !e.parentId).toArray();
@@ -49,7 +51,7 @@ export default function Dashboard() {
             return (b.id || 0) - (a.id || 0);
         });
         return topLevel.slice(0, 3);
-    });
+    }, [storeExpenses]);
 
 
 
@@ -82,7 +84,7 @@ export default function Dashboard() {
     const totalSpent = expensesThisMonth?.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0) || 0;
     const totalIncome = expensesThisMonth?.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0) || 0;
     
-    const allExpenses = useLiveQuery(() => db.expenses.filter(e => !e.parentId).toArray());
+    const allExpenses = useLiveQuery(() => db.expenses.filter(e => !e.parentId).toArray(), [storeExpenses]);
     const totalBalance = useMemo(() => {
         if (!allExpenses) return initialBalance;
         const derived = allExpenses.reduce((sum, exp) => {

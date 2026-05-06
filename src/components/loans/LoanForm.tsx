@@ -30,17 +30,20 @@ import { useUIStore } from '@/stores/uiStore';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 
-const loanSchema = z.object({
-    title: z.string().min(1, t('titleRequired')),
-    person: z.string().min(1, t('personRequired') || 'Person is required'),
-    totalAmount: z.number().min(1, t('amountRequired')),
-    currentAmount: z.number().min(0, 'Current amount cannot be negative'),
-    type: z.enum(['taken', 'given']),
-    dueDate: z.string().optional(),
-    note: z.string().optional(),
-});
+type LoanFormValues = z.infer<ReturnType<typeof useLoanFormSchema>>;
 
-type LoanFormValues = z.infer<typeof loanSchema>;
+function useLoanFormSchema() {
+    const { t } = useTranslation();
+    return z.object({
+        title: z.string().min(1, t('titleRequired') || 'Title is required'),
+        person: z.string().min(1, t('personRequired') || 'Person is required'),
+        totalAmount: z.number().min(1, t('amountRequired') || 'Amount is required'),
+        currentAmount: z.number().min(0, 'Current amount cannot be negative'),
+        type: z.enum(['taken', 'given']),
+        dueDate: z.string().optional(),
+        note: z.string().optional(),
+    });
+}
 
 interface LoanFormProps {
     initialData?: Loan;
@@ -50,6 +53,8 @@ interface LoanFormProps {
 
 export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
     const { t } = useTranslation();
+    const loanSchema = useLoanFormSchema();
+
     const addLoan = useLoanStore((state) => state.addLoan);
     const updateLoan = useLoanStore((state) => state.updateLoan);
     const deleteLoan = useLoanStore((state) => state.deleteLoan);
@@ -91,8 +96,11 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
     const onSubmit = async (data: LoanFormValues) => {
         try {
             const payload: Omit<Loan, 'id'> = {
-                ...data,
-                totalAmount: 0, // Always 0, amount is derived from records
+                title: data.title,
+                person: data.person,
+                totalAmount: 0, // Store handles this, but we keep it 0 for the "Holder" model
+                currentAmount: data.currentAmount,
+                type: data.type,
                 note: data.note || '',
                 dueDate: data.dueDate || null,
                 createdAt: initialData?.createdAt || new Date().toISOString(),

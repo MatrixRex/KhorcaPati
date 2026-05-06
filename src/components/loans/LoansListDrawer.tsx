@@ -17,11 +17,26 @@ export function LoansListDrawer() {
     } = useUIStore();
     const { t } = useTranslation();
 
-    const loans = useLiveQuery(async () => {
-        return await db.loans.orderBy('createdAt').reverse().toArray();
-    });
+    const { loans, totalAmountSum } = useLiveQuery(async () => {
+        const allLoans = await db.loans.orderBy('createdAt').reverse().toArray();
+        const allExpenses = await db.expenses.where('loanId').anyOf(allLoans.map(l => l.id!).filter(Boolean)).toArray();
+        
+        const sum = allLoans.reduce((acc, loan) => {
+            const linkedExpenses = allExpenses.filter(e => e.loanId === loan.id);
+            const totalAdditionalAmount = linkedExpenses
+                .filter(e => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
+                .reduce((s, e) => s + e.amount, 0);
+            // Doubling protection heuristic: 
+            // If totalAmount (base) is identical to totalAdditionalAmount (records), 
+            // it's likely a new-style loan where the initial amount was recorded twice.
+            const isProbablyDoubled = (loan.totalAmount > 0 && totalAdditionalAmount === loan.totalAmount);
+            const loanGross = isProbablyDoubled ? totalAdditionalAmount : ((loan.totalAmount || 0) + totalAdditionalAmount);
+            
+            return acc + loanGross;
+        }, 0);
 
-    const totalAmountSum = loans?.reduce((sum, loan) => sum + loan.totalAmount, 0) || 0;
+        return { loans: allLoans, totalAmountSum: sum };
+    }) || { loans: [], totalAmountSum: 0 };
 
     const isAnyDetailOpen = isGoalRecordsSheetOpen || isBudgetRecordsSheetOpen || isLoanRecordsSheetOpen || useUIStore.getState().isCategoryRecordsOpen;
     const isAnyFormOpen = isExpenseSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen || isLoanSheetOpen || isBalanceEditDrawerOpen;

@@ -77,9 +77,30 @@ export default function Dashboard() {
     });
 
     const activeLoans = useLiveQuery(async () => {
-        const all = await db.loans.orderBy('createdAt').reverse().toArray();
-        return all.filter(l => l.currentAmount < l.totalAmount).slice(0, 2);
-    });
+        const all = await db.loans.toArray();
+        const allExpenses = await db.expenses.where('loanId').anyOf(all.map(l => l.id!).filter(Boolean)).toArray();
+        
+        const active = all.filter(loan => {
+            const linkedExpenses = allExpenses.filter(e => e.loanId === loan.id);
+            const totalRepayments = linkedExpenses
+                .filter(e => (loan.type === 'taken' ? e.type === 'expense' : e.type === 'income'))
+                .reduce((s, e) => s + e.amount, 0);
+                
+            const totalAdditionalAmount = linkedExpenses
+                .filter(e => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
+                .reduce((s, e) => s + e.amount, 0);
+            
+            // Doubling protection heuristic: 
+            // If totalAmount (base) is identical to totalAdditionalAmount (records), 
+            // it's likely a new-style loan where the initial amount was recorded twice.
+            const isProbablyDoubled = (loan.totalAmount > 0 && totalAdditionalAmount === loan.totalAmount);
+            const totalGrossAmount = isProbablyDoubled ? totalAdditionalAmount : ((loan.totalAmount || 0) + totalAdditionalAmount);
+            
+            return totalRepayments < totalGrossAmount;
+        });
+        
+        return active.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 2);
+    }, [storeExpenses]);
 
     const totalSpent = expensesThisMonth?.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0) || 0;
     const totalIncome = expensesThisMonth?.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0) || 0;

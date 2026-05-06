@@ -43,7 +43,12 @@ export function LoanRecordsList({ loan }: LoanRecordsListProps) {
         .filter(e => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
         .reduce((s, e) => s + e.amount, 0);
 
-    const totalGrossAmount = totalAdditionalAmount; // Derived from records
+    // Doubling protection heuristic: 
+    // If totalAmount (base) is identical to totalAdditionalAmount (records), 
+    // it's likely a new-style loan where the initial amount was recorded twice.
+    const isProbablyDoubled = (loan.totalAmount > 0 && totalAdditionalAmount === loan.totalAmount);
+    const totalGrossAmount = isProbablyDoubled ? totalAdditionalAmount : ((loan.totalAmount || 0) + totalAdditionalAmount);
+
     const remainingAmount = Math.max(0, totalGrossAmount - totalRepayments);
     const percentage = Math.min((totalRepayments / totalGrossAmount) * 100, 100);
     const isTaken = loan.type === 'taken';

@@ -15,11 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Loan Total Calculation**: Updated `LoanCard` and `LoanRecordsList` to calculate balances by aggregating linked expenses and income, ignoring redundant database fields.
 
 ### Fixed
-- **Loan Amount Doubling**: Resolved a critical bug where initial loan amounts were being double-counted by both the loan entity and the auto-generated transaction record.
-- **Expense List Reactivity**: Resolved synchronization issues where new expenses didn't automatically appear in the list. Implemented a "Store-Observability Bridge" that forces UI re-renders across Dashboard, Records, and Reports whenever the database is updated.
-- **Loan Form Reactivity**: Integrated `useLiveQuery` into the Loan Form for accurate, real-time total amount display.
-- **i18n Keys**: Added missing localization for `manageVia` and validation messages in English and Bangla.
-- **Query Reactivity**: Improved `useLiveQuery` dependency tracking in `ExpenseCard` for better data consistency.
+- **Loan Calculation Doubling**: Resolved a critical issue where initial loan amounts were being double-counted. Implemented a smart heuristic to de-duplicate base amounts that match linked transactional records, and updated the store to enforce zeroed-out base amounts for all new/updated loans.
+- **Transactional Integrity**: Unified the "Loan as a Holder" aggregation logic across `LoanCard`, `LoanRecordsList`, `LoansListDrawer`, and the `Dashboard`.
+- **Expense List Reactivity**: Resolved synchronization issues where new expenses didn't automatically appear in the list.
+- **Loan Form Stability**: Fixed i18n translation errors in the loan schema and refined the transactional payload construction.
+- **Query Reactivity**: Improved `useLiveQuery` dependency tracking across loan components for better data consistency.
 
 ## [1.2.0] - 2026-03-13
 

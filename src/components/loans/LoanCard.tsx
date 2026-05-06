@@ -30,7 +30,11 @@ export function LoanCard({ loan, onClick }: LoanCardProps) {
         .filter((e: Expense) => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
         .reduce((s: number, e: Expense) => s + e.amount, 0);
 
-    const totalGrossAmount = totalAdditionalAmount; // Derived from records
+    // Doubling protection heuristic: 
+    // If totalAmount (base) is identical to totalAdditionalAmount (records), 
+    // it's likely a new-style loan where the initial amount was recorded twice.
+    const isProbablyDoubled = (loan.totalAmount > 0 && totalAdditionalAmount === loan.totalAmount);
+    const totalGrossAmount = isProbablyDoubled ? totalAdditionalAmount : ((loan.totalAmount || 0) + totalAdditionalAmount);
     const currentProgress = totalRepayments;
     const percentage = totalGrossAmount > 0 ? Math.min((totalRepayments / totalGrossAmount) * 100, 100) : 0;
     

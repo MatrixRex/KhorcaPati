@@ -12,7 +12,9 @@ interface LoanState {
 export const useLoanStore = create<LoanState>(() => ({
     addLoan: async (loan) => {
         try {
-            return (await db.loans.add(loan)) as number;
+            // Force totalAmount to 0 for the "Holder" model
+            const payload = { ...loan, totalAmount: 0 };
+            return (await db.loans.add(payload)) as number;
         } catch (error) {
             console.error("Failed to add loan", error);
             throw error;
@@ -21,7 +23,9 @@ export const useLoanStore = create<LoanState>(() => ({
 
     updateLoan: async (id, loan) => {
         try {
-            const updated = await db.loans.update(id, loan);
+            // Force totalAmount to 0 to migrate old loans to the "Holder" model when edited
+            const payload = { ...loan, totalAmount: 0 };
+            const updated = await db.loans.update(id, payload);
             return updated;
         } catch (error) {
             console.error("Failed to update loan", error);

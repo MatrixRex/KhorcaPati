@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Unified Filter Typography**: Standardized all filter dropdowns (Time Range, Category, and Sort) to use a unified design pattern: `h-8` trigger buttons, `h-9` items, and natural-case labels.
 - **Design Guidelines**: Formally documented the "Dropdowns & Popovers" standard in `design.md` to maintain UI consistency.
+- **Script Reorganization**: Moved temporary auditing and translation helper scripts from the root directory to `tests/audit-scripts/` for better project structure.
 
 ### Fixed
 - **Transactional Type Reset**: Resolved a race condition in `ExpenseForm` that caused the transaction type (e.g., 'Borrowed' vs 'Paid Back') to reset to default values during save operations when adding records from the Loan details drawer.

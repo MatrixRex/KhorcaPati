@@ -179,20 +179,30 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
         if (mode === 'debt') {
             if (selectedLoanInDb) {
                 const categoryName = selectedLoanInDb.type === 'given' ? 'Lent' : 'Borrowed';
-                form.setValue('category', categoryName, { shouldDirty: true });
+                
+                // Only update category if it's currently a generic debt category or mismatched
+                const currentCategory = form.getValues('category');
+                const isDebtCategory = ['Lent', 'Borrowed', 'Debt'].includes(currentCategory);
+                if (!currentCategory || (isDebtCategory && currentCategory !== categoryName)) {
+                    form.setValue('category', categoryName, { shouldDirty: true });
+                }
                 
                 // Set default type for new records in debt mode
-                // Lent (given) -> Repaid (income), Borrowed (taken) -> Paid Back (expense)
-                if (!initialData && !currentId) {
+                // ONLY if the field hasn't been modified by the user
+                if (!initialData && !currentId && !form.formState.dirtyFields.type) {
                     const defaultType = selectedLoanInDb.type === 'given' ? 'income' : 'expense';
-                    form.setValue('type', defaultType, { shouldDirty: true });
+                    if (form.getValues('type') !== defaultType) {
+                        form.setValue('type', defaultType, { shouldDirty: true });
+                    }
                 }
-            } else {
-                form.setValue('category', 'Debt', { shouldDirty: true });
+            } else if (!form.getValues('loanId')) {
+                const currentCategory = form.getValues('category');
+                if (['Lent', 'Borrowed'].includes(currentCategory)) {
+                    form.setValue('category', 'Debt', { shouldDirty: true });
+                }
             }
-            if (currentId) form.handleSubmit(performSave)();
         }
-    }, [mode, selectedLoanInDb, initialData, currentId]);
+    }, [mode, selectedLoanInDb, initialData, currentId, form.setValue, form.getValues, form.formState.dirtyFields.type]);
 
     // Reactive restriction for overpayment
     useEffect(() => {

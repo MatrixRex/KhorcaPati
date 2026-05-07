@@ -11,4 +11,4 @@ description: Stage all current changes and generate a structured git commit mess
    - **Type**: feat/fix/refactor/style
    - **Subject**: Main objective (one line)
    - **Body**: Detailed bullet points explaining the 'why' and technical changes.
-5. Present the final commit message to the user for confirmation.
+5. commit to git.

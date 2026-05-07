@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useLoanStore } from '@/stores/loanStore';
-import { db, type Loan } from '@/db/schema';
+import { db, type Loan, type Expense } from '@/db/schema';
 import { NumberPad } from '@/components/shared/NumberPad';
 import { Calculator, Plus, Link as LinkIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -72,7 +72,7 @@ export function LoanForm({ initialData, onSuccess, onCancel }: LoanFormProps) {
     const setIsLinkerOpen = setLoanLinkerOpen;
 
     // Fetch linked records for total amount calculation
-    const linkedRecords = useLiveQuery(() => 
+    const linkedRecords = useLiveQuery<Expense[]>(() => 
         initialData?.id ? db.expenses.where('loanId').equals(initialData.id).toArray() : Promise.resolve([])
     , [initialData?.id]) || [];
 

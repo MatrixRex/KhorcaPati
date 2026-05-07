@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Loan Total Calculation**: Updated `LoanCard` and `LoanRecordsList` to calculate balances by aggregating linked expenses and income, ignoring redundant database fields.
 
 ### Fixed
+- **Transactional Type Reset**: Resolved a race condition in `ExpenseForm` that caused the transaction type (e.g., 'Borrowed' vs 'Paid Back') to reset to default values during save operations when adding records from the Loan details drawer.
+- **Form State Persistence**: Implemented `dirtyFields` guards in `ExpenseForm` to preserve user selections during asynchronous database updates and re-renders.
+- **Build Stability**: Resolved TypeScript build failures (TS2339, TS2322) in `LoanForm.tsx` by adding missing `Expense` type imports and explicit type annotations for linked records.
 - **Loan Calculation Doubling**: Resolved a critical issue where initial loan amounts were being double-counted. Implemented a smart heuristic to de-duplicate base amounts that match linked transactional records, and updated the store to enforce zeroed-out base amounts for all new/updated loans.
 - **Transactional Integrity**: Unified the "Loan as a Holder" aggregation logic across `LoanCard`, `LoanRecordsList`, `LoansListDrawer`, and the `Dashboard`.
 - **Expense List Reactivity**: Resolved synchronization issues where new expenses didn't automatically appear in the list.

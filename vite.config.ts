@@ -64,4 +64,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.GITHUB_REF_NAME || process.env.npm_package_version),
+  },
 });

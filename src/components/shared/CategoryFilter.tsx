@@ -62,10 +62,13 @@ export function CategoryFilter() {
                 </PopoverTrigger>
                 <PopoverContent className="w-56 p-2" align="end">
                     <div className="flex flex-col space-y-1">
+                        <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                            {t('categories')}
+                        </div>
                         <Button
                             variant={selectedCategory === null ? 'secondary' : 'ghost'}
                             size="sm"
-                            className="justify-between font-normal h-8"
+                            className="justify-between font-normal h-9"
                             onClick={() => {
                                 setCategory(null);
                                 setIsOpen(false);
@@ -84,7 +87,7 @@ export function CategoryFilter() {
                                     key={category.id}
                                     variant={selectedCategory === category.name ? 'secondary' : 'ghost'}
                                     size="sm"
-                                    className="justify-between font-normal h-8 w-full mb-1"
+                                    className="justify-between font-normal h-9 w-full mb-1"
                                     onClick={() => {
                                         setCategory(category.name);
                                         setIsOpen(false);

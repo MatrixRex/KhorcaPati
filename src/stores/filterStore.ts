@@ -1,7 +1,15 @@
 import { create } from 'zustand';
-import { startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
+import { 
+    startOfMonth, 
+    endOfMonth, 
+    startOfWeek, 
+    endOfWeek, 
+    startOfDay, 
+    endOfDay, 
+    subMonths
+} from 'date-fns';
 
-export type Timeframe = 'this-month' | 'this-week' | 'custom';
+export type Timeframe = 'today' | 'this-week' | 'this-month' | 'past-month' | 'custom';
 
 export type InventorySortBy = 'alphabet' | 'count';
 export type ExpenseSortBy = 'latest' | 'oldest' | 'amount-high' | 'amount-low';
@@ -23,10 +31,16 @@ interface FilterState {
 const getInitialDates = (timeframe: Timeframe) => {
     const now = new Date();
     switch (timeframe) {
-        case 'this-month':
-            return { startDate: startOfMonth(now), endDate: endOfMonth(now) };
+        case 'today':
+            return { startDate: startOfDay(now), endDate: endOfDay(now) };
         case 'this-week':
             return { startDate: startOfWeek(now, { weekStartsOn: 6 }), endDate: endOfWeek(now, { weekStartsOn: 6 }) }; // Saturday to Friday
+        case 'this-month':
+            return { startDate: startOfMonth(now), endDate: endOfMonth(now) };
+        case 'past-month':
+            // Previous calendar month
+            const prevMonth = subMonths(now, 1);
+            return { startDate: startOfMonth(prevMonth), endDate: endOfMonth(prevMonth) };
         case 'custom':
         default:
             return { startDate: startOfMonth(now), endDate: endOfMonth(now) };

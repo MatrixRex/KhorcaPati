@@ -11,8 +11,10 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover';
 import { useFilterStore } from '@/stores/filterStore';
+import { useTranslation } from 'react-i18next';
 
 export function DateRangeFilter() {
+    const { t } = useTranslation();
     const { timeframe, startDate, endDate, setTimeframe, setDateRange } = useFilterStore();
     const [isOpen, setIsOpen] = React.useState(false);
     const [showCustom, setShowCustom] = React.useState(timeframe === 'custom');
@@ -29,13 +31,12 @@ export function DateRangeFilter() {
     }, [isOpen, timeframe, startDate, endDate]);
 
     const label = React.useMemo(() => {
+        if (timeframe === 'today') return t('today');
+        if (timeframe === 'this-week') return t('thisWeek') || 'This Week';
         if (timeframe === 'this-month') return format(new Date(), 'MMMM');
-        if (timeframe === 'this-week') {
-            const weekNum = Math.ceil(new Date().getDate() / 7);
-            return `${format(new Date(), 'MMM')} W${weekNum}`;
-        }
+        if (timeframe === 'past-month') return t('pastMonth') || 'Past Month';
         return `${format(startDate, 'MMM dd')} - ${format(endDate, 'MMM dd')}`;
-    }, [timeframe, startDate, endDate]);
+    }, [timeframe, startDate, endDate, t]);
 
     return (
         <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -50,12 +51,37 @@ export function DateRangeFilter() {
                     <ChevronDown className={cn("h-3 w-3 opacity-40 transition-transform duration-200", isOpen && "rotate-180")} />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-0 overflow-hidden" align="end">
-                <div className="flex flex-col p-2 space-y-1">
+            <PopoverContent className="w-80 p-2" align="end">
+                <div className="flex flex-col space-y-1">
+                    <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        {t('timeRange')}
+                    </div>
+                    <Button
+                        variant={timeframe === 'today' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        className="justify-start font-normal h-9"
+                        onClick={() => {
+                            setTimeframe('today');
+                            setIsOpen(false);
+                        }}
+                    >
+                        {t('today')}
+                    </Button>
+                    <Button
+                        variant={timeframe === 'this-week' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        className="justify-start font-normal h-9"
+                        onClick={() => {
+                            setTimeframe('this-week');
+                            setIsOpen(false);
+                        }}
+                    >
+                        {t('thisWeek') || 'This Week'}
+                    </Button>
                     <Button
                         variant={timeframe === 'this-month' ? 'secondary' : 'ghost'}
                         size="sm"
-                        className="justify-start font-normal"
+                        className="justify-start font-normal h-9"
                         onClick={() => {
                             setTimeframe('this-month');
                             setIsOpen(false);
@@ -64,20 +90,20 @@ export function DateRangeFilter() {
                         {format(new Date(), 'MMMM')}
                     </Button>
                     <Button
-                        variant={timeframe === 'this-week' ? 'secondary' : 'ghost'}
+                        variant={timeframe === 'past-month' ? 'secondary' : 'ghost'}
                         size="sm"
-                        className="justify-start font-normal"
+                        className="justify-start font-normal h-9"
                         onClick={() => {
-                            setTimeframe('this-week');
+                            setTimeframe('past-month');
                             setIsOpen(false);
                         }}
                     >
-                        {`${format(new Date(), 'MMM')} W${Math.ceil(new Date().getDate() / 7)}`}
+                        {t('pastMonth') || 'Past Month'}
                     </Button>
                     <Button
                         variant={(timeframe === 'custom' || showCustom) ? 'secondary' : 'ghost'}
                         size="sm"
-                        className="justify-start font-normal"
+                        className="justify-start font-normal h-9"
                         onClick={() => {
                             setShowCustom(true);
                             if (timeframe !== 'custom') {

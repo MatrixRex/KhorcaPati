@@ -44,3 +44,10 @@ We use `oklch` for all primary colors to ensure perceptual uniformity.
 - **Progress Bars**: Use `.premium-progress` with `--progress-indicator` for themed glows.
 - **Rounding**: Base is `rounded-xl` (`--radius: 0.75rem`). Sections use `rounded-3xl`.
 - **Stacking**: Use `.stacked-card-effect` for visual depth on "total" or "summary" sections.
+### Dropdowns & Popovers
+- **Trigger Style**: Use `variant="ghost" size="sm" h-8 text-xs font-medium`.
+- **Popover Style**: Use `p-2` padding and consistent width (e.g., `w-56` or `w-80` for calendars).
+- **Item Style**: Buttons inside should be `h-9 font-normal justify-start` (or `justify-between` if they have a checkmark).
+- **Section Headers**: Use `text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-2 py-1.5` for section labels.
+- **Typography**: Labels should be natural case (translated) unless explicitly required to be uppercase by the design system (like section headers).
+- **Transitions**: Trigger icons (like `ChevronDown`) should have `transition-transform duration-200` and rotate `180deg` when open.

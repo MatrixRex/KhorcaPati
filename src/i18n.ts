@@ -333,7 +333,10 @@ const resources = {
       "invalidDate": "Invalid date",
       "totalIncome": "Total Income",
       "totalExpense": "Total Expense",
-      "savings": "Savings"
+      "savings": "Savings",
+      "timeRange": "Time Range",
+      "thisWeek": "This Week",
+      "pastMonth": "Past Month"
     }
   },
   bn: {
@@ -665,7 +668,10 @@ const resources = {
       "invalidDate": "ভুল তারিখ",
       "totalIncome": "মোট আয়",
       "totalExpense": "মোট ব্যয়",
-      "savings": "সঞ্চয়"
+      "savings": "সঞ্চয়",
+      "timeRange": "সময়সীমা",
+      "thisWeek": "এই সপ্তাহ",
+      "pastMonth": "গত মাস"
     }
   }
 };

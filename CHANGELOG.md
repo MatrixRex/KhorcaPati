@@ -8,11 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Loan "Holder" Architecture**: Transitioned the loan system to a purely transactional model where the loan entity acts as a holder for linked records.
-- **Manage via Records**: Added UI feedback in the Loan Form to guide users toward managing loan balances through transactional records rather than manual amount edits.
+- **New Timeframe Presets**: Added "Today" and "Past Month" presets to the `DateRangeFilter` for quicker selection.
+- **Bangla Translations**: Added complete translations for time range presets and dropdown headers in Bangla.
+- **Filter Section Headers**: Implemented "TIME RANGE" and "CATEGORIES" headers across all filter dropdowns for better visual hierarchy.
 
 ### Changed
-- **Loan Total Calculation**: Updated `LoanCard` and `LoanRecordsList` to calculate balances by aggregating linked expenses and income, ignoring redundant database fields.
+- **Unified Filter Typography**: Standardized all filter dropdowns (Time Range, Category, and Sort) to use a unified design pattern: `h-8` trigger buttons, `h-9` items, and natural-case labels.
+- **Design Guidelines**: Formally documented the "Dropdowns & Popovers" standard in `design.md` to maintain UI consistency.
 
 ### Fixed
 - **Transactional Type Reset**: Resolved a race condition in `ExpenseForm` that caused the transaction type (e.g., 'Borrowed' vs 'Paid Back') to reset to default values during save operations when adding records from the Loan details drawer.

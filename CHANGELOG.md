@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Unified Filter Typography**: Standardized all filter dropdowns (Time Range, Category, and Sort) to use a unified design pattern: `h-8` trigger buttons, `h-9` items, and natural-case labels.
+- **Improved Suggestion Filtering**: Refactored `SuggestionInput` to use a 4-tier matching strategy, prioritizing exact matches and contiguous string matches (Starts-With/Contains) over non-contiguous fuzzy matches for better UX.
+- **Vite Configuration**: Updated `vite.config.ts` to bind to `127.0.0.1` and use a dynamic port (`0`) to avoid port conflicts during development.
 - **Design Guidelines**: Formally documented the "Dropdowns & Popovers" standard in `design.md` to maintain UI consistency.
 - **Script Reorganization**: Moved temporary auditing and translation helper scripts from the root directory to `tests/audit-scripts/` for better project structure.
 - **Dynamic Versioning**: Replaced the hardcoded version number with a dynamic build-time constant that prioritizes GitHub git tags or `package.json` version.

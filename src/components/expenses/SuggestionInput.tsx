@@ -76,20 +76,21 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
             const lowerPart = currentPart.toLowerCase();
             const searchPattern = lowerPart.replace(/\s+/g, '');
 
-            const exactMatches: string[] = [];
+            const fullMatches: string[] = [];
+            const startsWithMatches: string[] = [];
+            const containsMatches: string[] = [];
             const fuzzyMatches: string[] = [];
 
             safeSuggestions.forEach(s => {
                 if (!s) return;
-                const lowerS = s.toLowerCase();
+                const lowerS = s.toLowerCase().trim();
                 
-                if (lowerS.trim() === lowerPart) {
-                    exactMatches.unshift(s);
-                    return;
-                }
-
-                if (lowerS.includes(lowerPart)) {
-                    exactMatches.push(s);
+                if (lowerS === lowerPart) {
+                    fullMatches.push(s);
+                } else if (lowerS.startsWith(lowerPart)) {
+                    startsWithMatches.push(s);
+                } else if (lowerS.includes(lowerPart)) {
+                    containsMatches.push(s);
                 } else if (searchPattern.length > 0) {
                     let pIdx = 0;
                     for (let i = 0; i < lowerS.length && pIdx < searchPattern.length; i++) {
@@ -103,7 +104,14 @@ export const SuggestionInput = React.forwardRef<HTMLInputElement, SuggestionInpu
                 }
             });
 
-            return [...new Set([...exactMatches, ...fuzzyMatches])].slice(0, 10);
+            return [
+                ...new Set([
+                    ...fullMatches,
+                    ...startsWithMatches,
+                    ...containsMatches,
+                    ...fuzzyMatches
+                ])
+            ].slice(0, 10);
         }, [currentPart, suggestionsList]);
 
         const showStrip = isFocused && (filteredSuggestions.length > 0 || !!action);

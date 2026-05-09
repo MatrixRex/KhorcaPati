@@ -9,7 +9,8 @@ import basicSsl from '@vitejs/plugin-basic-ssl';
 export default defineConfig({
   base: '/KhorcaPati/',
   server: {
-    host: true,
+    host: '127.0.0.1',
+    port: 0,
     cors: true,
     allowedHosts: true,
     https: {},

@@ -408,7 +408,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                         </div>
                     )}
                     
-                    {onCancel && !initialData && (
+                    {onCancel && (
                         <Button
                             type="button"
                             variant="default"
@@ -430,7 +430,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                             }}
                             className="w-full btn-premium"
                         >
-                            {t('done')}
+                            {initialData ? t('saveChanges') : t('done')}
                         </Button>
                     )}
 

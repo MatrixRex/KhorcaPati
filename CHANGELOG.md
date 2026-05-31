@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Unique Screen IDs in Dev**: Added dev-only visual IDs (`p:`, `d:`, `m:`) next to page headers, drawers, and modal titles with click-to-copy capability.
 - **New Timeframe Presets**: Added "Today" and "Past Month" presets to the `DateRangeFilter` for quicker selection.
 - **Bangla Translations**: Added complete translations for time range presets and dropdown headers in Bangla.
 - **Filter Section Headers**: Implemented "TIME RANGE" and "CATEGORIES" headers across all filter dropdowns for better visual hierarchy.

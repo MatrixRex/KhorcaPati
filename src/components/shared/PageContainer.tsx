@@ -3,7 +3,8 @@ import { cn } from '@/lib/utils';
 import { DateRangeFilter } from './DateRangeFilter';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { DevBadge } from './DevBadge';
 
 interface PageContainerProps {
     title: string;
@@ -15,6 +16,7 @@ interface PageContainerProps {
     className?: string;
     contentClassName?: string;
     scrollable?: boolean;
+    devId?: string;
 }
 
 export function PageContainer({
@@ -27,9 +29,26 @@ export function PageContainer({
     className,
     contentClassName,
     scrollable = true,
+    devId,
 }: PageContainerProps) {
     const navigate = useNavigate();
     const handleBack = onBack || (() => navigate(-1));
+    const location = useLocation();
+
+    const getAutoDevId = (path: string) => {
+        switch (path) {
+            case '/': return 'p:dashboard';
+            case '/expenses': return 'p:expenses';
+            case '/items': return 'p:items';
+            case '/budgets': return 'p:budgets';
+            case '/goals': return 'p:goals';
+            case '/loans': return 'p:loans';
+            case '/reports': return 'p:reports';
+            case '/settings': return 'p:settings';
+            default: return `p:${path.replace(/^\//, '')}`;
+        }
+    };
+    const autoDevId = devId || getAutoDevId(location.pathname);
 
     return (
         <div className={cn("flex flex-col h-full w-full", className)}>
@@ -47,6 +66,7 @@ export function PageContainer({
                         </Button>
                     )}
                     <h1 className="text-xl font-black tracking-tight text-foreground font-heading truncate">{title}</h1>
+                    <DevBadge id={autoDevId} className="ml-1.5" />
                 </div>
                 <div className="flex items-center gap-2">
                     {headerAction}

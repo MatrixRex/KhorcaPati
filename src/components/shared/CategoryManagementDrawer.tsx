@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/select";
 import type { Category } from '@/db/schema';
 import { useTranslation } from 'react-i18next';
+import { DevBadge } from '@/components/shared/DevBadge';
 
 export function CategoryManagementDrawer() {
     const { t } = useTranslation();
@@ -60,18 +61,18 @@ export function CategoryManagementDrawer() {
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [customColor, setCustomColor] = useState('#3b82f6');
     const [hue, setHue] = useState(210); // Default blue hue
-
+ 
     const isAnyDetailOpen = isGoalRecordsSheetOpen || isBudgetRecordsSheetOpen || isLoanRecordsSheetOpen || useUIStore.getState().isCategoryRecordsOpen;
     const isAnyFormOpen = isExpenseSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isGoalSheetOpen || isLoanSheetOpen || isBalanceEditDrawerOpen;
     const isAnySpecializedOpen = isSubRecordSheetOpen || isGoalProgressSheetOpen || useUIStore.getState().isLoanLinkerOpen;
-
+ 
     const stackedStyle = cn(
         "transition-all duration-500 ease-in-out origin-bottom",
         "data-[stack-level='1']:-translate-y-6 data-[stack-level='1']:scale-[0.97] data-[stack-level='1']:opacity-80 data-[stack-level='1']:brightness-[0.9] data-[stack-level='1']:pointer-events-none",
         "data-[stack-level='2']:-translate-y-12 data-[stack-level='2']:scale-[0.94] data-[stack-level='2']:opacity-60 data-[stack-level='2']:brightness-[0.8] data-[stack-level='2']:pointer-events-none",
         "data-[stack-level='3']:-translate-y-18 data-[stack-level='3']:scale-[0.91] data-[stack-level='3']:opacity-40 data-[stack-level='3']:brightness-[0.7] data-[stack-level='3']:pointer-events-none"
     );
-
+ 
     const getStackLevel = () => {
         let level = 0;
         if (isAnySpecializedOpen) level += 1;
@@ -79,14 +80,14 @@ export function CategoryManagementDrawer() {
         if (isAnyDetailOpen) level += 1;
         return Math.min(level, 3);
     };
-
+ 
     const handleAdd = async () => {
         if (!newCategoryName.trim()) return;
         await addCategory(newCategoryName.trim());
         setNewCategoryName('');
         setIsAddingMode(false);
     };
-
+ 
     const handleUpdate = async () => {
         if (editingCategory && editingCategory.name.trim()) {
             await updateCategory(editingCategory.id!, { 
@@ -97,7 +98,7 @@ export function CategoryManagementDrawer() {
             setShowColorPicker(false);
         }
     };
-
+ 
     const handleDelete = async () => {
         if (deletingCategory?.id) {
             const migrateId = migrateToId === 'none' ? undefined : parseInt(migrateToId);
@@ -106,13 +107,13 @@ export function CategoryManagementDrawer() {
             setMigrateToId('none');
         }
     };
-
+ 
     const handleColorSelect = (color: string) => {
         if (editingCategory) {
             setEditingCategory({ ...editingCategory, color });
         }
     };
-
+ 
     const handleHueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const h = parseInt(e.target.value);
         setHue(h);
@@ -122,7 +123,7 @@ export function CategoryManagementDrawer() {
             setEditingCategory({ ...editingCategory, color });
         }
     };
-
+ 
     return (
         <Sheet open={isCategoryManagementOpen} onOpenChange={(open) => !open && closeCategoryManagement()}>
             <SheetContent 
@@ -140,7 +141,10 @@ export function CategoryManagementDrawer() {
                 <SheetHeader className="px-0 py-4 shrink-0 border-b mb-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <SheetTitle className="text-2xl font-black tracking-tight">{t('categories')}</SheetTitle>
+                            <SheetTitle className="text-2xl font-black tracking-tight flex items-center gap-1.5">
+                                {t('categories')}
+                                <DevBadge id="d:category-management" />
+                            </SheetTitle>
                             <SheetDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
                                 {categories.length} {t('totalCategories')}
                             </SheetDescription>

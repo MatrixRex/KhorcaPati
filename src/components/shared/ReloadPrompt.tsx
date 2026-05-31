@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw, X, AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useUIStore } from '@/stores/uiStore';
+import { DevBadge } from './DevBadge';
 
 export function ReloadPrompt() {
     const {
@@ -45,8 +46,9 @@ export function ReloadPrompt() {
                             <RefreshCw className={`w-5 h-5 ${needRefresh ? 'animate-spin-slow' : ''}`} />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-sm font-semibold">
+                            <span className="text-sm font-semibold flex items-center gap-1.5">
                                 {needRefresh ? 'Update Available' : 'Ready for Offline'}
+                                <DevBadge id="m:reload-prompt" />
                             </span>
                             <span className="text-xs text-muted-foreground leading-tight">
                                 {needRefresh

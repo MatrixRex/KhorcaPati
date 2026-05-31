@@ -18,6 +18,7 @@ import { Wallet, Check, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatAmount } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import { DevBadge } from './DevBadge';
 
 export function BalanceEditDrawer() {
     const { isBalanceEditDrawerOpen, closeBalanceEdit } = useUIStore();
@@ -95,7 +96,10 @@ export function BalanceEditDrawer() {
                                 <Wallet className="w-5 h-5" />
                             </div>
                             <div className="space-y-0.5">
-                                <SheetTitle className="text-xl font-black tracking-tight text-left leading-tight font-heading">{t('editBalance')}</SheetTitle>
+                                <SheetTitle className="text-xl font-black tracking-tight text-left leading-tight font-heading flex items-center gap-1.5">
+                                    {t('editBalance')}
+                                    <DevBadge id="d:balance-edit" />
+                                </SheetTitle>
                                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 text-left">
                                     {t('balanceDrawerDescription')}
                                 </p>

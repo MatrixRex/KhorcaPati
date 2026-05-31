@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { DevBadge } from '@/components/shared/DevBadge';
 
 export function GoalsListDrawer() {
     const { 
@@ -56,7 +57,10 @@ export function GoalsListDrawer() {
                     <SheetHeader className="px-0 py-4 shrink-0 border-b mb-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <SheetTitle className="text-2xl font-black tracking-tight">{t('savingsGoals')}</SheetTitle>
+                                <SheetTitle className="text-2xl font-black tracking-tight flex items-center gap-1.5">
+                                    {t('savingsGoals')}
+                                    <DevBadge id="d:goals-list" />
+                                </SheetTitle>
                                 <SheetDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
                                     {goals?.length || 0} {t('totalGoals')}
                                 </SheetDescription>

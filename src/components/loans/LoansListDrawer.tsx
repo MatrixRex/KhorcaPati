@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn, formatAmount } from '@/lib/utils';
+import { DevBadge } from '@/components/shared/DevBadge';
 
 export function LoansListDrawer() {
     const { 
@@ -73,7 +74,10 @@ export function LoansListDrawer() {
                     <SheetHeader className="px-0 py-4 shrink-0 border-b mb-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <SheetTitle className="text-2xl font-black tracking-tight">{t('loans')}</SheetTitle>
+                                <SheetTitle className="text-2xl font-black tracking-tight flex items-center gap-1.5">
+                                    {t('loans')}
+                                    <DevBadge id="d:loans-list" />
+                                </SheetTitle>
                                 <div className="flex flex-col gap-0.5 mt-1">
                                     <div className="text-lg font-black text-primary tracking-tight tabular-nums">
                                         ৳{formatAmount(totalAmountSum)}

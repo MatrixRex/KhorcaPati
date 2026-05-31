@@ -6,6 +6,7 @@ import { Check, Sun, Moon, Languages } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
+import { DevBadge } from './DevBadge';
 
 const LANGUAGES = [
     { code: 'en', label: 'English' },
@@ -75,7 +76,10 @@ export function WelcomeModal() {
 
                         {/* Header */}
                         <div>
-                            <h2 className="text-2xl font-black text-gradient">{t('appTitle')} 👋</h2>
+                            <h2 className="text-2xl font-black text-gradient flex items-center gap-1.5">
+                                {t('appTitle')} 👋
+                                <DevBadge id="m:welcome" />
+                            </h2>
                             <p className="text-sm text-muted-foreground font-medium mt-0.5">
                                 {t('selectLanguage')} & {t('appearance')}
                             </p>

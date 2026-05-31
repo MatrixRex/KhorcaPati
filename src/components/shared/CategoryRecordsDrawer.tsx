@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { ExpenseList } from '@/components/expenses/ExpenseList';
 import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
+import { DevBadge } from './DevBadge';
 
 export function CategoryRecordsDrawer() {
     const { isCategoryRecordsOpen, closeCategoryRecords, categoryForRecords, openEditExpense } = useUIStore();
@@ -41,8 +42,9 @@ export function CategoryRecordsDrawer() {
                                 <Search className="w-6 h-6" />
                             </div>
                             <div className="text-left">
-                                <SheetTitle className="text-2xl font-black tracking-tight leading-none mb-1">
+                                <SheetTitle className="text-2xl font-black tracking-tight leading-none mb-1 flex items-center gap-1.5">
                                     {t('recordsForCategory', { category: categoryForRecords })}
+                                    <DevBadge id="d:category-records" />
                                 </SheetTitle>
                                 <SheetDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
                                     {t('analytics')} • {categoryForRecords}

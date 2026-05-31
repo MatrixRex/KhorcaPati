@@ -37,6 +37,7 @@ import {
 
 import { useTranslation } from 'react-i18next';
 import { SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { DevBadge } from '@/components/shared/DevBadge';
 
 
 const expenseSchema = z.object({
@@ -365,8 +366,9 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
     return (
         <>
             <SheetHeader className="mb-6 flex flex-row items-center justify-between p-0">
-                <SheetTitle className="text-xl font-black">
+                <SheetTitle className="text-xl font-black flex items-center gap-1.5">
                     {initialData ? (hideCollectionToggle ? t('editSubRecord') : t('editRecord')) : (hideCollectionToggle ? t('addSubRecord') : t('addRecord'))}
+                    <DevBadge id={hideCollectionToggle ? 'd:sub-record-form' : 'd:expense-form'} />
                 </SheetTitle>
                 <div className="flex bg-muted p-0.5 rounded-lg border border-border/50">
                     <button

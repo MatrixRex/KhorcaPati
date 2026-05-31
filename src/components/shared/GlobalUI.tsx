@@ -21,6 +21,7 @@ import { LoanForm } from '@/components/loans/LoanForm';
 import { LoanRecordsList } from '@/components/loans/LoanRecordsList';
 import { LoansListDrawer } from '@/components/loans/LoansListDrawer';
 import { CategoryManagementDrawer } from '@/components/shared/CategoryManagementDrawer';
+import { DevBadge } from '@/components/shared/DevBadge';
 import { useUIStore } from '@/stores/uiStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useTranslation } from 'react-i18next';
@@ -213,6 +214,7 @@ export function GlobalUI() {
                                     <span className="text-[10px] font-black uppercase tracking-tight text-primary mb-0.5">{t('goalSavingsDetail')}</span>
                                     <div className="flex items-end gap-1">
                                         <SheetTitle className="text-2xl font-black truncate leading-tight">{liveGoal?.title}</SheetTitle>
+                                        <DevBadge id="d:goal-records" className="mb-0.5" />
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -275,6 +277,7 @@ export function GlobalUI() {
                                     <span className="text-[10px] font-black uppercase tracking-tight text-primary mb-0.5">{t('budgetUsageDetail')}</span>
                                     <div className="flex items-end gap-1">
                                         <SheetTitle className="text-2xl font-black capitalize truncate leading-tight">{liveBudget?.category}</SheetTitle>
+                                        <DevBadge id="d:budget-records" className="mb-0.5" />
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -332,6 +335,7 @@ export function GlobalUI() {
                                     </span>
                                     <div className="flex items-end gap-1">
                                         <SheetTitle className="text-2xl font-black truncate leading-tight">{liveLoan?.title}</SheetTitle>
+                                        <DevBadge id="d:loan-records" className="mb-0.5" />
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -438,7 +442,10 @@ export function GlobalUI() {
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
                     <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8" data-scroll-container>
                         <SheetHeader className="mb-4 text-left p-0">
-                            <SheetTitle className="text-xl font-black">{editingRecurringPayment ? t('editRecurring') : t('addRecurring')}</SheetTitle>
+                            <SheetTitle className="text-xl font-black flex items-center gap-1.5">
+                                {editingRecurringPayment ? t('editRecurring') : t('addRecurring')}
+                                <DevBadge id="d:recurring-payment-form" />
+                            </SheetTitle>
                         </SheetHeader>
                         <RecurringPaymentForm
                             key={editingRecurringPayment?.id ?? 'new-recurring'}
@@ -463,7 +470,10 @@ export function GlobalUI() {
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
                     <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8 text-foreground" data-scroll-container>
                         <SheetHeader className="mb-4 text-left p-0">
-                            <SheetTitle className="text-xl font-black">{editingBudget ? t('editBudget') : t('newBudgetLimit')}</SheetTitle>
+                            <SheetTitle className="text-xl font-black flex items-center gap-1.5">
+                                {editingBudget ? t('editBudget') : t('newBudgetLimit')}
+                                <DevBadge id="d:budget-form" />
+                            </SheetTitle>
                         </SheetHeader>
                         <BudgetForm
                             key={editingBudget?.id ?? 'new-budget'}
@@ -488,7 +498,10 @@ export function GlobalUI() {
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
                     <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8 text-foreground" data-scroll-container>
                         <SheetHeader className="mb-4 text-left p-0">
-                            <SheetTitle className="text-xl font-black">{editingGoal ? t('editSavingGoal') : t('addSavingGoal')}</SheetTitle>
+                            <SheetTitle className="text-xl font-black flex items-center gap-1.5">
+                                {editingGoal ? t('editSavingGoal') : t('addSavingGoal')}
+                                <DevBadge id="d:goal-form" />
+                            </SheetTitle>
                         </SheetHeader>
                         <GoalForm
                             key={editingGoal?.id ?? 'new-goal'}
@@ -510,7 +523,10 @@ export function GlobalUI() {
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
                     <div className="flex-1 overflow-y-auto px-6 pt-2 pb-12 text-foreground" data-scroll-container>
                         <SheetHeader className="mb-4 text-left p-0">
-                            <SheetTitle className="text-xl font-black">{t('linkRecordsToGoal')}</SheetTitle>
+                            <SheetTitle className="text-xl font-black flex items-center gap-1.5">
+                                {t('linkRecordsToGoal')}
+                                <DevBadge id="d:goal-linker" />
+                            </SheetTitle>
                         </SheetHeader>
                         {goalForProgress && (
                             <GoalLinker
@@ -535,7 +551,10 @@ export function GlobalUI() {
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-2 shrink-0" />
                     <div className="flex-1 overflow-y-auto px-6 pt-2 pb-8 text-foreground" data-scroll-container>
                         <SheetHeader className="mb-4 text-left p-0">
-                            <SheetTitle className="text-xl font-black">{editingLoan ? t('editLoan') : t('addLoan')}</SheetTitle>
+                            <SheetTitle className="text-xl font-black flex items-center gap-1.5">
+                                {editingLoan ? t('editLoan') : t('addLoan')}
+                                <DevBadge id="d:loan-form" />
+                            </SheetTitle>
                         </SheetHeader>
                         <LoanForm
                             key={editingLoan?.id ?? 'new-loan'}

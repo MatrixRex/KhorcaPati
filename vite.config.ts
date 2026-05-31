@@ -4,12 +4,13 @@ import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 import basicSsl from '@vitejs/plugin-basic-ssl';
+import { qrcode } from 'vite-plugin-qrcode';
 
 // https://vite.dev/config/
 export default defineConfig({
   base: '/KhorcaPati/',
   server: {
-    host: '127.0.0.1',
+    host: true,
     port: 0,
     cors: true,
     allowedHosts: true,
@@ -19,6 +20,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     basicSsl(),
+    qrcode(),
     VitePWA({
       registerType: 'prompt',
       injectRegister: 'auto',

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Dev Server QR Code**: Added `vite-plugin-qrcode` and exposed the host to the local network to generate a scan-to-open QR code in the terminal for remote device testing.
 - **Unique Screen IDs in Dev**: Added dev-only visual IDs (`p:`, `d:`, `m:`) next to page headers, drawers, and modal titles with click-to-copy capability.
 - **New Timeframe Presets**: Added "Today" and "Past Month" presets to the `DateRangeFilter` for quicker selection.
 - **Bangla Translations**: Added complete translations for time range presets and dropdown headers in Bangla.

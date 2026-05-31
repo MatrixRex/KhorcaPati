@@ -31,6 +31,8 @@ interface UIState {
     isBudgetsListOpen: boolean;
     isGoalsListOpen: boolean;
     isLoansListOpen: boolean;
+    isArchivedLoansListOpen: boolean;
+    isArchivedGoalsListOpen: boolean;
     isCategoryManagementOpen: boolean;
     isBalanceEditDrawerOpen: boolean;
     isCategoryRecordsOpen: boolean;
@@ -74,6 +76,10 @@ interface UIState {
     closeGoalsList: () => void;
     openLoansList: () => void;
     closeLoansList: () => void;
+    openArchivedLoansList: () => void;
+    closeArchivedLoansList: () => void;
+    openArchivedGoalsList: () => void;
+    closeArchivedGoalsList: () => void;
     openCategoryManagement: () => void;
     closeCategoryManagement: () => void;
     openBalanceEdit: () => void;
@@ -121,6 +127,8 @@ export const useUIStore = create<UIState>()(
             isBudgetsListOpen: false,
             isGoalsListOpen: false,
             isLoansListOpen: false,
+            isArchivedLoansListOpen: false,
+            isArchivedGoalsListOpen: false,
             isCategoryManagementOpen: false,
             isBalanceEditDrawerOpen: false,
             isCategoryRecordsOpen: false,
@@ -151,6 +159,8 @@ export const useUIStore = create<UIState>()(
                         state.isBudgetsListOpen ||
                         state.isGoalsListOpen ||
                         state.isLoansListOpen ||
+                        state.isArchivedLoansListOpen ||
+                        state.isArchivedGoalsListOpen ||
                         state.isCategoryManagementOpen ||
                         state.isBalanceEditDrawerOpen ||
                         state.isCategoryRecordsOpen ||
@@ -332,6 +342,23 @@ export const useUIStore = create<UIState>()(
             closeLoansList: () => set({
                 isLoansListOpen: false
             }),
+
+            openArchivedLoansList: () => set({
+                isArchivedLoansListOpen: true
+            }),
+
+            closeArchivedLoansList: () => set({
+                isArchivedLoansListOpen: false
+            }),
+
+            openArchivedGoalsList: () => set({
+                isArchivedGoalsListOpen: true
+            }),
+
+            closeArchivedGoalsList: () => set({
+                isArchivedGoalsListOpen: false
+            }),
+
             openCategoryManagement: () => set({
                 isCategoryManagementOpen: true
             }),

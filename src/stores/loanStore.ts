@@ -7,6 +7,7 @@ interface LoanState {
     deleteLoan: (id: number) => Promise<void>;
     linkExpenseToLoan: (expenseId: number, loanId: number | null) => Promise<void>;
     recalculateLoanAmount: (loanId: number) => Promise<number>;
+    archiveLoan: (id: number, archive: boolean) => Promise<void>;
 }
 
 export const useLoanStore = create<LoanState>(() => ({
@@ -95,17 +96,36 @@ export const useLoanStore = create<LoanState>(() => ({
                     .filter(e => (loan.type === 'taken' ? e.type === 'expense' : e.type === 'income'))
                     .reduce((s, e) => s + e.amount, 0);
 
+                const totalAdditionalAmount = linkedExpenses
+                    .filter(e => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
+                    .reduce((s, e) => s + e.amount, 0);
+
+                const isProbablyDoubled = (loan.totalAmount > 0 && totalAdditionalAmount === loan.totalAmount);
+                const totalGrossAmount = isProbablyDoubled ? totalAdditionalAmount : ((loan.totalAmount || 0) + totalAdditionalAmount);
+
+                const isCompleted = totalRepayments >= totalGrossAmount && totalGrossAmount > 0;
+
                 // Note: The UI calculates percentage as totalRepayments / (loan.totalAmount + totalAdditionalAmount)
                 // We update currentAmount to store the repayments progress
                 await db.loans.update(loanId, { 
                     currentAmount: totalRepayments,
-                    updatedAt: new Date().toISOString()
+                    updatedAt: new Date().toISOString(),
+                    ...(isCompleted ? { isArchived: true } : {})
                 });
                 return totalRepayments;
             });
         } catch (err) {
             console.error("Failed to recalculate loan amount", err);
             throw err;
+        }
+    },
+
+    archiveLoan: async (id, archive) => {
+        try {
+            await db.loans.update(id, { isArchived: archive });
+        } catch (error) {
+            console.error("Failed to archive loan", error);
+            throw error;
         }
     }
 }));

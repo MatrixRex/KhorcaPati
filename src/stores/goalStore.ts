@@ -7,12 +7,14 @@ interface GoalState {
     deleteGoal: (id: number) => Promise<void>;
     linkExpenseToGoal: (expenseId: number, goalId: number | null) => Promise<void>;
     recalculateGoalAmount: (goalId: number) => Promise<number>;
+    archiveGoal: (id: number, archive: boolean) => Promise<void>;
 }
 
 export const useGoalStore = create<GoalState>(() => ({
     addGoal: async (goal) => {
         try {
-            return (await db.goals.add(goal)) as number;
+            const payload = { ...goal, isArchived: goal.currentAmount >= goal.targetAmount };
+            return (await db.goals.add(payload)) as number;
         } catch (error) {
             console.error("Failed to add goal", error);
             throw error;
@@ -21,9 +23,15 @@ export const useGoalStore = create<GoalState>(() => ({
 
     updateGoal: async (id, goal) => {
         try {
-            const updated = await db.goals.update(id, goal);
-            // If amount was updated or something, we might want to ensure it's synced, 
-            // but usually we recalculate from expenses now.
+            const current = await db.goals.get(id);
+            const targetAmount = goal.targetAmount ?? current?.targetAmount ?? 0;
+            const currentAmount = goal.currentAmount ?? current?.currentAmount ?? 0;
+            const isCompleted = currentAmount >= targetAmount && targetAmount > 0;
+            const payload = { 
+                ...goal,
+                ...(isCompleted && current?.isArchived === undefined ? { isArchived: true } : {})
+            };
+            const updated = await db.goals.update(id, payload);
             return updated;
         } catch (error) {
             console.error("Failed to update goal", error);
@@ -79,15 +87,28 @@ export const useGoalStore = create<GoalState>(() => ({
                     return exp.type === 'expense' ? sum + exp.amount : sum - exp.amount;
                 }, 0);
 
+                const goal = await db.goals.get(goalId);
+                const isCompleted = goal ? (total >= goal.targetAmount) : false;
+
                 await db.goals.update(goalId, { 
                     currentAmount: Math.max(0, total),
-                    updatedAt: new Date().toISOString()
+                    updatedAt: new Date().toISOString(),
+                    ...(isCompleted ? { isArchived: true } : {})
                 });
                 return total;
             });
         } catch (err) {
             console.error("Failed to recalculate goal amount", err);
             throw err;
+        }
+    },
+
+    archiveGoal: async (id, archive) => {
+        try {
+            await db.goals.update(id, { isArchived: archive });
+        } catch (error) {
+            console.error("Failed to archive goal", error);
+            throw error;
         }
     }
 }));

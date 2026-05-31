@@ -17,8 +17,10 @@ export const GoalComboBox = React.forwardRef<HTMLInputElement, GoalComboBoxProps
         const goals = useLiveQuery(() => db.goals.toArray()) || [];
 
         const goalNames = React.useMemo(() => {
-            return goals.map(g => g.title);
-        }, [goals]);
+            return goals
+                .filter(g => g.id === value || !g.isArchived)
+                .map(g => g.title);
+        }, [goals, value]);
 
         const selectedGoal = React.useMemo(() => {
             return goals.find(g => g.id === value);

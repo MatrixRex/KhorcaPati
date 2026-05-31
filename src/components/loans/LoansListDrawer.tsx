@@ -20,9 +20,10 @@ export function LoansListDrawer() {
 
     const { loans, totalAmountSum } = useLiveQuery(async () => {
         const allLoans = await db.loans.orderBy('createdAt').reverse().toArray();
-        const allExpenses = await db.expenses.where('loanId').anyOf(allLoans.map(l => l.id!).filter(Boolean)).toArray();
+        const activeLoans = allLoans.filter(l => !l.isArchived);
+        const allExpenses = await db.expenses.where('loanId').anyOf(activeLoans.map(l => l.id!).filter(Boolean)).toArray();
         
-        const sum = allLoans.reduce((acc, loan) => {
+        const sum = activeLoans.reduce((acc, loan) => {
             const linkedExpenses = allExpenses.filter(e => e.loanId === loan.id);
             const totalAdditionalAmount = linkedExpenses
                 .filter(e => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
@@ -36,7 +37,7 @@ export function LoansListDrawer() {
             return acc + loanGross;
         }, 0);
 
-        return { loans: allLoans, totalAmountSum: sum };
+        return { loans: activeLoans, totalAmountSum: sum };
     }) || { loans: [], totalAmountSum: 0 };
 
     const isAnyDetailOpen = isGoalRecordsSheetOpen || isBudgetRecordsSheetOpen || isLoanRecordsSheetOpen || useUIStore.getState().isCategoryRecordsOpen;

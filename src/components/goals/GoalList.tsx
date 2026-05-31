@@ -5,9 +5,10 @@ import { useUIStore } from '@/stores/uiStore';
 
 export function GoalList() {
     const { openGoalRecords } = useUIStore();
-    const goals = useLiveQuery(
-        () => db.goals.orderBy('createdAt').reverse().toArray()
-    );
+    const goals = useLiveQuery(async () => {
+        const all = await db.goals.orderBy('createdAt').reverse().toArray();
+        return all.filter(g => !g.isArchived);
+    });
 
     if (!goals) {
         return <div className="p-4 text-center text-muted-foreground">Loading goals...</div>;

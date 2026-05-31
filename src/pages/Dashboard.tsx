@@ -73,7 +73,7 @@ export default function Dashboard() {
 
     const activeGoals = useLiveQuery(async () => {
         const all = await db.goals.orderBy('createdAt').reverse().toArray();
-        return all.filter(g => g.currentAmount < g.targetAmount).slice(0, 2);
+        return all.filter(g => !g.isArchived && g.currentAmount < g.targetAmount).slice(0, 2);
     });
 
     const activeLoans = useLiveQuery(async () => {
@@ -81,6 +81,7 @@ export default function Dashboard() {
         const allExpenses = await db.expenses.where('loanId').anyOf(all.map(l => l.id!).filter(Boolean)).toArray();
         
         const active = all.filter(loan => {
+            if (loan.isArchived) return false;
             const linkedExpenses = allExpenses.filter(e => e.loanId === loan.id);
             const totalRepayments = linkedExpenses
                 .filter(e => (loan.type === 'taken' ? e.type === 'expense' : e.type === 'income'))

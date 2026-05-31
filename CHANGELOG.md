@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Archived Items Drawers**: Added `ArchivedLoansDrawer` and `ArchivedGoalsDrawer` to manage and restore archived loans and goals.
+- **Archive Settings Section**: Added a new "Archived Items" management section to the Settings page.
 - **Dev Server QR Code**: Added `vite-plugin-qrcode` and exposed the host to the local network to generate a scan-to-open QR code in the terminal for remote device testing.
 - **Unique Screen IDs in Dev**: Added dev-only visual IDs (`p:`, `d:`, `m:`) next to page headers, drawers, and modal titles with click-to-copy capability.
 - **New Timeframe Presets**: Added "Today" and "Past Month" presets to the `DateRangeFilter` for quicker selection.
@@ -15,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Filter Section Headers**: Implemented "TIME RANGE" and "CATEGORIES" headers across all filter dropdowns for better visual hierarchy.
 
 ### Changed
+- **Active Lists Filtering**: Filtered out archived loans and goals from the Dashboard, main lists, and ComboBox selectors.
 - **Unified Filter Typography**: Standardized all filter dropdowns (Time Range, Category, and Sort) to use a unified design pattern: `h-8` trigger buttons, `h-9` items, and natural-case labels.
 - **Improved Suggestion Filtering**: Refactored `SuggestionInput` to use a 4-tier matching strategy, prioritizing exact matches and contiguous string matches (Starts-With/Contains) over non-contiguous fuzzy matches for better UX.
 - **Vite Configuration**: Updated `vite.config.ts` to bind to `127.0.0.1` and use a dynamic port (`0`) to avoid port conflicts during development.
@@ -23,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dynamic Versioning**: Replaced the hardcoded version number with a dynamic build-time constant that prioritizes GitHub git tags or `package.json` version.
 
 ### Fixed
+- **Paid Loan Calculation Bug**: Resolved a bug in the total loan calculation within the Loans list drawer where paid/completed loans were still included in the total outstanding sum.
 - **Transactional Type Reset**: Resolved a race condition in `ExpenseForm` that caused the transaction type (e.g., 'Borrowed' vs 'Paid Back') to reset to default values during save operations when adding records from the Loan details drawer.
 - **Form State Persistence**: Implemented `dirtyFields` guards in `ExpenseForm` to preserve user selections during asynchronous database updates and re-renders.
 - **Build Stability**: Resolved TypeScript build failures (TS2339, TS2322) in `LoanForm.tsx` by adding missing `Expense` type imports and explicit type annotations for linked records.

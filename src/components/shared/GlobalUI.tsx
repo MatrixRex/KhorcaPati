@@ -17,9 +17,11 @@ import { GoalForm } from '@/components/goals/GoalForm';
 import { GoalLinker } from '@/components/goals/GoalLinker';
 import { GoalRecordsList } from '@/components/goals/GoalRecordsList';
 import { GoalsListDrawer } from '@/components/goals/GoalsListDrawer';
+import { ArchivedGoalsDrawer } from '@/components/goals/ArchivedGoalsDrawer';
 import { LoanForm } from '@/components/loans/LoanForm';
 import { LoanRecordsList } from '@/components/loans/LoanRecordsList';
 import { LoansListDrawer } from '@/components/loans/LoansListDrawer';
+import { ArchivedLoansDrawer } from '@/components/loans/ArchivedLoansDrawer';
 import { CategoryManagementDrawer } from '@/components/shared/CategoryManagementDrawer';
 import { DevBadge } from '@/components/shared/DevBadge';
 import { useUIStore } from '@/stores/uiStore';
@@ -50,6 +52,8 @@ export function GlobalUI() {
         isBudgetsListOpen,
         isGoalsListOpen,
         isLoansListOpen,
+        isArchivedLoansListOpen,
+        isArchivedGoalsListOpen,
         isCategoryManagementOpen,
         isLoanLinkerOpen,
         theme, expenseSessionId, subSessionId,
@@ -121,7 +125,7 @@ export function GlobalUI() {
     // Add beforeunload listener to prevent accidental reload/close when editing
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isBudgetRecordsSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isLoanSheetOpen || isLoanRecordsSheetOpen || isRecurringPaymentsListOpen || isBudgetsListOpen || isGoalsListOpen || isLoansListOpen || isCategoryManagementOpen) {
+            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isBudgetRecordsSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isLoanSheetOpen || isLoanRecordsSheetOpen || isRecurringPaymentsListOpen || isBudgetsListOpen || isGoalsListOpen || isLoansListOpen || isCategoryManagementOpen || isArchivedLoansListOpen || isArchivedGoalsListOpen) {
                 e.preventDefault();
                 e.returnValue = ''; // Required for some browsers
                 return '';
@@ -130,7 +134,7 @@ export function GlobalUI() {
 
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isBudgetRecordsSheetOpen, isGoalSheetOpen, isGoalProgressSheetOpen, isGoalRecordsSheetOpen, isLoanSheetOpen, isLoanRecordsSheetOpen, isRecurringPaymentsListOpen, isBudgetsListOpen, isGoalsListOpen, isLoansListOpen, isCategoryManagementOpen]);
+    }, [isExpenseSheetOpen, isSubRecordSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isBudgetRecordsSheetOpen, isGoalSheetOpen, isGoalProgressSheetOpen, isGoalRecordsSheetOpen, isLoanSheetOpen, isLoanRecordsSheetOpen, isRecurringPaymentsListOpen, isBudgetsListOpen, isGoalsListOpen, isLoansListOpen, isCategoryManagementOpen, isArchivedLoansListOpen, isArchivedGoalsListOpen]);
 
     useEffect(() => {
         const init = async () => {
@@ -189,7 +193,9 @@ export function GlobalUI() {
             <RecurringPaymentsListDrawer />
             <BudgetsListDrawer />
             <GoalsListDrawer />
+            <ArchivedGoalsDrawer />
             <LoansListDrawer />
+            <ArchivedLoansDrawer />
             <CategoryManagementDrawer />
 
             {/* --- LAYER 2: Records/Details (Middle) --- */}

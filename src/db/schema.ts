@@ -60,6 +60,7 @@ export interface Goal {
     note: string;
     createdAt: string;
     updatedAt: string;
+    isArchived?: boolean;
 }
 
 export interface Loan {
@@ -73,6 +74,7 @@ export interface Loan {
     note: string;
     createdAt: string;
     updatedAt: string;
+    isArchived?: boolean;
 }
 
 export interface Category {
@@ -232,4 +234,42 @@ db.version(12).stores({
     recurringPayments: '++id, title, nextDueDate, category, type'
 });
 
+db.version(13).stores({
+    expenses: '++id, parentId, isNested, goalId, loanId, date, category, isRecurring, type, itemAutoTrack',
+    items: '++id, expenseId, name, date',
+    budgets: '++id, category, timelineType, recurringInterval',
+    goals: '++id, createdAt, isArchived',
+    loans: '++id, createdAt, type, person, isArchived',
+    categories: '++id, &name, isDefault',
+    recurringPayments: '++id, title, nextDueDate, category, type'
+}).upgrade(async (tx) => {
+    // Set isArchived for existing completed goals and loans
+    await tx.table('goals').toCollection().modify((goal: Goal) => {
+        if (goal.isArchived === undefined) {
+            goal.isArchived = goal.currentAmount >= goal.targetAmount;
+        }
+    });
+
+    const loans = await tx.table('loans').toArray();
+    const expenses = await tx.table('expenses').toArray();
+    for (const loan of loans) {
+        if (loan.isArchived === undefined) {
+            const linkedExpenses = expenses.filter(e => e.loanId === loan.id);
+            const totalRepayments = linkedExpenses
+                .filter(e => (loan.type === 'taken' ? e.type === 'expense' : e.type === 'income'))
+                .reduce((s, e) => s + e.amount, 0);
+            const totalAdditionalAmount = linkedExpenses
+                .filter(e => (loan.type === 'taken' ? e.type === 'income' : e.type === 'expense'))
+                .reduce((s, e) => s + e.amount, 0);
+            const isProbablyDoubled = (loan.totalAmount > 0 && totalAdditionalAmount === loan.totalAmount);
+            const totalGrossAmount = isProbablyDoubled ? totalAdditionalAmount : ((loan.totalAmount || 0) + totalAdditionalAmount);
+            
+            const isCompleted = totalRepayments >= totalGrossAmount && totalGrossAmount > 0;
+            loan.isArchived = isCompleted;
+            await tx.table('loans').put(loan);
+        }
+    }
+});
+
 export { db };
+

@@ -2,7 +2,7 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { useUIStore, type Theme } from '@/stores/uiStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useState } from 'react';
-import { Moon, Sun, Monitor, Check, Trash2, Bell, Target, Wallet, Languages, Download, Upload, TrendingUp } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, Trash2, Bell, Target, Wallet, Languages, Download, Upload, TrendingUp, Archive } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
@@ -270,6 +270,47 @@ export default function Settings() {
                                 </div>
                                 <div className="flex flex-col items-start min-w-0">
                                     <span className="text-sm font-bold">{t('loans')}</span>
+                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight leading-tight">{t('manageLoans')}</span>
+                                </div>
+                            </div>
+                            <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
+                                <Monitor className="w-4 h-4 rotate-[-90deg]" />
+                            </div>
+                        </button>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 className="label-header mb-3 px-1">{t('archivedItems')}</h2>
+                    <div className="grid grid-cols-1 gap-2">
+                        <button
+                            onClick={() => useUIStore.getState().openArchivedGoalsList()}
+                            className="setting-item-glass group"
+                        >
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div className="p-3 rounded-xl bg-primary/20 text-primary shadow-sm group-hover:scale-110 group-hover:shadow-primary/20 transition-all duration-300 shrink-0 border border-primary/10">
+                                    <Archive className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col items-start min-w-0">
+                                    <span className="text-sm font-bold">{t('archivedGoals')}</span>
+                                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight leading-tight">{t('manageTargets')}</span>
+                                </div>
+                            </div>
+                            <div className="w-8 h-8 rounded-full bg-muted/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-2">
+                                <Monitor className="w-4 h-4 rotate-[-90deg]" />
+                            </div>
+                        </button>
+
+                        <button
+                            onClick={() => useUIStore.getState().openArchivedLoansList()}
+                            className="setting-item-glass group"
+                        >
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div className="p-3 rounded-xl bg-destructive/20 text-destructive shadow-sm group-hover:scale-110 group-hover:shadow-destructive/20 transition-all duration-300 shrink-0 border border-destructive/10">
+                                    <Archive className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col items-start min-w-0">
+                                    <span className="text-sm font-bold">{t('archivedLoans')}</span>
                                     <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight leading-tight">{t('manageLoans')}</span>
                                 </div>
                             </div>

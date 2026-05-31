@@ -5,9 +5,10 @@ import { useTranslation } from 'react-i18next';
 
 export function LoanList() {
     const { t } = useTranslation();
-    const loans = useLiveQuery(
-        () => db.loans.orderBy('createdAt').reverse().toArray()
-    );
+    const loans = useLiveQuery(async () => {
+        const all = await db.loans.orderBy('createdAt').reverse().toArray();
+        return all.filter(l => !l.isArchived);
+    });
 
     if (!loans) {
         return <div className="p-4 text-center text-muted-foreground">{t('loading')}</div>;

@@ -25,7 +25,7 @@ export const LoanComboBox = React.forwardRef<HTMLInputElement, LoanComboBoxProps
 
         const loanNames = React.useMemo(() => {
             return loans
-                .filter(l => l.id === value || l.currentAmount < l.totalAmount)
+                .filter(l => l.id === value || !l.isArchived)
                 .map(l => `${l.title} (${l.person})`);
         }, [loans, value]);
 

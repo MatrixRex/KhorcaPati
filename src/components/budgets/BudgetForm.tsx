@@ -60,7 +60,7 @@ interface BudgetFormProps {
 }
 
 export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const addBudget = useBudgetStore((state) => state.addBudget);
     const updateBudget = useBudgetStore((state) => state.updateBudget);
     const deleteBudget = useBudgetStore((state) => state.deleteBudget);
@@ -76,10 +76,45 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
             alertThreshold: initialData?.alertThreshold ?? 0.8,
             timelineType: initialData?.timelineType ?? 'recurring',
             recurringInterval: initialData?.recurringInterval ?? 'monthly',
-            startDate: initialData?.startDate ?? today,
+            startDate: initialData?.startDate ?? (initialData?.timelineType === 'range' ? today : null),
             endDate: initialData?.endDate ?? today,
         },
     });
+
+    const getResetDayMessage = (interval: string | null, dateStr: string | null): string => {
+        if (!dateStr) return t('startDateHelpText');
+        try {
+            const date = parseISO(dateStr);
+            if (isNaN(date.getTime())) return t('startDateHelpText');
+            
+            const currentLanguage = i18n.language;
+            switch (interval) {
+                case 'daily':
+                    return t('daily');
+                case 'weekly': {
+                    const dayName = date.toLocaleDateString(currentLanguage, { weekday: 'long' });
+                    return t('resetsEveryDayOfWeek', { day: dayName });
+                }
+                case 'monthly': {
+                    let formattedDay: string;
+                    if (currentLanguage === 'en') {
+                        formattedDay = format(date, 'do');
+                    } else {
+                        formattedDay = new Intl.NumberFormat(currentLanguage).format(date.getDate());
+                    }
+                    return t('resetsOnDayOfMonth', { day: formattedDay });
+                }
+                case 'yearly': {
+                    const formattedDate = date.toLocaleDateString(currentLanguage, { month: 'long', day: 'numeric' });
+                    return t('resetsOnDateOfYear', { date: formattedDate });
+                }
+                default:
+                    return t('startDateHelpText');
+            }
+        } catch {
+            return t('startDateHelpText');
+        }
+    };
 
     const timelineType = form.watch('timelineType');
     const interval = form.watch('recurringInterval');
@@ -106,7 +141,7 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
                 alertThreshold: data.alertThreshold,
                 timelineType: data.timelineType,
                 recurringInterval: data.timelineType === 'recurring' ? data.recurringInterval : null,
-                startDate: data.timelineType === 'range' ? data.startDate : null,
+                startDate: data.timelineType === 'range' ? data.startDate : (data.timelineType === 'recurring' && data.startDate ? data.startDate : null),
                 endDate: data.timelineType === 'range' ? data.endDate : null,
                 createdAt: initialData?.createdAt ?? new Date().toISOString(),
             };
@@ -202,28 +237,53 @@ export function BudgetForm({ initialData, onSuccess, onCancel }: BudgetFormProps
 
                     {/* Recurring: interval chips */}
                     {timelineType === 'recurring' && (
-                        <div className="space-y-2">
-                            <p className="text-xs text-muted-foreground">{t('resetsEveryPeriod')}</p>
-                            <div className="grid grid-cols-4 gap-2">
-                                {INTERVALS.map(({ value, labelKey }) => (
-                                    <button
-                                        key={value}
-                                        type="button"
-                                        onClick={() => form.setValue('recurringInterval', value, { shouldDirty: true })}
-                                        className={cn(
-                                            'py-2 rounded-lg text-sm font-medium border transition-all',
-                                            interval === value
-                                                ? 'bg-primary text-primary-foreground border-primary shadow'
-                                                : 'bg-background border-border text-muted-foreground hover:bg-muted'
-                                        )}
-                                    >
-                                        {t(labelKey)}
-                                    </button>
-                                ))}
+                        <div className="space-y-3">
+                            <div className="space-y-2">
+                                <p className="text-xs text-muted-foreground">{t('resetsEveryPeriod')}</p>
+                                <div className="grid grid-cols-4 gap-2">
+                                    {INTERVALS.map(({ value, labelKey }) => (
+                                        <button
+                                            key={value}
+                                            type="button"
+                                            onClick={() => form.setValue('recurringInterval', value, { shouldDirty: true })}
+                                            className={cn(
+                                                'py-2 rounded-lg text-sm font-medium border transition-all',
+                                                interval === value
+                                                    ? 'bg-primary text-primary-foreground border-primary shadow'
+                                                    : 'bg-background border-border text-muted-foreground hover:bg-muted'
+                                            )}
+                                        >
+                                            {t(labelKey)}
+                                        </button>
+                                    ))}
+                                </div>
+                                {form.formState.errors.recurringInterval && (
+                                    <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.recurringInterval.message}</p>
+                                )}
                             </div>
-                            {form.formState.errors.recurringInterval && (
-                                <p className="text-rose-600 text-[11px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.recurringInterval.message}</p>
-                            )}
+
+                            {/* New Starting Date field for recurring budgets */}
+                            <div className="space-y-1.5 mt-3 animate-reveal">
+                                <Label htmlFor="recurringStartDate" className="text-xs">{t('startDate')}</Label>
+                                <Controller
+                                    control={form.control}
+                                    name="startDate"
+                                    render={({ field }) => (
+                                        <DatePicker
+                                            date={field.value ? parseISO(field.value) : undefined}
+                                            setDate={(date) => field.onChange(date ? format(date, 'yyyy-MM-dd') : null)}
+                                            placeholder={t('startDatePlaceholder')}
+                                            className="h-12 rounded-xl text-xs bg-background/50 border-border"
+                                        />
+                                    )}
+                                />
+                                <p className="text-[10px] text-muted-foreground ml-1 mt-1 font-medium transition-all">
+                                    {getResetDayMessage(interval, form.watch('startDate'))}
+                                </p>
+                                {form.formState.errors.startDate && (
+                                    <p className="text-rose-600 text-[10px] font-black mt-1 ml-1 uppercase tracking-tight leading-none antialiased">{form.formState.errors.startDate.message}</p>
+                                )}
+                            </div>
                         </div>
                     )}
 

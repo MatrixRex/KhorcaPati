@@ -5,6 +5,7 @@ import {
     startOfMonth, endOfMonth,
     startOfYear, endOfYear,
     isWithinInterval, parseISO,
+    subDays, addDays
 } from 'date-fns';
 import { type Budget, type Expense } from '@/db/schema';
 
@@ -20,6 +21,88 @@ export function getBudgetWindow(budget: Budget): SpendingWindow | null {
     }
 
     const now = new Date();
+
+    if (budget.startDate && budget.timelineType === 'recurring') {
+        const anchor = startOfDay(parseISO(budget.startDate));
+        switch (budget.recurringInterval) {
+            case 'daily':
+                return {
+                    start: format(startOfDay(now), 'yyyy-MM-dd'),
+                    end: format(endOfDay(now), 'yyyy-MM-dd'),
+                };
+            case 'weekly': {
+                const anchorDayOfWeek = anchor.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+                const nowDayOfWeek = now.getDay();
+                let diff = nowDayOfWeek - anchorDayOfWeek;
+                if (diff < 0) {
+                    diff += 7;
+                }
+                const start = startOfDay(subDays(now, diff));
+                const end = endOfDay(addDays(start, 6));
+                return {
+                    start: format(start, 'yyyy-MM-dd'),
+                    end: format(end, 'yyyy-MM-dd'),
+                };
+            }
+            case 'monthly': {
+                const anchorDay = anchor.getDate();
+                const nowYear = now.getFullYear();
+                const nowMonth = now.getMonth();
+                
+                const getPeriodStart = (year: number, month: number, day: number) => {
+                    const lastDayOfM = new Date(year, month + 1, 0).getDate();
+                    return startOfDay(new Date(year, month, Math.min(day, lastDayOfM)));
+                };
+
+                const candidateStart = getPeriodStart(nowYear, nowMonth, anchorDay);
+                let start: Date;
+                let nextStart: Date;
+
+                if (startOfDay(now) >= startOfDay(candidateStart)) {
+                    start = candidateStart;
+                    nextStart = getPeriodStart(nowYear, nowMonth + 1, anchorDay);
+                } else {
+                    start = getPeriodStart(nowYear, nowMonth - 1, anchorDay);
+                    nextStart = candidateStart;
+                }
+
+                const end = endOfDay(subDays(nextStart, 1));
+                return {
+                    start: format(start, 'yyyy-MM-dd'),
+                    end: format(end, 'yyyy-MM-dd'),
+                };
+            }
+            case 'yearly': {
+                const anchorMonth = anchor.getMonth();
+                const anchorDay = anchor.getDate();
+                const nowYear = now.getFullYear();
+
+                const getYearlyPeriodStart = (year: number, month: number, day: number) => {
+                    const lastDayOfM = new Date(year, month + 1, 0).getDate();
+                    return startOfDay(new Date(year, month, Math.min(day, lastDayOfM)));
+                };
+
+                const candidateStart = getYearlyPeriodStart(nowYear, anchorMonth, anchorDay);
+                let start: Date;
+                let nextStart: Date;
+
+                if (startOfDay(now) >= startOfDay(candidateStart)) {
+                    start = candidateStart;
+                    nextStart = getYearlyPeriodStart(nowYear + 1, anchorMonth, anchorDay);
+                } else {
+                    start = getYearlyPeriodStart(nowYear - 1, anchorMonth, anchorDay);
+                    nextStart = candidateStart;
+                }
+
+                const end = endOfDay(subDays(nextStart, 1));
+                return {
+                    start: format(start, 'yyyy-MM-dd'),
+                    end: format(end, 'yyyy-MM-dd'),
+                };
+            }
+        }
+    }
+
     switch (budget.recurringInterval) {
         case 'daily':
             return {

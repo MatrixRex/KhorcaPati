@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Test Save File**: Created a pre-populated realistic data backup file `fake-data-backup.json` containing mock records for categories, expenses, items, budgets, goals, loans, and recurring payments.
+
+### Fixed
+- **Loan Backup Support**: Added missing `loans` table serialization and restoration to the data backup export and import logic (`data-management.ts`) so that loan data is not lost on backup/restore.
+
 ## [1.9.3] - 2026-05-31
 
 ### Added

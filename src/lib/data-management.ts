@@ -10,6 +10,7 @@ export interface BackupData {
         items: any[];
         budgets: any[];
         goals: any[];
+        loans: any[];
         categories: any[];
         recurringPayments: any[];
     };
@@ -32,6 +33,7 @@ export const exportData = async () => {
             items: await db.items.toArray(),
             budgets: await db.budgets.toArray(),
             goals: await db.goals.toArray(),
+            loans: await db.loans.toArray(),
             categories: await db.categories.toArray(),
             recurringPayments: await db.recurringPayments.toArray(),
         },
@@ -65,12 +67,13 @@ export const importData = async (jsonString: string) => {
         }
 
         // Clear existing data
-        await db.transaction('rw', [db.expenses, db.items, db.budgets, db.goals, db.categories, db.recurringPayments], async () => {
+        await db.transaction('rw', [db.expenses, db.items, db.budgets, db.goals, db.loans, db.categories, db.recurringPayments], async () => {
             await Promise.all([
                 db.expenses.clear(),
                 db.items.clear(),
                 db.budgets.clear(),
                 db.goals.clear(),
+                db.loans.clear(),
                 db.categories.clear(),
                 db.recurringPayments.clear(),
             ]);
@@ -80,6 +83,7 @@ export const importData = async (jsonString: string) => {
             if (backup.dexie.items.length > 0) await db.items.bulkAdd(backup.dexie.items);
             if (backup.dexie.budgets.length > 0) await db.budgets.bulkAdd(backup.dexie.budgets);
             if (backup.dexie.goals.length > 0) await db.goals.bulkAdd(backup.dexie.goals);
+            if (backup.dexie.loans && backup.dexie.loans.length > 0) await db.loans.bulkAdd(backup.dexie.loans);
             if (backup.dexie.categories.length > 0) await db.categories.bulkAdd(backup.dexie.categories);
             if (backup.dexie.recurringPayments.length > 0) await db.recurringPayments.bulkAdd(backup.dexie.recurringPayments);
         });

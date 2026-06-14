@@ -33,3 +33,5 @@
 - `useUIStore` manages sheet/drawer open/close state. Many parallel sheet booleans — `isInEditingMode()` checks all.
 - Expense nesting ("Collection Mode") via `parentId` + `isNested` fields.
 - Goal/Loan expenses link via `goalId`/`loanId`. Updating/deleting triggers recalculation.
+- Always use inline execution. Never ask to run tasks using subagents.
+

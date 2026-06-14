@@ -204,7 +204,7 @@ export function RecurringPaymentDetailDrawer() {
                                     <Calendar className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
                                 )}
                                 <div>
-                                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('startDate')} & {t('timeline')}</h4>
+                                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('recurringDate')}</h4>
                                     <p className={cn(
                                         "text-sm font-black mt-0.5",
                                         isOverdue ? "text-destructive" : "text-foreground"

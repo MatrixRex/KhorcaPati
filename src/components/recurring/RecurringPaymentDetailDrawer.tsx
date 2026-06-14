@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
 import { useUIStore } from '@/stores/uiStore';
@@ -5,6 +6,8 @@ import { useRecurringPaymentStore } from '@/stores/recurringPaymentStore';
 import { useExpenseStore } from '@/stores/expenseStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useTranslation } from 'react-i18next';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Label } from '@/components/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { DevBadge } from '@/components/shared/DevBadge';
@@ -29,6 +32,14 @@ export function RecurringPaymentDetailDrawer() {
         isGoalProgressSheetOpen,
         isBalanceEditDrawerOpen
     } = useUIStore();
+
+    const [recordDate, setRecordDate] = useState<Date>(new Date());
+
+    useEffect(() => {
+        if (isRecurringPaymentDetailOpen) {
+            setRecordDate(new Date());
+        }
+    }, [isRecurringPaymentDetailOpen, recurringPaymentForDetail?.id]);
 
     const addExpense = useExpenseStore((state) => state.addExpense);
     const updateRecurringPayment = useRecurringPaymentStore((state) => state.updateRecurringPayment);
@@ -75,7 +86,7 @@ export function RecurringPaymentDetailDrawer() {
                 amount: payment.amount,
                 type: payment.type,
                 category: payment.category,
-                date: format(new Date(), 'yyyy-MM-dd'),
+                date: format(recordDate, 'yyyy-MM-dd'),
                 note: payment.note || '',
                 isRecurring: false,
                 recurringInterval: null,
@@ -211,6 +222,17 @@ export function RecurringPaymentDetailDrawer() {
                                     </p>
                                 </div>
                             )}
+                        </div>
+
+                        <div className="space-y-2 mb-6">
+                            <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t('date')}</Label>
+                            <DatePicker
+                                date={recordDate}
+                                setDate={(date) => {
+                                    if (date) setRecordDate(date);
+                                }}
+                                className="input-glass w-full"
+                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-3 mt-4">

@@ -13,6 +13,8 @@ interface UIState {
     editingSubRecord?: Expense;
     isRecurringPaymentSheetOpen: boolean;
     editingRecurringPayment?: RecurringPayment;
+    isRecurringPaymentDetailOpen: boolean;
+    recurringPaymentForDetail?: RecurringPayment;
     isBudgetSheetOpen: boolean;
     editingBudget?: Budget;
     isGoalSheetOpen: boolean;
@@ -54,6 +56,8 @@ interface UIState {
     openAddRecurringPayment: () => void;
     openEditRecurringPayment: (payment: RecurringPayment) => void;
     closeRecurringPaymentSheet: () => void;
+    openRecurringPaymentDetail: (payment: RecurringPayment) => void;
+    closeRecurringPaymentDetail: () => void;
     openAddGoal: () => void;
     openEditGoal: (goal: Goal) => void;
     closeGoalSheet: () => void;
@@ -109,6 +113,8 @@ export const useUIStore = create<UIState>()(
             editingSubRecord: undefined,
             isRecurringPaymentSheetOpen: false,
             editingRecurringPayment: undefined,
+            isRecurringPaymentDetailOpen: false,
+            recurringPaymentForDetail: undefined,
             isBudgetSheetOpen: false,
             editingBudget: undefined,
             isGoalSheetOpen: false,
@@ -148,6 +154,7 @@ export const useUIStore = create<UIState>()(
                 return state.isExpenseSheetOpen || 
                        state.isSubRecordSheetOpen || 
                        state.isRecurringPaymentSheetOpen ||
+                       state.isRecurringPaymentDetailOpen ||
                        state.isBudgetSheetOpen ||
                        state.isGoalSheetOpen ||
                        state.isGoalProgressSheetOpen ||
@@ -225,6 +232,16 @@ export const useUIStore = create<UIState>()(
             closeRecurringPaymentSheet: () => set({
                 isRecurringPaymentSheetOpen: false,
                 editingRecurringPayment: undefined
+            }),
+
+            openRecurringPaymentDetail: (payment) => set({
+                isRecurringPaymentDetailOpen: true,
+                recurringPaymentForDetail: payment
+            }),
+
+            closeRecurringPaymentDetail: () => set({
+                isRecurringPaymentDetailOpen: false,
+                recurringPaymentForDetail: undefined
             }),
             
             openAddBudget: () => set({

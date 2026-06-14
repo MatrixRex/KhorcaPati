@@ -24,7 +24,7 @@ export default function Dashboard() {
     const currentMonth = format(new Date(), 'yyyy-MM');
     const { 
         openEditExpense, 
-        openEditRecurringPayment, 
+        openRecurringPaymentDetail, 
         openRecurringPaymentsList,
         openBudgetsList,
         openGoalsList,
@@ -195,7 +195,7 @@ export default function Dashboard() {
                             <RecurringPaymentCard
                                 key={payment.id}
                                 payment={payment}
-                                onClick={() => openEditRecurringPayment(payment)}
+                                onClick={() => openRecurringPaymentDetail(payment)}
                             />
                         ))}
                     </div>

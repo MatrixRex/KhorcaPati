@@ -8,8 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useRecurringPaymentStore } from '@/stores/recurringPaymentStore';
-import { useExpenseStore } from '@/stores/expenseStore';
-import { format, addDays, addWeeks, addMonths, addYears, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { db, type RecurringPayment } from '@/db/schema';
 import { CategoryComboBox } from '../expenses/CategoryComboBox';
 import { NumberPad } from '@/components/shared/NumberPad';
@@ -58,7 +57,6 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [showNumberPad, setShowNumberPad] = useState(false);
 
-    const addExpense = useExpenseStore((state) => state.addExpense);
     const addRecurringPayment = useRecurringPaymentStore((state) => state.addRecurringPayment);
     const updateRecurringPayment = useRecurringPaymentStore((state) => state.updateRecurringPayment);
     const deleteRecurringPayment = useRecurringPaymentStore((state) => state.deleteRecurringPayment);
@@ -77,84 +75,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
         },
     });
 
-    const getNextDueDate = (current: Date, interval: string) => {
-        switch (interval) {
-            case 'daily': return addDays(current, 1);
-            case 'weekly': return addWeeks(current, 1);
-            case 'monthly': return addMonths(current, 1);
-            case 'yearly': return addYears(current, 1);
-            default: return current;
-        }
-    };
 
-    const handleConfirm = async () => {
-        const formData = form.getValues();
-        const id = currentId || initialData?.id;
-        if (!id) return;
-
-        try {
-            await performSave(formData);
-            const currentRecord = await db.recurringPayments.get(id);
-            if (!currentRecord) return;
-
-            // 1. Create Expense
-            await addExpense({
-                amount: currentRecord.amount,
-                type: currentRecord.type,
-                category: currentRecord.category,
-                date: format(new Date(), 'yyyy-MM-dd'), // Confirming now
-                note: currentRecord.note || '',
-                isRecurring: false, // This specific entry isn't recurring
-                recurringInterval: null,
-                recurringNextDue: null,
-                parentId: null,
-                isNested: false,
-                itemAutoTrack: false,
-                tags: [],
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-            });
-
-            // 2. Update or Delete Recurring Payment
-            if (currentRecord.interval === 'one-time') {
-                await deleteRecurringPayment(id);
-            } else {
-                const currentNext = parseISO(currentRecord.nextDueDate);
-                const nextDate = getNextDueDate(currentNext, currentRecord.interval);
-                await updateRecurringPayment(id, {
-                    nextDueDate: format(nextDate, 'yyyy-MM-dd')
-                });
-            }
-            onSuccess?.();
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const handleSkip = async () => {
-        const formData = form.getValues();
-        const id = currentId || initialData?.id;
-        if (!id) return;
-
-        try {
-            await performSave(formData);
-            const currentRecord = await db.recurringPayments.get(id);
-            if (!currentRecord) return;
-
-            if (currentRecord.interval === 'one-time') {
-                await deleteRecurringPayment(id);
-            } else {
-                const currentNext = parseISO(currentRecord.nextDueDate);
-                const nextDate = getNextDueDate(currentNext, currentRecord.interval);
-                await updateRecurringPayment(id, {
-                    nextDueDate: format(nextDate, 'yyyy-MM-dd')
-                });
-            }
-            onSuccess?.();
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
     const handleDelete = async () => {
         const idToDelete = currentId || initialData?.id;
@@ -387,27 +308,6 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                 </div>
 
                 <div className="pt-6 space-y-3">
-                    {initialData && (
-                        <div className="grid grid-cols-2 gap-3 mb-2">
-                            <Button
-                                type="button"
-                                variant="default"
-                                onClick={handleConfirm}
-                                className="w-full btn-premium"
-                            >
-                                {t('confirmPayment')}
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handleSkip}
-                                className="w-full btn-secondary-premium"
-                            >
-                                {t('skipNext')}
-                            </Button>
-                        </div>
-                    )}
-                    
                     {onCancel && (
                         <Button
                             type="button"
@@ -428,7 +328,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                                 await form.handleSubmit(performSave)();
                                 onCancel();
                             }}
-                            className="w-full btn-premium"
+                            className="w-full btn-premium active:scale-95 transition-all duration-200"
                         >
                             {initialData ? t('saveChanges') : t('done')}
                         </Button>
@@ -439,7 +339,7 @@ export function RecurringPaymentForm({ initialData, onSuccess, onCancel }: Recur
                             type="button"
                             variant="ghost"
                             onClick={() => setShowDeleteDialog(true)}
-                            className="w-full btn-destructive-premium"
+                            className="w-full btn-destructive-premium active:scale-95 transition-all duration-200"
                         >
                             <Trash2 className="w-3.5 h-3.5 mr-2" />
                             {t('deleteRecord')}

@@ -11,9 +11,9 @@ import { DevBadge } from '@/components/shared/DevBadge';
 
 export function RecurringPaymentsListDrawer() {
     const { 
-        isRecurringPaymentsListOpen, closeRecurringPaymentsList, openAddRecurringPayment, openEditRecurringPayment,
+        isRecurringPaymentsListOpen, closeRecurringPaymentsList, openAddRecurringPayment, openRecurringPaymentDetail,
         isGoalRecordsSheetOpen, isBudgetRecordsSheetOpen, isLoanRecordsSheetOpen,
-        isExpenseSheetOpen, isRecurringPaymentSheetOpen, isBudgetSheetOpen, isGoalSheetOpen, isLoanSheetOpen,
+        isExpenseSheetOpen, isRecurringPaymentSheetOpen, isRecurringPaymentDetailOpen, isBudgetSheetOpen, isGoalSheetOpen, isLoanSheetOpen,
         isSubRecordSheetOpen, isGoalProgressSheetOpen, isBalanceEditDrawerOpen
     } = useUIStore();
     const { t } = useTranslation();
@@ -23,7 +23,7 @@ export function RecurringPaymentsListDrawer() {
     });
 
     const isAnyHigherOpen = isGoalRecordsSheetOpen || isBudgetRecordsSheetOpen || isLoanRecordsSheetOpen || 
-                             isExpenseSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || 
+                             isExpenseSheetOpen || isRecurringPaymentSheetOpen || isRecurringPaymentDetailOpen || isBudgetSheetOpen || 
                              isGoalSheetOpen || isLoanSheetOpen || isSubRecordSheetOpen || isGoalProgressSheetOpen || isBalanceEditDrawerOpen;
 
     const stackedStyle = "transition-all duration-500 ease-in-out data-[stacked=true]:-translate-y-4 data-[stacked=true]:scale-[0.94] data-[stacked=true]:opacity-40 data-[stacked=true]:pointer-events-none data-[stacked=true]:brightness-50 data-[stacked=true]:blur-[0.5px]";
@@ -83,7 +83,7 @@ export function RecurringPaymentsListDrawer() {
                                     <RecurringPaymentCard
                                         key={payment.id}
                                         payment={payment}
-                                        onClick={() => openEditRecurringPayment(payment)}
+                                        onClick={() => openRecurringPaymentDetail(payment)}
                                     />
                                 ))}
                             </div>

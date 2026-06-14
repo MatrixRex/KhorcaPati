@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { ExpenseForm } from '@/components/expenses/ExpenseForm';
 import { RecurringPaymentForm } from '@/components/recurring/RecurringPaymentForm';
 import { RecurringPaymentsListDrawer } from '@/components/recurring/RecurringPaymentsListDrawer';
+import { RecurringPaymentDetailDrawer } from '@/components/recurring/RecurringPaymentDetailDrawer';
 import { BudgetForm } from '@/components/budgets/BudgetForm';
 import { BudgetRecordsList } from '@/components/budgets/BudgetRecordsList';
 import { BudgetsListDrawer } from '@/components/budgets/BudgetsListDrawer';
@@ -39,6 +40,7 @@ export function GlobalUI() {
         isExpenseSheetOpen, editingExpense, initialParentId, initialLoanId, returnPath, openAddExpense, closeExpenseSheet,
         isSubRecordSheetOpen, editingSubRecord, closeSubRecordSheet,
         isRecurringPaymentSheetOpen, editingRecurringPayment, closeRecurringPaymentSheet,
+        isRecurringPaymentDetailOpen,
         isBudgetSheetOpen, editingBudget, closeBudgetSheet,
         isBudgetRecordsSheetOpen, budgetForRecords, closeBudgetRecordsSheet,
         isGoalSheetOpen, editingGoal, closeGoalSheet,
@@ -125,7 +127,7 @@ export function GlobalUI() {
     // Add beforeunload listener to prevent accidental reload/close when editing
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isBudgetSheetOpen || isBudgetRecordsSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isLoanSheetOpen || isLoanRecordsSheetOpen || isRecurringPaymentsListOpen || isBudgetsListOpen || isGoalsListOpen || isLoansListOpen || isCategoryManagementOpen || isArchivedLoansListOpen || isArchivedGoalsListOpen) {
+            if (isExpenseSheetOpen || isSubRecordSheetOpen || isRecurringPaymentSheetOpen || isRecurringPaymentDetailOpen || isBudgetSheetOpen || isBudgetRecordsSheetOpen || isGoalSheetOpen || isGoalProgressSheetOpen || isGoalRecordsSheetOpen || isLoanSheetOpen || isLoanRecordsSheetOpen || isRecurringPaymentsListOpen || isBudgetsListOpen || isGoalsListOpen || isLoansListOpen || isCategoryManagementOpen || isArchivedLoansListOpen || isArchivedGoalsListOpen) {
                 e.preventDefault();
                 e.returnValue = ''; // Required for some browsers
                 return '';
@@ -199,6 +201,7 @@ export function GlobalUI() {
             <CategoryManagementDrawer />
 
             {/* --- LAYER 2: Records/Details (Middle) --- */}
+            <RecurringPaymentDetailDrawer />
 
             {/* Goal Records Sheet */}
             <Sheet open={isGoalRecordsSheetOpen} onOpenChange={(open) => !open && closeGoalRecordsSheet()}>

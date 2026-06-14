@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.4] - 2026-06-14
+
 ### Added
 - **Expense Date Segmentation**: Chronological lists on the Expenses page are now segmented by date with styled divider headers displaying localized dates alongside daily income and expense totals.
 - **Pre-Calculated Daily Summaries**: Added a dedicated `dailySummaries` Dexie DB table to pre-calculate and cache daily transaction aggregates, dynamically updated during record edits, additions, deletions, ungrouping, and backup imports.

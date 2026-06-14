@@ -1,4 +1,4 @@
-import { db } from '@/db/schema';
+import { db, recalculateDailySummary } from '@/db/schema';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useUIStore } from '@/stores/uiStore';
 
@@ -67,7 +67,7 @@ export const importData = async (jsonString: string) => {
         }
 
         // Clear existing data
-        await db.transaction('rw', [db.expenses, db.items, db.budgets, db.goals, db.loans, db.categories, db.recurringPayments], async () => {
+        await db.transaction('rw', [db.expenses, db.items, db.budgets, db.goals, db.loans, db.categories, db.recurringPayments, db.dailySummaries], async () => {
             await Promise.all([
                 db.expenses.clear(),
                 db.items.clear(),
@@ -76,6 +76,7 @@ export const importData = async (jsonString: string) => {
                 db.loans.clear(),
                 db.categories.clear(),
                 db.recurringPayments.clear(),
+                db.dailySummaries.clear(),
             ]);
 
             // Import Dexie data
@@ -87,6 +88,18 @@ export const importData = async (jsonString: string) => {
             if (backup.dexie.categories.length > 0) await db.categories.bulkAdd(backup.dexie.categories);
             if (backup.dexie.recurringPayments.length > 0) await db.recurringPayments.bulkAdd(backup.dexie.recurringPayments);
         });
+
+        // Recalculate daily summaries for all imported unique dates (top-level only)
+        if (backup.dexie.expenses.length > 0) {
+            const dates = Array.from(new Set(
+                backup.dexie.expenses
+                    .filter((e: any) => !e.parentId)
+                    .map((e: any) => e.date)
+            ));
+            for (const date of dates) {
+                await recalculateDailySummary(date);
+            }
+        }
 
         // Import Settings
         const settings = backup.settings;

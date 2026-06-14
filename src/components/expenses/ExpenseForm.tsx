@@ -12,7 +12,7 @@ import { useExpenseStore } from '@/stores/expenseStore';
 import { useItemStore } from '@/stores/itemStore';
 import { parseItemInput } from '@/parsers/itemParser';
 import { format, parseISO } from 'date-fns';
-import { db, type Expense } from '@/db/schema';
+import { db, type Expense, recalculateDailySummary } from '@/db/schema';
 import { CategoryComboBox } from './CategoryComboBox';
 import { GoalComboBox } from './GoalComboBox';
 import { LoanComboBox } from './LoanComboBox';
@@ -249,6 +249,9 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
     const handleUngroup = async () => {
         if (!currentId || !subExpenses) return;
         try {
+            const parentExpense = await db.expenses.get(currentId);
+            const parentDate = parentExpense?.date;
+
             await db.transaction('rw', db.expenses, async () => {
                 const subIds = subExpenses.map(s => s.id!).filter(id => id !== undefined);
                 if (subIds.length > 0) {
@@ -256,6 +259,16 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                 }
                 await db.expenses.delete(currentId);
             });
+
+            const datesToRecalculate = Array.from(new Set([
+                parentDate,
+                ...subExpenses.map(s => s.date)
+            ].filter(Boolean) as string[]));
+
+            for (const d of datesToRecalculate) {
+                await recalculateDailySummary(d);
+            }
+
             setShowUngroupDialog(false);
             onSuccess?.();
         } catch (err) {

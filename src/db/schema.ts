@@ -100,6 +100,12 @@ export interface RecurringPayment {
     updatedAt: string;
 }
 
+export interface DailySummary {
+    date: string; // YYYY-MM-DD
+    expenseTotal: number;
+    incomeTotal: number;
+}
+
 const db = new Dexie('KhorocaPatiDB') as Dexie & {
     expenses: EntityTable<Expense, 'id'>;
     items: EntityTable<Item, 'id'>;
@@ -108,6 +114,7 @@ const db = new Dexie('KhorocaPatiDB') as Dexie & {
     loans: EntityTable<Loan, 'id'>;
     categories: EntityTable<Category, 'id'>;
     recurringPayments: EntityTable<RecurringPayment, 'id'>;
+    dailySummaries: EntityTable<DailySummary, 'date'>;
 };
 
 // Schema declaration
@@ -270,6 +277,65 @@ db.version(13).stores({
         }
     }
 });
+
+db.version(14).stores({
+    expenses: '++id, parentId, isNested, goalId, loanId, date, category, isRecurring, type, itemAutoTrack',
+    items: '++id, expenseId, name, date',
+    budgets: '++id, category, timelineType, recurringInterval',
+    goals: '++id, createdAt, isArchived',
+    loans: '++id, createdAt, type, person, isArchived',
+    categories: '++id, &name, isDefault',
+    recurringPayments: '++id, title, nextDueDate, category, type',
+    dailySummaries: '&date'
+}).upgrade(async (tx) => {
+    const expenses = (await tx.table('expenses').toArray()) as Expense[];
+    const summaries: Record<string, { expenseTotal: number; incomeTotal: number }> = {};
+    for (const exp of expenses) {
+        if (exp.parentId) continue;
+        const d = exp.date;
+        if (!summaries[d]) {
+            summaries[d] = { expenseTotal: 0, incomeTotal: 0 };
+        }
+        if (exp.type === 'expense') {
+            summaries[d].expenseTotal += exp.amount;
+        } else {
+            summaries[d].incomeTotal += exp.amount;
+        }
+    }
+    for (const [date, totals] of Object.entries(summaries)) {
+        await tx.table('dailySummaries').put({
+            date,
+            expenseTotal: totals.expenseTotal,
+            incomeTotal: totals.incomeTotal
+        });
+    }
+});
+
+export async function recalculateDailySummary(dateStr: string): Promise<void> {
+    const topLevelExpenses = await db.expenses
+        .where('date')
+        .equals(dateStr)
+        .filter(e => !e.parentId)
+        .toArray();
+
+    const expenseTotal = topLevelExpenses
+        .filter(e => e.type === 'expense')
+        .reduce((sum, e) => sum + e.amount, 0);
+
+    const incomeTotal = topLevelExpenses
+        .filter(e => e.type === 'income')
+        .reduce((sum, e) => sum + e.amount, 0);
+
+    if (expenseTotal === 0 && incomeTotal === 0) {
+        await db.dailySummaries.delete(dateStr);
+    } else {
+        await db.dailySummaries.put({
+            date: dateStr,
+            expenseTotal,
+            incomeTotal
+        });
+    }
+}
 
 export { db };
 

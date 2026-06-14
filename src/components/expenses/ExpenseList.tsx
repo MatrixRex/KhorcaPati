@@ -5,6 +5,9 @@ import { useFilterStore } from '@/stores/filterStore';
 import { isWithinInterval } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useExpenseStore } from '@/stores/expenseStore';
+import { formatRelativeDate } from '@/utils/date';
+import { formatAmount } from '@/lib/utils';
+import { useMemo } from 'react';
 
 interface ExpenseListProps {
     onEdit?: (expense: Expense) => void;
@@ -58,6 +61,31 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
     }, [startDate, endDate, selectedCategory, expenseSortBy, storeExpenses]);
 
 
+    const dailySummaries = useLiveQuery(() => db.dailySummaries.toArray());
+    const summaryMap = useMemo(() => {
+        const map = new Map<string, { expenseTotal: number; incomeTotal: number }>();
+        if (dailySummaries) {
+            for (const s of dailySummaries) {
+                map.set(s.date, s);
+            }
+        }
+        return map;
+    }, [dailySummaries]);
+
+    const items = useMemo(() => {
+        if (!expenses) return [];
+        const result: Array<{ type: 'divider'; date: string } | { type: 'expense'; expense: Expense }> = [];
+        let lastDate = '';
+        for (const exp of expenses) {
+            if (expenseSortBy === 'latest' && exp.date !== lastDate) {
+                lastDate = exp.date;
+                result.push({ type: 'divider', date: exp.date });
+            }
+            result.push({ type: 'expense', expense: exp });
+        }
+        return result;
+    }, [expenses, expenseSortBy]);
+
     if (!expenses) {
         return <div className="p-4 text-center text-muted-foreground">{t('loading')}</div>;
     }
@@ -74,13 +102,38 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
 
     return (
         <div className="flex flex-col gap-[var(--item-gap)] pb-20">
-            {expenses.map((expense) => (
-                <ExpenseCard
-                    key={expense.id}
-                    expense={expense}
-                    onClick={() => onEdit?.(expense)}
-                />
-            ))}
+            {items.map((item) => {
+                if (item.type === 'divider') {
+                    const summary = summaryMap.get(item.date);
+                    return (
+                        <div key={`divider-${item.date}`} className="flex items-center justify-between px-3 py-2.5 my-1 rounded-2xl bg-white/5 dark:bg-black/10 border border-white/10 dark:border-white/5 backdrop-blur-md shadow-sm transition-all duration-300">
+                            <span className="text-xs font-black text-muted-foreground/80 tracking-wide">
+                                {formatRelativeDate(item.date, true)}
+                            </span>
+                            <div className="flex items-center gap-3 text-xs font-black tabular-nums tracking-tight">
+                                {summary && summary.incomeTotal > 0 && (
+                                    <span className="text-success">
+                                        +৳{formatAmount(summary.incomeTotal)}
+                                    </span>
+                                )}
+                                {summary && summary.expenseTotal > 0 && (
+                                    <span className="text-destructive">
+                                        -৳{formatAmount(summary.expenseTotal)}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    );
+                }
+
+                return (
+                    <ExpenseCard
+                        key={item.expense.id}
+                        expense={item.expense}
+                        onClick={() => onEdit?.(item.expense)}
+                    />
+                );
+            })}
         </div>
     );
 }

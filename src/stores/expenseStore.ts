@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { db, type Expense } from '@/db/schema';
+import { db, type Expense, recalculateDailySummary } from '@/db/schema';
 import { useGoalStore } from './goalStore';
 import { useLoanStore } from './loanStore';
 
@@ -30,6 +30,7 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
     addExpense: async (expense) => {
         try {
             const id = await db.expenses.add(expense);
+            await recalculateDailySummary(expense.date);
             if (expense.goalId) {
                 await useGoalStore.getState().recalculateGoalAmount(expense.goalId);
             }
@@ -47,13 +48,22 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
     updateExpense: async (id, expense) => {
         try {
             const oldExpense = await db.expenses.get(id);
+            const oldDate = oldExpense?.date;
             const oldGoalId = oldExpense?.goalId;
             
             await db.expenses.update(id, expense);
             
             const newExpense = await db.expenses.get(id);
+            const newDate = newExpense?.date;
             const newGoalId = newExpense?.goalId;
             const newLoanId = newExpense?.loanId;
+
+            if (newDate) {
+                await recalculateDailySummary(newDate);
+            }
+            if (oldDate && oldDate !== newDate) {
+                await recalculateDailySummary(oldDate);
+            }
 
             if (newGoalId) {
                 await useGoalStore.getState().recalculateGoalAmount(newGoalId);
@@ -81,6 +91,7 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
     deleteExpense: async (id) => {
         try {
             const expense = await db.expenses.get(id);
+            const date = expense?.date;
             const goalId = expense?.goalId;
             const loanId = expense?.loanId;
 
@@ -88,6 +99,10 @@ export const useExpenseStore = create<ExpenseState>((set, get) => ({
                 await db.expenses.where('parentId').equals(id).delete();
                 await db.expenses.delete(id);
             });
+
+            if (date) {
+                await recalculateDailySummary(date);
+            }
 
             if (goalId) {
                 await useGoalStore.getState().recalculateGoalAmount(goalId);

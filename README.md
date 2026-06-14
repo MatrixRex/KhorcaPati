@@ -20,6 +20,7 @@
 - **Responsive Layout**: Designed for mobile-first experience but works flawlessly on desktop.
 
 ### 🧠 Smart Tracking
+- **Date-wise Segmentation**: Chronological lists on the Expenses page are segmented with styled visual dividers displaying localized date headers alongside day-by-day pre-calculated income and expense totals.
 - **NLP Power**: Type natural notes like "Grocery: Rice 2kg, Oil 1L" and the app auto-parses quantities and items for granular tracking.
 - **Collection Mode**: Organize related expenses into nested "Collections" (perfect for trips, projects, or events).
 - **Recurring Payments**: Stay on top of bills (rent, subscriptions) with automatic next-due date calculations and tracking.

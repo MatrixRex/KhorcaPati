@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Expense Date Segmentation**: Chronological lists on the Expenses page are now segmented by date with styled divider headers displaying localized dates alongside daily income and expense totals.
+- **Pre-Calculated Daily Summaries**: Added a dedicated `dailySummaries` Dexie DB table to pre-calculate and cache daily transaction aggregates, dynamically updated during record edits, additions, deletions, ungrouping, and backup imports.
 - **Recurring Payment Drawers**: Separated confirm/postpone actions from the recurring payment editing form into dedicated, stacked bottom sheets.
 - **Test Save File**: Created a pre-populated realistic data backup file `fake-data-backup.json` containing mock records for categories, expenses, items, budgets, goals, loans, and recurring payments.
 

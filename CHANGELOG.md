@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.5] - 2026-06-15
+
 ### Added
 - **Date Picker Transitions & Animations**: Wrapped view transitions (Swipe, Scroll List, and Calendar) in Framer Motion `<AnimatePresence>` for smooth entry/exit animations. Added horizontal spring slide transitions to the date card that dynamically slide left/right matching the navigation direction of date changes (next/prev).
 

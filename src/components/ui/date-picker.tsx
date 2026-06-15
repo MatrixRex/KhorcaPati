@@ -1,7 +1,7 @@
 import * as React from "react"
 import { useState, useMemo } from "react"
 import { format, startOfDay, addDays, subDays, isSameDay } from "date-fns"
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react"
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react"
 import { motion } from "framer-motion"
 import i18next from "i18next"
 import { useTranslation } from "react-i18next"
@@ -66,6 +66,15 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             setTimeout(() => onNext?.(), 100)
         }
 
+        const handleCrossClick = () => {
+            if (view === 'swipe') {
+                setOpen(false)
+                setDate(tempDate)
+            } else {
+                setView('swipe')
+            }
+        }
+
         const formattedDateText = new Intl.DateTimeFormat(i18next.language, {
             weekday: 'long',
             month: 'short',
@@ -107,11 +116,25 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
                             {date ? format(date, "MMMM do, yy") : placeholder}
                         </span>
                     </Button>
-                    <SheetContent side="bottom" className="z-[100] p-0 border-t-2 border-primary/20 bg-background/95 backdrop-blur-md rounded-t-3xl max-w-[480px]" overlayClassName="z-[99]">
-                        <SheetHeader className="pb-2 pt-4 border-b border-border/40 flex flex-row items-center justify-between px-6">
+                    <SheetContent
+                        id="date-picker-drawer"
+                        side="bottom"
+                        showCloseButton={false}
+                        className="z-[100] p-0 border-t-2 border-primary/20 bg-background/95 backdrop-blur-md rounded-t-3xl max-w-[480px]"
+                        overlayClassName="z-[99]"
+                    >
+                        <SheetHeader className="pb-2 pt-4 border-b border-border/40 flex flex-row items-center justify-between px-6 relative">
                             <SheetTitle className="text-base font-black uppercase tracking-wider text-primary">
                                 {t('selectDate', { defaultValue: 'Select Date' })}
                             </SheetTitle>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={handleCrossClick}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 p-0 rounded-full hover:bg-muted active:scale-95 transition-all duration-200"
+                            >
+                                <X className="w-4 h-4" />
+                            </Button>
                         </SheetHeader>
 
                         {view === 'swipe' && (
@@ -168,7 +191,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
                         )}
 
                         {view === 'scroll' && (
-                            <div className="flex flex-col h-48 overflow-y-auto py-2 px-6 gap-1 divide-y divide-border/10">
+                            <div className="flex flex-col h-96 overflow-y-auto py-2 px-6 gap-1 divide-y divide-border/10">
                                 {nearbyDates.map((item) => (
                                     <button
                                         key={item.formattedValue}
@@ -191,7 +214,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
                         )}
 
                         {view === 'calendar' && (
-                            <div className="flex justify-center p-4">
+                            <div className="flex justify-center p-4 pt-10">
                                 <Calendar
                                     mode="single"
                                     selected={tempDate}

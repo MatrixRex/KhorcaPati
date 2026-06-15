@@ -81,6 +81,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
     const [wasAmountEdited, setWasAmountEdited] = useState(false);
     const categoryRef = useRef<HTMLInputElement>(null);
     const noteRef = useRef<HTMLInputElement>(null);
+    const dateRef = useRef<HTMLButtonElement>(null);
     const [mode, setMode] = useState<'regular' | 'debt'>(() => {
         if (initialData?.loanId) return 'debt';
         if (initialLoanId) return 'debt';
@@ -235,7 +236,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
     const handleAmountDone = () => {
         setShowNumberPad(false);
-        setTimeout(() => categoryRef.current?.focus(), 150);
+        setTimeout(() => dateRef.current?.focus(), 150);
     };
 
     const handleCategoryEnter = () => {
@@ -567,6 +568,8 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     name="date"
                                     render={({ field }) => (
                                         <DatePicker
+                                            ref={dateRef}
+                                            variant="drawer"
                                             date={field.value ? parseISO(field.value) : undefined}
                                             setDate={(date) => {
                                                 const newDate = date ? format(date, 'yyyy-MM-dd') : '';
@@ -574,6 +577,15 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                 if (newDate) {
                                                     form.handleSubmit(performSave)();
                                                 }
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    noteRef.current?.focus();
+                                                }
+                                            }}
+                                            onNext={() => {
+                                                setTimeout(() => noteRef.current?.focus(), 50);
                                             }}
                                             className="input-glass font-medium"
                                         />
@@ -728,7 +740,9 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     name="date"
                                     render={({ field }) => (
                                         <DatePicker
+                                            ref={dateRef}
                                             disabled={isNested}
+                                            variant="drawer"
                                             date={field.value ? parseISO(field.value) : undefined}
                                             setDate={(date) => {
                                                 const newDate = date ? format(date, 'yyyy-MM-dd') : '';
@@ -736,6 +750,15 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                 if (newDate) {
                                                     form.handleSubmit(performSave)();
                                                 }
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    categoryRef.current?.focus();
+                                                }
+                                            }}
+                                            onNext={() => {
+                                                setTimeout(() => categoryRef.current?.focus(), 50);
                                             }}
                                             className="input-glass font-medium"
                                         />

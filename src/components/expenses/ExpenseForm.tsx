@@ -236,7 +236,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
     const handleAmountDone = () => {
         setShowNumberPad(false);
-        setTimeout(() => dateRef.current?.focus(), 150);
+        setTimeout(() => dateRef.current?.click(), 150);
     };
 
     const handleCategoryEnter = () => {

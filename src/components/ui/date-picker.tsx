@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { format, startOfDay, addDays, subDays, isSameDay } from "date-fns"
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react"
 import { motion } from "framer-motion"
@@ -42,17 +42,9 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
         const [view, setView] = useState<'swipe' | 'scroll' | 'calendar'>('swipe')
         const [tempDate, setTempDate] = useState<Date>(date || new Date())
 
-        // Sync tempDate with date prop when open changes to true
-        useEffect(() => {
-            if (open && date) {
-                setTempDate(date)
-                setView('swipe')
-            }
-        }, [open, date])
-
         const nearbyDates = useMemo(() => {
             return getNearbyDates(new Date(), 30)
-        }, [open]) // Re-generate when sheet opens
+        }, [])
 
         const today = startOfDay(new Date())
         const isSelectedDateToday = isSameDay(startOfDay(tempDate), today)
@@ -74,14 +66,12 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             setTimeout(() => onNext?.(), 100)
         }
 
-        const formattedDateText = useMemo(() => {
-            return new Intl.DateTimeFormat(i18next.language, {
-                weekday: 'long',
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            }).format(tempDate)
-        }, [tempDate, i18next.language])
+        const formattedDateText = new Intl.DateTimeFormat(i18next.language, {
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        }).format(tempDate)
 
         // Drawer presentation variant
         if (variant === 'drawer') {
@@ -104,14 +94,20 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
                             className
                         )}
                         onKeyDown={onKeyDown}
-                        onClick={() => setOpen(true)}
+                        onClick={() => {
+                            if (date) {
+                                setTempDate(date)
+                            }
+                            setView('swipe')
+                            setOpen(true)
+                        }}
                     >
                         <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
                         <span className="truncate text-xs font-black uppercase tracking-tight">
                             {date ? format(date, "MMMM do, yy") : placeholder}
                         </span>
                     </Button>
-                    <SheetContent side="bottom" className="p-0 border-t-2 border-primary/20 bg-background/95 backdrop-blur-md rounded-t-3xl max-w-[480px]">
+                    <SheetContent side="bottom" className="z-[100] p-0 border-t-2 border-primary/20 bg-background/95 backdrop-blur-md rounded-t-3xl max-w-[480px]" overlayClassName="z-[99]">
                         <SheetHeader className="pb-2 pt-4 border-b border-border/40 flex flex-row items-center justify-between px-6">
                             <SheetTitle className="text-base font-black uppercase tracking-wider text-primary">
                                 {t('selectDate', { defaultValue: 'Select Date' })}

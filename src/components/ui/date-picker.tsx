@@ -214,7 +214,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
                         )}
 
                         {view === 'calendar' && (
-                            <div className="flex justify-center p-4 pt-10">
+                            <div className="flex justify-center p-4 pt-6">
                                 <Calendar
                                     mode="single"
                                     selected={tempDate}

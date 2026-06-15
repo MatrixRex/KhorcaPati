@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Calendar Navigation Overlap**: Fixed month navigation buttons (`<` and `>`) in the `<Calendar>` component by setting the container to `w-fit mx-auto` to prevent it from stretching to the full width of the screen, which was causing the buttons to align with the outer sheet corners and overlap with the header/close buttons.
+
+
 ## [1.9.4] - 2026-06-14
 
 ### Added

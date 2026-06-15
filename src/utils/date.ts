@@ -46,3 +46,34 @@ export function getRelativeTimeLabel(dateStr: string | Date): string {
     if (diff > 0) return i18next.t('inDays', { count: diff });
     return i18next.t('daysAgo', { count: Math.abs(diff) });
 }
+
+export interface NearbyDateItem {
+    date: Date;
+    label: string;
+    formattedValue: string; // yyyy-MM-dd
+}
+
+export function getNearbyDates(today: Date = new Date(), limit = 30): NearbyDateItem[] {
+    const items: NearbyDateItem[] = [];
+    for (let i = 0; i < limit; i++) {
+        const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+        let label = '';
+        if (i === 0) {
+            label = i18next.t('today');
+        } else if (i === 1) {
+            label = i18next.t('yesterday');
+        } else {
+            label = new Intl.DateTimeFormat(i18next.language, {
+                weekday: 'long',
+                month: 'short',
+                day: 'numeric'
+            }).format(d);
+        }
+        items.push({
+            date: d,
+            label,
+            formattedValue: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+        });
+    }
+    return items;
+}

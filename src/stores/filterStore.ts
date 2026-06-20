@@ -1,13 +1,12 @@
 import { create } from 'zustand';
 import { 
-    startOfMonth, 
-    endOfMonth, 
     startOfWeek, 
     endOfWeek, 
     startOfDay, 
     endOfDay, 
-    subMonths
 } from 'date-fns';
+import { getBillingCycleRange, getPreviousBillingCycleRange } from '@/utils/cycle';
+import { useSettingsStore } from './settingsStore';
 
 export type Timeframe = 'today' | 'this-week' | 'this-month' | 'past-month' | 'custom';
 
@@ -28,7 +27,7 @@ interface FilterState {
     setExpenseSortBy: (sort: ExpenseSortBy) => void;
 }
 
-const getInitialDates = (timeframe: Timeframe) => {
+const getInitialDates = (timeframe: Timeframe, resetDate: number) => {
     const now = new Date();
     switch (timeframe) {
         case 'today':
@@ -36,39 +35,54 @@ const getInitialDates = (timeframe: Timeframe) => {
         case 'this-week':
             return { startDate: startOfWeek(now, { weekStartsOn: 6 }), endDate: endOfWeek(now, { weekStartsOn: 6 }) }; // Saturday to Friday
         case 'this-month':
-            return { startDate: startOfMonth(now), endDate: endOfMonth(now) };
+            return getBillingCycleRange(now, resetDate);
         case 'past-month':
-            // Previous calendar month
-            const prevMonth = subMonths(now, 1);
-            return { startDate: startOfMonth(prevMonth), endDate: endOfMonth(prevMonth) };
+            return getPreviousBillingCycleRange(now, resetDate);
         case 'custom':
         default:
-            return { startDate: startOfMonth(now), endDate: endOfMonth(now) };
+            return getBillingCycleRange(now, resetDate);
     }
 };
 
-export const useFilterStore = create<FilterState>((set) => ({
-    timeframe: 'this-month',
-    ...getInitialDates('this-month'),
-    selectedCategory: null,
-    inventorySortBy: 'alphabet',
-    expenseSortBy: 'latest',
+export const useFilterStore = create<FilterState>((set) => {
+    const resetDate = useSettingsStore.getState()?.resetDate ?? 1;
 
-    setTimeframe: (timeframe) => {
-        if (timeframe === 'custom') {
-            set({ timeframe });
-            return;
-        }
-        set({ timeframe, ...getInitialDates(timeframe) });
-    },
+    return {
+        timeframe: 'this-month',
+        ...getInitialDates('this-month', resetDate),
+        selectedCategory: null,
+        inventorySortBy: 'alphabet',
+        expenseSortBy: 'latest',
 
-    setDateRange: (start, end) => set({
-        startDate: start,
-        endDate: end,
-        timeframe: 'custom'
-    }),
+        setTimeframe: (timeframe) => {
+            if (timeframe === 'custom') {
+                set({ timeframe });
+                return;
+            }
+            const currentResetDate = useSettingsStore.getState()?.resetDate ?? 1;
+            set({ timeframe, ...getInitialDates(timeframe, currentResetDate) });
+        },
 
-    setCategory: (category) => set({ selectedCategory: category }),
-    setInventorySortBy: (sort) => set({ inventorySortBy: sort }),
-    setExpenseSortBy: (sort) => set({ expenseSortBy: sort }),
-}));
+        setDateRange: (start, end) => set({
+            startDate: start,
+            endDate: end,
+            timeframe: 'custom'
+        }),
+
+        setCategory: (category) => set({ selectedCategory: category }),
+        setInventorySortBy: (sort) => set({ inventorySortBy: sort }),
+        setExpenseSortBy: (sort) => set({ expenseSortBy: sort }),
+    };
+});
+
+// Reactively update dates when resetDate changes in settings
+useSettingsStore.subscribe((state) => {
+    const filterState = useFilterStore.getState();
+    if (filterState.timeframe !== 'custom') {
+        const newDates = getInitialDates(filterState.timeframe, state.resetDate);
+        useFilterStore.setState({
+            startDate: newDates.startDate,
+            endDate: newDates.endDate
+        });
+    }
+});

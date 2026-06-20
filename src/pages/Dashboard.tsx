@@ -18,6 +18,7 @@ import { BalanceEditDrawer } from '@/components/shared/BalanceEditDrawer';
 import { useTranslation } from 'react-i18next';
 import { formatAmount } from '@/lib/utils';
 import { useExpenseStore } from '@/stores/expenseStore';
+import { getBillingCycleRange } from '@/utils/cycle';
 
 export default function Dashboard() {
     const { t } = useTranslation();
@@ -34,13 +35,18 @@ export default function Dashboard() {
         openGoalRecords,
         openLoanRecords
     } = useUIStore();
-    const { initialBalance } = useSettingsStore();
+    const { resetDate } = useSettingsStore();
+
+    const currentCycle = useMemo(() => getBillingCycleRange(new Date(), resetDate), [resetDate]);
 
     const storeExpenses = useExpenseStore(state => state.expenses);
     const expensesThisMonth = useLiveQuery(async () => {
         const all = await db.expenses.filter(e => !e.parentId).toArray();
-        return all.filter(e => e.date.startsWith(currentMonth));
-    }, [currentMonth, storeExpenses]);
+        return all.filter(e => {
+            const expDate = new Date(e.date);
+            return expDate >= currentCycle.start && expDate <= currentCycle.end;
+        });
+    }, [currentCycle, storeExpenses]);
 
     const recentExpenses = useLiveQuery(async () => {
         const topLevel = await db.expenses.filter(e => !e.parentId).toArray();
@@ -106,14 +112,12 @@ export default function Dashboard() {
     const totalSpent = expensesThisMonth?.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0) || 0;
     const totalIncome = expensesThisMonth?.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0) || 0;
     
-    const allExpenses = useLiveQuery(() => db.expenses.filter(e => !e.parentId).toArray(), [storeExpenses]);
     const totalBalance = useMemo(() => {
-        if (!allExpenses) return initialBalance;
-        const derived = allExpenses.reduce((sum, exp) => {
+        if (!expensesThisMonth) return 0;
+        return expensesThisMonth.reduce((sum, exp) => {
             return exp.type === 'income' ? sum + exp.amount : sum - exp.amount;
         }, 0);
-        return initialBalance + derived;
-    }, [allExpenses, initialBalance]);
+    }, [expensesThisMonth]);
 
     return (
         <PageContainer
@@ -135,7 +139,7 @@ export default function Dashboard() {
                         </div>
                         
                         <div className="flex flex-col gap-0.5 relative z-10">
-                            <p className="text-foreground/40 text-[11px] font-black uppercase tracking-[0.2em] ml-1">{t('currentBalance')}</p>
+                            <p className="text-foreground/40 text-[11px] font-black uppercase tracking-[0.2em] ml-1">{t('monthlyBalance')}</p>
                             <div className="flex items-baseline gap-2 font-heading">
                                 <span className="text-xl font-black text-primary/40 decoration-primary/20 underline underline-offset-8">৳</span>
                                 <h2 className="text-4xl font-black tracking-tighter text-foreground leading-tight">{formatAmount(totalBalance)}</h2>

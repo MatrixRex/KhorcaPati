@@ -22,7 +22,7 @@ import {
 export default function Settings() {
     const { t } = useTranslation();
     const { theme, setTheme, fontScale, setFontScale } = useUIStore();
-    const { language, setLanguage } = useSettingsStore();
+    const { language, setLanguage, resetDate, setResetDate } = useSettingsStore();
     const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
     const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
     const [isImportSuccessOpen, setIsImportSuccessOpen] = useState(false);
@@ -143,6 +143,37 @@ export default function Settings() {
                                 </Button>
                             );
                         })}
+                    </div>
+                </section>
+
+                <section>
+                    <h2 className="label-header mb-3 px-1">{t('billingCycle')}</h2>
+                    <div className="report-card-container p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <span className="text-xs font-bold uppercase tracking-wider opacity-60">{t('resetDate')}</span>
+                            <span className="text-lg font-black text-primary">{resetDate}</span>
+                        </div>
+                        
+                        <div className="px-2">
+                            <input
+                                type="range"
+                                min="1"
+                                max="31"
+                                step="1"
+                                value={resetDate}
+                                onChange={(e) => setResetDate(parseInt(e.target.value))}
+                                className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary transition-all active:scale-[1.01]"
+                            />
+                            <div className="flex justify-between mt-2 px-1">
+                                <span className="text-[10px] font-bold text-muted-foreground/40">1</span>
+                                <span className="text-[10px] font-bold text-muted-foreground/40">15</span>
+                                <span className="text-[10px] font-bold text-muted-foreground/40">31</span>
+                            </div>
+                        </div>
+
+                        <p className="text-[10px] text-muted-foreground mt-4 text-center font-medium italic opacity-60">
+                            {t('resetDateDescription')}
+                        </p>
                     </div>
                 </section>
 

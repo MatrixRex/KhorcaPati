@@ -21,7 +21,7 @@ import { useExpenseStore } from '@/stores/expenseStore';
 import { getBillingCycleRange } from '@/utils/cycle';
 
 export default function Dashboard() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { 
         openEditExpense, 
         openRecurringPaymentDetail, 
@@ -37,6 +37,21 @@ export default function Dashboard() {
     const { resetDate } = useSettingsStore();
 
     const currentCycle = useMemo(() => getBillingCycleRange(new Date(), resetDate), [resetDate]);
+
+    const startFormatter = useMemo(() => {
+        return new Intl.DateTimeFormat(i18n.language, { month: 'short', day: 'numeric' });
+    }, [i18n.language]);
+
+    const formattedStartDate = useMemo(() => {
+        return startFormatter.format(currentCycle.start);
+    }, [currentCycle.start, startFormatter]);
+
+    const daysRemainingLabel = useMemo(() => {
+        const daysLeft = differenceInCalendarDays(currentCycle.end, new Date());
+        if (daysLeft <= 0) return t('endsToday');
+        if (daysLeft === 1) return t('dayRemaining');
+        return t('daysRemaining', { count: daysLeft });
+    }, [currentCycle.end, t]);
 
     const storeExpenses = useExpenseStore(state => state.expenses);
     const expensesThisMonth = useLiveQuery(async () => {
@@ -137,11 +152,24 @@ export default function Dashboard() {
                             <div className="text-[14rem] font-black italic text-foreground/50">৳</div>
                         </div>
                         
-                        <div className="flex flex-col gap-0.5 relative z-10">
-                            <p className="text-foreground/40 text-[11px] font-black uppercase tracking-[0.2em] ml-1">{t('monthlyBalance')}</p>
-                            <div className="flex items-baseline gap-2 font-heading">
-                                <span className="text-xl font-black text-primary/40 decoration-primary/20 underline underline-offset-8">৳</span>
-                                <h2 className="text-4xl font-black tracking-tighter text-foreground leading-tight">{formatAmount(totalBalance)}</h2>
+                        <div className="flex justify-between items-start relative z-10">
+                            <div className="flex flex-col gap-0.5">
+                                <p className="text-foreground/40 text-[11px] font-black uppercase tracking-[0.2em] ml-1">{t('monthlyBalance')}</p>
+                                <div className="flex items-baseline gap-2 font-heading">
+                                    <span className="text-xl font-black text-primary/40 decoration-primary/20 underline underline-offset-8">৳</span>
+                                    <h2 className="text-4xl font-black tracking-tighter text-foreground leading-tight">{formatAmount(totalBalance)}</h2>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col items-end text-right gap-1 bg-white/5 dark:bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-[12px] border border-white/10 dark:border-white/5">
+                                {resetDate !== 1 && (
+                                    <span className="text-[10px] font-black uppercase tracking-wider text-foreground/50">
+                                        {t('cycleStarts', { date: formattedStartDate })}
+                                    </span>
+                                )}
+                                <span className="text-[10px] font-black uppercase tracking-wider text-primary">
+                                    {daysRemainingLabel}
+                                </span>
                             </div>
                         </div>
 

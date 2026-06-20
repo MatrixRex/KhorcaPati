@@ -27,20 +27,26 @@ interface FilterState {
     setExpenseSortBy: (sort: ExpenseSortBy) => void;
 }
 
-const getInitialDates = (timeframe: Timeframe, resetDate: number) => {
+const getInitialDates = (timeframe: Timeframe, resetDate: number): { startDate: Date; endDate: Date } => {
     const now = new Date();
     switch (timeframe) {
         case 'today':
             return { startDate: startOfDay(now), endDate: endOfDay(now) };
         case 'this-week':
             return { startDate: startOfWeek(now, { weekStartsOn: 6 }), endDate: endOfWeek(now, { weekStartsOn: 6 }) }; // Saturday to Friday
-        case 'this-month':
-            return getBillingCycleRange(now, resetDate);
-        case 'past-month':
-            return getPreviousBillingCycleRange(now, resetDate);
+        case 'this-month': {
+            const range = getBillingCycleRange(now, resetDate);
+            return { startDate: range.start, endDate: range.end };
+        }
+        case 'past-month': {
+            const range = getPreviousBillingCycleRange(now, resetDate);
+            return { startDate: range.start, endDate: range.end };
+        }
         case 'custom':
-        default:
-            return getBillingCycleRange(now, resetDate);
+        default: {
+            const range = getBillingCycleRange(now, resetDate);
+            return { startDate: range.start, endDate: range.end };
+        }
     }
 };
 

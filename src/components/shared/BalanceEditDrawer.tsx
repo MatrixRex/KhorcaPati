@@ -23,7 +23,7 @@ import { getBillingCycleRange } from '@/utils/cycle';
 
 export function BalanceEditDrawer() {
     const { isBalanceEditDrawerOpen, closeBalanceEdit } = useUIStore();
-    const { initialBalance, setInitialBalance, resetDate } = useSettingsStore();
+    const { setInitialBalance, resetDate } = useSettingsStore();
     const { addExpense } = useExpenseStore();
     const { t } = useTranslation();
 

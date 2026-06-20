@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
-import { format, parseISO, differenceInCalendarDays } from 'date-fns';
+import { parseISO, differenceInCalendarDays } from 'date-fns';
 import { ExpenseCard } from '@/components/expenses/ExpenseCard';
 import { RecurringPaymentCard } from '@/components/recurring/RecurringPaymentCard';
 import { GoalCard } from '@/components/goals/GoalCard';
@@ -22,7 +22,6 @@ import { getBillingCycleRange } from '@/utils/cycle';
 
 export default function Dashboard() {
     const { t } = useTranslation();
-    const currentMonth = format(new Date(), 'yyyy-MM');
     const { 
         openEditExpense, 
         openRecurringPaymentDetail, 

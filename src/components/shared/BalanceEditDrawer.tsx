@@ -19,20 +19,27 @@ import { format } from 'date-fns';
 import { formatAmount } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { DevBadge } from './DevBadge';
+import { getBillingCycleRange } from '@/utils/cycle';
 
 export function BalanceEditDrawer() {
     const { isBalanceEditDrawerOpen, closeBalanceEdit } = useUIStore();
-    const { initialBalance, setInitialBalance } = useSettingsStore();
+    const { initialBalance, setInitialBalance, resetDate } = useSettingsStore();
     const { addExpense } = useExpenseStore();
     const { t } = useTranslation();
 
+    const currentCycle = getBillingCycleRange(new Date(), resetDate);
     const allExpenses = useLiveQuery(() => db.expenses.filter(e => !e.parentId).toArray()) || [];
     
-    const derivedBalance = allExpenses.reduce((sum, exp) => {
-        return exp.type === 'income' ? sum + exp.amount : sum - exp.amount;
-    }, 0);
+    const derivedBalance = allExpenses
+        .filter(e => {
+            const expDate = new Date(e.date);
+            return expDate >= currentCycle.start && expDate <= currentCycle.end;
+        })
+        .reduce((sum, exp) => {
+            return exp.type === 'income' ? sum + exp.amount : sum - exp.amount;
+        }, 0);
 
-    const currentTotalBalance = initialBalance + derivedBalance;
+    const currentTotalBalance = derivedBalance;
 
     const [newBalance, setNewBalance] = useState<string>('');
     const [createRecord, setCreateRecord] = useState(true);

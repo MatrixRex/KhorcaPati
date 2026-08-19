@@ -10,7 +10,7 @@ import { BudgetCard } from '@/components/budgets/BudgetCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Settings2 } from 'lucide-react';
+import { Settings2, Sparkles, Plus } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -24,6 +24,8 @@ export default function Dashboard() {
     const { t, i18n } = useTranslation();
     const { 
         openEditExpense, 
+        openAddExpense,
+        openSmartBatchParser,
         openRecurringPaymentDetail, 
         openRecurringPaymentsList,
         openBudgetsList,
@@ -186,6 +188,37 @@ export default function Dashboard() {
                         </div>
                     </CardContent>
                 </Card>
+            </div>
+
+            {/* Quick Actions Grid */}
+            <div className="grid grid-cols-2 gap-2.5 mb-6">
+                <button
+                    type="button"
+                    onClick={() => openSmartBatchParser()}
+                    className="p-3.5 rounded-2xl glass border border-primary/20 bg-primary/5 hover:bg-primary/10 flex items-center gap-3 text-left transition-all duration-300 active:scale-95 group shadow-sm"
+                >
+                    <div className="p-2.5 rounded-xl bg-primary/15 text-primary group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300 shrink-0">
+                        <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-black tracking-tight text-foreground">{t('aiSmartNote', { defaultValue: 'AI Smart Note' })}</span>
+                        <span className="text-[10px] text-muted-foreground font-medium truncate">{t('aiSmartNoteSubtitle', { defaultValue: 'Parse messy notes' })}</span>
+                    </div>
+                </button>
+
+                <button
+                    type="button"
+                    onClick={() => openAddExpense()}
+                    className="p-3.5 rounded-2xl glass border border-white/10 hover:border-primary/30 bg-white/5 hover:bg-muted/40 flex items-center gap-3 text-left transition-all duration-300 active:scale-95 group shadow-sm"
+                >
+                    <div className="p-2.5 rounded-xl bg-muted/60 text-foreground group-hover:scale-110 transition-all duration-300 shrink-0">
+                        <Plus className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-xs font-black tracking-tight text-foreground">{t('addRecord', { defaultValue: 'Add Record' })}</span>
+                        <span className="text-[10px] text-muted-foreground font-medium truncate">{t('singleTransaction', { defaultValue: 'Single entry' })}</span>
+                    </div>
+                </button>
             </div>
 
             {/* Recent Expenses */}

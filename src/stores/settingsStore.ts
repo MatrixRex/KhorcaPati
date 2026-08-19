@@ -7,10 +7,14 @@ interface SettingsState {
     language: string;
     hasSeenWelcome: boolean;
     resetDate: number;
+    geminiApiKey: string;
+    geminiModel: string;
     setInitialBalance: (amount: number) => void;
     setLanguage: (lang: string) => void;
     markWelcomeSeen: () => void;
     setResetDate: (date: number) => void;
+    setGeminiApiKey: (key: string) => void;
+    setGeminiModel: (model: string) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -20,6 +24,8 @@ export const useSettingsStore = create<SettingsState>()(
             language: 'en',
             hasSeenWelcome: false,
             resetDate: 1,
+            geminiApiKey: '',
+            geminiModel: 'gemini-flash-lite-latest',
             setInitialBalance: (amount: number) => set({ initialBalance: amount }),
             setLanguage: (lang: string) => {
                 set({ language: lang });
@@ -27,6 +33,8 @@ export const useSettingsStore = create<SettingsState>()(
             },
             markWelcomeSeen: () => set({ hasSeenWelcome: true }),
             setResetDate: (date: number) => set({ resetDate: date }),
+            setGeminiApiKey: (key: string) => set({ geminiApiKey: key }),
+            setGeminiModel: (model: string) => set({ geminiModel: model }),
         }),
         {
             name: 'khorchapati-settings-store',

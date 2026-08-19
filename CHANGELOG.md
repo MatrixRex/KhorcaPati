@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **AI Smart Note Parser (Google Gemini NLP)**: Added natural language processing for messy, unstructured transaction notes, receipts, conversational text, and multi-record batches. Extracts clean titles, amounts, income/expense classifications, dates, and auto-tracked item lists directly via Google Gemini API.
+- **Intelligent Category Mapping**: Automatically maps parsed transactions to the user's active categories or generates standard categories, avoiding unlisted dumps.
+- **Smart Batch Parser Drawer**: Interactive glassmorphic review sheet with editable cards, category pickers, type toggles, manual record addition, sample presets, and bulk import.
+- **Gemini Assistant Settings**: Added Google Gemini API configuration in Settings with real-time connection tester, free key onboarding link, and model alias selection (`gemini-flash-lite-latest`, `gemini-flash-latest`).
+- **Dashboard & Expenses Quick Actions**: Added `✨ AI Smart Note` quick action card on the Dashboard and `✨ AI Note` button in the Expenses header.
+- **UI Components**: Added standard `@/components/ui/textarea` component with Tailwind styling.
+- **Localization**: Added full English and Bangla i18n translations for the AI layer.
 - **Monthly Balance Reset**: Replaced the lifetime total balance calculation on the Dashboard with a cycle-based net balance (income minus expenses).
 - **Billing Cycle Reset Date Selector**: Added a slider in the Settings page to configure the cycle reset date (1 to 31, default 1).
 - **Billing Cycle Date Ranges**: Implemented utility functions to calculate billing cycle start and end dates based on the reset date, updating the date filter store reactively so reports align with the cycle.

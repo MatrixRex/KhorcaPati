@@ -2,9 +2,10 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { useUIStore, type Theme } from '@/stores/uiStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useState } from 'react';
-import { Moon, Sun, Monitor, Check, Trash2, Bell, Target, Wallet, Languages, Download, Upload, TrendingUp, Archive } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, Trash2, Bell, Target, Wallet, Languages, Download, Upload, TrendingUp, Archive, Sparkles, Key, ExternalLink, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useTranslation } from 'react-i18next';
 import { exportData, importData } from '@/lib/data-management';
 import {
@@ -22,12 +23,55 @@ import {
 export default function Settings() {
     const { t } = useTranslation();
     const { theme, setTheme, fontScale, setFontScale } = useUIStore();
-    const { language, setLanguage, resetDate, setResetDate } = useSettingsStore();
+    const { language, setLanguage, resetDate, setResetDate, geminiApiKey, geminiModel, setGeminiApiKey, setGeminiModel } = useSettingsStore();
     const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
     const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
     const [isImportSuccessOpen, setIsImportSuccessOpen] = useState(false);
     const [isImportErrorOpen, setIsImportErrorOpen] = useState(false);
     const [importFile, setImportFile] = useState<File | null>(null);
+
+    const [apiKeyInput, setApiKeyInput] = useState(geminiApiKey || '');
+    const [showApiKey, setShowApiKey] = useState(false);
+    const [keySaved, setKeySaved] = useState(false);
+    const [isTestingKey, setIsTestingKey] = useState(false);
+    const [testKeyStatus, setTestKeyStatus] = useState<{ ok: boolean; msg: string } | null>(null);
+
+    const handleSaveGeminiKey = () => {
+        setGeminiApiKey(apiKeyInput.trim());
+        setKeySaved(true);
+        setTestKeyStatus(null);
+        setTimeout(() => setKeySaved(false), 2000);
+    };
+
+    const handleTestGeminiKey = async () => {
+        const keyToTest = apiKeyInput.trim() || geminiApiKey;
+        if (!keyToTest) {
+            setTestKeyStatus({ ok: false, msg: t('apiKeyRequired', { defaultValue: 'Please enter an API key' }) });
+            return;
+        }
+        setIsTestingKey(true);
+        setTestKeyStatus(null);
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiModel || 'gemini-flash-lite-latest'}:generateContent?key=${keyToTest}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ role: 'user', parts: [{ text: 'Respond with OK' }] }]
+                })
+            });
+            if (res.ok) {
+                setTestKeyStatus({ ok: true, msg: t('apiKeyValid', { defaultValue: 'API Key is valid & connected!' }) });
+                setGeminiApiKey(keyToTest);
+            } else {
+                const errJson = await res.json().catch(() => ({}));
+                setTestKeyStatus({ ok: false, msg: errJson?.error?.message || `Error ${res.status}: ${res.statusText}` });
+            }
+        } catch (e: any) {
+            setTestKeyStatus({ ok: false, msg: e?.message || 'Connection failed' });
+        } finally {
+            setIsTestingKey(false);
+        }
+    };
 
     const handleReset = async () => {
         const { db } = await import('@/db/schema');
@@ -213,6 +257,122 @@ export default function Settings() {
                         <p className="text-[10px] text-muted-foreground mt-6 text-center font-medium italic opacity-60">
                             {t('dragSlider')}
                         </p>
+                    </div>
+                </section>
+
+                <section>
+                    <div className="flex items-center justify-between mb-3 px-1">
+                        <h2 className="label-header flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-primary" />
+                            {t('aiAssistant', { defaultValue: 'Gemini AI Assistant' })}
+                        </h2>
+                        <a
+                            href="https://aistudio.google.com/app/apikey"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
+                        >
+                            <span>{t('getFreeKey', { defaultValue: 'Get Free Key' })}</span>
+                            <ExternalLink className="w-3 h-3" />
+                        </a>
+                    </div>
+
+                    <div className="p-5 rounded-3xl bg-card/60 glass border border-primary/20 space-y-4 shadow-sm">
+                        <div className="flex flex-col gap-1">
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-black uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                                    <Key className="w-3.5 h-3.5 text-primary" />
+                                    {t('geminiApiKey', { defaultValue: 'Google Gemini API Key' })}
+                                </span>
+                                {geminiApiKey && (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/15 text-primary">
+                                        {t('keyConfigured', { defaultValue: 'Configured' })}
+                                    </span>
+                                )}
+                            </div>
+                            <p className="text-[11px] text-muted-foreground font-medium leading-relaxed">
+                                {t('geminiSettingsDesc', { defaultValue: 'Powers AI batch note parsing and smart transaction categorization. Free API key from Google AI Studio.' })}
+                            </p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="flex gap-2">
+                                <div className="relative flex-1">
+                                    <Input
+                                        type={showApiKey ? 'text' : 'password'}
+                                        placeholder="AIzaSy..."
+                                        value={apiKeyInput}
+                                        onChange={(e) => setApiKeyInput(e.target.value)}
+                                        className="h-10 text-xs rounded-xl bg-background/80 pr-10 font-mono"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowApiKey(!showApiKey)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                    >
+                                        {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                                <Button
+                                    type="button"
+                                    onClick={handleSaveGeminiKey}
+                                    className="h-10 px-4 rounded-xl font-bold text-xs shrink-0 active:scale-95 transition-all duration-200"
+                                >
+                                    {keySaved ? <Check className="w-4 h-4 text-emerald-400 mr-1" /> : null}
+                                    {keySaved ? t('saved', { defaultValue: 'Saved' }) : t('save', { defaultValue: 'Save' })}
+                                </Button>
+                            </div>
+
+                            {/* Model Selector & Test Key Button */}
+                            <div className="flex items-center justify-between gap-2 pt-1">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Model:</span>
+                                    {[
+                                        { id: 'gemini-flash-lite-latest', label: 'gemini-flash-lite-latest' },
+                                        { id: 'gemini-flash-latest', label: 'gemini-flash-latest' },
+                                    ].map((m) => (
+                                        <button
+                                            key={m.id}
+                                            type="button"
+                                            onClick={() => setGeminiModel(m.id)}
+                                            className={cn(
+                                                "text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border transition-all duration-200 active:scale-95",
+                                                (geminiModel || 'gemini-flash-lite-latest') === m.id
+                                                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                                                    : "bg-background/60 hover:bg-muted text-muted-foreground border-border/40"
+                                            )}
+                                        >
+                                            {m.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleTestGeminiKey}
+                                    disabled={isTestingKey}
+                                    className="h-7 px-2.5 text-[11px] font-bold rounded-lg border-primary/30 text-primary hover:bg-primary/10 active:scale-95 transition-all duration-200"
+                                >
+                                    {isTestingKey ? (
+                                        <Loader2 className="w-3 h-3 animate-spin mr-1" />
+                                    ) : (
+                                        <Sparkles className="w-3 h-3 mr-1" />
+                                    )}
+                                    {t('testConnection', { defaultValue: 'Test Key' })}
+                                </Button>
+                            </div>
+
+                            {testKeyStatus && (
+                                <p className={cn(
+                                    "text-[11px] font-semibold pt-1",
+                                    testKeyStatus.ok ? "text-emerald-500" : "text-destructive"
+                                )}>
+                                    {testKeyStatus.msg}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </section>
 

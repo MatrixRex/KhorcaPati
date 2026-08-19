@@ -39,6 +39,10 @@ interface UIState {
     isBalanceEditDrawerOpen: boolean;
     isCategoryRecordsOpen: boolean;
     categoryForRecords?: string;
+    isSmartBatchParserOpen: boolean;
+    initialSmartBatchText: string;
+    openSmartBatchParser: (initialText?: string) => void;
+    closeSmartBatchParser: () => void;
     isLoanLinkerOpen: boolean;
     setLoanLinkerOpen: (isOpen: boolean) => void;
     selectedInventoryItem: string | null;
@@ -138,6 +142,8 @@ export const useUIStore = create<UIState>()(
             isCategoryManagementOpen: false,
             isBalanceEditDrawerOpen: false,
             isCategoryRecordsOpen: false,
+            isSmartBatchParserOpen: false,
+            initialSmartBatchText: '',
             isLoanLinkerOpen: false,
             selectedInventoryItem: null,
             returnPath: null,
@@ -171,8 +177,19 @@ export const useUIStore = create<UIState>()(
                         state.isCategoryManagementOpen ||
                         state.isBalanceEditDrawerOpen ||
                         state.isCategoryRecordsOpen ||
+                        state.isSmartBatchParserOpen ||
                         state.isLoanLinkerOpen;
             },
+
+            openSmartBatchParser: (initialText) => set({
+                isSmartBatchParserOpen: true,
+                initialSmartBatchText: initialText || ''
+            }),
+
+            closeSmartBatchParser: () => set({
+                isSmartBatchParserOpen: false,
+                initialSmartBatchText: ''
+            }),
 
             openAddExpense: (parentId, loanId) => set({
                 isExpenseSheetOpen: true,

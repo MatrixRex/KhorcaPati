@@ -24,6 +24,7 @@ import { LoanRecordsList } from '@/components/loans/LoanRecordsList';
 import { LoansListDrawer } from '@/components/loans/LoansListDrawer';
 import { ArchivedLoansDrawer } from '@/components/loans/ArchivedLoansDrawer';
 import { CategoryManagementDrawer } from '@/components/shared/CategoryManagementDrawer';
+import { SmartBatchParserDrawer } from '@/components/expenses/SmartBatchParserDrawer';
 import { DevBadge } from '@/components/shared/DevBadge';
 import { useUIStore } from '@/stores/uiStore';
 import { useCategoryStore } from '@/stores/categoryStore';
@@ -575,7 +576,8 @@ export function GlobalUI() {
                 </SheetContent>
             </Sheet>
 
-            {/* Loan Linker Sheet removed */}
+            {/* Smart Batch / AI Parser Drawer */}
+            <SmartBatchParserDrawer />
         </>
     );
 }

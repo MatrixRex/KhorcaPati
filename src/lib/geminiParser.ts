@@ -88,6 +88,10 @@ TRANSACTION FIELD EXTRACTION RULES:
 - "itemAutoTrack": Set to true if physical grocery, shopping, or supply items are listed.
 - "items": Extract item list if present with "name" (singular item name), "qty" (number), and "unit" (e.g. "kg", "L", "pcs", "dozen", "pack"). Otherwise empty array [].
 
+SPLITTING VS GROUPING RULES (CRITICAL):
+- If items have individual prices (e.g., "egg 20 taka, fish 50 taka"), you MUST create a SEPARATE transaction record for each item (one transaction for egg with amount 20, one for fish with amount 50).
+- If multiple items are grouped together with a single total price (e.g., "egg and fish 70 taka"), create a SINGLE transaction record containing all those items in the "items" array, with the "amount" set to the total price (70).
+
 Return ONLY valid JSON adhering to the specified schema.`;
 
     const requestPayload = {

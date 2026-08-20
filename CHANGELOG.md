@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Billing Cycle Reset Date Selector**: Added a slider in the Settings page to configure the cycle reset date (1 to 31, default 1).
 - **Billing Cycle Date Ranges**: Implemented utility functions to calculate billing cycle start and end dates based on the reset date, updating the date filter store reactively so reports align with the cycle.
 
+### Changed
+- **AI Prompt Settings**: Refined Gemini system prompt rules to accurately split transaction items with individual prices into separate records, while correctly grouping multiple items under a single total price.
+
 ## [1.9.5] - 2026-06-15
 
 ### Added

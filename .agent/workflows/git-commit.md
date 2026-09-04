@@ -12,3 +12,7 @@ description: Stage all current changes and generate a structured git commit mess
    - **Subject**: Main objective (one line)
    - **Body**: Detailed bullet points explaining the 'why' and technical changes.
 5. commit to git.
+6. If this commit is part of a release (version bump / tag):
+   - Push commit and tags immediately: `git push && git push --tags`
+   - Monitor GitHub Actions deployment run: `gh run list --limit 1` and ensure deployment completes with status `success`.
+   - If deployment fails: check logs (`gh run view --log-failed`), fix the issue, commit, and re-try until deployment succeeds.

@@ -10,9 +10,12 @@
 - `npx tsc -b` — TypeScript typecheck (0 errors required)
 - Testing architecture guide: `TESTING.md`
 
-## Deploy
+## Deploy & Release
 - Git tag `v*` push triggers GitHub Actions → deploys `dist/` to `gh-pages` branch.
 - `vite.config.ts` has `base: '/KhorcaPati/'` — do not change.
+- **Mandatory Post-Release Push & Verification**: Always push commits and tags immediately after creating any release (`git push && git push --tags`).
+- **Deployment Verification**: Check that GitHub Actions deployment succeeds using `gh run list --limit 1` and `gh run watch <run-id>`.
+- **Failure Recovery**: If deployment fails, inspect logs (`gh run view <run-id> --log-failed`), fix the issue, and re-try until the deployment is verified successful.
 
 ## Architecture
 - React 19 + Vite 7 + TypeScript 5.9 (strict, noUnusedLocals, noUnusedParameters, verbatimModuleSyntax)

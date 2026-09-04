@@ -385,7 +385,17 @@ const resources = {
       "testConnection": "Test Key",
       "geminiKeyRequiredTitle": "Google Gemini API Key Required",
       "geminiKeyRequiredDesc": "To use the AI Smart Note Parser, please configure your Google Gemini API key in Settings first.",
-      "goToSettings": "Open Settings"
+      "goToSettings": "Open Settings",
+      "noteSavedOffline": "You are currently offline. Your note has been saved offline and will automatically process in the background when connection is restored.",
+      "offlineQueueTitle": "Offline Notes Queue",
+      "offlineReadyToReview": "Ready to review",
+      "waitingForConnection": "Waiting for network...",
+      "clearCompleted": "Clear Finished",
+      "reviewAndEdit": "Review & Edit",
+      "quickImport": "Quick Import",
+      "retryNow": "Retry Now",
+      "retryingInBackground": "Processing with Gemini...",
+      "parseFailed": "Parse failed"
     }
   },
   bn: {
@@ -769,7 +779,17 @@ const resources = {
       "testConnection": "পরীক্ষা করুন",
       "geminiKeyRequiredTitle": "গুগল জেমিনি এপিআই কি প্রয়োজন",
       "geminiKeyRequiredDesc": "AI স্মার্ট নোট পার্সার ব্যবহার করতে প্রথমে সেটিংসে গিয়ে গুগল জেমিনি এপিআই কি সেট করুন।",
-      "goToSettings": "সেটিংসে যান"
+      "goToSettings": "সেটিংসে যান",
+      "noteSavedOffline": "আপনি বর্তমানে অফলাইনে আছেন। আপনার নোটটি অফলাইনে সংরক্ষিত হয়েছে এবং ইন্টারনেট সংযোগ পেলে স্বয়ংক্রিয়ভাবে প্রসেস হবে।",
+      "offlineQueueTitle": "অফলাইন নোটের সারি",
+      "offlineReadyToReview": "পর্যালোচনার জন্য প্রস্তুত",
+      "waitingForConnection": "সংযোগের জন্য অপেক্ষা করা হচ্ছে...",
+      "clearCompleted": "সম্পন্ন তালিকা মুছুন",
+      "reviewAndEdit": "পর্যালোচনা ও সম্পাদনা",
+      "quickImport": "দ্রুত যোগ করুন",
+      "retryNow": "পুনরায় চেষ্টা করুন",
+      "retryingInBackground": "জেমিনি দিয়ে প্রসেস হচ্ছে...",
+      "parseFailed": "পার্স ব্যর্থ হয়েছে"
     }
   }
 };

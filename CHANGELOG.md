@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.10.2] - 2026-09-04
+## [1.10.3] - 2026-09-04
+
+### Added
+- **Offline Support for AI Smart Notes**: When disconnected or offline, notes submitted to the AI Smart Note parser are saved locally and automatically retried in the background as soon as network connectivity is restored.
+- **Connection Error Discrimination**: Accurately distinguishes between true connection failures (`navigator.onLine === false`, `Failed to fetch`, network timeouts, DNS errors) and API limits/errors (`HTTP 429 Quota Exceeded`, `HTTP 400 Invalid Key`, `HTTP 403 Forbidden`). Only connection failures trigger the offline queue, while quota and auth errors display immediate actionable feedback.
+- **Persistent Offline Queue Store**: Created `useSmartNoteQueueStore` with local persistence to track queued notes through `pending`, `processing`, `ready`, and `failed` lifecycle states, complete with retry counts and duplicate prevention.
+- **Background Queue Processor & Global Hook**: Added `smartNoteQueueProcessor` service and `useSmartNoteQueueProcessor` global hook in `App.tsx` that listens to `online` events, tab visibility changes, and periodic heartbeats to process queued notes seamlessly without blocking the user.
+- **Atomic Batch Importer**: Added `importParsedTransactions` for atomic Dexie DB insertion, category auto-creation, item auto-tracking, and daily summary recalculation.
+- **Interactive Offline Queue UI**: Added offline notice banner and an "Offline Notes Queue" card section in `SmartBatchParserDrawer` with 1-click "Review & Edit", "Quick Import", "Retry Now", and delete actions.
+- **Dashboard Indicator Badges**: Added dynamic status badges to the `AI Smart Note` quick action card on the Dashboard to indicate ready or pending offline notes.
+- **Bilingual Localization**: Added full English and Bangla translations for all offline notifications, queue states, and action buttons.
+- **Automated Test Suite Expansion**: Added unit and integration test suites for the offline queue store and queue processor (89 total automated tests passing across 20 test suites).
 
 ### Added
 - **AI Category Personalization & Memory**: Dynamically learns category preferences whenever a user edits AI batch extraction results or saves transactions, storing normalized item-to-category associations in `settingsStore` to prioritize user-preferred categories and semantically related items in future parses.

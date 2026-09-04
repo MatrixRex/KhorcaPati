@@ -15,7 +15,12 @@ import {
     RotateCcw,
     AlertCircle,
     Loader2,
-    Settings
+    Settings,
+    WifiOff,
+    Clock,
+    CheckCircle2,
+    RefreshCw,
+    X
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn, formatAmount } from '@/lib/utils';
@@ -29,9 +34,10 @@ import { CategoryComboBox } from '@/components/expenses/CategoryComboBox';
 import { useUIStore } from '@/stores/uiStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCategoryStore } from '@/stores/categoryStore';
-import { useExpenseStore } from '@/stores/expenseStore';
-import { db, recalculateDailySummary, type Expense } from '@/db/schema';
-import { parseTransactionsWithGemini, type ParsedGeminiTransaction } from '@/lib/geminiParser';
+import { useSmartNoteQueueStore, type QueuedSmartNote } from '@/stores/smartNoteQueueStore';
+import { db } from '@/db/schema';
+import { parseTransactionsWithGemini, isNetworkConnectionError, type ParsedGeminiTransaction } from '@/lib/geminiParser';
+import { importParsedTransactions, processNextQueuedNote } from '@/services/smartNoteQueueProcessor';
 
 const SAMPLE_NOTES = [
     {
@@ -64,13 +70,15 @@ export function SmartBatchParserDrawer() {
     const { isSmartBatchParserOpen, closeSmartBatchParser, initialSmartBatchText } = useUIStore();
     const { geminiApiKey, geminiModel } = useSettingsStore();
     const { categories } = useCategoryStore();
-    const { loadExpenses } = useExpenseStore();
+
+    const { queue, enqueueNote, removeNote, clearCompleted } = useSmartNoteQueueStore();
 
     const [noteText, setNoteText] = useState('');
     const [parsedList, setParsedList] = useState<ParsedGeminiTransaction[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [offlineNotice, setOfflineNotice] = useState<string | null>(null);
 
     const hasKey = Boolean(geminiApiKey && geminiApiKey.trim());
 
@@ -79,6 +87,7 @@ export function SmartBatchParserDrawer() {
             setNoteText(initialSmartBatchText || '');
             setParsedList([]);
             setErrorMessage(null);
+            setOfflineNotice(null);
         }
     }, [isSmartBatchParserOpen, initialSmartBatchText]);
 
@@ -93,8 +102,18 @@ export function SmartBatchParserDrawer() {
             return;
         }
 
+        // Check if device is offline upfront
+        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+            enqueueNote(noteText, format(new Date(), 'yyyy-MM-dd'));
+            setOfflineNotice(t('noteSavedOffline', { defaultValue: 'You are currently offline. Your note has been saved offline and will automatically process in the background when connection is restored.' }));
+            setNoteText('');
+            setErrorMessage(null);
+            return;
+        }
+
         setIsLoading(true);
         setErrorMessage(null);
+        setOfflineNotice(null);
 
         try {
             const dbCategories = await db.categories.toArray();
@@ -129,11 +148,40 @@ export function SmartBatchParserDrawer() {
             }
         } catch (err: unknown) {
             console.error('Gemini parse error:', err);
-            const msg = err instanceof Error ? err.message : 'Failed to parse transactions with Gemini.';
-            setErrorMessage(msg);
+            if (isNetworkConnectionError(err)) {
+                enqueueNote(noteText, format(new Date(), 'yyyy-MM-dd'));
+                setOfflineNotice(t('noteSavedOffline', { defaultValue: 'Connection lost. Your note has been saved offline and will automatically process in the background when connection is restored.' }));
+                setNoteText('');
+                setErrorMessage(null);
+            } else {
+                const msg = err instanceof Error ? err.message : 'Failed to parse transactions with Gemini.';
+                setErrorMessage(msg);
+            }
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleQuickImportQueuedNote = async (item: QueuedSmartNote) => {
+        if (!item.parsedTransactions || item.parsedTransactions.length === 0) return;
+        setIsSaving(true);
+        try {
+            await importParsedTransactions(item.parsedTransactions);
+            removeNote(item.id);
+            setOfflineNotice(null);
+        } catch (err) {
+            console.error('Failed to quick import queued note:', err);
+            setErrorMessage('Failed to import offline note transactions.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleLoadQueuedNoteToReview = (item: QueuedSmartNote) => {
+        if (!item.parsedTransactions || item.parsedTransactions.length === 0) return;
+        setParsedList(item.parsedTransactions);
+        removeNote(item.id);
+        setOfflineNotice(null);
     };
 
     const handleToggleSelectAll = () => {
@@ -201,85 +249,11 @@ export function SmartBatchParserDrawer() {
         setIsSaving(true);
 
         try {
-            const nowIso = new Date().toISOString();
-            const datesToRecalculate = new Set<string>();
-            const { addCategory } = useCategoryStore.getState();
-            const { learnCategoryPreference } = useSettingsStore.getState();
-
-            // Auto-create any new categories detected by Gemini and learn category preferences
-            const currentDbCats = await db.categories.toArray();
-            const existingCatNames = new Set(currentDbCats.map(c => c.name.toLowerCase().trim()));
-
-            for (const tx of selectedTransactions) {
-                const catName = (tx.category || '').trim();
-                if (catName && catName !== 'Unlisted') {
-                    learnCategoryPreference(tx.title || tx.note, catName);
-                    if (!existingCatNames.has(catName.toLowerCase())) {
-                        await addCategory(catName);
-                        existingCatNames.add(catName.toLowerCase());
-                    }
-                }
-            }
-
-            await db.transaction('rw', [db.expenses, db.items, db.dailySummaries], async () => {
-                for (const tx of selectedTransactions) {
-                    const txDate = tx.date || format(new Date(), 'yyyy-MM-dd');
-                    datesToRecalculate.add(txDate);
-
-                    const txTitle = (tx.title || tx.note || '').trim();
-                    const txNote = (tx.note || tx.title || '').trim();
-
-                    const expensePayload: Omit<Expense, 'id'> = {
-                        parentId: null,
-                        isNested: false,
-                        goalId: null,
-                        loanId: null,
-                        title: txTitle || undefined,
-                        amount: Number(tx.amount) || 0,
-                        type: tx.type,
-                        category: tx.category || 'Unlisted',
-                        date: txDate,
-                        note: txNote,
-                        isRecurring: false,
-                        recurringInterval: null,
-                        recurringNextDue: null,
-                        itemAutoTrack: Boolean(tx.itemAutoTrack),
-                        tags: [],
-                        createdAt: nowIso,
-                        updatedAt: nowIso,
-                    };
-
-                    const newExpenseId = await db.expenses.add(expensePayload);
-
-                    // If items were extracted and itemAutoTrack is enabled, save items
-                    if (tx.itemAutoTrack && tx.items && tx.items.length > 0) {
-                        for (const it of tx.items) {
-                            await db.items.add({
-                                expenseId: newExpenseId as number,
-                                name: it.name.trim().toLowerCase(),
-                                rawInput: `${it.name} ${it.qty}${it.unit}`,
-                                qty: Number(it.qty) || 1,
-                                unit: it.unit || 'pcs',
-                                date: txDate,
-                                note: tx.title,
-                                createdAt: nowIso,
-                            });
-                        }
-                    }
-                }
-            });
-
-            // Recalculate daily summaries
-            for (const d of datesToRecalculate) {
-                await recalculateDailySummary(d);
-            }
-
-            await loadExpenses();
-
-            // Clear local state and close the drawer immediately
+            await importParsedTransactions(selectedTransactions);
             setParsedList([]);
             setNoteText('');
             setErrorMessage(null);
+            setOfflineNotice(null);
             closeSmartBatchParser();
         } catch (err) {
             console.error('Failed to import batch transactions:', err);
@@ -447,6 +421,151 @@ export function SmartBatchParserDrawer() {
                                     {t('goToSettings', { defaultValue: 'Settings' })}
                                 </Button>
                             )}
+                        </div>
+                    )}
+
+                    {/* Offline Notice Banner */}
+                    {offlineNotice && (
+                        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-medium flex items-start justify-between gap-2.5 shadow-sm">
+                            <div className="flex items-start gap-2.5 flex-1">
+                                <WifiOff className="w-4 h-4 shrink-0 mt-0.5 text-amber-500" />
+                                <span className="leading-snug">{offlineNotice}</span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setOfflineNotice(null)}
+                                className="p-1 rounded-lg text-amber-500 hover:bg-amber-500/20 active:scale-95 transition-all duration-200"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Offline Notes Queue Card / List */}
+                    {queue.length > 0 && (
+                        <div className="p-4 rounded-2xl bg-muted/40 border border-border/60 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Clock className="w-4 h-4 text-primary" />
+                                    <span className="text-xs font-black uppercase tracking-wider text-foreground">
+                                        {t('offlineQueueTitle', { defaultValue: 'Offline Notes Queue' })}
+                                    </span>
+                                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/15 text-primary">
+                                        {queue.length}
+                                    </span>
+                                </div>
+                                {queue.some(n => n.status === 'ready') && (
+                                    <button
+                                        type="button"
+                                        onClick={clearCompleted}
+                                        className="text-[11px] font-semibold text-muted-foreground hover:text-foreground active:scale-95 transition-all duration-200"
+                                    >
+                                        {t('clearCompleted', { defaultValue: 'Clear Finished' })}
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                {queue.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className={cn(
+                                            "p-3 rounded-xl border text-xs space-y-2 transition-all duration-200",
+                                            item.status === 'ready'
+                                                ? "bg-emerald-500/10 border-emerald-500/30"
+                                                : item.status === 'processing'
+                                                ? "bg-primary/10 border-primary/30"
+                                                : item.status === 'failed'
+                                                ? "bg-destructive/10 border-destructive/30"
+                                                : "bg-background/60 border-border/40"
+                                        )}
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-semibold text-foreground truncate">
+                                                    "{item.noteText.slice(0, 45)}{item.noteText.length > 45 ? '...' : ''}"
+                                                </p>
+                                                <div className="flex items-center gap-1.5 mt-1 text-[11px] text-muted-foreground">
+                                                    {item.status === 'ready' && (
+                                                        <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-bold">
+                                                            <CheckCircle2 className="w-3.5 h-3.5" />
+                                                            {t('offlineReadyToReview', { defaultValue: 'Ready to review' })} ({item.parsedTransactions?.length || 0} items)
+                                                        </span>
+                                                    )}
+                                                    {item.status === 'processing' && (
+                                                        <span className="flex items-center gap-1 text-primary font-bold">
+                                                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                            {t('retryingInBackground', { defaultValue: 'Processing with Gemini...' })}
+                                                        </span>
+                                                    )}
+                                                    {item.status === 'pending' && (
+                                                        <span className="flex items-center gap-1">
+                                                            <WifiOff className="w-3 h-3 text-amber-500" />
+                                                            {t('waitingForConnection', { defaultValue: 'Waiting for connection...' })}
+                                                            {item.retryCount > 0 && ` (${item.retryCount}x)`}
+                                                        </span>
+                                                    )}
+                                                    {item.status === 'failed' && (
+                                                        <span className="text-destructive font-medium truncate">
+                                                            {item.errorMessage || t('parseFailed', { defaultValue: 'Parse failed' })}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => removeNote(item.id)}
+                                                className="p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-all duration-200 shrink-0"
+                                                title={t('delete', { defaultValue: 'Delete' })}
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+
+                                        {/* Action buttons per queued note */}
+                                        {item.status === 'ready' && item.parsedTransactions && (
+                                            <div className="flex items-center gap-2 pt-1 border-t border-emerald-500/20">
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    onClick={() => handleLoadQueuedNoteToReview(item)}
+                                                    className="h-7 px-2.5 text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg active:scale-95 transition-all duration-200"
+                                                >
+                                                    <Sparkles className="w-3 h-3 mr-1" />
+                                                    {t('reviewAndEdit', { defaultValue: 'Review & Edit' })}
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="outline"
+                                                    disabled={isSaving}
+                                                    onClick={() => handleQuickImportQueuedNote(item)}
+                                                    className="h-7 px-2.5 text-[11px] font-bold border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/10 rounded-lg active:scale-95 transition-all duration-200"
+                                                >
+                                                    <Check className="w-3 h-3 mr-1" />
+                                                    {t('quickImport', { defaultValue: 'Quick Import' })}
+                                                </Button>
+                                            </div>
+                                        )}
+
+                                        {(item.status === 'pending' || item.status === 'failed') && (
+                                            <div className="flex items-center justify-end pt-1">
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={() => processNextQueuedNote()}
+                                                    className="h-6 px-2 text-[11px] font-bold text-primary hover:bg-primary/10 active:scale-95 transition-all duration-200"
+                                                >
+                                                    <RefreshCw className="w-3 h-3 mr-1" />
+                                                    {t('retryNow', { defaultValue: 'Retry Now' })}
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
 

@@ -18,6 +18,7 @@ import { BalanceEditDrawer } from '@/components/shared/BalanceEditDrawer';
 import { useTranslation } from 'react-i18next';
 import { formatAmount } from '@/lib/utils';
 import { useExpenseStore } from '@/stores/expenseStore';
+import { useSmartNoteQueueStore } from '@/stores/smartNoteQueueStore';
 import { getBillingCycleRange } from '@/utils/cycle';
 
 export default function Dashboard() {
@@ -135,6 +136,10 @@ export default function Dashboard() {
         }, 0);
     }, [expensesThisMonth]);
 
+    const queue = useSmartNoteQueueStore(state => state.queue);
+    const readyNotesCount = queue.filter(n => n.status === 'ready').length;
+    const pendingNotesCount = queue.filter(n => n.status === 'pending' || n.status === 'processing').length;
+
     return (
         <PageContainer
             title={t('appTitle')}
@@ -201,8 +206,25 @@ export default function Dashboard() {
                         <Sparkles className="w-4 h-4" />
                     </div>
                     <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-black tracking-tight text-foreground">{t('aiSmartNote', { defaultValue: 'AI Smart Note' })}</span>
-                        <span className="text-[10px] text-muted-foreground font-medium truncate">{t('aiSmartNoteSubtitle', { defaultValue: 'Parse messy notes' })}</span>
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-black tracking-tight text-foreground">{t('aiSmartNote', { defaultValue: 'AI Smart Note' })}</span>
+                            {readyNotesCount > 0 ? (
+                                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                                    {readyNotesCount}
+                                </span>
+                            ) : pendingNotesCount > 0 ? (
+                                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                                    {pendingNotesCount}
+                                </span>
+                            ) : null}
+                        </div>
+                        <span className="text-[10px] text-muted-foreground font-medium truncate">
+                            {readyNotesCount > 0 
+                                ? t('offlineReadyToReview', { defaultValue: 'Ready to review' })
+                                : pendingNotesCount > 0
+                                ? t('waitingForConnection', { defaultValue: 'Waiting for network...' })
+                                : t('aiSmartNoteSubtitle', { defaultValue: 'Parse messy notes' })}
+                        </span>
                     </div>
                 </button>
 

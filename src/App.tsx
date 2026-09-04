@@ -5,6 +5,7 @@ import { BottomNav } from '@/components/shared/BottomNav';
 import { GlobalUI } from '@/components/shared/GlobalUI';
 import { useBudgetNotifications } from '@/hooks/useBudgetNotifications';
 import { useRecurringNotifications } from '@/hooks/useRecurringNotifications';
+import { useSmartNoteQueueProcessor } from '@/hooks/useSmartNoteQueueProcessor';
 import { useUIStore } from '@/stores/uiStore';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -20,10 +21,11 @@ import Settings from '@/pages/Settings';
 import { ReloadPrompt } from '@/components/shared/ReloadPrompt';
 import { WelcomeModal } from '@/components/shared/WelcomeModal';
 
-/** Requests notification permission once on app start, then runs budget alert checks. */
+/** Requests notification permission once on app start, then runs budget alert checks and offline queue processor. */
 function NotificationManager() {
   useBudgetNotifications();
   useRecurringNotifications();
+  useSmartNoteQueueProcessor();
   return null;
 }
 

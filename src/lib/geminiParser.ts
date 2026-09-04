@@ -12,6 +12,56 @@ export interface CleanedTransactionData {
     amount: number;
 }
 
+export class NetworkConnectionError extends Error {
+    constructor(message: string = 'Network error contacting Gemini API. Check your internet connection.') {
+        super(message);
+        this.name = 'NetworkConnectionError';
+    }
+}
+
+export function isNetworkConnectionError(err: unknown): boolean {
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        return true;
+    }
+    if (!err) return false;
+
+    if (err instanceof NetworkConnectionError) {
+        return true;
+    }
+
+    const msg = err instanceof Error ? err.message : String(err);
+    const lower = msg.toLowerCase();
+
+    // Explicitly exclude quota limits, bad requests, and authentication errors
+    if (
+        lower.includes('rate limit') ||
+        lower.includes('quota') ||
+        lower.includes('resource_exhausted') ||
+        lower.includes('429') ||
+        lower.includes('api key') ||
+        lower.includes('unauthorized') ||
+        lower.includes('permission denied') ||
+        lower.includes('403') ||
+        lower.includes('400')
+    ) {
+        return false;
+    }
+
+    // Include connection failures
+    return (
+        err instanceof TypeError ||
+        lower.includes('failed to fetch') ||
+        lower.includes('network error') ||
+        lower.includes('networkerror') ||
+        lower.includes('internet connection') ||
+        lower.includes('econnrefused') ||
+        lower.includes('enotfound') ||
+        lower.includes('net::err_') ||
+        lower.includes('offline') ||
+        lower.includes('aborterror')
+    );
+}
+
 const bengaliToEnglishDigits = (str: string): string => {
     const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
     return str.replace(/[০-৯]/g, (d) => String(bnDigits.indexOf(d)));
@@ -367,7 +417,7 @@ Return ONLY valid JSON adhering to the specified schema.`;
             body: JSON.stringify(requestPayload)
         });
     } catch (err: any) {
-        throw new Error(`Network error contacting Gemini API: ${err?.message || 'Check your internet connection.'}`);
+        throw new NetworkConnectionError(`Network error contacting Gemini API: ${err?.message || 'Check your internet connection.'}`);
     }
 
     if (!response.ok) {

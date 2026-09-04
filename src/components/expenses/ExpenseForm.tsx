@@ -18,6 +18,7 @@ import { GoalComboBox } from './GoalComboBox';
 import { LoanComboBox } from './LoanComboBox';
 
 import { useCategoryStore } from '@/stores/categoryStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useUIStore } from '@/stores/uiStore';
 import { ChevronRight, Plus, Layers, Trash2, Calculator, Edit2 } from 'lucide-react';
@@ -328,6 +329,10 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
             let finalParentId = fixedParentId;
             if (currentId && finalParentId === currentId) {
                 finalParentId = null;
+            }
+
+            if (data.note && validCategory && validCategory !== 'Unlisted') {
+                useSettingsStore.getState().learnCategoryPreference(data.note, validCategory);
             }
 
             const payload: Omit<Expense, 'id'> = {

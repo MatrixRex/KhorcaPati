@@ -49,4 +49,11 @@ describe('Smart Item Parser', () => {
         expect(parseItemInput('apples 5')).toEqual({ name: 'apple', qty: 5, unit: 'pcs' });
         expect(parseItemInput('potatoes 2kg')).toEqual({ name: 'potato', qty: 2, unit: 'kg' });
     });
+
+    it('handles count multipliers like x24 and 24x with or without trailing price', () => {
+        expect(parseItemInput('egg x24')).toEqual({ name: 'egg', qty: 24, unit: 'pcs' });
+        expect(parseItemInput('egg 24x')).toEqual({ name: 'egg', qty: 24, unit: 'pcs' });
+        expect(parseItemInput('egg x24 120')).toEqual({ name: 'egg', qty: 24, unit: 'pcs' });
+        expect(parseItemInput('x12 eggs')).toEqual({ name: 'egg', qty: 12, unit: 'pcs' });
+    });
 });

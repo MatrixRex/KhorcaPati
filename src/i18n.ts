@@ -382,7 +382,10 @@ const resources = {
       "geminiSettingsDesc": "Powers AI batch note parsing and smart transaction categorization. Free API key from Google AI Studio.",
       "apiKeyRequired": "Please enter an API key",
       "apiKeyValid": "API Key is valid & connected!",
-      "testConnection": "Test Key"
+      "testConnection": "Test Key",
+      "geminiKeyRequiredTitle": "Google Gemini API Key Required",
+      "geminiKeyRequiredDesc": "To use the AI Smart Note Parser, please configure your Google Gemini API key in Settings first.",
+      "goToSettings": "Open Settings"
     }
   },
   bn: {
@@ -763,7 +766,10 @@ const resources = {
       "geminiSettingsDesc": "AI দিয়ে নোট পার্সিং ও স্বয়ংক্রিয় ক্যাটাগরি নির্বাচনের জন্য। গুগল এআই স্টুডিও থেকে ফ্রি এপিআই কি নিন।",
       "apiKeyRequired": "অনুগ্রহ করে একটি এপিআই কি দিন",
       "apiKeyValid": "এপিআই কি সফলভাবে সংযুক্ত হয়েছে!",
-      "testConnection": "পরীক্ষা করুন"
+      "testConnection": "পরীক্ষা করুন",
+      "geminiKeyRequiredTitle": "গুগল জেমিনি এপিআই কি প্রয়োজন",
+      "geminiKeyRequiredDesc": "AI স্মার্ট নোট পার্সার ব্যবহার করতে প্রথমে সেটিংসে গিয়ে গুগল জেমিনি এপিআই কি সেট করুন।",
+      "goToSettings": "সেটিংসে যান"
     }
   }
 };

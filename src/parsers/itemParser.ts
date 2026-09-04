@@ -54,7 +54,7 @@ export function parseItemInput(input: string): ParsedItem {
 
     let qty = 1;
     let unit = 'pcs';
-    let nameTokens: string[] = [];
+    const nameTokens: string[] = [];
 
     let foundQty = false;
     let foundUnit = false;
@@ -89,6 +89,16 @@ export function parseItemInput(input: string): ParsedItem {
             continue;
         }
 
+        // Is it an x-prefixed multiplier? (e.g. "x24", "x12")
+        const xPrefixMatch = token.match(/^x(\d+)$/i);
+        if (!foundQty && xPrefixMatch) {
+            qty = parseFloat(xPrefixMatch[1]) * multiplier;
+            unit = 'pcs';
+            foundQty = true;
+            foundUnit = true;
+            continue;
+        }
+
         // Is it a number or number+unit?
         const numMatch = token.match(/^([\d.]+)([a-zA-Z]*)$/);
         if (!foundQty && numMatch) {
@@ -99,7 +109,10 @@ export function parseItemInput(input: string): ParsedItem {
 
                 const attachedUnit = numMatch[2];
                 if (attachedUnit) {
-                    if (KNOWN_UNITS[attachedUnit]) {
+                    if (attachedUnit.toLowerCase() === 'x') {
+                        unit = 'pcs';
+                        foundUnit = true;
+                    } else if (KNOWN_UNITS[attachedUnit]) {
                         unit = KNOWN_UNITS[attachedUnit];
                         foundUnit = true;
                     } else {

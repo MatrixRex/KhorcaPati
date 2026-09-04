@@ -1,20 +1,21 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { 
     Sparkles, 
     Trash2, 
     Plus, 
-    Key, 
+    KeyRound,
     ArrowUpRight, 
     ArrowDownLeft, 
     Check, 
-    ExternalLink, 
     Package, 
     CheckSquare, 
     Square, 
     RotateCcw,
     AlertCircle,
-    Loader2
+    Loader2,
+    Settings
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn, formatAmount } from '@/lib/utils';
@@ -59,8 +60,9 @@ Mobile flexiload recharge 300`
 
 export function SmartBatchParserDrawer() {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const { isSmartBatchParserOpen, closeSmartBatchParser, initialSmartBatchText } = useUIStore();
-    const { geminiApiKey, geminiModel, setGeminiApiKey } = useSettingsStore();
+    const { geminiApiKey, geminiModel } = useSettingsStore();
     const { categories } = useCategoryStore();
     const { loadExpenses } = useExpenseStore();
 
@@ -69,25 +71,16 @@ export function SmartBatchParserDrawer() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [tempKey, setTempKey] = useState('');
-    const [showKeySetup, setShowKeySetup] = useState(false);
+
+    const hasKey = Boolean(geminiApiKey && geminiApiKey.trim());
 
     useEffect(() => {
         if (isSmartBatchParserOpen) {
             setNoteText(initialSmartBatchText || '');
             setParsedList([]);
             setErrorMessage(null);
-            setTempKey(geminiApiKey || '');
-            setShowKeySetup(!geminiApiKey);
         }
-    }, [isSmartBatchParserOpen, initialSmartBatchText, geminiApiKey]);
-
-    const handleSaveKey = () => {
-        if (!tempKey.trim()) return;
-        setGeminiApiKey(tempKey.trim());
-        setShowKeySetup(false);
-        setErrorMessage(null);
-    };
+    }, [isSmartBatchParserOpen, initialSmartBatchText]);
 
     const handleParse = async () => {
         if (!noteText.trim()) {
@@ -95,10 +88,8 @@ export function SmartBatchParserDrawer() {
             return;
         }
 
-        const effectiveKey = geminiApiKey || tempKey.trim();
-        if (!effectiveKey) {
-            setShowKeySetup(true);
-            setErrorMessage(t('apiKeyRequired', { defaultValue: 'Google Gemini API key is required.' }));
+        if (!hasKey) {
+            setErrorMessage(t('geminiKeyRequiredDesc', { defaultValue: 'To use the AI Smart Note Parser, please configure your Google Gemini API key in Settings first.' }));
             return;
         }
 
@@ -109,11 +100,25 @@ export function SmartBatchParserDrawer() {
             const dbCategories = await db.categories.toArray();
             const effectiveCategories = dbCategories.length > 0 ? dbCategories : categories;
 
+            const { categoryPreferences } = useSettingsStore.getState();
+
+            const recentExpenses = await db.expenses
+                .orderBy('id')
+                .reverse()
+                .limit(100)
+                .toArray();
+
+            const historyExamples = recentExpenses
+                .filter(e => e.note && e.category && e.category !== 'Unlisted')
+                .map(e => ({ item: e.note, category: e.category }));
+
             const results = await parseTransactionsWithGemini({
                 noteText,
                 categories: effectiveCategories,
+                categoryPreferences,
+                historyExamples,
                 referenceDate: format(new Date(), 'yyyy-MM-dd'),
-                apiKey: effectiveKey,
+                apiKey: geminiApiKey,
                 model: geminiModel || 'gemini-flash-lite-latest'
             });
 
@@ -122,9 +127,10 @@ export function SmartBatchParserDrawer() {
             } else {
                 setParsedList(results);
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Gemini parse error:', err);
-            setErrorMessage(err?.message || 'Failed to parse transactions with Gemini.');
+            const msg = err instanceof Error ? err.message : 'Failed to parse transactions with Gemini.';
+            setErrorMessage(msg);
         } finally {
             setIsLoading(false);
         }
@@ -140,7 +146,17 @@ export function SmartBatchParserDrawer() {
     };
 
     const handleUpdateItem = (id: string, updates: Partial<ParsedGeminiTransaction>) => {
-        setParsedList(prev => prev.map(tx => tx.id === id ? { ...tx, ...updates } : tx));
+        const { learnCategoryPreference } = useSettingsStore.getState();
+        setParsedList(prev => prev.map(tx => {
+            if (tx.id === id) {
+                const updated = { ...tx, ...updates };
+                if (updates.category && updates.category !== tx.category) {
+                    learnCategoryPreference(updated.title || updated.note, updates.category);
+                }
+                return updated;
+            }
+            return tx;
+        }));
     };
 
     const handleDeleteItem = (id: string) => {
@@ -188,16 +204,20 @@ export function SmartBatchParserDrawer() {
             const nowIso = new Date().toISOString();
             const datesToRecalculate = new Set<string>();
             const { addCategory } = useCategoryStore.getState();
+            const { learnCategoryPreference } = useSettingsStore.getState();
 
-            // Auto-create any new categories detected by Gemini
+            // Auto-create any new categories detected by Gemini and learn category preferences
             const currentDbCats = await db.categories.toArray();
             const existingCatNames = new Set(currentDbCats.map(c => c.name.toLowerCase().trim()));
 
             for (const tx of selectedTransactions) {
                 const catName = (tx.category || '').trim();
-                if (catName && catName !== 'Unlisted' && !existingCatNames.has(catName.toLowerCase())) {
-                    await addCategory(catName);
-                    existingCatNames.add(catName.toLowerCase());
+                if (catName && catName !== 'Unlisted') {
+                    learnCategoryPreference(tx.title || tx.note, catName);
+                    if (!existingCatNames.has(catName.toLowerCase())) {
+                        await addCategory(catName);
+                        existingCatNames.add(catName.toLowerCase());
+                    }
                 }
             }
 
@@ -206,17 +226,20 @@ export function SmartBatchParserDrawer() {
                     const txDate = tx.date || format(new Date(), 'yyyy-MM-dd');
                     datesToRecalculate.add(txDate);
 
+                    const txTitle = (tx.title || tx.note || '').trim();
+                    const txNote = (tx.note || tx.title || '').trim();
+
                     const expensePayload: Omit<Expense, 'id'> = {
                         parentId: null,
                         isNested: false,
                         goalId: null,
                         loanId: null,
-                        title: tx.title.trim() || undefined,
+                        title: txTitle || undefined,
                         amount: Number(tx.amount) || 0,
                         type: tx.type,
                         category: tx.category || 'Unlisted',
                         date: txDate,
-                        note: tx.note || '',
+                        note: txNote,
                         isRecurring: false,
                         recurringInterval: null,
                         recurringNextDue: null,
@@ -295,55 +318,40 @@ export function SmartBatchParserDrawer() {
                     </div>
                 </SheetHeader>
 
-                {/* Main Scrollable Content */}
-                <div className="flex-1 overflow-y-auto px-6 py-4 pb-44 space-y-4 text-foreground overscroll-contain" data-scroll-container>
-                    
-                    {/* API Key Setup Banner */}
-                    {(showKeySetup || !geminiApiKey) && (
-                        <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 space-y-3">
-                            <div className="flex items-start justify-between gap-2">
-                                <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
-                                    <Key className="w-4 h-4" />
-                                    <span>{t('geminiApiKeySetup', { defaultValue: 'Google Gemini API Key' })}</span>
+                {!hasKey ? (
+                    /* Key Required Screen - direct to Settings */
+                    <div className="flex-1 overflow-y-auto px-6 py-6 pb-24 text-foreground overscroll-contain flex flex-col items-center justify-center text-center" data-scroll-container>
+                        <div className="max-w-md w-full mx-auto space-y-6">
+                            <div className="p-6 rounded-3xl bg-primary/10 border border-primary/20 space-y-4 text-center">
+                                <div className="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary shadow-lg shadow-primary/15 mx-auto">
+                                    <KeyRound className="w-7 h-7" />
                                 </div>
-                                <a 
-                                    href="https://aistudio.google.com/app/apikey" 
-                                    target="_blank" 
-                                    rel="noreferrer" 
-                                    className="text-[11px] text-primary/80 hover:text-primary underline flex items-center gap-1 font-medium"
-                                >
-                                    <span>{t('getFreeKey', { defaultValue: 'Get Free Key' })}</span>
-                                    <ExternalLink className="w-3 h-3" />
-                                </a>
-                            </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed">
-                                {t('apiKeyDescription', { defaultValue: 'Enter your free Google Gemini API key to enable AI transaction extraction. Stored securely on your device.' })}
-                            </p>
-                            <div className="flex gap-2">
-                                <Input
-                                    type="password"
-                                    placeholder="AIzaSy..."
-                                    value={tempKey}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTempKey(e.target.value)}
-                                    onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
-                                        setTimeout(() => {
-                                            e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                        }, 150);
-                                    }}
-                                    className="h-10 text-xs rounded-xl bg-background/80"
-                                />
+                                <div className="space-y-1.5">
+                                    <h3 className="text-base font-black tracking-tight">
+                                        {t('geminiKeyRequiredTitle', { defaultValue: 'Google Gemini API Key Required' })}
+                                    </h3>
+                                    <p className="text-xs text-muted-foreground leading-relaxed">
+                                        {t('geminiKeyRequiredDesc', { defaultValue: 'To use the AI Smart Note Parser, please configure your Google Gemini API key in Settings first.' })}
+                                    </p>
+                                </div>
+
                                 <Button
                                     type="button"
-                                    onClick={handleSaveKey}
-                                    disabled={!tempKey.trim()}
-                                    className="h-10 px-4 rounded-xl font-bold text-xs shrink-0 active:scale-95 transition-all duration-200"
+                                    onClick={() => {
+                                        closeSmartBatchParser();
+                                        navigate('/settings');
+                                    }}
+                                    className="w-full h-11 rounded-xl text-xs font-black uppercase tracking-wider bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 active:scale-[0.98] transition-all duration-200"
                                 >
-                                    <Check className="w-4 h-4 mr-1" />
-                                    {t('saveKey', { defaultValue: 'Save' })}
+                                    <Settings className="w-4 h-4 mr-2" />
+                                    {t('goToSettings', { defaultValue: 'Open Settings' })}
                                 </Button>
                             </div>
                         </div>
-                    )}
+                    </div>
+                ) : (
+                    /* Main Parser View */
+                    <div className="flex-1 overflow-y-auto px-6 py-4 pb-44 space-y-4 text-foreground overscroll-contain" data-scroll-container>
 
                     {/* Note Input Area */}
                     <div className="space-y-2">
@@ -419,9 +427,26 @@ export function SmartBatchParserDrawer() {
 
                     {/* Error Alert */}
                     {errorMessage && (
-                        <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs font-medium flex items-start gap-2.5">
-                            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                            <span className="flex-1 leading-snug">{errorMessage}</span>
+                        <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-xs font-medium flex items-start justify-between gap-2.5">
+                            <div className="flex items-start gap-2.5 flex-1">
+                                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                                <span className="leading-snug">{errorMessage}</span>
+                            </div>
+                            {(errorMessage.toLowerCase().includes('api key') || errorMessage.toLowerCase().includes('apikey')) && (
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                        closeSmartBatchParser();
+                                        navigate('/settings');
+                                    }}
+                                    className="h-7 px-2 text-[11px] font-bold border-destructive/30 hover:bg-destructive/10 shrink-0 active:scale-95 transition-all duration-200"
+                                >
+                                    <Settings className="w-3 h-3 mr-1" />
+                                    {t('goToSettings', { defaultValue: 'Settings' })}
+                                </Button>
+                            )}
                         </div>
                     )}
 
@@ -487,8 +512,8 @@ export function SmartBatchParserDrawer() {
                                                 <Input
                                                     type="text"
                                                     value={tx.title}
-                                                    onChange={(e) => handleUpdateItem(tx.id, { title: e.target.value })}
-                                                    placeholder="Title"
+                                                    onChange={(e) => handleUpdateItem(tx.id, { title: e.target.value, note: e.target.value })}
+                                                    placeholder={t('note', { defaultValue: 'Note' })}
                                                     className="h-9 text-xs font-bold rounded-xl flex-1 bg-background/60"
                                                 />
 
@@ -599,9 +624,10 @@ export function SmartBatchParserDrawer() {
                         </div>
                     )}
                 </div>
+            )}
 
-                {/* Bottom Fixed Import Bar */}
-                {parsedList.length > 0 && (
+            {/* Bottom Fixed Import Bar */}
+            {hasKey && parsedList.length > 0 && (
                     <div className="p-4 border-t border-border/40 glass bg-background/80 backdrop-blur-md shrink-0 space-y-2">
                         <div className="flex items-center justify-between text-xs font-bold">
                             <span className="text-muted-foreground">

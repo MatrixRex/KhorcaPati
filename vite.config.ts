@@ -11,7 +11,7 @@ export default defineConfig({
   base: '/KhorcaPati/',
   server: {
     host: true,
-    port: 0,
+    port: 5174,
     cors: true,
     allowedHosts: true,
     https: {},

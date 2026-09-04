@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.2] - 2026-09-04
+
 ### Added
-- **Test-Driven Development (TDD) Architecture**: Established an automated test infrastructure using Vitest and `fake-indexeddb` for in-memory Dexie database emulation, verifying 100% of business logic across 17 test suites with 60 automated tests.
+- **AI Category Personalization & Memory**: Dynamically learns category preferences whenever a user edits AI batch extraction results or saves transactions, storing normalized item-to-category associations in `settingsStore` to prioritize user-preferred categories and semantically related items in future parses.
+- **AI Smart Note Arithmetic & Formula Evaluation**: Automatically calculates inline arithmetic expressions in transaction notes (e.g., `transport 10+20+10` → total amount 40 tk) and cleans the note to remove the arithmetic text.
+- **Standalone Price Stripping & Note Normalization**: Automatically strips redundant price numbers and currency keywords from transaction notes and titles (e.g., `chicken 100` → note `chicken`, price 100) while carefully preserving item quantity multipliers (e.g., `egg x24 120` → note `egg x24`, price 120).
+- **Test-Driven Development (TDD) Architecture**: Established an automated test infrastructure using Vitest and `fake-indexeddb` for in-memory Dexie database emulation, verifying 100% of business logic across 18 test suites with 75 automated tests.
 - **Test Infrastructure & Factories**: Added `src/test/setup.ts` for automated database isolation and `src/test/factories.ts` with mock entity generators (`createMockExpense`, `createMockGoal`, `createMockLoan`, `createMockBudget`, etc.).
 - **Pure Financial Analytics Engine**: Extracted analytical calculations from `Reports.tsx` into a pure, testable domain function `calculateReportAnalytics()` in `src/utils/analytics.ts` with full test coverage in `src/utils/analytics.test.ts`.
 - **Database & Daily Summary Verification**: Added `src/db/schema.test.ts` verifying top-level aggregations, child record exclusion, and automatic zero-balance cleanup.
-- **Domain Store Test Suites**: Added unit and integration test suites for all Zustand stores (`expenseStore.test.ts`, `goalStore.test.ts`, `loanStore.test.ts`, `categoryStore.test.ts`, `budgetStore.test.ts`, `recurringPaymentStore.test.ts`, `itemStore.test.ts`).
+- **Domain Store Test Suites**: Added unit and integration test suites for all Zustand stores (`expenseStore.test.ts`, `goalStore.test.ts`, `loanStore.test.ts`, `categoryStore.test.ts`, `budgetStore.test.ts`, `recurringPaymentStore.test.ts`, `itemStore.test.ts`, `settingsStore.test.ts`).
 - **Data Management & Backup Tests**: Added `src/lib/data-management.test.ts` verifying full roundtrip export/import, Dexie table hydration, daily summary recalculations, and corrupted JSON rejection.
 - **Notification & Alert Logic Tests**: Added `src/utils/notificationLogic.test.ts` verifying budget threshold alerts, overspend alerts, due payment detection, and period deduping.
 - **Developer Playbook & Workflow Guide**: Created `TESTING.md` documenting the TDD methodology and updated `AGENTS.md` to mandate automated tests for all business logic.
@@ -29,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Billing Cycle Date Ranges**: Implemented utility functions to calculate billing cycle start and end dates based on the reset date, updating the date filter store reactively so reports align with the cycle.
 
 ### Changed
+- **AI Parser Drawer Flow**: Streamlined the AI batch parser drawer to enforce setting an API key before presenting the parser interface, removing redundant API key inputs directly from the drawer to consolidate key management into Settings.
 - **AI Prompt Settings**: Refined Gemini system prompt rules to accurately split transaction items with individual prices into separate records, while correctly grouping multiple items under a single total price.
 
 ## [1.9.5] - 2026-06-15

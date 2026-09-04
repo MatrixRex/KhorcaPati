@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Test-Driven Development (TDD) Architecture**: Established an automated test infrastructure using Vitest and `fake-indexeddb` for in-memory Dexie database emulation, verifying 100% of business logic across 17 test suites with 60 automated tests.
+- **Test Infrastructure & Factories**: Added `src/test/setup.ts` for automated database isolation and `src/test/factories.ts` with mock entity generators (`createMockExpense`, `createMockGoal`, `createMockLoan`, `createMockBudget`, etc.).
+- **Pure Financial Analytics Engine**: Extracted analytical calculations from `Reports.tsx` into a pure, testable domain function `calculateReportAnalytics()` in `src/utils/analytics.ts` with full test coverage in `src/utils/analytics.test.ts`.
+- **Database & Daily Summary Verification**: Added `src/db/schema.test.ts` verifying top-level aggregations, child record exclusion, and automatic zero-balance cleanup.
+- **Domain Store Test Suites**: Added unit and integration test suites for all Zustand stores (`expenseStore.test.ts`, `goalStore.test.ts`, `loanStore.test.ts`, `categoryStore.test.ts`, `budgetStore.test.ts`, `recurringPaymentStore.test.ts`, `itemStore.test.ts`).
+- **Data Management & Backup Tests**: Added `src/lib/data-management.test.ts` verifying full roundtrip export/import, Dexie table hydration, daily summary recalculations, and corrupted JSON rejection.
+- **Notification & Alert Logic Tests**: Added `src/utils/notificationLogic.test.ts` verifying budget threshold alerts, overspend alerts, due payment detection, and period deduping.
+- **Developer Playbook & Workflow Guide**: Created `TESTING.md` documenting the TDD methodology and updated `AGENTS.md` to mandate automated tests for all business logic.
+- **NPM Test Scripts**: Added `pnpm test` and `pnpm test:watch` to `package.json`.
 - **AI Smart Note Parser (Google Gemini NLP)**: Added natural language processing for messy, unstructured transaction notes, receipts, conversational text, and multi-record batches. Extracts clean titles, amounts, income/expense classifications, dates, and auto-tracked item lists directly via Google Gemini API.
 - **Intelligent Category Mapping**: Automatically maps parsed transactions to the user's active categories or generates standard categories, avoiding unlisted dumps.
 - **Smart Batch Parser Drawer**: Interactive glassmorphic review sheet with editable cards, category pickers, type toggles, manual record addition, sample presets, and bulk import.

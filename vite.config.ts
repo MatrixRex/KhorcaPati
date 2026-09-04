@@ -70,4 +70,10 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(process.env.GITHUB_REF_NAME || process.env.npm_package_version),
   },
+  // @ts-expect-error vitest config
+  test: {
+    globals: true,
+    environment: 'node',
+    setupFiles: ['./src/test/setup.ts'],
+  },
 });

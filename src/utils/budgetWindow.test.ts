@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getBudgetWindow } from './budgetWindow';
-import { type Budget } from '@/db/schema';
+import { getBudgetWindow, calcSpent, findOverspentInfo, budgetPeriodKey } from './budgetWindow';
+import { type Budget, type Expense } from '@/db/schema';
 
 describe('getBudgetWindow custom reset date calculation', () => {
     beforeEach(() => {
@@ -128,5 +128,74 @@ describe('getBudgetWindow custom reset date calculation', () => {
             start: '2026-06-10',
             end: '2027-06-09'
         });
+    });
+
+    it('calcSpent correctly aggregates only matching category and expense type within window', () => {
+        const budget: Budget = {
+            category: 'Food',
+            limitAmount: 1000,
+            alertThreshold: 0.8,
+            timelineType: 'recurring',
+            recurringInterval: 'monthly',
+            startDate: null,
+            endDate: null,
+            createdAt: '2026-06-01T00:00:00.000Z'
+        };
+
+        const expenses: Expense[] = [
+            // Inside June, Food, expense -> YES (300)
+            { id: 1, parentId: null, isNested: false, amount: 300, type: 'expense', category: 'food', date: '2026-06-10', note: '', isRecurring: false, recurringInterval: null, recurringNextDue: null, itemAutoTrack: false, tags: [], createdAt: '', updatedAt: '' },
+            // Inside June, Food, income -> NO (ignored)
+            { id: 2, parentId: null, isNested: false, amount: 500, type: 'income', category: 'Food', date: '2026-06-12', note: '', isRecurring: false, recurringInterval: null, recurringNextDue: null, itemAutoTrack: false, tags: [], createdAt: '', updatedAt: '' },
+            // Inside June, Transport -> NO (different category)
+            { id: 3, parentId: null, isNested: false, amount: 200, type: 'expense', category: 'Transport', date: '2026-06-12', note: '', isRecurring: false, recurringInterval: null, recurringNextDue: null, itemAutoTrack: false, tags: [], createdAt: '', updatedAt: '' },
+            // Outside June -> NO (different month)
+            { id: 4, parentId: null, isNested: false, amount: 400, type: 'expense', category: 'Food', date: '2026-05-30', note: '', isRecurring: false, recurringInterval: null, recurringNextDue: null, itemAutoTrack: false, tags: [], createdAt: '', updatedAt: '' },
+            // Inside June, Food, expense -> YES (150)
+            { id: 5, parentId: null, isNested: false, amount: 150, type: 'expense', category: 'Food', date: '2026-06-25', note: '', isRecurring: false, recurringInterval: null, recurringNextDue: null, itemAutoTrack: false, tags: [], createdAt: '', updatedAt: '' },
+        ];
+
+        expect(calcSpent(budget, expenses)).toBe(450);
+    });
+
+    it('findOverspentInfo detects the exact moment when budget is breached', () => {
+        const budget: Budget = {
+            category: 'Food',
+            limitAmount: 500,
+            alertThreshold: 0.8,
+            timelineType: 'recurring',
+            recurringInterval: 'monthly',
+            startDate: null,
+            endDate: null,
+            createdAt: '2026-06-01T00:00:00.000Z'
+        };
+
+        const expenses: Expense[] = [
+            { id: 1, parentId: null, isNested: false, amount: 300, type: 'expense', category: 'Food', date: '2026-06-10', note: '', isRecurring: false, recurringInterval: null, recurringNextDue: null, itemAutoTrack: false, tags: [], createdAt: '', updatedAt: '' },
+            { id: 2, parentId: null, isNested: false, amount: 300, type: 'expense', category: 'Food', date: '2026-06-12', note: '', isRecurring: false, recurringInterval: null, recurringNextDue: null, itemAutoTrack: false, tags: [], createdAt: '', updatedAt: '' },
+            { id: 3, parentId: null, isNested: false, amount: 100, type: 'expense', category: 'Food', date: '2026-06-14', note: '', isRecurring: false, recurringInterval: null, recurringNextDue: null, itemAutoTrack: false, tags: [], createdAt: '', updatedAt: '' },
+        ];
+
+        // Today is June 14, overspend happened on June 12 (300 + 300 = 600 > 500) -> 2 days ago
+        const overspent = findOverspentInfo(budget, expenses, new Date('2026-06-14T12:00:00'));
+        expect(overspent).toEqual({
+            daysAgo: 2,
+            total: 600
+        });
+    });
+
+    it('budgetPeriodKey creates a stable unique string for the period', () => {
+        const budget: Budget = {
+            category: 'Food',
+            limitAmount: 500,
+            alertThreshold: 0.8,
+            timelineType: 'recurring',
+            recurringInterval: 'monthly',
+            startDate: null,
+            endDate: null,
+            createdAt: '2026-06-01T00:00:00.000Z'
+        };
+
+        expect(budgetPeriodKey(budget)).toBe('2026-06-01__2026-06-30');
     });
 });

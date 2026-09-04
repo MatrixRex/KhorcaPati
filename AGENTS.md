@@ -5,8 +5,10 @@
 - `pnpm build` — `tsc -b && vite build` (typechecks first, output to `dist/`)
 - `pnpm lint` — `eslint .`
 - `pnpm preview` — `vite preview`
-- **No `test` or `typecheck` scripts.** Run `npx vitest run` or `npx tsc -b` directly.
-- Single test file: `src/parsers/itemParser.test.ts`
+- `pnpm test` — Run all automated test suites with Vitest (`src/**/*.test.ts`)
+- `pnpm test:watch` — Interactive TDD watch mode
+- `npx tsc -b` — TypeScript typecheck (0 errors required)
+- Testing architecture guide: `TESTING.md`
 
 ## Deploy
 - Git tag `v*` push triggers GitHub Actions → deploys `dist/` to `gh-pages` branch.
@@ -34,4 +36,5 @@
 - Expense nesting ("Collection Mode") via `parentId` + `isNested` fields.
 - Goal/Loan expenses link via `goalId`/`loanId`. Updating/deleting triggers recalculation.
 - Always use inline execution. Never ask to run tasks using subagents.
+- **Strict TDD for Business Logic**: All business logic (stores, schema, financial calculations, utilities, data management) must be backed by automated tests. Always run `pnpm test && npx tsc -b` before considering any task complete. UI and design are reserved for user review.
 

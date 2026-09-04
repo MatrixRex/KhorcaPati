@@ -24,4 +24,32 @@ describe('Billing Cycle Range Utilities', () => {
         expect(range.end.getMonth()).toBe(1); // Feb
         expect(range.end.getDate()).toBe(27);
     });
+
+    it('calculates cycle correctly when today IS the reset date', () => {
+        const today = new Date(2026, 5, 10, 0, 0, 0); // June 10
+        const range = getBillingCycleRange(today, 10);
+        expect(range.start.getDate()).toBe(10);
+        expect(range.start.getMonth()).toBe(5); // June
+        expect(range.end.getDate()).toBe(9);
+        expect(range.end.getMonth()).toBe(6); // July
+    });
+
+    it('calculates cycle correctly when today is 1 day before the reset date', () => {
+        const today = new Date(2026, 5, 9, 23, 59, 59); // June 9
+        const range = getBillingCycleRange(today, 10);
+        expect(range.start.getDate()).toBe(10);
+        expect(range.start.getMonth()).toBe(4); // May
+        expect(range.end.getDate()).toBe(9);
+        expect(range.end.getMonth()).toBe(5); // June
+    });
+
+    it('calculates previous billing cycle range seamlessly', () => {
+        const today = new Date(2026, 5, 15); // June 15
+        const current = getBillingCycleRange(today, 10);
+        const prev = getBillingCycleRange(new Date(current.start.getTime() - 86400000), 10);
+        expect(prev.start.getMonth()).toBe(4); // May
+        expect(prev.start.getDate()).toBe(10);
+        expect(prev.end.getMonth()).toBe(5); // June
+        expect(prev.end.getDate()).toBe(9);
+    });
 });

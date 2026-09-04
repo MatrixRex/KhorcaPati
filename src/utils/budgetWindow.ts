@@ -155,3 +155,40 @@ export function budgetPeriodKey(budget: Budget): string {
     if (!w) return 'no-window';
     return `${w.start}__${w.end}`;
 }
+
+export interface OverspentInfo {
+    daysAgo: number;
+    total: number;
+}
+
+export function findOverspentInfo(budget: Budget, expenses: Expense[], currentDate: Date = new Date()): OverspentInfo | null {
+    const window = getBudgetWindow(budget);
+    if (!window) return null;
+
+    const filtered = expenses
+        .filter(exp => {
+            if (exp.type !== 'expense') return false;
+            if (exp.category.toLowerCase() !== budget.category.toLowerCase()) return false;
+            try {
+                return isWithinInterval(parseISO(exp.date), {
+                    start: parseISO(window.start),
+                    end: parseISO(window.end),
+                });
+            } catch {
+                return false;
+            }
+        })
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    let runningTotal = 0;
+    for (const exp of filtered) {
+        runningTotal += exp.amount;
+        if (runningTotal > budget.limitAmount) {
+            const overspentDate = startOfDay(parseISO(exp.date));
+            const diffInMs = startOfDay(currentDate).getTime() - overspentDate.getTime();
+            const daysAgo = Math.max(0, Math.floor(diffInMs / (1000 * 60 * 60 * 24)));
+            return { daysAgo, total: runningTotal };
+        }
+    }
+    return null;
+}

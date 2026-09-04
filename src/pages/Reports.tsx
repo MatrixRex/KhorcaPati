@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
-import { isWithinInterval, startOfDay } from 'date-fns';
+import { calculateReportAnalytics } from '@/utils/analytics';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     XAxis, YAxis, ResponsiveContainer, Cell,
@@ -93,96 +93,16 @@ export default function Reports() {
     const reportData = useMemo(() => {
         if (!expenses) return null;
 
-        const filtered = expenses.filter(exp => {
-            const date = new Date(exp.date);
-            return isWithinInterval(date, { start: startDate, end: endDate });
-        }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-        let totalIncome = 0;
-        let totalExpense = 0;
-        const expenseCategoryMap = new Map<string, number>();
-        const incomeCategoryMap = new Map<string, number>();
-        const dailyAggs = new Map<string, { income: number; expense: number }>();
-
-        const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-        const dateFormatter = new Intl.DateTimeFormat(i18n.language, dateOptions);
-
-        filtered.forEach(exp => {
-            const day = dateFormatter.format(startOfDay(new Date(exp.date)));
-            const currentDay = dailyAggs.get(day) || { income: 0, expense: 0 };
-
-            if (exp.type === 'income') {
-                totalIncome += exp.amount;
-                currentDay.income += exp.amount;
-                incomeCategoryMap.set(exp.category, (incomeCategoryMap.get(exp.category) || 0) + exp.amount);
-            } else {
-                totalExpense += exp.amount;
-                currentDay.expense += exp.amount;
-                expenseCategoryMap.set(exp.category, (expenseCategoryMap.get(exp.category) || 0) + exp.amount);
-            }
-            dailyAggs.set(day, currentDay);
+        return calculateReportAnalytics({
+            expenses,
+            startDate,
+            endDate,
+            initialBalance,
+            categoryList,
+            language: i18n.language,
+            incomeLabel: t('incomeLabel')
         });
-
-        // Helper to get category color
-        const getCategoryColor = (catName: string) => {
-            const found = categoryList.find(c => c.name.toLowerCase() === catName.toLowerCase());
-            return found?.color || '#3b82f6';
-        };
-
-        const expenseCategories = Array.from(expenseCategoryMap.entries()).sort((a, b) => b[1] - a[1]);
-        const incomeCategories = Array.from(incomeCategoryMap.entries()).sort((a, b) => b[1] - a[1]);
-
-        const nodes = [
-            { name: t('incomeLabel'), fill: '#10b981' }
-        ];
-        const links: any[] = [];
-
-        // Add categories as nodes and create links from Income
-        expenseCategories.forEach(([name, value]) => {
-            nodes.push({ name, fill: getCategoryColor(name) });
-            links.push({ source: 0, target: nodes.length - 1, value });
-        });
-
-        const sankeyData = { nodes, links };
-
-        // 2. Category Horizontal Bars Data (Still for Expense only, or we could change this too)
-        const categoryData = expenseCategories.map(([name, value]) => ({
-            name,
-            value,
-            fill: getCategoryColor(name)
-        }));
-
-        const incomeCategoryData = incomeCategories.map(([name, value]) => ({
-            name,
-            value,
-            fill: getCategoryColor(name)
-        }));
-
-        // 3. Line Chart Timeline Data
-        const beforeRange = expenses.filter(exp => {
-            const date = new Date(exp.date);
-            return date < startDate;
-        });
-        const balanceBeforeRange = initialBalance + beforeRange.reduce((sum, exp) => {
-            return exp.type === 'income' ? sum + exp.amount : sum - exp.amount;
-        }, 0);
-
-        let runningBalance = balanceBeforeRange;
-        const timelineData = Array.from(dailyAggs.entries()).map(([date, vals]) => {
-            const change = vals.income - vals.expense;
-            runningBalance += change;
-
-            return {
-                date,
-                runningBalance,
-                change,
-                income: vals.income,
-                expense: vals.expense
-            };
-        });
-
-        return { sankeyData, categoryData, incomeCategoryData, timelineData, totalIncome, totalExpense };
-    }, [expenses, startDate, endDate, t, i18n.language]);
+    }, [expenses, startDate, endDate, initialBalance, categoryList, t, i18n.language]);
 
     const [viewType, setViewType] = useState<'income' | 'expense'>('expense');
 

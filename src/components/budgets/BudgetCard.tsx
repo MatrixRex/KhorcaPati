@@ -1,9 +1,9 @@
-import { type Budget, db, type Expense } from '@/db/schema';
+import { type Budget, db } from '@/db/schema';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { formatRelativeDate } from '@/utils/date';
-import { getBudgetWindow } from '@/utils/budgetWindow';
+import { getBudgetWindow, findOverspentInfo } from '@/utils/budgetWindow';
 import { cn, formatAmount } from '@/lib/utils';
 import { differenceInDays, parseISO, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
 import { useCategoryStore } from '@/stores/categoryStore';
@@ -42,35 +42,7 @@ function timelineLabel(budget: Budget, t: any): string {
 }
 
 
-function findOverspentInfo(budget: Budget, expenses: Expense[]) {
-    const window = getBudgetWindow(budget);
-    if (!window) return null;
 
-    const filtered = expenses
-        .filter(exp => {
-            if (exp.type !== 'expense') return false;
-            try {
-                return isWithinInterval(parseISO(exp.date), {
-                    start: parseISO(window.start),
-                    end: parseISO(window.end),
-                });
-            } catch {
-                return false;
-            }
-        })
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    let runningTotal = 0;
-    for (const exp of filtered) {
-        runningTotal += exp.amount;
-        if (runningTotal > budget.limitAmount) {
-            const overspentDate = startOfDay(parseISO(exp.date));
-            const daysAgo = differenceInDays(startOfDay(new Date()), overspentDate);
-            return { daysAgo, total: runningTotal };
-        }
-    }
-    return null;
-}
 
 export function BudgetCard({ budget, onClick }: BudgetCardProps) {
     const { t } = useTranslation();

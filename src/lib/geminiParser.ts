@@ -1,4 +1,4 @@
-import { parseItemInput } from '@/parsers/itemParser';
+import { parseItemInput, bengaliToEnglishDigits, normalizeUnitAndQty } from '@/parsers/itemParser';
 
 export interface ExtractedItem {
     name: string;
@@ -62,10 +62,6 @@ export function isNetworkConnectionError(err: unknown): boolean {
     );
 }
 
-const bengaliToEnglishDigits = (str: string): string => {
-    const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
-    return str.replace(/[০-৯]/g, (d) => String(bnDigits.indexOf(d)));
-};
 
 function evaluateArithmeticExpression(expr: string): number | null {
     const sanitized = expr.replace(/\s+/g, '');
@@ -163,7 +159,7 @@ export function cleanTransactionNoteAndAmount(input: {
 
             const isXPrefix = /^[xX]\d+/i.test(matchedSubstring);
             const isXSuffix = /^\d+[xX]/i.test(matchedSubstring);
-            const isUnitSuffix = /^\d+(?:kg|g|gm|gms|l|ml|lb|oz|pcs|pc|pack|packs|box|boxes|dozen)/i.test(matchedSubstring);
+            const isUnitSuffix = /^\d+(?:kg|kgs|g|gm|gms|mg|l|ltr|ltrs|lt|liter|liters|litre|litres|litter|litters|ml|cl|dl|lb|lbs|oz|pcs|pc|piece|pieces|item|items|pack|packs|packet|packets|pkg|pkgs|box|boxes|carton|bag|bags|sack|sacks|bottle|bottles|can|cans|tin|strip|strips|tab|tabs|cap|caps|dozen|hali|pair|pairs|poa|powa|mon|gaj|meter|m|cm|ft)/i.test(matchedSubstring);
 
             if (!isXPrefix && !isXSuffix && !isUnitSuffix && !isNaN(val) && val > 0) {
                 if (detectedAmount === null) {
@@ -339,8 +335,19 @@ TRANSACTION FIELD EXTRACTION RULES:
   * Example: "transport 10+20+10" -> note: "transport" (do NOT include arithmetic in note).
   * Example: "egg x24 120" -> note: "egg x24" (keep multiplier x24, ignore 120).
 - "itemAutoTrack": Set to true if physical grocery, shopping, or supply items are listed.
-- "items": Extract item list if present with "name" (singular item name), "qty" (number), and "unit" (e.g. "kg", "L", "pcs", "dozen", "pack").
-  * Example: "egg x24 120" -> items: [{ "name": "egg", "qty": 24, "unit": "pcs" }]. Otherwise empty array [].
+- "items": Extract item list if present with "name" (singular item name), "qty" (number), and "unit" (e.g. "kg", "L", "pcs", "bottle", "can", "pack", "bag", "box", "strip", "dozen").
+  * CRITICAL UNIT RULES:
+    - Volume: Always map volume units ("ltr", "ltrs", "liter", "liters", "litre", "litres", "litter", "litters", "l") to "L". For milliliters ("ml"), use "ml" or convert 1000ml to 1 L.
+    - Weight: Always map weight units ("kg", "kgs", "kilogram", "kilo") to "kg". Map grams ("g", "gram", "gm") to "kg" (if >= 1000) or "g".
+    - Containers & Packaging: Preserve specific packaging like "bottle", "can", "bag", "box", "strip", "pack".
+    - Count Multipliers: "hali" = 4 pcs (e.g. 2 hali eggs -> qty: 8, unit: "pcs"), "pair" = 2 pcs, "dozen" = 12 pcs.
+  * Examples:
+    - "soybean oil 2 ltr 380" -> items: [{ "name": "soybean oil", "qty": 2, "unit": "L" }]
+    - "milk 1ltr 90" -> items: [{ "name": "milk", "qty": 1, "unit": "L" }]
+    - "egg x24 120" -> items: [{ "name": "egg", "qty": 24, "unit": "pcs" }]
+    - "coke 2 bottles 100" -> items: [{ "name": "coke", "qty": 2, "unit": "bottle" }]
+    - "napa 2 strips 40" -> items: [{ "name": "napa", "qty": 2, "unit": "strip" }]
+  * Otherwise empty array [].
 
 SPLITTING VS GROUPING RULES (CRITICAL):
 - If items have individual prices (e.g., "egg 20 taka, fish 50 taka"), you MUST create a SEPARATE transaction record for each item (one transaction for egg with amount 20, one for fish with amount 50).
@@ -488,16 +495,21 @@ Return ONLY valid JSON adhering to the specified schema.`;
         }
 
         const rawItems = Array.isArray(tx.items) ? tx.items : [];
-        let validItems: ExtractedItem[] = rawItems.map((item: any) => ({
-            name: String(item.name || '').trim().toLowerCase(),
-            qty: Number(item.qty) || 1,
-            unit: String(item.unit || 'pcs').trim()
-        })).filter((item: ExtractedItem) => item.name.length > 0);
+        let validItems: ExtractedItem[] = rawItems.map((item: any) => {
+            const rawQty = Number(item.qty) || 1;
+            const rawUnit = String(item.unit || 'pcs');
+            const { qty, unit } = normalizeUnitAndQty(rawQty, rawUnit);
+            return {
+                name: String(item.name || '').trim().toLowerCase(),
+                qty,
+                unit
+            };
+        }).filter((item: ExtractedItem) => item.name.length > 0);
 
-        // Fallback: If no items were extracted by Gemini, but the cleaned note contains an item (e.g. egg x24), extract it
+        // Fallback: If no items were extracted by Gemini, but the cleaned note contains an item (e.g. egg x24, oil 1 ltr, rice 1kg), extract it
         if (validItems.length === 0) {
             const parsed = parseItemInput(cleaned.note);
-            if (parsed.name && (cleaned.note.toLowerCase().includes('x') || parsed.qty > 1)) {
+            if (parsed.name && (cleaned.note.toLowerCase().includes('x') || parsed.qty > 1 || parsed.unit !== 'pcs')) {
                 validItems = [parsed];
             }
         }

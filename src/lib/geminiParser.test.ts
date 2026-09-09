@@ -384,4 +384,125 @@ describe('Gemini AI Transaction Parser', () => {
         expect(results[0].amount).toBe(1000);
         expect(results[0].category).toBe('House');
     });
+
+    it('canonicalizes item units returned by Gemini (ltr, liter, litter, bottles, cans)', async () => {
+        const mockGeminiResponse = {
+            candidates: [
+                {
+                    content: {
+                        parts: [
+                            {
+                                text: JSON.stringify({
+                                    transactions: [
+                                        {
+                                            title: 'Soybean Oil 2ltr',
+                                            amount: 380,
+                                            type: 'expense',
+                                            category: 'Groceries',
+                                            date: '2026-08-19',
+                                            note: 'Soybean oil 2ltr',
+                                            itemAutoTrack: true,
+                                            items: [
+                                                { name: 'soybean oil', qty: 2, unit: 'ltr' },
+                                                { name: 'milk', qty: 1, unit: 'litter' },
+                                                { name: 'water', qty: 2.5, unit: 'liters' },
+                                                { name: 'coke', qty: 2, unit: 'bottles' },
+                                                { name: 'soda', qty: 3, unit: 'cans' },
+                                                { name: 'potatoes', qty: 3, unit: 'kgs' }
+                                            ]
+                                        }
+                                    ]
+                                })
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
+
+        const mockFetch = vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => mockGeminiResponse
+        });
+        globalThis.fetch = mockFetch as any;
+
+        const results = await parseTransactionsWithGemini({
+            noteText: 'Soybean oil 2ltr 380 tk',
+            categories: mockCategories,
+            referenceDate: '2026-08-19',
+            apiKey: 'valid-gemini-key'
+        });
+
+        expect(results).toHaveLength(1);
+        expect(results[0].items).toEqual([
+            { name: 'soybean oil', qty: 2, unit: 'L' },
+            { name: 'milk', qty: 1, unit: 'L' },
+            { name: 'water', qty: 2.5, unit: 'L' },
+            { name: 'coke', qty: 2, unit: 'bottle' },
+            { name: 'soda', qty: 3, unit: 'can' },
+            { name: 'potatoes', qty: 3, unit: 'kg' }
+        ]);
+    });
+
+    it('fallback extracts single-quantity volume and non-pcs items when Gemini returns empty items', async () => {
+        const mockGeminiResponse = {
+            candidates: [
+                {
+                    content: {
+                        parts: [
+                            {
+                                text: JSON.stringify({
+                                    transactions: [
+                                        {
+                                            title: 'Oil 1 ltr',
+                                            amount: 190,
+                                            type: 'expense',
+                                            category: 'Groceries',
+                                            date: '2026-08-19',
+                                            note: 'oil 1 ltr',
+                                            itemAutoTrack: false,
+                                            items: []
+                                        }
+                                    ]
+                                })
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
+
+        const mockFetch = vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => mockGeminiResponse
+        });
+        globalThis.fetch = mockFetch as any;
+
+        const results = await parseTransactionsWithGemini({
+            noteText: 'oil 1 ltr 190',
+            categories: mockCategories,
+            referenceDate: '2026-08-19',
+            apiKey: 'valid-gemini-key'
+        });
+
+        expect(results).toHaveLength(1);
+        expect(results[0].items).toEqual([
+            { name: 'oil', qty: 1, unit: 'L' }
+        ]);
+        expect(results[0].itemAutoTrack).toBe(true);
+    });
+
+    it('cleanTransactionNoteAndAmount preserves trailing numbers attached to unit suffixes', () => {
+        const cleaned1 = cleanTransactionNoteAndAmount({ note: 'oil 2ltr 380', amount: 0 });
+        expect(cleaned1.amount).toBe(380);
+        expect(cleaned1.note).toBe('oil 2ltr');
+
+        const cleaned2 = cleanTransactionNoteAndAmount({ note: 'coke 2bottles 100 tk', amount: 0 });
+        expect(cleaned2.amount).toBe(100);
+        expect(cleaned2.note).toBe('coke 2bottles');
+
+        const cleaned3 = cleanTransactionNoteAndAmount({ note: 'napa 2strips 40', amount: 0 });
+        expect(cleaned3.amount).toBe(40);
+        expect(cleaned3.note).toBe('napa 2strips');
+    });
 });

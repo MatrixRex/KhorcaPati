@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.4] - 2026-09-09
+
+### Fixed
+- **Volume Unit Parsing (`ltr`, `litter`, `liter`)**: Resolved issue where volume unit notations like `ltr`, `ltrs`, `lt`, `litter`, `litters`, `liter`, `litre`, and `লিটার` were not recognized in `itemParser` and were instead appended to the product name with default `pcs` units. Now accurately normalizes to canonical `'L'` (volume).
+- **Gemini AI Unit Canonicalization**: Ensured all items extracted by Google Gemini API are canonicalized through `normalizeUnitAndQty` so units like `ltr`, `liter`, or `litter` map to standard `'L'`.
+- **Single-Quantity Item Fallback Extraction**: Fixed fallback item parser in `geminiParser` so that physical items with single quantities and standard units (e.g. `oil 1 ltr 190`, `rice 1kg 65`) are properly detected and tracked when Gemini returns empty items.
+- **Unit-Suffixed Number Protection**: Updated `isUnitSuffix` in `cleanTransactionNoteAndAmount` to prevent trailing unit patterns (e.g. `2ltr`, `2bottles`, `2strips`) from being mistakenly stripped as transaction price amounts.
+
+### Added
+- **Comprehensive Extended Units Catalog**: Expanded `KNOWN_UNITS` with extensive everyday, packaging, medicine, and regional units:
+  - Containers & Packaging: `bottle` (`বোতল`), `can` (`ক্যান`), `tin`, `bag` (`ব্যাগ`), `sack` (`বস্তা`), `box` (`বক্স`), `carton`, `jar`, `tube`, `roll`, `bundle` (`আঁটি`).
+  - Medicine: `strip` (`পাতা`), `tab`/`tablet`, `pill`, `cap`/`capsule`, `sachet`.
+  - Regional Counts & Multipliers: `hali` / `হালি` (4 pcs), `pair` / `জোড়া` / `জোড়া` (2 pcs), `powa` / `পোয়া` / `পোয়া` (0.25 kg), `mon` / `মন` (40 kg).
+  - Length & Fabric: `meter`, `cm`, `mm`, `km`, `ft`, `inch`, `yard`, `gaj` / `গজ` (fabric), `hat` / `হাত`.
+  - Bengali Numerals: Automated conversion from Bengali digits (`০-৯`) to ASCII digits (`0-9`).
+- **Automated Test Expansion**: Added automated test suites covering all extended units and AI unit canonicalization (95 total passing tests across 20 test files).
+
 ## [1.10.3] - 2026-09-04
 
 ### Added

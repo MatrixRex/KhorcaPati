@@ -23,9 +23,16 @@ export async function importParsedTransactions(transactions: ParsedGeminiTransac
 
     const currentDbCats = await db.categories.toArray();
     const existingCatNames = new Set(currentDbCats.map((c) => c.name.toLowerCase().trim()));
+    const { deletedCategories } = useSettingsStore.getState();
+    const deletedNamesSet = new Set((deletedCategories || []).map((c) => c.toLowerCase().trim()));
 
     for (const tx of transactions) {
-        const catName = (tx.category || '').trim();
+        let catName = (tx.category || '').trim();
+        if (deletedNamesSet.has(catName.toLowerCase())) {
+            catName = 'Unlisted';
+            tx.category = 'Unlisted';
+        }
+
         if (catName && catName !== 'Unlisted') {
             learnCategoryPreference(tx.title || tx.note, catName);
             if (!existingCatNames.has(catName.toLowerCase())) {
@@ -120,7 +127,9 @@ export async function processNextQueuedNote(): Promise<boolean> {
         const dbCategories = await db.categories.toArray();
         const effectiveCategories =
             dbCategories.length > 0 ? dbCategories : useCategoryStore.getState().categories;
-        const { categoryPreferences } = useSettingsStore.getState();
+        const { categoryPreferences, deletedCategories } = useSettingsStore.getState();
+        const deletedNamesSet = new Set((deletedCategories || []).map((c) => c.toLowerCase().trim()));
+        const validCategoryNamesSet = new Set(effectiveCategories.map((c) => c.name.toLowerCase().trim()));
 
         const recentExpenses = await db.expenses
             .orderBy('id')
@@ -129,13 +138,18 @@ export async function processNextQueuedNote(): Promise<boolean> {
             .toArray();
 
         const historyExamples = recentExpenses
-            .filter((e) => e.note && e.category && e.category !== 'Unlisted')
+            .filter((e) => {
+                if (!e.note || !e.category || e.category === 'Unlisted') return false;
+                const catLower = e.category.toLowerCase().trim();
+                return validCategoryNamesSet.has(catLower) && !deletedNamesSet.has(catLower);
+            })
             .map((e) => ({ item: e.note, category: e.category }));
 
         const results = await parseTransactionsWithGemini({
             noteText: pendingNote.noteText,
             categories: effectiveCategories,
             categoryPreferences,
+            deletedCategories,
             historyExamples,
             referenceDate: pendingNote.referenceDate,
             apiKey: geminiApiKey,

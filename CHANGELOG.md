@@ -7,7 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.10.4] - 2026-09-09
+## [1.10.5] - 2026-09-17
+
+### Fixed
+- **Prevent Deleted Categories Resurrected by AI Parse**:
+  - Track user-deleted categories in `useSettingsStore` (`deletedCategories: string[]`) persisted across sessions.
+  - Automatically clean up or migrate learned item-to-category associations in `categoryPreferences` when categories are deleted or renamed.
+  - Guard `learnCategoryPreference` to never learn or store preferences for deleted categories.
+  - Case-insensitively migrate `db.expenses`, `db.budgets`, and `db.recurringPayments` during category deletion or rename, preventing orphaned records.
+  - Fixed default category retrieval in `deleteCategory` for boolean `isDefault: true`.
+- **AI Prompt Hardening & Post-Processing Sanitization**:
+  - Filter `categoryPreferences` and `historyExamples` so deleted or non-existent categories are stripped out before constructing the Gemini prompt.
+  - Added a strict `DELETED CATEGORIES (STRICT FORBIDDEN LIST)` section to the Gemini system prompt instructing the AI to never assign transactions to deleted categories.
+  - Post-process and sanitize any extracted transactions matching deleted categories to `'Unlisted'`.
+- **Protected Batch Imports**:
+  - Guarded `importParsedTransactions` in `smartNoteQueueProcessor` and `SmartBatchParserDrawer` against auto-creating any category marked as deleted, cleanly remapping them to `'Unlisted'`.
+- **Automated Test Coverage**:
+  - Added test suites for category deletion, case-insensitive migrations, recurring payments, settings preference cleanup, prompt filtering, and import safeguards (104 passing tests across 20 test files).
+
 
 ### Fixed
 - **Volume Unit Parsing (`ltr`, `litter`, `liter`)**: Resolved issue where volume unit notations like `ltr`, `ltrs`, `lt`, `litter`, `litters`, `liter`, `litre`, and `লিটার` were not recognized in `itemParser` and were instead appended to the product name with default `pcs` units. Now accurately normalizes to canonical `'L'` (volume).

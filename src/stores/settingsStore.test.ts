@@ -9,7 +9,9 @@ describe('Settings Store Business Logic', () => {
             hasSeenWelcome: false,
             resetDate: 1,
             geminiApiKey: '',
-            geminiModel: 'gemini-flash-lite-latest'
+            geminiModel: 'gemini-flash-lite-latest',
+            categoryPreferences: {},
+            deletedCategories: []
         });
     });
 
@@ -72,4 +74,60 @@ describe('Settings Store Business Logic', () => {
         clearCategoryPreferences();
         expect(useSettingsStore.getState().categoryPreferences).toEqual({});
     });
+
+    it('marks and unmarks deleted categories', () => {
+        const { markDeletedCategory, unmarkDeletedCategory } = useSettingsStore.getState();
+
+        markDeletedCategory('Gaming');
+        expect(useSettingsStore.getState().deletedCategories).toContain('Gaming');
+
+        // Case insensitive duplicate prevention
+        markDeletedCategory('gaming');
+        expect(useSettingsStore.getState().deletedCategories.filter(c => c.toLowerCase() === 'gaming').length).toBe(1);
+
+        unmarkDeletedCategory('gaming');
+        expect(useSettingsStore.getState().deletedCategories).not.toContain('Gaming');
+    });
+
+    it('prevents learning preference for deleted categories', () => {
+        const { markDeletedCategory, learnCategoryPreference } = useSettingsStore.getState();
+
+        markDeletedCategory('Fast Food');
+        learnCategoryPreference('burger', 'Fast Food');
+
+        expect(useSettingsStore.getState().categoryPreferences['burger']).toBeUndefined();
+    });
+
+    it('removes or migrates category preferences when a category is deleted', () => {
+        const { learnCategoryPreference, removeCategoryPreferences } = useSettingsStore.getState();
+
+        learnCategoryPreference('burger', 'Fast Food');
+        learnCategoryPreference('pizza', 'Fast Food');
+        learnCategoryPreference('coffee', 'Drinks');
+
+        // Migrate Fast Food to Food
+        removeCategoryPreferences('Fast Food', 'Food');
+        expect(useSettingsStore.getState().categoryPreferences).toEqual({
+            burger: 'Food',
+            pizza: 'Food',
+            coffee: 'Drinks',
+        });
+
+        // Remove Drinks completely (no migration target or target is Unlisted)
+        removeCategoryPreferences('Drinks');
+        expect(useSettingsStore.getState().categoryPreferences).toEqual({
+            burger: 'Food',
+            pizza: 'Food',
+        });
+    });
+
+    it('renames category preferences when category name is updated', () => {
+        const { learnCategoryPreference, renameCategoryPreference } = useSettingsStore.getState();
+
+        learnCategoryPreference('subway sandwich', 'Snacks');
+        renameCategoryPreference('Snacks', 'Quick Bites');
+
+        expect(useSettingsStore.getState().categoryPreferences['subway sandwich']).toBe('Quick Bites');
+    });
 });
+

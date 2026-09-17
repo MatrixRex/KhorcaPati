@@ -196,4 +196,42 @@ describe('Smart Note Queue Processor & Offline Import Engine', () => {
         expect(note.status).toBe('failed');
         expect(note.errorMessage).toContain('rate limit');
     });
+
+    it('importParsedTransactions never resurrects deleted categories and maps them to Unlisted', async () => {
+        // Mark Fast Food as deleted
+        useSettingsStore.getState().markDeletedCategory('Fast Food');
+
+        const mockTransactions: ParsedGeminiTransaction[] = [
+            {
+                id: 'tx-deleted-cat',
+                title: 'Burger King',
+                amount: 350,
+                type: 'expense',
+                category: 'Fast Food',
+                date: '2026-09-04',
+                note: 'Burger King',
+                itemAutoTrack: false,
+                items: [],
+                selected: true,
+            },
+        ];
+
+        const importedCount = await importParsedTransactions(mockTransactions);
+        expect(importedCount).toBe(1);
+
+        // Verify category was NOT created in DB
+        const cats = await db.categories.toArray();
+        expect(cats.some((c) => c.name.toLowerCase() === 'fast food')).toBe(false);
+
+        // Verify expense was saved under Unlisted
+        const expenses = await db.expenses.toArray();
+        const burgerExpense = expenses.find((e) => e.title === 'Burger King');
+        expect(burgerExpense).toBeDefined();
+        expect(burgerExpense?.category).toBe('Unlisted');
+
+        // Verify preference was NOT learned for Fast Food
+        const preferences = useSettingsStore.getState().categoryPreferences;
+        expect(preferences['burger king']).toBeUndefined();
+    });
 });
+

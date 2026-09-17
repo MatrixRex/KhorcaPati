@@ -119,7 +119,9 @@ export function SmartBatchParserDrawer() {
             const dbCategories = await db.categories.toArray();
             const effectiveCategories = dbCategories.length > 0 ? dbCategories : categories;
 
-            const { categoryPreferences } = useSettingsStore.getState();
+            const { categoryPreferences, deletedCategories } = useSettingsStore.getState();
+            const deletedNamesSet = new Set((deletedCategories || []).map(c => c.toLowerCase().trim()));
+            const validCategoryNamesSet = new Set(effectiveCategories.map(c => c.name.toLowerCase().trim()));
 
             const recentExpenses = await db.expenses
                 .orderBy('id')
@@ -128,13 +130,18 @@ export function SmartBatchParserDrawer() {
                 .toArray();
 
             const historyExamples = recentExpenses
-                .filter(e => e.note && e.category && e.category !== 'Unlisted')
+                .filter((e) => {
+                    if (!e.note || !e.category || e.category === 'Unlisted') return false;
+                    const catLower = e.category.toLowerCase().trim();
+                    return validCategoryNamesSet.has(catLower) && !deletedNamesSet.has(catLower);
+                })
                 .map(e => ({ item: e.note, category: e.category }));
 
             const results = await parseTransactionsWithGemini({
                 noteText,
                 categories: effectiveCategories,
                 categoryPreferences,
+                deletedCategories,
                 historyExamples,
                 referenceDate: format(new Date(), 'yyyy-MM-dd'),
                 apiKey: geminiApiKey,

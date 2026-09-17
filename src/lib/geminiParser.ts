@@ -221,6 +221,7 @@ export interface GeminiParseOptions {
     noteText: string;
     categories: Array<{ id?: number; name: string }>;
     categoryPreferences?: Record<string, string>;
+    deletedCategories?: string[];
     historyExamples?: Array<{ item: string; category: string }>;
     referenceDate?: string; // YYYY-MM-DD
     apiKey: string;
@@ -232,6 +233,7 @@ export async function parseTransactionsWithGemini(options: GeminiParseOptions): 
         noteText,
         categories,
         categoryPreferences = {},
+        deletedCategories = [],
         historyExamples = [],
         referenceDate = new Date().toISOString().split('T')[0],
         apiKey,
@@ -249,11 +251,15 @@ export async function parseTransactionsWithGemini(options: GeminiParseOptions): 
     const categoryNames = categories.map(c => c.name.trim()).filter(Boolean);
     const nonSystemCategories = categoryNames.filter(name => !['Unlisted', 'Lent', 'Borrowed'].includes(name));
 
+    const validCategoryNamesSet = new Set(categoryNames.map(c => c.toLowerCase().trim()));
+    const deletedNamesSet = new Set(deletedCategories.map(d => d.toLowerCase().trim()));
+
     const userPrefsList: Array<{ item: string; category: string }> = [];
 
     if (categoryPreferences) {
         for (const [item, cat] of Object.entries(categoryPreferences)) {
-            if (item && cat && cat !== 'Unlisted') {
+            const normCat = (cat || '').trim().toLowerCase();
+            if (item && cat && cat !== 'Unlisted' && validCategoryNamesSet.has(normCat) && !deletedNamesSet.has(normCat)) {
                 userPrefsList.push({ item, category: cat });
             }
         }
@@ -261,7 +267,15 @@ export async function parseTransactionsWithGemini(options: GeminiParseOptions): 
 
     if (historyExamples) {
         for (const ex of historyExamples) {
-            if (ex.item && ex.category && ex.category !== 'Unlisted' && !userPrefsList.some(p => p.item.toLowerCase() === ex.item.toLowerCase())) {
+            const normCat = (ex.category || '').trim().toLowerCase();
+            if (
+                ex.item &&
+                ex.category &&
+                ex.category !== 'Unlisted' &&
+                validCategoryNamesSet.has(normCat) &&
+                !deletedNamesSet.has(normCat) &&
+                !userPrefsList.some(p => p.item.toLowerCase() === ex.item.toLowerCase())
+            ) {
                 userPrefsList.push({ item: ex.item.toLowerCase().trim(), category: ex.category.trim() });
             }
         }
@@ -282,6 +296,13 @@ PERSONALIZATION & LEARNING RULES:
 `
         : '';
 
+    const deletedCategoriesSection = deletedCategories.length > 0
+        ? `\nDELETED CATEGORIES (STRICT FORBIDDEN LIST):
+The user has explicitly deleted these categories: ${JSON.stringify(deletedCategories)}.
+Under NO circumstances should you assign transactions to any of these deleted categories!
+Instead, map to the closest matching category from "User's Existing Categories", or use "Unlisted".\n`
+        : '';
+
     const systemPrompt = `You are an expert financial categorization and extraction AI for the personal expense tracker app "KhorcaPati".
 Your goal is to parse unstructured, conversational, or messy notes, receipts, and messages into clean, structured transactions, and accurately assign every transaction to an appropriate category.
 
@@ -289,7 +310,7 @@ CONTEXT:
 - Reference Today's Date: ${referenceDate}
 - User's Existing Categories: ${JSON.stringify(categoryNames)}
 - User's Custom Categories: ${JSON.stringify(nonSystemCategories)}
-${personalizationSection}
+${personalizationSection}${deletedCategoriesSection}
 
 CATEGORIZATION RULES (CRITICAL):
 1. **Prioritize Existing Categories**:
@@ -468,6 +489,10 @@ Return ONLY valid JSON adhering to the specified schema.`;
         // Match category case-insensitively against user categories
         let matchedCategory = categoryNames.find(c => c.toLowerCase() === (tx.category || '').toLowerCase()) || tx.category || 'Unlisted';
 
+        if (deletedNamesSet.has(matchedCategory.toLowerCase().trim())) {
+            matchedCategory = 'Unlisted';
+        }
+
         const safeDate = typeof tx.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(tx.date) ? tx.date : referenceDate;
 
         const cleaned = cleanTransactionNoteAndAmount({
@@ -481,17 +506,23 @@ Return ONLY valid JSON adhering to the specified schema.`;
             const noteLower = cleaned.note.toLowerCase();
             for (const [prefItem, prefCat] of Object.entries(categoryPreferences)) {
                 if (!prefItem || !prefCat) continue;
+                const prefCatLower = prefCat.toLowerCase().trim();
+                if (deletedNamesSet.has(prefCatLower)) continue;
                 const prefItemLower = prefItem.toLowerCase();
                 const isMatch = noteLower === prefItemLower ||
                     new RegExp(`(^|\\s)${prefItemLower}(\\s|$)`, 'i').test(noteLower);
                 if (isMatch) {
-                    const validCat = categoryNames.find(c => c.toLowerCase() === prefCat.toLowerCase());
+                    const validCat = categoryNames.find(c => c.toLowerCase() === prefCatLower);
                     if (validCat) {
                         matchedCategory = validCat;
                         break;
                     }
                 }
             }
+        }
+
+        if (deletedNamesSet.has(matchedCategory.toLowerCase().trim())) {
+            matchedCategory = 'Unlisted';
         }
 
         const rawItems = Array.isArray(tx.items) ? tx.items : [];

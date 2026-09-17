@@ -505,4 +505,99 @@ describe('Gemini AI Transaction Parser', () => {
         expect(cleaned3.amount).toBe(40);
         expect(cleaned3.note).toBe('napa 2strips');
     });
+
+    it('filters out deleted or non-existent categories from personalization prompt and includes forbidden section', async () => {
+        let sentBody: any = null;
+        const mockFetch = vi.fn().mockImplementation(async (_url, options) => {
+            sentBody = JSON.parse(options.body);
+            return {
+                ok: true,
+                json: async () => ({
+                    candidates: [{
+                        content: {
+                            parts: [{
+                                text: JSON.stringify({
+                                    transactions: [{
+                                        title: 'Burger',
+                                        amount: 250,
+                                        type: 'expense',
+                                        category: 'Food & Dining',
+                                        date: '2026-08-19',
+                                        note: 'Burger'
+                                    }]
+                                })
+                            }]
+                        }
+                    }]
+                })
+            };
+        });
+        globalThis.fetch = mockFetch as any;
+
+        await parseTransactionsWithGemini({
+            noteText: 'burger 250',
+            categories: mockCategories,
+            categoryPreferences: {
+                burger: 'Fast Food', // Deleted category!
+                pasta: 'Food & Dining' // Valid existing category
+            },
+            deletedCategories: ['Fast Food'],
+            historyExamples: [
+                { item: 'pizza', category: 'Fast Food' }, // Deleted!
+                { item: 'tea', category: 'Food & Dining' } // Valid!
+            ],
+            apiKey: 'valid-key'
+        });
+
+        const systemPrompt = sentBody?.systemInstruction?.parts?.[0]?.text;
+        expect(systemPrompt).toBeDefined();
+
+        // Should include pasta -> Food & Dining and tea -> Food & Dining
+        expect(systemPrompt).toContain('pasta');
+        expect(systemPrompt).toContain('tea');
+
+        // Should NOT include burger -> Fast Food or pizza -> Fast Food in preferences
+        expect(systemPrompt).not.toContain('"burger" -> "Fast Food"');
+        expect(systemPrompt).not.toContain('"pizza" -> "Fast Food"');
+
+        // Should contain the strict forbidden section for deleted categories
+        expect(systemPrompt).toContain('DELETED CATEGORIES (STRICT FORBIDDEN LIST)');
+        expect(systemPrompt).toContain('Fast Food');
+    });
+
+    it('sanitizes returned category to Unlisted if Gemini attempts to return a deleted category', async () => {
+        const mockFetch = vi.fn().mockResolvedValue({
+            ok: true,
+            json: async () => ({
+                candidates: [{
+                    content: {
+                        parts: [{
+                            text: JSON.stringify({
+                                transactions: [{
+                                    title: 'Game Subscription',
+                                    amount: 500,
+                                    type: 'expense',
+                                    category: 'Gaming', // Deleted by user
+                                    date: '2026-08-19',
+                                    note: 'Game'
+                                }]
+                            })
+                        }]
+                    }
+                }]
+            })
+        });
+        globalThis.fetch = mockFetch as any;
+
+        const results = await parseTransactionsWithGemini({
+            noteText: 'game subscription 500',
+            categories: mockCategories,
+            deletedCategories: ['Gaming'],
+            apiKey: 'valid-key'
+        });
+
+        expect(results).toHaveLength(1);
+        expect(results[0].category).toBe('Unlisted');
+    });
 });
+

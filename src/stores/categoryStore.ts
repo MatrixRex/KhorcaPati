@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { db, type Category } from '@/db/schema';
+import { useSettingsStore } from '@/stores/settingsStore';
 
 export const CATEGORY_COLORS = [
     '#3b82f6', // Blue
@@ -113,7 +114,10 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
         const capitalizedName = trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1);
 
         const existing = await db.categories.where('name').equalsIgnoreCase(capitalizedName).first();
-        if (existing) return existing.id!;
+        if (existing) {
+            useSettingsStore.getState().unmarkDeletedCategory(capitalizedName);
+            return existing.id!;
+        }
 
         // Use provided color or pick random from presets
         const finalColor = color || CATEGORY_COLORS[Math.floor(Math.random() * CATEGORY_COLORS.length)];
@@ -125,6 +129,8 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
             isDefault: false,
             isSystem: false
         });
+
+        useSettingsStore.getState().unmarkDeletedCategory(capitalizedName);
         await get().loadCategories();
         return id as number;
     },
@@ -137,18 +143,29 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
             const existing = await db.categories.where('name').equalsIgnoreCase(trimmedName).first();
             if (existing && existing.id !== id) {
                 // Name already exists for another category
-                // We could merge them, but for now just return
                 return id;
             }
 
             const category = await db.categories.get(id);
             if (category && category.name !== trimmedName) {
-                // Update all expenses with this category name
-                await db.transaction('rw', [db.categories, db.expenses, db.budgets], async () => {
-                    await db.expenses.where('category').equals(category.name).modify({ category: trimmedName });
-                    await db.budgets.where('category').equals(category.name).modify({ category: trimmedName });
+                const oldNameLower = category.name.toLowerCase().trim();
+                // Update all expenses, budgets, and recurring payments with this category name (case-insensitive)
+                await db.transaction('rw', [db.categories, db.expenses, db.budgets, db.recurringPayments], async () => {
+                    await db.expenses
+                        .filter(e => Boolean(e.category && e.category.toLowerCase().trim() === oldNameLower))
+                        .modify({ category: trimmedName });
+                    await db.budgets
+                        .filter(b => Boolean(b.category && b.category.toLowerCase().trim() === oldNameLower))
+                        .modify({ category: trimmedName });
+                    await db.recurringPayments
+                        .filter(r => Boolean(r.category && r.category.toLowerCase().trim() === oldNameLower))
+                        .modify({ category: trimmedName });
                     await db.categories.update(id, { ...updates, name: trimmedName });
                 });
+
+                const { renameCategoryPreference, unmarkDeletedCategory } = useSettingsStore.getState();
+                renameCategoryPreference(category.name, trimmedName);
+                unmarkDeletedCategory(trimmedName);
             } else {
                 await db.categories.update(id, { ...updates, name: trimmedName });
             }
@@ -164,24 +181,44 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
         if (!category) return;
         if (category.isDefault || category.isSystem) return;
 
-        await db.transaction('rw', [db.categories, db.expenses, db.budgets], async () => {
-            let targetName = 'Unlisted';
-            if (migrateToId) {
-                const targetCategory = await db.categories.get(migrateToId);
-                if (targetCategory) {
-                    targetName = targetCategory.name;
-                }
-            } else {
-                const defaultCat = await db.categories.where('isDefault').equals(1).first();
-                if (defaultCat) {
-                    targetName = defaultCat.name;
-                }
-            }
+        const catName = category.name;
+        const catNameLower = catName.toLowerCase().trim();
 
-            await db.expenses.where('category').equals(category.name).modify({ category: targetName });
-            await db.budgets.where('category').equals(category.name).modify({ category: targetName });
+        let targetName = 'Unlisted';
+        if (migrateToId) {
+            const targetCategory = await db.categories.get(migrateToId);
+            if (targetCategory) {
+                targetName = targetCategory.name;
+            }
+        } else {
+            const allCats = await db.categories.toArray();
+            const defaultCat = allCats.find(c => c.isDefault === true || (c.isDefault as any) === 1);
+            if (defaultCat) {
+                targetName = defaultCat.name;
+            }
+        }
+
+        await db.transaction('rw', [db.categories, db.expenses, db.budgets, db.recurringPayments], async () => {
+            await db.expenses
+                .filter(e => Boolean(e.category && e.category.toLowerCase().trim() === catNameLower))
+                .modify({ category: targetName });
+
+            await db.budgets
+                .filter(b => Boolean(b.category && b.category.toLowerCase().trim() === catNameLower))
+                .modify({ category: targetName });
+
+            await db.recurringPayments
+                .filter(r => Boolean(r.category && r.category.toLowerCase().trim() === catNameLower))
+                .modify({ category: targetName });
+
             await db.categories.delete(id);
         });
+
+        const { markDeletedCategory, removeCategoryPreferences } = useSettingsStore.getState();
+        markDeletedCategory(catName);
+        removeCategoryPreferences(catName, targetName !== 'Unlisted' ? targetName : undefined);
+
         await get().loadCategories();
     }
 }));
+

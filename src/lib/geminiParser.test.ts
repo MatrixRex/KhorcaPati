@@ -599,5 +599,112 @@ describe('Gemini AI Transaction Parser', () => {
         expect(results).toHaveLength(1);
         expect(results[0].category).toBe('Unlisted');
     });
+
+    describe('Multi-Provider Fallback Chain', () => {
+        it('automatically falls back to secondary provider if primary provider fails with 429 or error', async () => {
+            const mockFetch = vi.fn()
+                // Call 1: Gemini rate limited (429)
+                .mockResolvedValueOnce({
+                    ok: false,
+                    status: 429,
+                    statusText: 'Too Many Requests',
+                    json: async () => ({ error: { message: 'Quota exceeded' } })
+                })
+                // Call 2: Groq succeeds (200)
+                .mockResolvedValueOnce({
+                    ok: true,
+                    status: 200,
+                    json: async () => ({
+                        choices: [
+                            {
+                                message: {
+                                    content: JSON.stringify({
+                                        transactions: [
+                                            {
+                                                title: 'Cat Food',
+                                                amount: 570,
+                                                type: 'expense',
+                                                category: 'Groceries',
+                                                date: '2026-08-19',
+                                                note: 'Cat food'
+                                            }
+                                        ]
+                                    })
+                                }
+                            }
+                        ]
+                    })
+                });
+            globalThis.fetch = mockFetch as any;
+
+            const results = await parseTransactionsWithGemini({
+                noteText: 'Cat food 570',
+                categories: mockCategories,
+                providers: [
+                    {
+                        id: 'gemini-1',
+                        name: 'Primary Gemini',
+                        type: 'gemini',
+                        apiKey: 'gemini-key',
+                        model: 'gemini-2.0-flash',
+                        enabled: true
+                    },
+                    {
+                        id: 'groq-2',
+                        name: 'Secondary Groq',
+                        type: 'groq',
+                        apiKey: 'groq-key',
+                        model: 'openai/gpt-oss-20b',
+                        enabled: true
+                    }
+                ]
+            });
+
+            expect(mockFetch).toHaveBeenCalledTimes(2);
+            expect(results).toHaveLength(1);
+            expect(results[0].title).toBe('Cat Food');
+            expect(results[0].amount).toBe(570);
+        });
+
+        it('throws comprehensive aggregated error if all configured providers fail', async () => {
+            const mockFetch = vi.fn()
+                .mockResolvedValueOnce({
+                    ok: false,
+                    status: 429,
+                    statusText: 'Too Many Requests',
+                    json: async () => ({ error: { message: 'Rate limit' } })
+                })
+                .mockResolvedValueOnce({
+                    ok: false,
+                    status: 401,
+                    statusText: 'Unauthorized',
+                    json: async () => ({ error: { message: 'Bad Key' } })
+                });
+            globalThis.fetch = mockFetch as any;
+
+            await expect(parseTransactionsWithGemini({
+                noteText: 'Uber 250',
+                categories: mockCategories,
+                providers: [
+                    {
+                        id: 'gemini-1',
+                        name: 'Primary Gemini',
+                        type: 'gemini',
+                        apiKey: 'gemini-key',
+                        model: 'gemini-2.0-flash',
+                        enabled: true
+                    },
+                    {
+                        id: 'groq-2',
+                        name: 'Secondary Groq',
+                        type: 'groq',
+                        apiKey: 'groq-key',
+                        model: 'openai/gpt-oss-20b',
+                        enabled: true
+                    }
+                ]
+            })).rejects.toThrow(/All configured AI providers failed/i);
+        });
+    });
 });
 

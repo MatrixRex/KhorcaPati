@@ -217,6 +217,8 @@ export interface ParsedGeminiTransaction {
     selected: boolean;
 }
 
+import type { AIProviderConfig } from './aiProviders';
+
 export interface GeminiParseOptions {
     noteText: string;
     categories: Array<{ id?: number; name: string }>;
@@ -224,8 +226,151 @@ export interface GeminiParseOptions {
     deletedCategories?: string[];
     historyExamples?: Array<{ item: string; category: string }>;
     referenceDate?: string; // YYYY-MM-DD
-    apiKey: string;
+    apiKey?: string;
     model?: string;
+    providers?: AIProviderConfig[];
+}
+
+async function callGeminiApi(apiKey: string, model: string, systemPrompt: string, userText: string): Promise<string> {
+    const requestPayload = {
+        contents: [
+            {
+                role: 'user',
+                parts: [{ text: `Extract all financial transactions from this note:\n\n"""\n${userText}\n"""` }]
+            }
+        ],
+        systemInstruction: {
+            parts: [{ text: systemPrompt }]
+        },
+        generationConfig: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+                type: 'OBJECT',
+                properties: {
+                    transactions: {
+                        type: 'ARRAY',
+                        items: {
+                            type: 'OBJECT',
+                            properties: {
+                                title: { type: 'STRING' },
+                                amount: { type: 'NUMBER' },
+                                type: { type: 'STRING', enum: ['expense', 'income'] },
+                                category: { type: 'STRING' },
+                                date: { type: 'STRING' },
+                                note: { type: 'STRING' },
+                                itemAutoTrack: { type: 'BOOLEAN' },
+                                items: {
+                                    type: 'ARRAY',
+                                    items: {
+                                        type: 'OBJECT',
+                                        properties: {
+                                            name: { type: 'STRING' },
+                                            qty: { type: 'NUMBER' },
+                                            unit: { type: 'STRING' }
+                                        },
+                                        required: ['name', 'qty', 'unit']
+                                    }
+                                }
+                            },
+                            required: ['title', 'amount', 'type', 'category', 'date']
+                        }
+                    }
+                },
+                required: ['transactions']
+            }
+        }
+    };
+
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
+    let response: Response;
+    try {
+        response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestPayload)
+        });
+    } catch (err: any) {
+        throw new NetworkConnectionError(`Network error contacting Gemini API: ${err?.message || 'Check your internet connection.'}`);
+    }
+
+    if (!response.ok) {
+        let errorData: any = {};
+        try { errorData = await response.json(); } catch { }
+        const msg = errorData?.error?.message || `API error (${response.status}: ${response.statusText})`;
+        if (response.status === 400 && msg.toLowerCase().includes('api key')) {
+            throw new Error('Invalid Gemini API Key. Please verify your key in Settings.');
+        }
+        if (response.status === 429) {
+            throw new Error('Gemini API rate limit exceeded.');
+        }
+        throw new Error(`Gemini API Error: ${msg}`);
+    }
+
+    const data = await response.json();
+    const candidateText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!candidateText) {
+        throw new Error('No response received from Gemini model.');
+    }
+    return candidateText;
+}
+
+async function callOpenAiCompatibleApi(provider: AIProviderConfig, systemPrompt: string, userText: string): Promise<string> {
+    let endpoint = '';
+    if (provider.type === 'groq') {
+        endpoint = 'https://api.groq.com/openai/v1/chat/completions';
+    } else if (provider.type === 'openrouter') {
+        endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+    } else if (provider.baseUrl) {
+        endpoint = provider.baseUrl.replace(/\/$/, '') + '/chat/completions';
+    } else {
+        endpoint = 'http://localhost:11434/v1/chat/completions';
+    }
+
+    const payload = {
+        model: provider.model,
+        messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Extract all financial transactions from this note:\n\n"""\n${userText}\n"""` }
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.1
+    };
+
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+    };
+    if (provider.apiKey) {
+        headers['Authorization'] = `Bearer ${provider.apiKey.trim()}`;
+    }
+    if (provider.type === 'openrouter') {
+        headers['HTTP-Referer'] = 'https://github.com/MatrixRex/KhorcaPati';
+        headers['X-Title'] = 'KhorcaPati';
+    }
+
+    let res: Response;
+    try {
+        res = await fetch(endpoint, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload)
+        });
+    } catch (err: any) {
+        throw new NetworkConnectionError(`Network error contacting ${provider.name || provider.type}: ${err?.message || 'Check your internet connection.'}`);
+    }
+
+    if (!res.ok) {
+        let errJson: any = {};
+        try { errJson = await res.json(); } catch { }
+        const errMsg = errJson?.error?.message || `API error (${res.status}: ${res.statusText})`;
+        throw new Error(`${provider.name || provider.type} Error (${res.status}): ${errMsg}`);
+    }
+
+    const json = await res.json();
+    const content = json.choices?.[0]?.message?.content;
+    if (!content) {
+        throw new Error(`No content returned from ${provider.name || provider.type}`);
+    }
+    return content;
 }
 
 export async function parseTransactionsWithGemini(options: GeminiParseOptions): Promise<ParsedGeminiTransaction[]> {
@@ -240,8 +385,9 @@ export async function parseTransactionsWithGemini(options: GeminiParseOptions): 
         model = 'gemini-flash-lite-latest'
     } = options;
 
-    if (!apiKey || !apiKey.trim()) {
-        throw new Error('Please configure your Google Gemini API key in Settings or the prompt above.');
+    const hasProviders = options.providers && options.providers.some(p => p.enabled && p.apiKey && p.apiKey.trim());
+    if (!hasProviders && (!apiKey || !apiKey.trim())) {
+        throw new Error('Please configure your Google Gemini or AI provider API key in Settings.');
     }
 
     if (!noteText || !noteText.trim()) {
@@ -376,108 +522,71 @@ SPLITTING VS GROUPING RULES (CRITICAL):
 
 Return ONLY valid JSON adhering to the specified schema.`;
 
-    const requestPayload = {
-        contents: [
-            {
-                role: 'user',
-                parts: [
-                    {
-                        text: `Extract all financial transactions from this note:\n\n"""\n${noteText}\n"""`
-                    }
-                ]
-            }
-        ],
-        systemInstruction: {
-            parts: [
-                {
-                    text: systemPrompt
-                }
-            ]
-        },
-        generationConfig: {
-            responseMimeType: 'application/json',
-            responseSchema: {
-                type: 'OBJECT',
-                properties: {
-                    transactions: {
-                        type: 'ARRAY',
-                        items: {
-                            type: 'OBJECT',
-                            properties: {
-                                title: { type: 'STRING' },
-                                amount: { type: 'NUMBER' },
-                                type: { type: 'STRING', enum: ['expense', 'income'] },
-                                category: { type: 'STRING' },
-                                date: { type: 'STRING' },
-                                note: { type: 'STRING' },
-                                itemAutoTrack: { type: 'BOOLEAN' },
-                                items: {
-                                    type: 'ARRAY',
-                                    items: {
-                                        type: 'OBJECT',
-                                        properties: {
-                                            name: { type: 'STRING' },
-                                            qty: { type: 'NUMBER' },
-                                            unit: { type: 'STRING' }
-                                        },
-                                        required: ['name', 'qty', 'unit']
-                                    }
-                                }
-                            },
-                            required: ['title', 'amount', 'type', 'category', 'date']
-                        }
-                    }
-                },
-                required: ['transactions']
-            }
-        }
-    };
-
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey.trim()}`;
-
-    let response: Response;
-    try {
-        response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestPayload)
+// Build active candidate providers list
+    const candidateProviders: AIProviderConfig[] = [];
+    if (options.providers && options.providers.length > 0) {
+        candidateProviders.push(...options.providers.filter(p => p.enabled && p.apiKey && p.apiKey.trim()));
+    } else if (apiKey && apiKey.trim()) {
+        candidateProviders.push({
+            id: 'legacy-gemini',
+            name: 'Google Gemini',
+            type: 'gemini',
+            apiKey: apiKey.trim(),
+            model: model || 'gemini-flash-lite-latest',
+            enabled: true
         });
-    } catch (err: any) {
-        throw new NetworkConnectionError(`Network error contacting Gemini API: ${err?.message || 'Check your internet connection.'}`);
     }
 
-    if (!response.ok) {
-        let errorData: any = {};
+    if (candidateProviders.length === 0) {
+        throw new Error('Please configure an AI provider with an API key in Settings.');
+    }
+
+    let candidateText = '';
+    const failureErrors: string[] = [];
+
+    for (const provider of candidateProviders) {
         try {
-            errorData = await response.json();
-        } catch {
-            // ignore
+            if (provider.type === 'gemini') {
+                candidateText = await callGeminiApi(provider.apiKey, provider.model || 'gemini-flash-lite-latest', systemPrompt, noteText);
+            } else {
+                candidateText = await callOpenAiCompatibleApi(provider, systemPrompt, noteText);
+            }
+            if (candidateText) {
+                break; // Succeeded!
+            }
+        } catch (err: any) {
+            console.warn(`[AI Parser] Provider ${provider.name || provider.type} failed:`, err);
+            failureErrors.push(`${provider.name || provider.type}: ${err?.message || 'Failed'}`);
+            // If it's a network error and there are no other providers, rethrow network error so offline queue triggers
+            if (isNetworkConnectionError(err) && candidateProviders.length === 1) {
+                throw err;
+            }
         }
-
-        const msg = errorData?.error?.message || `API error (${response.status}: ${response.statusText})`;
-        if (response.status === 400 && msg.toLowerCase().includes('api key')) {
-            throw new Error('Invalid Gemini API Key. Please verify your key in Settings.');
-        }
-        if (response.status === 429) {
-            throw new Error('Gemini API rate limit exceeded. Please wait a moment and try again.');
-        }
-        throw new Error(`Gemini API Error: ${msg}`);
     }
-
-    const data = await response.json();
-    const candidateText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!candidateText) {
-        throw new Error('No response received from Gemini model.');
+        // If all candidate errors were network errors, throw NetworkConnectionError
+        if (failureErrors.length > 0 && failureErrors.every(e => e.toLowerCase().includes('network error') || e.toLowerCase().includes('connection'))) {
+            throw new NetworkConnectionError(`Network error contacting AI providers: ${failureErrors.join('; ')}`);
+        }
+        throw new Error(`All configured AI providers failed. Errors: ${failureErrors.join(' | ')}`);
     }
 
     let parsedResult: { transactions?: any[] };
     try {
         parsedResult = JSON.parse(candidateText);
     } catch {
-        throw new Error('Failed to parse Gemini output into structured transactions.');
+        // Attempt to extract json block if wrapped in markdown
+        const match = candidateText.match(/\{[\s\S]*\}/);
+        if (match) {
+            try {
+                parsedResult = JSON.parse(match[0]);
+            } catch {
+                throw new Error('Failed to parse AI output into structured transactions.');
+            }
+        } else {
+            throw new Error('Failed to parse AI output into structured transactions.');
+        }
     }
 
     const rawTransactions = Array.isArray(parsedResult?.transactions) ? parsedResult.transactions : [];

@@ -68,7 +68,7 @@ export function SmartBatchParserDrawer() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { isSmartBatchParserOpen, closeSmartBatchParser, initialSmartBatchText } = useUIStore();
-    const { geminiApiKey, geminiModel } = useSettingsStore();
+    const { geminiApiKey, geminiModel, aiProviders } = useSettingsStore();
     const { categories } = useCategoryStore();
 
     const { queue, enqueueNote, removeNote, clearCompleted } = useSmartNoteQueueStore();
@@ -80,7 +80,10 @@ export function SmartBatchParserDrawer() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [offlineNotice, setOfflineNotice] = useState<string | null>(null);
 
-    const hasKey = Boolean(geminiApiKey && geminiApiKey.trim());
+    const hasKey = Boolean(
+        (aiProviders && aiProviders.some(p => p.enabled && p.apiKey && p.apiKey.trim())) ||
+        (geminiApiKey && geminiApiKey.trim())
+    );
 
     useEffect(() => {
         if (isSmartBatchParserOpen) {
@@ -145,7 +148,8 @@ export function SmartBatchParserDrawer() {
                 historyExamples,
                 referenceDate: format(new Date(), 'yyyy-MM-dd'),
                 apiKey: geminiApiKey,
-                model: geminiModel || 'gemini-flash-lite-latest'
+                model: geminiModel || 'gemini-flash-lite-latest',
+                providers: aiProviders,
             });
 
             if (results.length === 0) {

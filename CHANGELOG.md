@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.6] - 2026-09-28
+
+### Added
+- **Provider-Agnostic Multi-LLM Support**:
+  - Full support for Groq, Google Gemini, OpenRouter, and custom OpenAI-compatible endpoints (Ollama, LM Studio, etc.).
+  - Configurable sequential fallback chain: if primary provider encounters rate limits (429), quota exhaustion, or service outages, the system automatically falls back to secondary and tertiary providers seamlessly.
+- **Dynamic Model Auto-Discovery**:
+  - Automatically queries available active models from the provider as soon as an API key is pasted.
+  - Interactive model pill selector with special indicators for recommended fast models (e.g. `openai/gpt-oss-20b` and `openai/gpt-oss-120b` on Groq).
+  - Automatically filters 100% free models on OpenRouter based on token pricing metadata.
+- **AI Provider Management UI**:
+  - Dedicated provider management card in Settings with priority ordering (Move Up / Move Down buttons), connection testing, and custom endpoint URL configuration.
+- **Automated Fallback Testing**:
+  - Added multi-provider test coverage in Vitest verifying automatic failover from 429 quota exhaustion to secondary providers.
+
 ## [1.10.5] - 2026-09-17
 
 ### Fixed

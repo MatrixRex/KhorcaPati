@@ -13,6 +13,8 @@ export function normalizePreferenceKeyword(input: string): string {
         .trim();
 }
 
+import type { AIProviderConfig } from '@/lib/aiProviders';
+
 interface SettingsState {
     initialBalance: number;
     language: string;
@@ -20,6 +22,7 @@ interface SettingsState {
     resetDate: number;
     geminiApiKey: string;
     geminiModel: string;
+    aiProviders: AIProviderConfig[];
     categoryPreferences: Record<string, string>;
     deletedCategories: string[];
     setInitialBalance: (amount: number) => void;
@@ -28,6 +31,11 @@ interface SettingsState {
     setResetDate: (date: number) => void;
     setGeminiApiKey: (key: string) => void;
     setGeminiModel: (model: string) => void;
+    setAIProviders: (providers: AIProviderConfig[]) => void;
+    addAIProvider: (provider: Omit<AIProviderConfig, 'id'>) => void;
+    updateAIProvider: (id: string, updates: Partial<AIProviderConfig>) => void;
+    removeAIProvider: (id: string) => void;
+    moveAIProvider: (fromIndex: number, toIndex: number) => void;
     learnCategoryPreference: (item: string, category: string) => void;
     clearCategoryPreferences: () => void;
     markDeletedCategory: (categoryName: string) => void;
@@ -45,6 +53,7 @@ export const useSettingsStore = create<SettingsState>()(
             resetDate: 1,
             geminiApiKey: '',
             geminiModel: 'gemini-flash-lite-latest',
+            aiProviders: [],
             categoryPreferences: {},
             deletedCategories: [],
             setInitialBalance: (amount: number) => set({ initialBalance: amount }),
@@ -56,6 +65,28 @@ export const useSettingsStore = create<SettingsState>()(
             setResetDate: (date: number) => set({ resetDate: date }),
             setGeminiApiKey: (key: string) => set({ geminiApiKey: key }),
             setGeminiModel: (model: string) => set({ geminiModel: model }),
+            setAIProviders: (providers: AIProviderConfig[]) => set({ aiProviders: providers }),
+            addAIProvider: (provider) => set((state) => ({
+                aiProviders: [
+                    ...state.aiProviders,
+                    { ...provider, id: `prov_${Date.now()}_${Math.random().toString(36).substring(2, 7)}` }
+                ]
+            })),
+            updateAIProvider: (id, updates) => set((state) => ({
+                aiProviders: state.aiProviders.map(p => p.id === id ? { ...p, ...updates } : p)
+            })),
+            removeAIProvider: (id) => set((state) => ({
+                aiProviders: state.aiProviders.filter(p => p.id !== id)
+            })),
+            moveAIProvider: (fromIndex, toIndex) => set((state) => {
+                if (fromIndex < 0 || toIndex < 0 || fromIndex >= state.aiProviders.length || toIndex >= state.aiProviders.length) {
+                    return state;
+                }
+                const updated = [...state.aiProviders];
+                const [moved] = updated.splice(fromIndex, 1);
+                updated.splice(toIndex, 0, moved);
+                return { aiProviders: updated };
+            }),
             learnCategoryPreference: (item: string, category: string) => {
                 const cleanKey = normalizePreferenceKeyword(item);
                 const cleanCat = category.trim();
@@ -134,6 +165,19 @@ export const useSettingsStore = create<SettingsState>()(
             onRehydrateStorage: () => (state) => {
                 if (state) {
                     i18n.changeLanguage(state.language);
+                    // Automatic migration: if user has a legacy geminiApiKey and empty aiProviders, seed Gemini provider
+                    if (state.geminiApiKey && (!state.aiProviders || state.aiProviders.length === 0)) {
+                        state.aiProviders = [
+                            {
+                                id: 'prov_legacy_gemini',
+                                name: 'Google Gemini',
+                                type: 'gemini',
+                                apiKey: state.geminiApiKey,
+                                model: state.geminiModel || 'gemini-flash-lite-latest',
+                                enabled: true
+                            }
+                        ];
+                    }
                 }
             },
         }

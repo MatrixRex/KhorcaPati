@@ -110,8 +110,9 @@ export async function processNextQueuedNote(): Promise<boolean> {
         return false;
     }
 
-    const { geminiApiKey, geminiModel } = useSettingsStore.getState();
-    if (!geminiApiKey || !geminiApiKey.trim()) {
+    const { geminiApiKey, geminiModel, aiProviders } = useSettingsStore.getState();
+    const hasActiveProviders = (aiProviders && aiProviders.some(p => p.enabled && p.apiKey && p.apiKey.trim())) || Boolean(geminiApiKey && geminiApiKey.trim());
+    if (!hasActiveProviders) {
         return false;
     }
 
@@ -154,6 +155,7 @@ export async function processNextQueuedNote(): Promise<boolean> {
             referenceDate: pendingNote.referenceDate,
             apiKey: geminiApiKey,
             model: geminiModel || 'gemini-flash-lite-latest',
+            providers: aiProviders,
         });
 
         if (results && results.length > 0) {

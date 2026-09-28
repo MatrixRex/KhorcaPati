@@ -33,6 +33,7 @@ interface DatePickerProps {
     // Drawer variant additions
     variant?: 'default' | 'drawer';
     onNext?: () => void;
+    displayFormat?: string;
 }
 
 const slideVariants = {
@@ -51,7 +52,7 @@ const slideVariants = {
 }
 
 export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
-    ({ date, setDate, placeholder = "Pick a date", className, disabled, onKeyDown, variant = 'default', onNext }, ref) => {
+    ({ date, setDate, placeholder = "Pick a date", className, disabled, onKeyDown, variant = 'default', onNext, displayFormat = "d-MMM-yy" }, ref) => {
         const { t } = useTranslation()
         const [open, setOpen] = useState(false)
         const [view, setView] = useState<'swipe' | 'scroll' | 'calendar'>('swipe')
@@ -131,7 +132,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
                     >
                         <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
                         <span className="truncate text-xs font-black uppercase tracking-tight">
-                            {date ? format(date, "MMMM do, yy") : placeholder}
+                            {date ? format(date, displayFormat) : placeholder}
                         </span>
                     </Button>
                     <SheetContent
@@ -325,7 +326,7 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
                     >
                         <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
                         <span className="truncate text-xs font-black uppercase tracking-tight">
-                            {date ? format(date, "MMMM do, yy") : placeholder}
+                            {date ? format(date, displayFormat) : placeholder}
                         </span>
                     </Button>
                 </PopoverTrigger>

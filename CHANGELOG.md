@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.7] - 2026-09-29
+
+### Fixed
+- **AI Batch Parser Count Display**: Resolved template literal interpolation bug by passing `total: parsedList.length` into `t('selectedCount')`. The footer text now accurately renders `X of Y selected` (and localized Bengali equivalent) instead of unpopulated raw tokens.
+- **Provider-Agnostic Parsing Label**: Updated status indicator and button text from "Parsing with Gemini AI..." to "Parsing with AI..." across English and Bengali locales to align with the multi-provider LLM architecture.
+
+### Changed
+- **Short Date Trigger Format**: Updated default trigger display of `DatePicker` to concise format (`d-MMM-yy`, e.g. `9-Sep-26`) with a customizable `displayFormat` prop.
+
+### Added
+- **Detailed Sub-Item Editor in AI Batch Parser**:
+  - Direct on/off item tracking toggle (`Tracking ON` / `Tracking OFF`) per transaction entry.
+  - Interactive inline editing for each extracted sub-item's name, quantity, and unit.
+  - Quick action buttons to remove existing items or add new tracked sub-items manually.
+
 ## [1.10.6] - 2026-09-28
 
 ### Added

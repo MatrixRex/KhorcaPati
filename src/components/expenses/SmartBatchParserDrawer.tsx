@@ -218,6 +218,36 @@ export function SmartBatchParserDrawer() {
         }));
     };
 
+    const handleUpdateTrackedItem = (txId: string, itemIndex: number, updates: Partial<{ name: string; qty: number; unit: string }>) => {
+        setParsedList(prev => prev.map(tx => {
+            if (tx.id === txId && tx.items) {
+                const newItems = tx.items.map((it, idx) => idx === itemIndex ? { ...it, ...updates } : it);
+                return { ...tx, items: newItems };
+            }
+            return tx;
+        }));
+    };
+
+    const handleDeleteTrackedItem = (txId: string, itemIndex: number) => {
+        setParsedList(prev => prev.map(tx => {
+            if (tx.id === txId && tx.items) {
+                const newItems = tx.items.filter((_, idx) => idx !== itemIndex);
+                return { ...tx, items: newItems };
+            }
+            return tx;
+        }));
+    };
+
+    const handleAddTrackedItem = (txId: string) => {
+        setParsedList(prev => prev.map(tx => {
+            if (tx.id === txId) {
+                const newItems = [...(tx.items || []), { name: 'Item', qty: 1, unit: 'pcs' }];
+                return { ...tx, items: newItems, itemAutoTrack: true };
+            }
+            return tx;
+        }));
+    };
+
     const handleDeleteItem = (id: string) => {
         setParsedList(prev => prev.filter(tx => tx.id !== id));
     };
@@ -400,7 +430,7 @@ export function SmartBatchParserDrawer() {
                         {isLoading ? (
                             <span className="flex items-center gap-2">
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                {t('geminiParsing', { defaultValue: 'Parsing with Gemini AI...' })}
+                                {t('geminiParsing', { defaultValue: 'Parsing with AI...' })}
                             </span>
                         ) : (
                             <span className="flex items-center gap-2">
@@ -719,32 +749,90 @@ export function SmartBatchParserDrawer() {
                                                 </div>
                                             </div>
 
-                                            {/* Optional Note / Extracted Items Details */}
-                                            {tx.items && tx.items.length > 0 && (
-                                                <div className="p-2 rounded-xl bg-primary/5 border border-primary/10 space-y-1">
-                                                    <div className="flex items-center justify-between text-[10px] font-bold text-primary">
-                                                        <span className="flex items-center gap-1">
-                                                            <Package className="w-3 h-3" />
-                                                            {t('itemsDetected', { count: tx.items.length, defaultValue: `${tx.items.length} items will be auto-tracked` })}
-                                                        </span>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleUpdateItem(tx.id, { itemAutoTrack: !tx.itemAutoTrack })}
-                                                            className={cn(
-                                                                "px-2 py-0.5 rounded-full text-[9px] font-black uppercase",
-                                                                tx.itemAutoTrack ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-                                                            )}
-                                                        >
-                                                            {tx.itemAutoTrack ? 'Track ON' : 'Track OFF'}
-                                                        </button>
-                                                    </div>
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {tx.items.map((it, i) => (
-                                                            <span key={i} className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-background/80 border border-border/30 text-foreground">
-                                                                {it.name} ({it.qty} {it.unit})
+                                            {/* Extracted Items Details & Editing */}
+                                            {tx.items && tx.items.length > 0 ? (
+                                                <div className="p-3 rounded-2xl bg-primary/5 border border-primary/15 space-y-2.5">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary">
+                                                            <Package className="w-3.5 h-3.5" />
+                                                            <span>
+                                                                {t('itemsDetected', { count: tx.items.length, defaultValue: `${tx.items.length} items detected` })}
                                                             </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleUpdateItem(tx.id, { itemAutoTrack: !tx.itemAutoTrack })}
+                                                                className={cn(
+                                                                    "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 active:scale-95",
+                                                                    tx.itemAutoTrack ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25" : "bg-muted text-muted-foreground hover:text-foreground"
+                                                                )}
+                                                            >
+                                                                {tx.itemAutoTrack ? 'Tracking ON' : 'Tracking OFF'}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleAddTrackedItem(tx.id)}
+                                                                className="p-1 rounded-lg text-primary hover:bg-primary/10 active:scale-95 transition-all"
+                                                                title="Add Item"
+                                                            >
+                                                                <Plus className="w-3.5 h-3.5" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Editable Items List */}
+                                                    <div className="space-y-1.5">
+                                                        {tx.items.map((it, i) => (
+                                                            <div key={i} className="flex items-center gap-1.5 p-1.5 rounded-xl bg-background/70 border border-border/40 shadow-2xs">
+                                                                <Input
+                                                                    type="text"
+                                                                    value={it.name}
+                                                                    onChange={(e) => handleUpdateTrackedItem(tx.id, i, { name: e.target.value })}
+                                                                    placeholder="Item name"
+                                                                    className="h-7 text-xs font-semibold px-2 rounded-lg flex-1 min-w-[90px] bg-background/90"
+                                                                />
+                                                                <Input
+                                                                    type="number"
+                                                                    step="any"
+                                                                    min="0"
+                                                                    value={it.qty}
+                                                                    onChange={(e) => handleUpdateTrackedItem(tx.id, i, { qty: parseFloat(e.target.value) || 0 })}
+                                                                    placeholder="Qty"
+                                                                    className="h-7 text-xs font-bold text-center px-1 rounded-lg w-16 bg-background/90"
+                                                                />
+                                                                <Input
+                                                                    type="text"
+                                                                    value={it.unit}
+                                                                    onChange={(e) => handleUpdateTrackedItem(tx.id, i, { unit: e.target.value })}
+                                                                    placeholder="Unit"
+                                                                    className="h-7 text-xs font-medium text-center px-1 rounded-lg w-16 bg-background/90"
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleDeleteTrackedItem(tx.id, i)}
+                                                                    className="p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-colors shrink-0"
+                                                                    title="Remove Item"
+                                                                >
+                                                                    <X className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            </div>
                                                         ))}
                                                     </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center justify-between px-1">
+                                                    <span className="text-[10px] text-muted-foreground font-medium">
+                                                        No sub-items tracked
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleAddTrackedItem(tx.id)}
+                                                        className="text-[11px] font-bold text-primary flex items-center gap-1 hover:underline active:scale-95 transition-all"
+                                                    >
+                                                        <Plus className="w-3 h-3" />
+                                                        <span>Add Tracked Items</span>
+                                                    </button>
                                                 </div>
                                             )}
                                         </div>
@@ -761,7 +849,7 @@ export function SmartBatchParserDrawer() {
                     <div className="p-4 border-t border-border/40 glass bg-background/80 backdrop-blur-md shrink-0 space-y-2">
                         <div className="flex items-center justify-between text-xs font-bold">
                             <span className="text-muted-foreground">
-                                {t('selectedCount', { count: selectedTransactions.length, defaultValue: `${selectedTransactions.length} of ${parsedList.length} selected` })}
+                                {t('selectedCount', { count: selectedTransactions.length, total: parsedList.length, defaultValue: `${selectedTransactions.length} of ${parsedList.length} selected` })}
                             </span>
                             <div className="flex items-center gap-3">
                                 {totalExpense > 0 && (

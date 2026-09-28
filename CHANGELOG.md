@@ -7,7 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.10.7] - 2026-09-29
+## [1.10.8] - 2026-09-29
+
+### Added
+- **Dual-Function Quick Add Floating Action Button (FAB)**:
+  - Single tap vs Tap & Hold gestures:
+    - Default mode (`single`): Single tap opens Single Record entry; Tap & Hold (500ms press with haptic feedback vibration) opens AI Smart Note drawer.
+    - Flipped mode (`ai`): Single tap opens AI Smart Note drawer; Tap & Hold opens Single Record entry.
+  - Dynamic visual icon: Displays `Plus` icon in single mode and flips to AI star `Sparkles` icon in AI mode.
+  - Full drag safety: Retains touch repositioning and spring physics while preventing accidental triggers during movement.
+- **Quick Add Behavior Setting**:
+  - Dedicated configuration card in Settings with switch toggle and localized descriptions in English and Bengali.
+  - State persisted via `useSettingsStore` (`quickAddMode: 'single' | 'ai'`).
+
+### Changed
+- **Home / Dashboard UI Simplification**:
+  - Removed duplicate "AI Smart Note" and "Add Record" quick action buttons from Dashboard to streamline navigation towards the enhanced Quick Add FAB.
 
 ### Fixed
 - **AI Batch Parser Count Display**: Resolved template literal interpolation bug by passing `total: parsedList.length` into `t('selectedCount')`. The footer text now accurately renders `X of Y selected` (and localized Bengali equivalent) instead of unpopulated raw tokens.

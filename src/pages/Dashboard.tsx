@@ -10,7 +10,7 @@ import { BudgetCard } from '@/components/budgets/BudgetCard';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Settings2, Sparkles, Plus } from 'lucide-react';
+import { Settings2 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -18,15 +18,12 @@ import { BalanceEditDrawer } from '@/components/shared/BalanceEditDrawer';
 import { useTranslation } from 'react-i18next';
 import { formatAmount } from '@/lib/utils';
 import { useExpenseStore } from '@/stores/expenseStore';
-import { useSmartNoteQueueStore } from '@/stores/smartNoteQueueStore';
 import { getBillingCycleRange } from '@/utils/cycle';
 
 export default function Dashboard() {
     const { t, i18n } = useTranslation();
     const { 
         openEditExpense, 
-        openAddExpense,
-        openSmartBatchParser,
         openRecurringPaymentDetail, 
         openRecurringPaymentsList,
         openBudgetsList,
@@ -136,10 +133,6 @@ export default function Dashboard() {
         }, 0);
     }, [expensesThisMonth]);
 
-    const queue = useSmartNoteQueueStore(state => state.queue);
-    const readyNotesCount = queue.filter(n => n.status === 'ready').length;
-    const pendingNotesCount = queue.filter(n => n.status === 'pending' || n.status === 'processing').length;
-
     return (
         <PageContainer
             title={t('appTitle')}
@@ -193,54 +186,6 @@ export default function Dashboard() {
                         </div>
                     </CardContent>
                 </Card>
-            </div>
-
-            {/* Quick Actions Grid */}
-            <div className="grid grid-cols-2 gap-2.5 mb-6">
-                <button
-                    type="button"
-                    onClick={() => openSmartBatchParser()}
-                    className="p-3.5 rounded-2xl glass border border-primary/20 bg-primary/5 hover:bg-primary/10 flex items-center gap-3 text-left transition-all duration-300 active:scale-95 group shadow-sm"
-                >
-                    <div className="p-2.5 rounded-xl bg-primary/15 text-primary group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300 shrink-0">
-                        <Sparkles className="w-4 h-4" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                        <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-black tracking-tight text-foreground">{t('aiSmartNote', { defaultValue: 'AI Smart Note' })}</span>
-                            {readyNotesCount > 0 ? (
-                                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-                                    {readyNotesCount}
-                                </span>
-                            ) : pendingNotesCount > 0 ? (
-                                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                                    {pendingNotesCount}
-                                </span>
-                            ) : null}
-                        </div>
-                        <span className="text-[10px] text-muted-foreground font-medium truncate">
-                            {readyNotesCount > 0 
-                                ? t('offlineReadyToReview', { defaultValue: 'Ready to review' })
-                                : pendingNotesCount > 0
-                                ? t('waitingForConnection', { defaultValue: 'Waiting for network...' })
-                                : t('aiSmartNoteSubtitle', { defaultValue: 'Parse messy notes' })}
-                        </span>
-                    </div>
-                </button>
-
-                <button
-                    type="button"
-                    onClick={() => openAddExpense()}
-                    className="p-3.5 rounded-2xl glass border border-white/10 hover:border-primary/30 bg-white/5 hover:bg-muted/40 flex items-center gap-3 text-left transition-all duration-300 active:scale-95 group shadow-sm"
-                >
-                    <div className="p-2.5 rounded-xl bg-muted/60 text-foreground group-hover:scale-110 transition-all duration-300 shrink-0">
-                        <Plus className="w-4 h-4" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-black tracking-tight text-foreground">{t('addRecord', { defaultValue: 'Add Record' })}</span>
-                        <span className="text-[10px] text-muted-foreground font-medium truncate">{t('singleTransaction', { defaultValue: 'Single entry' })}</span>
-                    </div>
-                </button>
             </div>
 
             {/* Recent Expenses */}

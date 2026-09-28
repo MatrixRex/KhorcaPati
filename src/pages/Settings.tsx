@@ -2,9 +2,10 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { useUIStore, type Theme } from '@/stores/uiStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useState } from 'react';
-import { Moon, Sun, Monitor, Check, Trash2, Bell, Target, Wallet, Languages, Download, Upload, TrendingUp, Archive } from 'lucide-react';
+import { Moon, Sun, Monitor, Check, Trash2, Bell, Target, Wallet, Languages, Download, Upload, TrendingUp, Archive, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { useTranslation } from 'react-i18next';
 import { exportData, importData } from '@/lib/data-management';
 import { AIProviderManager } from '@/components/settings/AIProviderManager';
@@ -23,7 +24,7 @@ import {
 export default function Settings() {
     const { t } = useTranslation();
     const { theme, setTheme, fontScale, setFontScale } = useUIStore();
-    const { language, setLanguage, resetDate, setResetDate } = useSettingsStore();
+    const { language, setLanguage, resetDate, setResetDate, quickAddMode, toggleQuickAddMode } = useSettingsStore();
     const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
     const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
     const [isImportSuccessOpen, setIsImportSuccessOpen] = useState(false);
@@ -220,6 +221,36 @@ export default function Settings() {
                 {/* AI Providers & Fallback Chain Section */}
                 <section>
                     <AIProviderManager />
+                </section>
+
+                {/* Quick Add Button Behavior Section */}
+                <section>
+                    <h2 className="label-header mb-3 px-1">{t('quickAddBehavior')}</h2>
+                    <div className="report-card-container p-4">
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div className="p-2.5 rounded-xl bg-primary/10 text-primary shrink-0 border border-primary/20">
+                                    <Sparkles className="w-5 h-5" />
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                    <span className="text-sm font-bold text-foreground">
+                                        {t('quickAddDefaultTap')}
+                                    </span>
+                                    <span className="text-[11px] text-muted-foreground font-medium mt-0.5">
+                                        {t('quickAddTapHold', {
+                                            tap: quickAddMode === 'ai' ? t('quickAddAiSmartNote') : t('quickAddSingleRecord'),
+                                            hold: quickAddMode === 'ai' ? t('quickAddSingleRecord') : t('quickAddAiSmartNote')
+                                        })}
+                                    </span>
+                                </div>
+                            </div>
+                            <Switch
+                                checked={quickAddMode === 'ai'}
+                                onCheckedChange={toggleQuickAddMode}
+                                aria-label={t('quickAddDefaultTap')}
+                            />
+                        </div>
+                    </div>
                 </section>
 
                 <section>

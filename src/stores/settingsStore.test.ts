@@ -11,7 +11,8 @@ describe('Settings Store Business Logic', () => {
             geminiApiKey: '',
             geminiModel: 'gemini-flash-lite-latest',
             categoryPreferences: {},
-            deletedCategories: []
+            deletedCategories: [],
+            quickAddMode: 'single'
         });
     });
 
@@ -128,6 +129,21 @@ describe('Settings Store Business Logic', () => {
         renameCategoryPreference('Snacks', 'Quick Bites');
 
         expect(useSettingsStore.getState().categoryPreferences['subway sandwich']).toBe('Quick Bites');
+    });
+
+    it('manages quickAddMode setting (single vs ai)', () => {
+        expect(useSettingsStore.getState().quickAddMode).toBe('single');
+
+        const { setQuickAddMode, toggleQuickAddMode } = useSettingsStore.getState();
+        
+        setQuickAddMode('ai');
+        expect(useSettingsStore.getState().quickAddMode).toBe('ai');
+
+        toggleQuickAddMode();
+        expect(useSettingsStore.getState().quickAddMode).toBe('single');
+
+        toggleQuickAddMode();
+        expect(useSettingsStore.getState().quickAddMode).toBe('ai');
     });
 });
 

@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/db/schema';
-import { Plus, Edit2, Link2 } from 'lucide-react';
+import { Plus, Edit2, Link2, Sparkles } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -27,6 +27,7 @@ import { CategoryManagementDrawer } from '@/components/shared/CategoryManagement
 import { SmartBatchParserDrawer } from '@/components/expenses/SmartBatchParserDrawer';
 import { DevBadge } from '@/components/shared/DevBadge';
 import { useUIStore } from '@/stores/uiStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -149,6 +150,64 @@ export function GlobalUI() {
 
     // Hide FAB on settings page
     const showFAB = location.pathname !== '/settings';
+    const openSmartBatchParser = useUIStore(state => state.openSmartBatchParser);
+    const quickAddMode = useSettingsStore(state => state.quickAddMode);
+
+    const longPressTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isDraggingRef = React.useRef(false);
+    const didTriggerHoldRef = React.useRef(false);
+
+    const clearHoldTimer = React.useCallback(() => {
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+    }, []);
+
+    const handlePointerDown = React.useCallback(() => {
+        isDraggingRef.current = false;
+        didTriggerHoldRef.current = false;
+        clearHoldTimer();
+
+        longPressTimerRef.current = setTimeout(() => {
+            if (!isDraggingRef.current) {
+                didTriggerHoldRef.current = true;
+                if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+                    try {
+                        window.navigator.vibrate(50);
+                    } catch {
+                        // ignore vibration errors
+                    }
+                }
+                // Tap & Hold action (opposite of single tap)
+                if (quickAddMode === 'ai') {
+                    openAddExpense();
+                } else {
+                    openSmartBatchParser();
+                }
+            }
+        }, 500);
+    }, [clearHoldTimer, openAddExpense, openSmartBatchParser, quickAddMode]);
+
+    const handlePointerUpOrLeave = React.useCallback(() => {
+        clearHoldTimer();
+    }, [clearHoldTimer]);
+
+    const handleClick = React.useCallback((e: React.MouseEvent) => {
+        clearHoldTimer();
+        if (didTriggerHoldRef.current || isDraggingRef.current) {
+            e.preventDefault();
+            e.stopPropagation();
+            didTriggerHoldRef.current = false;
+            return;
+        }
+        // Single tap action
+        if (quickAddMode === 'ai') {
+            openSmartBatchParser();
+        } else {
+            openAddExpense();
+        }
+    }, [clearHoldTimer, openAddExpense, openSmartBatchParser, quickAddMode]);
 
     return (
         <>
@@ -157,11 +216,20 @@ export function GlobalUI() {
                     drag
                     dragMomentum={false}
                     dragElastic={0.2}
+                    onDragStart={() => {
+                        isDraggingRef.current = true;
+                        clearHoldTimer();
+                    }}
                     onDragEnd={(_e, info) => {
+                        clearHoldTimer();
                         setFabPosition({
                             x: (fabPosition?.x || 0) + info.offset.x,
                             y: (fabPosition?.y || 0) + info.offset.y
                         });
+                        // Reset drag state shortly after release so click doesn't trigger immediately
+                        setTimeout(() => {
+                            isDraggingRef.current = false;
+                        }, 50);
                     }}
                     animate={{
                         x: fabPosition?.x || 0,
@@ -183,12 +251,18 @@ export function GlobalUI() {
                         timeConstant: 400
                     }}
                     className="fixed bottom-20 right-4 h-14 w-14 rounded-full z-[51] bg-white/10 dark:bg-black/20 backdrop-blur-sm text-primary shadow-2xl shadow-primary/10 border border-white/40 dark:border-white/10 cursor-grab active:cursor-grabbing touch-none select-none overflow-hidden !transition-none"
-                    onClick={() => {
-                        // Action: open add expense sheet
-                        openAddExpense();
-                    }}
+                    onPointerDown={handlePointerDown}
+                    onPointerUp={handlePointerUpOrLeave}
+                    onPointerCancel={handlePointerUpOrLeave}
+                    onClick={handleClick}
+                    title={quickAddMode === 'ai' ? 'Tap: AI Smart Note, Hold: Single Record' : 'Tap: Single Record, Hold: AI Smart Note'}
+                    aria-label={quickAddMode === 'ai' ? 'AI Smart Note (Hold for Single Record)' : 'Add Record (Hold for AI Smart Note)'}
                 >
-                    <Plus className="w-7 h-7 stroke-[3] pointer-events-none" />
+                    {quickAddMode === 'ai' ? (
+                        <Sparkles className="w-7 h-7 stroke-[2.5] pointer-events-none" />
+                    ) : (
+                        <Plus className="w-7 h-7 stroke-[3] pointer-events-none" />
+                    )}
                 </MotionButton>
             )}
 

@@ -25,6 +25,7 @@ interface SettingsState {
     aiProviders: AIProviderConfig[];
     categoryPreferences: Record<string, string>;
     deletedCategories: string[];
+    quickAddMode: 'single' | 'ai';
     setInitialBalance: (amount: number) => void;
     setLanguage: (lang: string) => void;
     markWelcomeSeen: () => void;
@@ -36,6 +37,8 @@ interface SettingsState {
     updateAIProvider: (id: string, updates: Partial<AIProviderConfig>) => void;
     removeAIProvider: (id: string) => void;
     moveAIProvider: (fromIndex: number, toIndex: number) => void;
+    setQuickAddMode: (mode: 'single' | 'ai') => void;
+    toggleQuickAddMode: () => void;
     learnCategoryPreference: (item: string, category: string) => void;
     clearCategoryPreferences: () => void;
     markDeletedCategory: (categoryName: string) => void;
@@ -56,6 +59,7 @@ export const useSettingsStore = create<SettingsState>()(
             aiProviders: [],
             categoryPreferences: {},
             deletedCategories: [],
+            quickAddMode: 'single',
             setInitialBalance: (amount: number) => set({ initialBalance: amount }),
             setLanguage: (lang: string) => {
                 set({ language: lang });
@@ -87,6 +91,10 @@ export const useSettingsStore = create<SettingsState>()(
                 updated.splice(toIndex, 0, moved);
                 return { aiProviders: updated };
             }),
+            setQuickAddMode: (mode) => set({ quickAddMode: mode }),
+            toggleQuickAddMode: () => set((state) => ({
+                quickAddMode: state.quickAddMode === 'single' ? 'ai' : 'single'
+            })),
             learnCategoryPreference: (item: string, category: string) => {
                 const cleanKey = normalizePreferenceKeyword(item);
                 const cleanCat = category.trim();

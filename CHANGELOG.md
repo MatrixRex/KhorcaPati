@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.10] - 2026-09-30
+
+### Fixed
+- **Filter Backdrop Blocking UI**: The blur backdrop added in 1.10.9 was rendered inside Radix's `Portal`, whose single-child `Presence` wrapper then never unmounted the modal popover, leaving the whole UI blocked after a filter was used. The backdrop now renders in its own portal outside Radix's, so popovers close and release the page normally.
+
 ## [1.10.9] - 2026-09-30
 
 ### Changed

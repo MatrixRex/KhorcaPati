@@ -1,4 +1,5 @@
 import * as React from "react"
+import { createPortal } from "react-dom"
 import { Popover as PopoverPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
@@ -36,6 +37,16 @@ function Popover({
         modal={modal ?? backdrop}
         {...props}
       />
+      {/* Kept outside Radix's Portal: it wraps its children in a single-child Presence,
+          and an extra sibling there stops the popover from ever unmounting. */}
+      {backdrop && open && createPortal(
+        <div
+          data-slot="popover-backdrop"
+          aria-hidden="true"
+          className="fixed inset-0 z-[149] pointer-events-auto bg-background/40 backdrop-blur-sm animate-in fade-in-0 duration-200"
+        />,
+        document.body
+      )}
     </PopoverContext.Provider>
   )
 }
@@ -52,17 +63,8 @@ function PopoverContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
-  const { open, backdrop } = React.useContext(PopoverContext)
-
   return (
     <PopoverPrimitive.Portal>
-      {backdrop && open && (
-        <div
-          data-slot="popover-backdrop"
-          aria-hidden="true"
-          className="fixed inset-0 z-[149] bg-background/40 backdrop-blur-sm animate-in fade-in-0 duration-200"
-        />
-      )}
       <PopoverPrimitive.Content
         data-slot="popover-content"
         align={align}

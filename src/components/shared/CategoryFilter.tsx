@@ -34,7 +34,7 @@ export function CategoryFilter() {
 
     return (
         <div className="flex items-center gap-1">
-            <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <Popover open={isOpen} onOpenChange={setIsOpen} backdrop>
                 <PopoverTrigger asChild>
                     <Button
                         variant="ghost"

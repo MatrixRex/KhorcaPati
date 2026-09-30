@@ -4,13 +4,22 @@ import { Popover as PopoverPrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 import { useCloseWatcher } from "@/hooks/use-close-watcher"
 
-const PopoverContext = React.createContext<{ onClose?: () => void }>({})
+const PopoverContext = React.createContext<{
+  onClose?: () => void
+  open?: boolean
+  backdrop?: boolean
+}>({})
 
 function Popover({
   open,
   onOpenChange,
+  backdrop = false,
+  modal,
   ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Root>) {
+}: React.ComponentProps<typeof PopoverPrimitive.Root> & {
+  /** Dim + blur the page behind the popover and block taps from reaching it. */
+  backdrop?: boolean
+}) {
   const onClose = React.useCallback(() => {
     onOpenChange?.(false)
   }, [onOpenChange])
@@ -18,11 +27,13 @@ function Popover({
   useCloseWatcher(!!open, onClose)
 
   return (
-    <PopoverContext.Provider value={{ onClose }}>
+    <PopoverContext.Provider value={{ onClose, open, backdrop }}>
       <PopoverPrimitive.Root
         data-slot="popover"
         open={open}
         onOpenChange={onOpenChange}
+        // Modal mode stops the dismissing tap from also activating whatever is underneath
+        modal={modal ?? backdrop}
         {...props}
       />
     </PopoverContext.Provider>
@@ -41,8 +52,17 @@ function PopoverContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
+  const { open, backdrop } = React.useContext(PopoverContext)
+
   return (
     <PopoverPrimitive.Portal>
+      {backdrop && open && (
+        <div
+          data-slot="popover-backdrop"
+          aria-hidden="true"
+          className="fixed inset-0 z-[149] bg-background/40 backdrop-blur-sm animate-in fade-in-0 duration-200"
+        />
+      )}
       <PopoverPrimitive.Content
         data-slot="popover-content"
         align={align}

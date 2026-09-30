@@ -29,7 +29,7 @@ export function ExpenseSort() {
     };
 
     return (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <Popover open={isOpen} onOpenChange={setIsOpen} backdrop>
             <PopoverTrigger asChild>
                 <Button
                     variant="ghost"

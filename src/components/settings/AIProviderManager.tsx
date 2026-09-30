@@ -21,7 +21,9 @@ import {
     Loader2,
     ExternalLink,
     RefreshCw,
-    Server
+    Server,
+    ChevronDown,
+    Check
 } from 'lucide-react';
 
 const PROVIDER_INFO: Record<AIProviderType, { name: string; keyUrl: string; placeholder: string; defaultModel: string }> = {
@@ -83,6 +85,10 @@ export function AIProviderManager() {
     const [fetchingModelsMap, setFetchingModelsMap] = useState<Record<string, boolean>>({});
     const [testingMap, setTestingMap] = useState<Record<string, { testing: boolean; result?: { ok: boolean; msg: string } }>>({});
     const [showKeyMap, setShowKeyMap] = useState<Record<string, boolean>>({});
+
+    // Once a key has been set up, start collapsed; stay open for first-time setup
+    const isConfigured = (aiProviders ?? []).some(p => p.apiKey?.trim());
+    const [expanded, setExpanded] = useState(() => !isConfigured);
 
     // Fetch models for a provider
     const loadModelsForProvider = async (provider: AIProviderConfig, force = false) => {
@@ -166,18 +172,34 @@ export function AIProviderManager() {
     return (
         <div className="space-y-4">
             {/* Header description */}
-            <div className="flex items-center justify-between px-1">
-                <div>
+            <button
+                type="button"
+                onClick={() => setExpanded(prev => !prev)}
+                aria-expanded={expanded}
+                className="w-full flex items-center justify-between gap-3 px-1 text-left active:scale-[0.99] transition-all duration-200"
+            >
+                <div className="min-w-0">
                     <h3 className="text-sm font-black tracking-tight text-foreground flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-primary" />
+                        <Sparkles className="w-4 h-4 text-primary shrink-0" />
                         AI Parsing Providers & Fallback Chain
                     </h3>
-                    <p className="text-[11px] text-muted-foreground font-medium">
-                        Automatic sequential fallback: if Priority #1 hits rate limits or fails, Priority #2 is seamlessly used.
-                    </p>
+                    {expanded ? (
+                        <p className="text-[11px] text-muted-foreground font-medium">
+                            Automatic sequential fallback: if Priority #1 hits rate limits or fails, Priority #2 is seamlessly used.
+                        </p>
+                    ) : (
+                        <p className="text-[11px] text-muted-foreground font-medium flex items-center gap-1 truncate">
+                            <Check className="w-3 h-3 text-emerald-500 shrink-0" />
+                            <span className="truncate">
+                                {(aiProviders ?? []).filter(p => p.apiKey?.trim()).map(p => p.name).join(' → ')}
+                            </span>
+                        </p>
+                    )}
                 </div>
-            </div>
+                <ChevronDown className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200", expanded && "rotate-180")} />
+            </button>
 
+            {expanded && (<>
             {/* Provider List */}
             <div className="space-y-3">
                 {aiProviders && aiProviders.length > 0 ? (
@@ -436,6 +458,7 @@ export function AIProviderManager() {
                     </Button>
                 </div>
             </div>
+            </>)}
         </div>
     );
 }

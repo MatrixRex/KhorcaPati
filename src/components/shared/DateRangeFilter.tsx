@@ -33,13 +33,13 @@ export function DateRangeFilter() {
     const label = React.useMemo(() => {
         if (timeframe === 'today') return t('today');
         if (timeframe === 'this-week') return t('thisWeek') || 'This Week';
-        if (timeframe === 'this-month') return format(new Date(), 'MMMM');
+        if (timeframe === 'this-month') return format(new Date(), 'MMM');
         if (timeframe === 'past-month') return t('pastMonth') || 'Past Month';
         return `${format(startDate, 'MMM dd')} - ${format(endDate, 'MMM dd')}`;
     }, [timeframe, startDate, endDate, t]);
 
     return (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <Popover open={isOpen} onOpenChange={setIsOpen} backdrop>
             <PopoverTrigger asChild>
                 <Button
                     variant="ghost"
@@ -87,7 +87,7 @@ export function DateRangeFilter() {
                             setIsOpen(false);
                         }}
                     >
-                        {format(new Date(), 'MMMM')}
+                        {format(new Date(), 'MMM')}
                     </Button>
                     <Button
                         variant={timeframe === 'past-month' ? 'secondary' : 'ghost'}

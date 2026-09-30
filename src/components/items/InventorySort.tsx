@@ -27,7 +27,7 @@ export function InventorySort() {
     };
 
     return (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <Popover open={isOpen} onOpenChange={setIsOpen} backdrop>
             <PopoverTrigger asChild>
                 <Button
                     variant="ghost"

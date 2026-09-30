@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.9] - 2026-09-30
+
+### Changed
+- **Records Header**: Removed the "AI Note" button from the Records tab header (AI Smart Note remains available via the Quick Add FAB).
+- **Date Range Filter**: Current month now displays as a short month name (e.g. "Sep") in the header trigger and dropdown.
+- **Settings**: The AI provider / API key section starts collapsed once a key has been configured, showing a summary of the active fallback chain; it stays expanded for first-time setup.
+
+### Fixed
+- **Filter Dropdowns**: Opening a filter or sort popover now dims and blurs the page behind it, and tapping outside closes it without accidentally selecting an item in the list underneath (new opt-in `backdrop` prop on `Popover`).
+
 ## [1.10.8] - 2026-09-29
 
 ### Added

@@ -103,6 +103,73 @@ function evaluateArithmeticExpression(expr: string): number | null {
     return isNaN(result) ? null : Math.round(result * 100) / 100;
 }
 
+/**
+ * Finds the money amount in free text (arithmetic, currency, k/lakh/crore shorthand, Bengali digits,
+ * trailing price) and returns the text without it. Quantities like "5kg" or "x24" are not prices.
+ */
+export function extractAmountFromText(rawStr: string): { text: string; amount: number | null } {
+    let text = bengaliToEnglishDigits(rawStr);
+    let detectedAmount: number | null = null;
+
+    // 1. Check for arithmetic expression: e.g. "10+20+10", "10 + 20 + 10", "50+30"
+    // (Do NOT match item multipliers like "x24" or "24x")
+    const arithRegex = /(?:^|\s)([\d.]+(?:\s*[-+*/]\s*[\d.]+)+)(?:\s*(?:tk|taka|টাকা|৳|\$|bdt))?(?:\s|$)/i;
+    const arithMatch = text.match(arithRegex);
+    if (arithMatch) {
+        const val = evaluateArithmeticExpression(arithMatch[1]);
+        if (val !== null && val > 0) {
+            detectedAmount = val;
+            text = text.replace(arithMatch[0], ' ');
+        }
+    }
+
+    // 2. Check for currency-prefixed or currency-suffixed price anywhere: e.g. "৳100", "$50", "100tk", "100 taka"
+    const currencyPriceRegex = /(?:^|\s)(?:(?:tk|taka|টাকা|৳|\$|bdt)\s*([\d,]+(?:\.\d+)?)|([\d,]+(?:\.\d+)?)\s*(?:tk|taka|টাকা|৳|\$|bdt))(?:\s|$)/i;
+    const currMatch = text.match(currencyPriceRegex);
+    if (currMatch) {
+        const rawNum = (currMatch[1] || currMatch[2] || '').replace(/,/g, '');
+        const val = parseFloat(rawNum);
+        if (!isNaN(val) && val > 0) {
+            if (detectedAmount === null) {
+                detectedAmount = val;
+            }
+            text = text.replace(currMatch[0], ' ');
+        }
+    }
+
+    // 3. Check for trailing standalone price: e.g. "chicken 100", "egg x24 120", "cng 150", "fan 1k"
+    // Ensure it does NOT match "x24" (multiplier), "24x" (multiplier), or units like "2kg", "1L", "500g", "2pcs"
+    const trailingPriceRegex = /(?:^|\s)(?:(?:tk|taka|টাকা|৳|\$|bdt)\s*)?([\d,]+(?:\.\d+)?)\s*(k|lakh|crore|tk|taka|টাকা|৳|\$|bdt)?\s*$/i;
+    const trailingMatch = text.match(trailingPriceRegex);
+    if (trailingMatch) {
+        const rawNum = trailingMatch[1].replace(/,/g, '');
+        let val = parseFloat(rawNum);
+        const suffix = (trailingMatch[2] || '').toLowerCase();
+        if (suffix === 'k') val *= 1000;
+        else if (suffix === 'lakh') val *= 100000;
+        else if (suffix === 'crore') val *= 10000000;
+
+        const matchIndex = text.lastIndexOf(trailingMatch[0]);
+        const matchedSubstring = trailingMatch[0].trim();
+
+        const isXPrefix = /^[xX]\d+/i.test(matchedSubstring);
+        const isXSuffix = /^\d+[xX]/i.test(matchedSubstring);
+        const isUnitSuffix = /^\d+(?:kg|kgs|g|gm|gms|mg|l|ltr|ltrs|lt|liter|liters|litre|litres|litter|litters|ml|cl|dl|lb|lbs|oz|pcs|pc|piece|pieces|item|items|pack|packs|packet|packets|pkg|pkgs|box|boxes|carton|bag|bags|sack|sacks|bottle|bottles|can|cans|tin|strip|strips|tab|tabs|cap|caps|dozen|hali|pair|pairs|poa|powa|mon|gaj|meter|m|cm|ft)/i.test(matchedSubstring);
+
+        if (!isXPrefix && !isXSuffix && !isUnitSuffix && !isNaN(val) && val > 0) {
+            if (detectedAmount === null) {
+                detectedAmount = val;
+            }
+            text = text.slice(0, matchIndex) + text.slice(matchIndex + trailingMatch[0].length);
+        }
+    }
+
+    // Clean up punctuation and whitespace: remove leading/trailing dashes, colons, commas, extra spaces
+    text = text.replace(/^[\s\-:,]+|[\s\-:,]+$/g, '').replace(/\s+/g, ' ').trim();
+
+    return { text, amount: detectedAmount };
+}
+
 export function cleanTransactionNoteAndAmount(input: {
     title?: string;
     note?: string;
@@ -112,76 +179,14 @@ export function cleanTransactionNoteAndAmount(input: {
     const note = (input.note || '').trim();
     let amount = typeof input.amount === 'number' && !isNaN(input.amount) && input.amount > 0 ? input.amount : 0;
 
-    const cleanText = (rawStr: string): { text: string; detectedAmount: number | null } => {
-        let text = bengaliToEnglishDigits(rawStr);
-        let detectedAmount: number | null = null;
 
-        // 1. Check for arithmetic expression: e.g. "10+20+10", "10 + 20 + 10", "50+30"
-        // (Do NOT match item multipliers like "x24" or "24x")
-        const arithRegex = /(?:^|\s)([\d.]+(?:\s*[-+*/]\s*[\d.]+)+)(?:\s*(?:tk|taka|৳|\$|bdt))?(?:\s|$)/i;
-        const arithMatch = text.match(arithRegex);
-        if (arithMatch) {
-            const val = evaluateArithmeticExpression(arithMatch[1]);
-            if (val !== null && val > 0) {
-                detectedAmount = val;
-                text = text.replace(arithMatch[0], ' ');
-            }
-        }
+    const cleanedNoteResult = extractAmountFromText(note);
+    const cleanedTitleResult = extractAmountFromText(title);
 
-        // 2. Check for currency-prefixed or currency-suffixed price anywhere: e.g. "৳100", "$50", "100tk", "100 taka"
-        const currencyPriceRegex = /(?:^|\s)(?:(?:tk|taka|৳|\$|bdt)\s*([\d,]+(?:\.\d+)?)|([\d,]+(?:\.\d+)?)\s*(?:tk|taka|৳|\$|bdt))(?:\s|$)/i;
-        const currMatch = text.match(currencyPriceRegex);
-        if (currMatch) {
-            const rawNum = (currMatch[1] || currMatch[2] || '').replace(/,/g, '');
-            const val = parseFloat(rawNum);
-            if (!isNaN(val) && val > 0) {
-                if (detectedAmount === null) {
-                    detectedAmount = val;
-                }
-                text = text.replace(currMatch[0], ' ');
-            }
-        }
-
-        // 3. Check for trailing standalone price: e.g. "chicken 100", "egg x24 120", "cng 150", "fan 1k"
-        // Ensure it does NOT match "x24" (multiplier), "24x" (multiplier), or units like "2kg", "1L", "500g", "2pcs"
-        const trailingPriceRegex = /(?:^|\s)(?:(?:tk|taka|৳|\$|bdt)\s*)?([\d,]+(?:\.\d+)?)\s*(k|lakh|crore|tk|taka|৳|\$|bdt)?\s*$/i;
-        const trailingMatch = text.match(trailingPriceRegex);
-        if (trailingMatch) {
-            const rawNum = trailingMatch[1].replace(/,/g, '');
-            let val = parseFloat(rawNum);
-            const suffix = (trailingMatch[2] || '').toLowerCase();
-            if (suffix === 'k') val *= 1000;
-            else if (suffix === 'lakh') val *= 100000;
-            else if (suffix === 'crore') val *= 10000000;
-
-            const matchIndex = text.lastIndexOf(trailingMatch[0]);
-            const matchedSubstring = trailingMatch[0].trim();
-
-            const isXPrefix = /^[xX]\d+/i.test(matchedSubstring);
-            const isXSuffix = /^\d+[xX]/i.test(matchedSubstring);
-            const isUnitSuffix = /^\d+(?:kg|kgs|g|gm|gms|mg|l|ltr|ltrs|lt|liter|liters|litre|litres|litter|litters|ml|cl|dl|lb|lbs|oz|pcs|pc|piece|pieces|item|items|pack|packs|packet|packets|pkg|pkgs|box|boxes|carton|bag|bags|sack|sacks|bottle|bottles|can|cans|tin|strip|strips|tab|tabs|cap|caps|dozen|hali|pair|pairs|poa|powa|mon|gaj|meter|m|cm|ft)/i.test(matchedSubstring);
-
-            if (!isXPrefix && !isXSuffix && !isUnitSuffix && !isNaN(val) && val > 0) {
-                if (detectedAmount === null) {
-                    detectedAmount = val;
-                }
-                text = text.slice(0, matchIndex) + text.slice(matchIndex + trailingMatch[0].length);
-            }
-        }
-
-        // Clean up punctuation and whitespace: remove leading/trailing dashes, colons, commas, extra spaces
-        text = text.replace(/^[\s\-:,]+|[\s\-:,]+$/g, '').replace(/\s+/g, ' ').trim();
-
-        return { text, detectedAmount };
-    };
-
-    const cleanedNoteResult = cleanText(note);
-    const cleanedTitleResult = cleanText(title);
-
-    if (cleanedNoteResult.detectedAmount !== null && (amount <= 0.01 || cleanedNoteResult.detectedAmount !== amount)) {
-        amount = cleanedNoteResult.detectedAmount;
-    } else if (cleanedTitleResult.detectedAmount !== null && (amount <= 0.01 || cleanedTitleResult.detectedAmount !== amount)) {
-        amount = cleanedTitleResult.detectedAmount;
+    if (cleanedNoteResult.amount !== null && (amount <= 0.01 || cleanedNoteResult.amount !== amount)) {
+        amount = cleanedNoteResult.amount;
+    } else if (cleanedTitleResult.amount !== null && (amount <= 0.01 || cleanedTitleResult.amount !== amount)) {
+        amount = cleanedTitleResult.amount;
     }
 
     let finalNote = cleanedNoteResult.text;
@@ -231,12 +236,15 @@ export interface GeminiParseOptions {
     providers?: AIProviderConfig[];
 }
 
-async function callGeminiApi(apiKey: string, model: string, systemPrompt: string, userText: string): Promise<string> {
+export const buildUserMessage = (noteText: string) =>
+    `Extract all financial transactions from this note:\n\n"""\n${noteText}\n"""`;
+
+async function callGeminiApi(apiKey: string, model: string, systemPrompt: string, userMessage: string): Promise<string> {
     const requestPayload = {
         contents: [
             {
                 role: 'user',
-                parts: [{ text: `Extract all financial transactions from this note:\n\n"""\n${userText}\n"""` }]
+                parts: [{ text: userMessage }]
             }
         ],
         systemInstruction: {
@@ -314,7 +322,7 @@ async function callGeminiApi(apiKey: string, model: string, systemPrompt: string
     return candidateText;
 }
 
-async function callOpenAiCompatibleApi(provider: AIProviderConfig, systemPrompt: string, userText: string): Promise<string> {
+async function callOpenAiCompatibleApi(provider: AIProviderConfig, systemPrompt: string, userMessage: string): Promise<string> {
     let endpoint = '';
     if (provider.type === 'groq') {
         endpoint = 'https://api.groq.com/openai/v1/chat/completions';
@@ -330,7 +338,7 @@ async function callOpenAiCompatibleApi(provider: AIProviderConfig, systemPrompt:
         model: provider.model,
         messages: [
             { role: 'system', content: systemPrompt },
-            { role: 'user', content: `Extract all financial transactions from this note:\n\n"""\n${userText}\n"""` }
+            { role: 'user', content: userMessage }
         ],
         response_format: { type: 'json_object' },
         temperature: 0.1
@@ -373,26 +381,34 @@ async function callOpenAiCompatibleApi(provider: AIProviderConfig, systemPrompt:
     return content;
 }
 
-export async function parseTransactionsWithGemini(options: GeminiParseOptions): Promise<ParsedGeminiTransaction[]> {
+/** Sends one prompt to a configured cloud provider and returns its raw text reply. */
+export function callAIProvider(provider: AIProviderConfig, systemPrompt: string, userMessage: string): Promise<string> {
+    return provider.type === 'gemini'
+        ? callGeminiApi(provider.apiKey, provider.model || 'gemini-flash-lite-latest', systemPrompt, userMessage)
+        : callOpenAiCompatibleApi(provider, systemPrompt, userMessage);
+}
+
+/** Normalized parse inputs shared by prompt building and response post-processing. */
+export interface ParseContext {
+    categoryNames: string[];
+    nonSystemCategories: string[];
+    deletedCategories: string[];
+    deletedNamesSet: Set<string>;
+    categoryPreferences: Record<string, string>;
+    userPrefsList: Array<{ item: string; category: string }>;
+    referenceDate: string;
+}
+
+export type ParseContextInput = Pick<GeminiParseOptions, 'categories' | 'categoryPreferences' | 'deletedCategories' | 'historyExamples' | 'referenceDate'>;
+
+export function buildParseContext(options: ParseContextInput): ParseContext {
     const {
-        noteText,
         categories,
         categoryPreferences = {},
         deletedCategories = [],
         historyExamples = [],
         referenceDate = new Date().toISOString().split('T')[0],
-        apiKey,
-        model = 'gemini-flash-lite-latest'
     } = options;
-
-    const hasProviders = options.providers && options.providers.some(p => p.enabled && p.apiKey && p.apiKey.trim());
-    if (!hasProviders && (!apiKey || !apiKey.trim())) {
-        throw new Error('Please configure your Google Gemini or AI provider API key in Settings.');
-    }
-
-    if (!noteText || !noteText.trim()) {
-        return [];
-    }
 
     const categoryNames = categories.map(c => c.name.trim()).filter(Boolean);
     const nonSystemCategories = categoryNames.filter(name => !['Unlisted', 'Lent', 'Borrowed'].includes(name));
@@ -427,6 +443,12 @@ export async function parseTransactionsWithGemini(options: GeminiParseOptions): 
         }
     }
 
+    return { categoryNames, nonSystemCategories, deletedCategories, deletedNamesSet, categoryPreferences, userPrefsList, referenceDate };
+}
+
+export function buildSystemPrompt(ctx: ParseContext): string {
+    const { categoryNames, nonSystemCategories, deletedCategories, userPrefsList, referenceDate } = ctx;
+
     const personalizationSection = userPrefsList.length > 0
         ? `\nUSER CATEGORIZATION PREFERENCES & HISTORICAL HABITS (CRITICAL PERSONALIZATION):
 The user has established specific past categorization preferences and corrections:
@@ -449,7 +471,7 @@ Under NO circumstances should you assign transactions to any of these deleted ca
 Instead, map to the closest matching category from "User's Existing Categories", or use "Unlisted".\n`
         : '';
 
-    const systemPrompt = `You are an expert financial categorization and extraction AI for the personal expense tracker app "KhorcaPati".
+    return `You are an expert financial categorization and extraction AI for the personal expense tracker app "KhorcaPati".
 Your goal is to parse unstructured, conversational, or messy notes, receipts, and messages into clean, structured transactions, and accurately assign every transaction to an appropriate category.
 
 CONTEXT:
@@ -521,8 +543,24 @@ SPLITTING VS GROUPING RULES (CRITICAL):
 - If multiple items are grouped together with a single total price (e.g., "egg and fish 70 taka"), create a SINGLE transaction record containing all those items in the "items" array, with the "amount" set to the total price (70).
 
 Return ONLY valid JSON adhering to the specified schema.`;
+}
 
-// Build active candidate providers list
+export async function parseTransactionsWithGemini(options: GeminiParseOptions): Promise<ParsedGeminiTransaction[]> {
+    const { noteText, apiKey, model = 'gemini-flash-lite-latest' } = options;
+
+    const hasProviders = options.providers && options.providers.some(p => p.enabled && p.apiKey && p.apiKey.trim());
+    if (!hasProviders && (!apiKey || !apiKey.trim())) {
+        throw new Error('Please configure your Google Gemini or AI provider API key in Settings.');
+    }
+
+    if (!noteText || !noteText.trim()) {
+        return [];
+    }
+
+    const ctx = buildParseContext(options);
+    const systemPrompt = buildSystemPrompt(ctx);
+
+    // Build active candidate providers list
     const candidateProviders: AIProviderConfig[] = [];
     if (options.providers && options.providers.length > 0) {
         candidateProviders.push(...options.providers.filter(p => p.enabled && p.apiKey && p.apiKey.trim()));
@@ -546,11 +584,7 @@ Return ONLY valid JSON adhering to the specified schema.`;
 
     for (const provider of candidateProviders) {
         try {
-            if (provider.type === 'gemini') {
-                candidateText = await callGeminiApi(provider.apiKey, provider.model || 'gemini-flash-lite-latest', systemPrompt, noteText);
-            } else {
-                candidateText = await callOpenAiCompatibleApi(provider, systemPrompt, noteText);
-            }
+            candidateText = await callAIProvider(provider, systemPrompt, buildUserMessage(noteText));
             if (candidateText) {
                 break; // Succeeded!
             }
@@ -571,6 +605,13 @@ Return ONLY valid JSON adhering to the specified schema.`;
         }
         throw new Error(`All configured AI providers failed. Errors: ${failureErrors.join(' | ')}`);
     }
+
+    return postProcessAIResponse(candidateText, ctx);
+}
+
+/** Parses raw model JSON output and applies the shared cleanup and category rules, whichever engine produced it. */
+export function postProcessAIResponse(candidateText: string, ctx: ParseContext): ParsedGeminiTransaction[] {
+    const { categoryNames, deletedNamesSet, categoryPreferences, referenceDate } = ctx;
 
     let parsedResult: { transactions?: any[] };
     try {

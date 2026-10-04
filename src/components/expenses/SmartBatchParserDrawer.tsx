@@ -20,6 +20,7 @@ import {
     Clock,
     CheckCircle2,
     RefreshCw,
+    Smartphone,
     X
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
@@ -35,9 +36,10 @@ import { useUIStore } from '@/stores/uiStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useSmartNoteQueueStore, type QueuedSmartNote } from '@/stores/smartNoteQueueStore';
-import { db } from '@/db/schema';
-import { parseTransactionsWithGemini, isNetworkConnectionError, type ParsedGeminiTransaction } from '@/lib/geminiParser';
+import { isNetworkConnectionError, type ParsedGeminiTransaction } from '@/lib/geminiParser';
 import { importParsedTransactions, processNextQueuedNote } from '@/services/smartNoteQueueProcessor';
+import { getSmartNoteAvailability, parseSmartNote } from '@/services/smartNoteParser';
+import { OfflineModelPanel } from '@/components/settings/AISettingsSection';
 
 const SAMPLE_NOTES = [
     {
@@ -68,7 +70,6 @@ export function SmartBatchParserDrawer() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { isSmartBatchParserOpen, closeSmartBatchParser, initialSmartBatchText } = useUIStore();
-    const { geminiApiKey, geminiModel, aiProviders } = useSettingsStore();
     const { categories } = useCategoryStore();
 
     const { queue, enqueueNote, removeNote, clearCompleted } = useSmartNoteQueueStore();
@@ -80,10 +81,9 @@ export function SmartBatchParserDrawer() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [offlineNotice, setOfflineNotice] = useState<string | null>(null);
 
-    const hasKey = Boolean(
-        (aiProviders && aiProviders.some(p => p.enabled && p.apiKey && p.apiKey.trim())) ||
-        (geminiApiKey && geminiApiKey.trim())
-    );
+    // Re-evaluated whenever settings change (mode, downloaded model, keys).
+    const availability = useSettingsStore(() => getSmartNoteAvailability());
+    const isOfflineMode = useSettingsStore(s => s.aiMode === 'offline');
 
     useEffect(() => {
         if (isSmartBatchParserOpen) {
@@ -100,13 +100,17 @@ export function SmartBatchParserDrawer() {
             return;
         }
 
-        if (!hasKey) {
+        if (availability === 'needs-key') {
             setErrorMessage(t('geminiKeyRequiredDesc', { defaultValue: 'To use the AI Smart Note Parser, please configure your Google Gemini API key in Settings first.' }));
             return;
         }
+        if (availability === 'needs-model') {
+            setErrorMessage(t('offlineModelRequiredDesc'));
+            return;
+        }
 
-        // Check if device is offline upfront
-        if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        // Online mode needs the network; queue the note for later instead of failing.
+        if (!isOfflineMode && typeof navigator !== 'undefined' && navigator.onLine === false) {
             enqueueNote(noteText, format(new Date(), 'yyyy-MM-dd'));
             setOfflineNotice(t('noteSavedOffline', { defaultValue: 'You are currently offline. Your note has been saved offline and will automatically process in the background when connection is restored.' }));
             setNoteText('');
@@ -119,38 +123,7 @@ export function SmartBatchParserDrawer() {
         setOfflineNotice(null);
 
         try {
-            const dbCategories = await db.categories.toArray();
-            const effectiveCategories = dbCategories.length > 0 ? dbCategories : categories;
-
-            const { categoryPreferences, deletedCategories } = useSettingsStore.getState();
-            const deletedNamesSet = new Set((deletedCategories || []).map(c => c.toLowerCase().trim()));
-            const validCategoryNamesSet = new Set(effectiveCategories.map(c => c.name.toLowerCase().trim()));
-
-            const recentExpenses = await db.expenses
-                .orderBy('id')
-                .reverse()
-                .limit(100)
-                .toArray();
-
-            const historyExamples = recentExpenses
-                .filter((e) => {
-                    if (!e.note || !e.category || e.category === 'Unlisted') return false;
-                    const catLower = e.category.toLowerCase().trim();
-                    return validCategoryNamesSet.has(catLower) && !deletedNamesSet.has(catLower);
-                })
-                .map(e => ({ item: e.note, category: e.category }));
-
-            const results = await parseTransactionsWithGemini({
-                noteText,
-                categories: effectiveCategories,
-                categoryPreferences,
-                deletedCategories,
-                historyExamples,
-                referenceDate: format(new Date(), 'yyyy-MM-dd'),
-                apiKey: geminiApiKey,
-                model: geminiModel || 'gemini-flash-lite-latest',
-                providers: aiProviders,
-            });
+            const results = await parseSmartNote({ noteText, referenceDate: format(new Date(), 'yyyy-MM-dd') });
 
             if (results.length === 0) {
                 setErrorMessage(t('noTransactionsFound', { defaultValue: 'No transactions could be detected in this text. Try another note format.' }));
@@ -158,14 +131,15 @@ export function SmartBatchParserDrawer() {
                 setParsedList(results);
             }
         } catch (err: unknown) {
-            console.error('Gemini parse error:', err);
-            if (isNetworkConnectionError(err)) {
+            console.error('Smart note parse error:', err);
+            // Offline mode never uses the network, so a failure there is a real error, not "connection lost".
+            if (!isOfflineMode && isNetworkConnectionError(err)) {
                 enqueueNote(noteText, format(new Date(), 'yyyy-MM-dd'));
                 setOfflineNotice(t('noteSavedOffline', { defaultValue: 'Connection lost. Your note has been saved offline and will automatically process in the background when connection is restored.' }));
                 setNoteText('');
                 setErrorMessage(null);
             } else {
-                const msg = err instanceof Error ? err.message : 'Failed to parse transactions with Gemini.';
+                const msg = err instanceof Error ? err.message : 'Failed to read transactions from this note.';
                 setErrorMessage(msg);
             }
         } finally {
@@ -326,14 +300,42 @@ export function SmartBatchParserDrawer() {
                                     <DevBadge id="d:smart-batch-parser" />
                                 </SheetTitle>
                                 <p className="text-[11px] text-muted-foreground font-medium">
-                                    {t('aiParserSubtitle', { defaultValue: 'Paste unstructured notes & auto-create categorized records with Gemini' })}
+                                    {isOfflineMode ? t('aiParserSubtitleOffline') : t('aiParserSubtitleOnline')}
                                 </p>
                             </div>
                         </div>
                     </div>
                 </SheetHeader>
 
-                {!hasKey ? (
+                {availability === 'needs-model' ? (
+                    /* Offline mode: one-tap model download, or switch to Online in Settings */
+                    <div className="flex-1 overflow-y-auto px-6 py-6 pb-24 text-foreground overscroll-contain flex flex-col items-center justify-center text-center" data-scroll-container>
+                        <div className="max-w-md w-full mx-auto space-y-6">
+                            <div className="p-6 rounded-3xl bg-primary/10 border border-primary/20 space-y-4 text-center">
+                                <div className="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary shadow-lg shadow-primary/15 mx-auto">
+                                    <Smartphone className="w-7 h-7" />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <h3 className="text-base font-black tracking-tight">{t('offlineModelRequiredTitle')}</h3>
+                                    <p className="text-xs text-muted-foreground leading-relaxed">{t('offlineModelRequiredDesc')}</p>
+                                </div>
+                                <OfflineModelPanel compact />
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => {
+                                        closeSmartBatchParser();
+                                        navigate('/settings');
+                                    }}
+                                    className="w-full h-9 rounded-xl text-xs font-bold text-muted-foreground active:scale-[0.98] transition-all duration-200"
+                                >
+                                    <Settings className="w-4 h-4 mr-2" />
+                                    {t('goToSettings', { defaultValue: 'Open Settings' })}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                ) : availability === 'needs-key' ? (
                     /* Key Required Screen - direct to Settings */
                     <div className="flex-1 overflow-y-auto px-6 py-6 pb-24 text-foreground overscroll-contain flex flex-col items-center justify-center text-center" data-scroll-container>
                         <div className="max-w-md w-full mx-auto space-y-6">
@@ -536,7 +538,7 @@ export function SmartBatchParserDrawer() {
                                                     {item.status === 'processing' && (
                                                         <span className="flex items-center gap-1 text-primary font-bold">
                                                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                                            {t('retryingInBackground', { defaultValue: 'Processing with Gemini...' })}
+                                                            {t('retryingInBackground', { defaultValue: 'Processing note...' })}
                                                         </span>
                                                     )}
                                                     {item.status === 'pending' && (
@@ -845,7 +847,7 @@ export function SmartBatchParserDrawer() {
             )}
 
             {/* Bottom Fixed Import Bar */}
-            {hasKey && parsedList.length > 0 && (
+            {availability === 'ready' && parsedList.length > 0 && (
                     <div className="p-4 border-t border-border/40 glass bg-background/80 backdrop-blur-md shrink-0 space-y-2">
                         <div className="flex items-center justify-between text-xs font-bold">
                             <span className="text-muted-foreground">

@@ -3,4 +3,6 @@ packages:
 allowBuilds:
   esbuild: true
   msw: true
-
+  # Install script only fetches Linux CUDA binaries; CPU binaries ship in the package.
+  onnxruntime-node: false
+  protobufjs: false

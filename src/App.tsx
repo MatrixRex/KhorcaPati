@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { BottomNav } from '@/components/shared/BottomNav';
@@ -17,6 +17,9 @@ import Goals from '@/pages/Goals';
 import Loans from '@/pages/Loans';
 import Reports from '@/pages/Reports';
 import Settings from '@/pages/Settings';
+
+// Dev/testing page for on-device AI; lazy so WebLLM stays out of the main bundle.
+const AILab = lazy(() => import('@/pages/AILab'));
 
 import { ReloadPrompt } from '@/components/shared/ReloadPrompt';
 import { WelcomeModal } from '@/components/shared/WelcomeModal';
@@ -85,6 +88,7 @@ function AppContent() {
                 <Route path="/loans" element={<Loans />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/ai-lab" element={<Suspense fallback={null}><AILab /></Suspense>} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </motion.div>

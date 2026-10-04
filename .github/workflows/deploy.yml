@@ -29,6 +29,9 @@ jobs:
 
       - name: Install dependencies 🔧
         run: pnpm install
+        env:
+          # onnxruntime-node (used only by local eval scripts) would otherwise download CUDA binaries on Linux.
+          ONNXRUNTIME_NODE_INSTALL: skip
 
       - name: Build 🏗️
         run: pnpm build

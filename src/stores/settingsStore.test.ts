@@ -145,5 +145,19 @@ describe('Settings Store Business Logic', () => {
         toggleQuickAddMode();
         expect(useSettingsStore.getState().quickAddMode).toBe('ai');
     });
-});
 
+    // Saved settings from older versions have no aiMode, so persist's merge gives them this default too.
+    it('defaults to offline AI mode with no model downloaded', () => {
+        const initial = useSettingsStore.getInitialState();
+        expect(initial.aiMode).toBe('offline');
+        expect(initial.offlineModelDownloaded).toBe(false);
+    });
+
+    it('switches AI mode and records the offline model download', () => {
+        const { setAIMode, setOfflineModelDownloaded } = useSettingsStore.getState();
+        setAIMode('online');
+        expect(useSettingsStore.getState().aiMode).toBe('online');
+        setOfflineModelDownloaded(true);
+        expect(useSettingsStore.getState().offlineModelDownloaded).toBe(true);
+    });
+});

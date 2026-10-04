@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useTranslation } from 'react-i18next';
 import { exportData, importData } from '@/lib/data-management';
-import { AIProviderManager } from '@/components/settings/AIProviderManager';
+import { AISettingsSection } from '@/components/settings/AISettingsSection';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -218,9 +218,9 @@ export default function Settings() {
                     </div>
                 </section>
 
-                {/* AI Providers & Fallback Chain Section */}
+                {/* AI Smart Notes: offline (on-device) or online (API providers) */}
                 <section>
-                    <AIProviderManager />
+                    <AISettingsSection />
                 </section>
 
                 {/* Quick Add Button Behavior Section */}

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-10-04
+
+### Added
+- **Offline AI Smart Notes (new default)**: Smart Notes can now run entirely on the phone with no API key and no internet. A rule-based extractor reads amounts (arithmetic, k/lakh, ৳/টাকা, Bangla digits, `120/=`), dates (today/yesterday/gotokal/গতকাল/N days ago), income vs expense and items; an on-device multilingual model (multilingual-e5-small, ~130 MB one-time download) picks categories from ~3,000 built-in English/Banglish/Bangla words plus the user's own history and corrections. Scored 33/40 perfect notes on a fresh test set (vs 12/36 for the best on-device LLM).
+- **Offline / Online setting**: New "AI Smart Notes" section in Settings to choose Offline (download / delete the model, progress shown) or Online (the existing API-key providers, unchanged). Existing API keys are kept for switching back.
+- **Category onboarding**: After choosing language and theme, new users pick from 10 starter categories in their language (tap to remove, or add their own).
+- **AI Lab** (`#/ai-lab`, developer page): Compare on-device and cloud engines on labelled notes, with device capability checks and timings.
+
+### Changed
+- **Smart Note drawer**: Works offline without queuing notes; shows a one-tap model download when needed; wording no longer assumes Gemini.
+- **Category learning**: Imported AI results are no longer saved as category preferences; only explicit category edits (and manual records) are learned, so unchecked guesses don't reinforce mistakes.
+- **Amount detection**: "টাকা" is now recognised as a currency word.
+
 ## [1.10.10] - 2026-09-30
 
 ### Fixed

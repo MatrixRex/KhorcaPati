@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { parseTransactionsWithGemini, cleanTransactionNoteAndAmount } from './geminiParser';
+import { parseTransactionsWithGemini, cleanTransactionNoteAndAmount, extractAmountFromText } from './geminiParser';
 
 describe('Gemini AI Transaction Parser', () => {
     const mockCategories = [
@@ -708,3 +708,22 @@ describe('Gemini AI Transaction Parser', () => {
     });
 });
 
+
+describe('extractAmountFromText', () => {
+    it('finds trailing, currency, shorthand and arithmetic amounts and removes them from the text', () => {
+        expect(extractAmountFromText('chicken 100')).toEqual({ text: 'chicken', amount: 100 });
+        expect(extractAmountFromText('Netflix $9.99')).toEqual({ text: 'Netflix', amount: 9.99 });
+        expect(extractAmountFromText('new phone 18.5k')).toEqual({ text: 'new phone', amount: 18500 });
+        expect(extractAmountFromText('transport 10+20+10')).toEqual({ text: 'transport', amount: 40 });
+        expect(extractAmountFromText('বাজার ৫০০ টাকা').amount).toBe(500);
+    });
+
+    it('does not treat quantities or multipliers as prices', () => {
+        expect(extractAmountFromText('egg x24 120')).toEqual({ text: 'egg x24', amount: 120 });
+        expect(extractAmountFromText('rice 5kg')).toEqual({ text: 'rice 5kg', amount: null });
+    });
+
+    it('returns null when there is no amount', () => {
+        expect(extractAmountFromText('remind me to pay rent')).toEqual({ text: 'remind me to pay rent', amount: null });
+    });
+});

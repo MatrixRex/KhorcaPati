@@ -6,6 +6,9 @@ import { useCategoryStore } from '@/stores/categoryStore';
 import { processNextQueuedNote, importParsedTransactions } from './smartNoteQueueProcessor';
 import { NetworkConnectionError, type ParsedGeminiTransaction } from '@/lib/geminiParser';
 
+const parseSmartNoteOffline = vi.fn();
+vi.mock('@/lib/offlineAI/offlineEngine', () => ({ parseSmartNoteOffline: (...a: unknown[]) => parseSmartNoteOffline(...a) }));
+
 describe('Smart Note Queue Processor & Offline Import Engine', () => {
     beforeEach(async () => {
         await db.expenses.clear();
@@ -14,6 +17,8 @@ describe('Smart Note Queue Processor & Offline Import Engine', () => {
         await db.dailySummaries.clear();
         useSmartNoteQueueStore.getState().clearAll();
         useSettingsStore.getState().setGeminiApiKey('test-valid-key');
+        useSettingsStore.setState({ aiMode: 'online', offlineModelDownloaded: false, categoryPreferences: {} });
+        parseSmartNoteOffline.mockReset();
         await useCategoryStore.getState().ensureDefaultCategory();
     });
 
@@ -79,9 +84,35 @@ describe('Smart Note Queue Processor & Offline Import Engine', () => {
         const cats = await db.categories.toArray();
         expect(cats.some((c) => c.name.toLowerCase() === 'freelance')).toBe(true);
 
-        // Verify learned preferences
+        // Unchecked imports are not learned as preferences; only explicit category edits are.
         const preferences = useSettingsStore.getState().categoryPreferences;
-        expect(preferences['grocery bazar']).toBe('Groceries');
+        expect(preferences['grocery bazar']).toBeUndefined();
+    });
+
+    it('processNextQueuedNote in offline mode parses on-device without needing the network', async () => {
+        useSettingsStore.setState({ aiMode: 'offline', offlineModelDownloaded: true });
+        parseSmartNoteOffline.mockResolvedValue([{ id: 'o1', title: 'Uber', amount: 250, type: 'expense', category: 'Transport', date: '2026-10-04', note: 'Uber', itemAutoTrack: false, items: [], selected: true }]);
+        useSmartNoteQueueStore.getState().enqueueNote('uber 250', '2026-10-04');
+
+        const originalNavigator = globalThis.navigator;
+        Object.defineProperty(globalThis, 'navigator', { value: { onLine: false }, configurable: true });
+        try {
+            expect(await processNextQueuedNote()).toBe(true);
+        } finally {
+            Object.defineProperty(globalThis, 'navigator', { value: originalNavigator, configurable: true });
+        }
+
+        expect(parseSmartNoteOffline).toHaveBeenCalledWith({ noteText: 'uber 250', referenceDate: '2026-10-04' });
+        expect(useSmartNoteQueueStore.getState().queue[0].status).toBe('ready');
+    });
+
+    it('processNextQueuedNote in offline mode waits until the model is downloaded', async () => {
+        useSettingsStore.setState({ aiMode: 'offline', offlineModelDownloaded: false });
+        useSmartNoteQueueStore.getState().enqueueNote('uber 250', '2026-10-04');
+
+        expect(await processNextQueuedNote()).toBe(false);
+        expect(parseSmartNoteOffline).not.toHaveBeenCalled();
+        expect(useSmartNoteQueueStore.getState().queue[0].status).toBe('pending');
     });
 
     it('processNextQueuedNote skips processing when offline or when no API key exists', async () => {

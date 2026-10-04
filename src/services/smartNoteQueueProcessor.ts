@@ -3,7 +3,8 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useExpenseStore } from '@/stores/expenseStore';
 import { useSmartNoteQueueStore } from '@/stores/smartNoteQueueStore';
-import { parseTransactionsWithGemini, isNetworkConnectionError, type ParsedGeminiTransaction } from '@/lib/geminiParser';
+import { isNetworkConnectionError, type ParsedGeminiTransaction } from '@/lib/geminiParser';
+import { getSmartNoteAvailability, parseSmartNote } from './smartNoteParser';
 import { fireNotification } from '@/utils/notifications';
 import { format } from 'date-fns';
 
@@ -11,7 +12,8 @@ let isProcessing = false;
 
 /**
  * Imports an array of parsed transactions into Dexie DB, calculates daily summaries,
- * updates category preferences, and refreshes the expense store.
+ * creates missing categories, and refreshes the expense store. Categories are not learned as
+ * preferences here: unchecked AI guesses would reinforce mistakes; only explicit edits are learned.
  */
 export async function importParsedTransactions(transactions: ParsedGeminiTransaction[]): Promise<number> {
     if (!transactions || transactions.length === 0) return 0;
@@ -19,7 +21,6 @@ export async function importParsedTransactions(transactions: ParsedGeminiTransac
     const nowIso = new Date().toISOString();
     const datesToRecalculate = new Set<string>();
     const { addCategory } = useCategoryStore.getState();
-    const { learnCategoryPreference } = useSettingsStore.getState();
 
     const currentDbCats = await db.categories.toArray();
     const existingCatNames = new Set(currentDbCats.map((c) => c.name.toLowerCase().trim()));
@@ -34,7 +35,6 @@ export async function importParsedTransactions(transactions: ParsedGeminiTransac
         }
 
         if (catName && catName !== 'Unlisted') {
-            learnCategoryPreference(tx.title || tx.note, catName);
             if (!existingCatNames.has(catName.toLowerCase())) {
                 await addCategory(catName);
                 existingCatNames.add(catName.toLowerCase());
@@ -102,17 +102,16 @@ export async function importParsedTransactions(transactions: ParsedGeminiTransac
 }
 
 /**
- * Attempts to parse the next pending note in the offline queue.
- * Returns true if a note was processed, false if no notes or network stopped it.
+ * Attempts to parse the next pending note in the queue.
+ * Returns true if a note was processed, false if there is none or the engine can't run yet
+ * (online mode without network or key; offline mode before the model is downloaded).
  */
 export async function processNextQueuedNote(): Promise<boolean> {
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    const isOnlineMode = useSettingsStore.getState().aiMode === 'online';
+    if (isOnlineMode && typeof navigator !== 'undefined' && navigator.onLine === false) {
         return false;
     }
-
-    const { geminiApiKey, geminiModel, aiProviders } = useSettingsStore.getState();
-    const hasActiveProviders = (aiProviders && aiProviders.some(p => p.enabled && p.apiKey && p.apiKey.trim())) || Boolean(geminiApiKey && geminiApiKey.trim());
-    if (!hasActiveProviders) {
+    if (getSmartNoteAvailability() !== 'ready') {
         return false;
     }
 
@@ -125,38 +124,7 @@ export async function processNextQueuedNote(): Promise<boolean> {
     setNoteStatus(pendingNote.id, 'processing');
 
     try {
-        const dbCategories = await db.categories.toArray();
-        const effectiveCategories =
-            dbCategories.length > 0 ? dbCategories : useCategoryStore.getState().categories;
-        const { categoryPreferences, deletedCategories } = useSettingsStore.getState();
-        const deletedNamesSet = new Set((deletedCategories || []).map((c) => c.toLowerCase().trim()));
-        const validCategoryNamesSet = new Set(effectiveCategories.map((c) => c.name.toLowerCase().trim()));
-
-        const recentExpenses = await db.expenses
-            .orderBy('id')
-            .reverse()
-            .limit(100)
-            .toArray();
-
-        const historyExamples = recentExpenses
-            .filter((e) => {
-                if (!e.note || !e.category || e.category === 'Unlisted') return false;
-                const catLower = e.category.toLowerCase().trim();
-                return validCategoryNamesSet.has(catLower) && !deletedNamesSet.has(catLower);
-            })
-            .map((e) => ({ item: e.note, category: e.category }));
-
-        const results = await parseTransactionsWithGemini({
-            noteText: pendingNote.noteText,
-            categories: effectiveCategories,
-            categoryPreferences,
-            deletedCategories,
-            historyExamples,
-            referenceDate: pendingNote.referenceDate,
-            apiKey: geminiApiKey,
-            model: geminiModel || 'gemini-flash-lite-latest',
-            providers: aiProviders,
-        });
+        const results = await parseSmartNote({ noteText: pendingNote.noteText, referenceDate: pendingNote.referenceDate });
 
         if (results && results.length > 0) {
             setNoteStatus(pendingNote.id, 'ready', {
@@ -199,7 +167,6 @@ export async function processNextQueuedNote(): Promise<boolean> {
  */
 export async function processAllQueuedNotes(): Promise<void> {
     if (isProcessing) return;
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
 
     isProcessing = true;
     try {

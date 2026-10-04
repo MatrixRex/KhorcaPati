@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev"],
+      "port": 5174,
+      "url": "https://localhost:5174"
+    },
+    {
+      "name": "dev-http",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev:http"],
+      "port": 5175
+    }
+  ]
+}

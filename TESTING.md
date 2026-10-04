@@ -107,3 +107,35 @@ const expense = createMockExpense({ amount: 1500, type: 'expense', category: 'Fo
 | **Smart Item NLP** | `src/parsers/itemParser.test.ts` | Units (kg, L, pcs, dozen), fractional quantities, singularization |
 | **Smart Batch Parser** | `src/lib/geminiParser.test.ts` | AI structured JSON extraction, heuristic fallback |
 | **Notification Engine** | `src/utils/notificationLogic.test.ts` | Over-budget alerts, threshold alerts, due payment detection, period deduping |
+| **AI Eval Scoring** | `src/lib/aiEval/scoring.test.ts` | Amount-based transaction matching, category alternatives, items, per-tag summary, latency percentiles |
+| **AI Eval Dataset / Prompts / Runner** | `src/lib/aiEval/*.test.ts` | Dataset integrity, compact prompt + JSON schema, engine runs with failures and abort |
+
+---
+
+## 🤖 On-Device AI Lab (`#/ai-lab`)
+
+A hidden page for comparing AI engines on the same labelled notes (`src/lib/aiEval/dataset.ts`, 36 cases in English, Banglish, Bangla and mixed).
+Engines: WebLLM models (WebGPU, on-device), Chrome built-in AI (Gemini Nano), and your configured cloud providers as a baseline.
+Every engine's output goes through the production `postProcessAIResponse`, so scores reflect what users would see.
+
+**Desktop (quality):**
+- `pnpm dev:http` → open `http://localhost:5175/KhorcaPati/#/ai-lab` (plain http on localhost; works in embedded browsers that reject self-signed certs).
+
+**Phone (device support and speed):**
+- `pnpm dev`, phone on the same Wi-Fi → scan the QR code in the terminal, accept the certificate warning, then open `#/ai-lab`.
+- Use Chrome on Android. WebGPU needs HTTPS, which the dev server provides.
+
+**Reading results:** each run is saved on the device (Saved runs) and can be exported as JSON. The first call after loading is slower (GPU shader compilation), so judge speed by p50.
+**Adding cases:** append to `EVAL_CASES`; `dataset.test.ts` validates ids, tags, dates and category names.
+
+### Category model (embedding, `src/lib/categoryEmbed`)
+- `seeds.json` holds ~3,000 labelled words (English, Banglish, Bangla); `pnpm seeds:build` turns them into `seedVectors.json` (a test fails if they're out of sync).
+- `pnpm seeds:eval` scores the app's `categorize()` path on `heldout.ts` (385 items never in the seeds; reported as novel words vs new phrasings of seed words).
+- `node scripts/compare-category-methods.ts [model…]` benchmarks alternative methods/models.
+- In the AI Lab, "Category model" loads it on-device (CPU/WASM recommended) and runs the same 385-item test; the Evaluation toggle uses it to pick categories for LLM runs.
+- To grow the seeds, use `.agent/workflows/generate-category-seeds.md`.
+
+### Offline Smart Notes (`src/lib/offlineAI`)
+- Offline mode = rule-based extraction (`ruleParser.ts`) + on-device categories (`userCategorizer.ts`: seeds, the user's history and corrections) + the same post-processing as online (`offlineParser.ts`).
+- `pnpm offline:eval` scores it on the 36 development notes and the 40 fresh notes in `src/lib/aiEval/holdoutDataset.ts` (uses the cached model from `pnpm seeds:build`).
+- Routing between Offline and Online is in `src/services/smartNoteParser.ts`; the AI Lab has an "Offline mode" engine for phone timing.

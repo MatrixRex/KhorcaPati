@@ -1,18 +1,24 @@
 {
   "name": "khorcapati",
   "private": true,
-  "version": "1.10.10",
+  "version": "1.11.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:http": "vite --mode http --port 5175",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seeds:build": "node scripts/build-seed-vectors.ts",
+    "seeds:eval": "node scripts/eval-categories.ts",
+    "offline:eval": "vitest run --config vitest.eval.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@huggingface/transformers": "4.3.0",
+    "@mlc-ai/web-llm": "0.2.85",
     "@radix-ui/react-switch": "^1.2.6",
     "@tailwindcss/vite": "^4.2.1",
     "class-variance-authority": "^0.7.1",

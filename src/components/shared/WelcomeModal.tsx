@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useUIStore } from '@/stores/uiStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/lib/utils';
-import { Check, Sun, Moon, Languages } from 'lucide-react';
+import { Check, Sun, Moon, Languages, Plus, X, Tags } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
 import { DevBadge } from './DevBadge';
+import { PRESET_CATEGORIES, createOnboardingCategories, presetCategoryNames } from '@/lib/onboardingCategories';
 
 const LANGUAGES = [
     { code: 'en', label: 'English' },
@@ -51,14 +53,38 @@ export function WelcomeModal() {
         i18n.changeLanguage(selectedLang);
     }, [selectedLang, visible]);
 
-    const handleDone = () => {
-        setTheme(selectedTheme);
-        setLanguage(selectedLang);
-        markWelcomeSeen();
-        setVisible(false);
+    const [step, setStep] = useState<'preferences' | 'categories'>('preferences');
+    // Presets are tracked by index so switching language keeps the selection.
+    const [selectedPresets, setSelectedPresets] = useState<boolean[]>(() => PRESET_CATEGORIES.map(() => true));
+    const [customCategories, setCustomCategories] = useState<string[]>([]);
+    const [customDraft, setCustomDraft] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+    const presetNames = presetCategoryNames(selectedLang);
+
+    const addCustomCategory = () => {
+        const name = customDraft.trim();
+        if (!name) return;
+        const exists = [...presetNames, ...customCategories].some(n => n.toLowerCase() === name.toLowerCase());
+        if (!exists) setCustomCategories(prev => [...prev, name]);
+        setCustomDraft('');
+    };
+
+    const handleDone = async () => {
+        setIsSaving(true);
+        try {
+            await createOnboardingCategories([...presetNames.filter((_, i) => selectedPresets[i]), ...customCategories]);
+        } finally {
+            setTheme(selectedTheme);
+            setLanguage(selectedLang);
+            markWelcomeSeen();
+            setVisible(false);
+            setIsSaving(false);
+        }
     };
 
     if (!visible) return null;
+
+    const chipClass = 'inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-semibold active:scale-95 transition-all duration-200';
 
     return (
         <>
@@ -72,6 +98,88 @@ export function WelcomeModal() {
                     {/* Drag handle */}
                     <div className="h-1.5 w-12 bg-muted/40 rounded-full mx-auto mt-3 mb-1" />
 
+                    {step === 'categories' ? (
+                    <div className="px-6 pt-4 pb-8 space-y-5">
+                        <div>
+                            <h2 className="text-2xl font-black text-gradient flex items-center gap-2">
+                                <Tags className="w-5 h-5 text-primary" />
+                                {t('onboardingCategoriesTitle')}
+                            </h2>
+                            <p className="text-sm text-muted-foreground font-medium mt-1">{t('onboardingCategoriesDesc')}</p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto">
+                            {presetNames.map((name, i) => {
+                                const isOn = selectedPresets[i];
+                                return (
+                                    <button
+                                        key={PRESET_CATEGORIES[i].standard}
+                                        type="button"
+                                        aria-pressed={isOn}
+                                        onClick={() => setSelectedPresets(prev => prev.map((v, j) => (j === i ? !v : v)))}
+                                        className={cn(
+                                            chipClass,
+                                            isOn ? 'border-primary/40 bg-primary/10 text-foreground' : 'border-dashed border-muted text-muted-foreground line-through'
+                                        )}
+                                    >
+                                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: PRESET_CATEGORIES[i].color }} />
+                                        {name}
+                                        {isOn ? <X className="w-3 h-3 opacity-60" /> : <Plus className="w-3 h-3" />}
+                                    </button>
+                                );
+                            })}
+                            {customCategories.map(name => (
+                                <button
+                                    key={name}
+                                    type="button"
+                                    onClick={() => setCustomCategories(prev => prev.filter(n => n !== name))}
+                                    className={cn(chipClass, 'border-primary/40 bg-primary/10 text-foreground')}
+                                >
+                                    {name}
+                                    <X className="w-3 h-3 opacity-60" />
+                                </button>
+                            ))}
+                        </div>
+
+                        <form
+                            className="flex gap-2"
+                            onSubmit={e => {
+                                e.preventDefault();
+                                addCustomCategory();
+                            }}
+                        >
+                            <Input
+                                value={customDraft}
+                                onChange={e => setCustomDraft(e.target.value)}
+                                placeholder={t('onboardingCategoryPlaceholder')}
+                                className="h-10 rounded-lg text-sm"
+                            />
+                            <Button type="submit" variant="outline" className="h-10 shrink-0 active:scale-95 transition-all duration-200" disabled={!customDraft.trim()}>
+                                <Plus className="w-4 h-4 mr-1" /> {t('add')}
+                            </Button>
+                        </form>
+
+                        <div className="flex gap-2">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className="h-12 rounded-lg font-bold text-sm active:scale-95 transition-all duration-200"
+                                onClick={() => setStep('preferences')}
+                                disabled={isSaving}
+                            >
+                                ← {t('onboardingBack')}
+                            </Button>
+                            <Button
+                                type="button"
+                                className="flex-1 h-12 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all duration-200"
+                                onClick={handleDone}
+                                disabled={isSaving}
+                            >
+                                {t('getStarted')} →
+                            </Button>
+                        </div>
+                    </div>
+                    ) : (
                     <div className="px-6 pt-4 pb-8 space-y-6">
 
                         {/* Header */}
@@ -158,12 +266,13 @@ export function WelcomeModal() {
                         {/* CTA */}
                         <Button
                             type="button"
-                            className="w-full h-12 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all"
-                            onClick={handleDone}
+                            className="w-full h-12 rounded-lg font-bold text-sm shadow-sm active:scale-95 transition-all duration-200"
+                            onClick={() => setStep('categories')}
                         >
-                            {t('getStarted')} →
+                            {t('onboardingNext')} →
                         </Button>
                     </div>
+                    )}
                 </div>
             </div>
         </>

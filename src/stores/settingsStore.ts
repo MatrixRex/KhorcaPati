@@ -15,6 +15,8 @@ export function normalizePreferenceKeyword(input: string): string {
 
 import type { AIProviderConfig } from '@/lib/aiProviders';
 
+export type AIMode = 'offline' | 'online';
+
 interface SettingsState {
     initialBalance: number;
     language: string;
@@ -26,6 +28,10 @@ interface SettingsState {
     categoryPreferences: Record<string, string>;
     deletedCategories: string[];
     quickAddMode: 'single' | 'ai';
+    /** Smart Notes engine: on-device (no key, works without internet) or cloud API providers. */
+    aiMode: AIMode;
+    /** Set once the on-device model has been downloaded into the browser cache. */
+    offlineModelDownloaded: boolean;
     setInitialBalance: (amount: number) => void;
     setLanguage: (lang: string) => void;
     markWelcomeSeen: () => void;
@@ -39,6 +45,8 @@ interface SettingsState {
     moveAIProvider: (fromIndex: number, toIndex: number) => void;
     setQuickAddMode: (mode: 'single' | 'ai') => void;
     toggleQuickAddMode: () => void;
+    setAIMode: (mode: AIMode) => void;
+    setOfflineModelDownloaded: (downloaded: boolean) => void;
     learnCategoryPreference: (item: string, category: string) => void;
     clearCategoryPreferences: () => void;
     markDeletedCategory: (categoryName: string) => void;
@@ -60,6 +68,8 @@ export const useSettingsStore = create<SettingsState>()(
             categoryPreferences: {},
             deletedCategories: [],
             quickAddMode: 'single',
+            aiMode: 'offline',
+            offlineModelDownloaded: false,
             setInitialBalance: (amount: number) => set({ initialBalance: amount }),
             setLanguage: (lang: string) => {
                 set({ language: lang });
@@ -92,6 +102,8 @@ export const useSettingsStore = create<SettingsState>()(
                 return { aiProviders: updated };
             }),
             setQuickAddMode: (mode) => set({ quickAddMode: mode }),
+            setAIMode: (mode) => set({ aiMode: mode }),
+            setOfflineModelDownloaded: (downloaded) => set({ offlineModelDownloaded: downloaded }),
             toggleQuickAddMode: () => set((state) => ({
                 quickAddMode: state.quickAddMode === 'single' ? 'ai' : 'single'
             })),

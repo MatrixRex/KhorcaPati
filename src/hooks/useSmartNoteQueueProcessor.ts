@@ -1,24 +1,25 @@
 import { useEffect } from 'react';
 import { processAllQueuedNotes } from '@/services/smartNoteQueueProcessor';
 import { useSmartNoteQueueStore } from '@/stores/smartNoteQueueStore';
+import { warmUpOfflineRuntime } from '@/lib/offlineAI/offlineEngine';
 
 /**
- * Global background hook that monitors network connectivity and retries
- * parsing offline-queued smart notes when the device is online.
+ * Global background hook that processes queued smart notes: on start, when the app becomes visible,
+ * when the network returns, and every 30 seconds while notes are pending. Each attempt checks whether
+ * the current engine can run (online mode needs network; offline mode needs the downloaded model).
+ * Also warms up the on-device model shortly after start so the first Smart Note is instant.
  */
 export function useSmartNoteQueueProcessor() {
     useEffect(() => {
-        // Initial check on mount
-        if (typeof navigator === 'undefined' || navigator.onLine !== false) {
-            processAllQueuedNotes();
-        }
+        processAllQueuedNotes();
+        warmUpOfflineRuntime();
 
         const handleOnline = () => {
             processAllQueuedNotes();
         };
 
         const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible' && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
+            if (document.visibilityState === 'visible') {
                 processAllQueuedNotes();
             }
         };
@@ -26,10 +27,9 @@ export function useSmartNoteQueueProcessor() {
         window.addEventListener('online', handleOnline);
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
-        // Periodic heartbeat retry every 30 seconds if pending notes exist
         const intervalId = setInterval(() => {
             const hasPending = useSmartNoteQueueStore.getState().queue.some((n) => n.status === 'pending');
-            if (hasPending && (typeof navigator === 'undefined' || navigator.onLine !== false)) {
+            if (hasPending) {
                 processAllQueuedNotes();
             }
         }, 30000);

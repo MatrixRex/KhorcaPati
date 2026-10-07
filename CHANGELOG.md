@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.1] - 2026-10-07
+
+### Added
+- **Search** on Records and Items: a round search button at the bottom-left (above the nav) expands into a search bar. Search is intent-focused and typo tolerant (exact matches rank first, then prefix, substring and typos), matches records by note, title, category, amount and type (e.g. "earned", "spent"), and items by name, raw text and unit. Bangla digits work.
+- **Search time picker**: Follows the page's date range by default. Has its own range options and an "All time" switch that hides the other options; opens as a centered dialog.
+- **Items list in the record drawer**: With Items mode on, the add/edit record drawer shows a live list of the items (name, quantity, unit) parsed from the note.
+
+### Changed
+- Range labels shortened: "This Week" is now "Week" and "Past Month" is now "Month" (Bangla: সপ্তাহ, মাস).
+- The shared date range picker is now a reusable component (`DateRangePicker`).
+
+### Fixed
+- **Bottom nav hidden behind the browser bar** on mobile: the app root now uses dynamic viewport height (`h-dvh`) instead of `100vh`.
+
 ## [1.11.0] - 2026-10-04
 
 ### Added

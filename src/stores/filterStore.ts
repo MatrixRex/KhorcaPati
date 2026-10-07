@@ -27,7 +27,7 @@ interface FilterState {
     setExpenseSortBy: (sort: ExpenseSortBy) => void;
 }
 
-const getInitialDates = (timeframe: Timeframe, resetDate: number): { startDate: Date; endDate: Date } => {
+export const getInitialDates = (timeframe: Timeframe, resetDate: number): { startDate: Date; endDate: Date } => {
     const now = new Date();
     switch (timeframe) {
         case 'today':

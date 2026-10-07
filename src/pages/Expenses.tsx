@@ -3,6 +3,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { CategoryFilter } from '@/components/shared/CategoryFilter';
 import { ExpenseSort } from '@/components/expenses/ExpenseSort';
+import { SearchBar } from '@/components/shared/SearchBar';
 import { useTranslation } from 'react-i18next';
 
 export default function Expenses() {
@@ -13,6 +14,7 @@ export default function Expenses() {
         <PageContainer
             title={t('records')}
             showDateFilter
+            overlay={<SearchBar placeholder={t('searchRecordsPlaceholder')} />}
             headerAction={
                 <div className="flex items-center gap-1">
                     <ExpenseSort />

@@ -8,6 +8,9 @@ import { useExpenseStore } from '@/stores/expenseStore';
 import { formatRelativeDate } from '@/utils/date';
 import { formatAmount } from '@/lib/utils';
 import { useMemo } from 'react';
+import { Search } from 'lucide-react';
+import { useSearchStore, useSearchWindow } from '@/stores/searchStore';
+import { hasQuery, searchExpenses } from '@/utils/search';
 
 interface ExpenseListProps {
     onEdit?: (expense: Expense) => void;
@@ -17,8 +20,37 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
     const { t } = useTranslation();
     const { startDate, endDate, selectedCategory, expenseSortBy } = useFilterStore();
     const storeExpenses = useExpenseStore(state => state.expenses);
+    const query = useSearchStore(s => s.query);
+    const searchWindow = useSearchWindow();
+    const searching = hasQuery(query);
+    const winStart = searchWindow?.start.getTime() ?? null;
+    const winEnd = searchWindow?.end.getTime() ?? null;
 
     const expenses = useLiveQuery(async () => {
+        if (searching) {
+            // Intent search: ranked by relevance, bounded by the search window (null = all time).
+            const pool = selectedCategory
+                ? await db.expenses.where('category').equals(selectedCategory).toArray()
+                : await db.expenses.toArray();
+            const inWindow = pool.filter(e => {
+                if (winStart === null || winEnd === null) return true;
+                const t = new Date(e.date).getTime();
+                return t >= winStart && t <= winEnd;
+            });
+            const ranked = searchExpenses(inWindow, query);
+            // A matching sub-record surfaces its parent collection.
+            const byId = new Map<number, { expense: Expense; score: number }>();
+            for (const { item, score } of ranked) {
+                const top = item.parentId ? await db.expenses.get(item.parentId) : item;
+                if (!top?.id) continue;
+                const prev = byId.get(top.id);
+                if (!prev || score > prev.score) byId.set(top.id, { expense: top, score });
+            }
+            return [...byId.values()]
+                .sort((a, b) => b.score - a.score || b.expense.date.localeCompare(a.expense.date))
+                .map(x => x.expense);
+        }
+
         // Only fetch top-level records
         let collection;
 
@@ -58,7 +90,7 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
         });
 
         return filtered;
-    }, [startDate, endDate, selectedCategory, expenseSortBy, storeExpenses]);
+    }, [startDate, endDate, selectedCategory, expenseSortBy, storeExpenses, searching, query, winStart, winEnd]);
 
 
     const dailySummaries = useLiveQuery(() => db.dailySummaries.toArray());
@@ -77,17 +109,27 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
         const result: Array<{ type: 'divider'; date: string } | { type: 'expense'; expense: Expense }> = [];
         let lastDate = '';
         for (const exp of expenses) {
-            if (expenseSortBy === 'latest' && exp.date !== lastDate) {
+            if (!searching && expenseSortBy === 'latest' && exp.date !== lastDate) {
                 lastDate = exp.date;
                 result.push({ type: 'divider', date: exp.date });
             }
             result.push({ type: 'expense', expense: exp });
         }
         return result;
-    }, [expenses, expenseSortBy]);
+    }, [expenses, expenseSortBy, searching]);
 
     if (!expenses) {
         return <div className="p-4 text-center text-muted-foreground">{t('loading')}</div>;
+    }
+
+    if (expenses.length === 0 && searching) {
+        return (
+            <div className="p-8 text-center flex flex-col items-center justify-center">
+                <Search className="w-8 h-8 mb-4 opacity-40" />
+                <h3 className="font-semibold text-lg">{t('noSearchResults')}</h3>
+                <p className="text-muted-foreground text-sm">{t('noSearchResultsHint')}</p>
+            </div>
+        );
     }
 
     if (expenses.length === 0) {
@@ -101,7 +143,7 @@ export function ExpenseList({ onEdit }: ExpenseListProps) {
     }
 
     return (
-        <div className="flex flex-col gap-[var(--item-gap)] pb-20">
+        <div className="flex flex-col gap-[var(--item-gap)] pb-32">
             {items.map((item) => {
                 if (item.type === 'divider') {
                     const summary = summaryMap.get(item.date);

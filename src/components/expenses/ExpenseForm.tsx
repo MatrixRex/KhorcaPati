@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useExpenseStore } from '@/stores/expenseStore';
 import { useItemStore } from '@/stores/itemStore';
-import { parseItemInput } from '@/parsers/itemParser';
 import { format, parseISO } from 'date-fns';
 import { db, type Expense, recalculateDailySummary } from '@/db/schema';
 import { CategoryComboBox } from './CategoryComboBox';
@@ -25,6 +24,8 @@ import { ChevronRight, Plus, Layers, Trash2, Calculator, Edit2 } from 'lucide-re
 import { NumberPad } from '@/components/shared/NumberPad';
 
 import { SuggestionInput } from './SuggestionInput';
+import { NoteItemsList } from './NoteItemsList';
+import { parseNoteItems } from '@/utils/noteItems';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -292,21 +293,17 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
     const processItems = async (expenseId: number, note: string, date: string) => {
         if (!note) return;
-        const itemLines = note.split(/[,\n]/).filter(s => s.trim());
-        for (const line of itemLines) {
-            const parsed = parseItemInput(line.trim());
-            if (parsed.name) {
-                await addItem({
-                    expenseId,
-                    name: parsed.name,
-                    rawInput: line.trim(),
-                    qty: parsed.qty,
-                    unit: parsed.unit,
-                    date: date,
-                    note: '',
-                    createdAt: new Date().toISOString()
-                });
-            }
+        for (const parsed of parseNoteItems(note)) {
+            await addItem({
+                expenseId,
+                name: parsed.name,
+                rawInput: parsed.rawInput,
+                qty: parsed.qty,
+                unit: parsed.unit,
+                date: date,
+                note: '',
+                createdAt: new Date().toISOString()
+            });
         }
     };
 
@@ -865,6 +862,7 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     />
                                 )}
                             />
+                            {!isNested && form.watch('itemAutoTrack') && <NoteItemsList note={form.watch('note') || ''} />}
                             {!isNested && form.watch('itemAutoTrack') && <p className="text-[9px] text-muted-foreground font-medium italic">{t('autoTrackDescription')}</p>}
                         </div>
 

@@ -17,6 +17,8 @@ interface PageContainerProps {
     contentClassName?: string;
     scrollable?: boolean;
     devId?: string;
+    /** Rendered over the content, anchored above the bottom nav (e.g. search). */
+    overlay?: React.ReactNode;
 }
 
 export function PageContainer({
@@ -30,6 +32,7 @@ export function PageContainer({
     contentClassName,
     scrollable = true,
     devId,
+    overlay,
 }: PageContainerProps) {
     const navigate = useNavigate();
     const handleBack = onBack || (() => navigate(-1));
@@ -51,7 +54,7 @@ export function PageContainer({
     const autoDevId = devId || getAutoDevId(location.pathname);
 
     return (
-        <div className={cn("flex flex-col h-full w-full", className)}>
+        <div className={cn("flex flex-col h-full w-full relative", className)}>
             {/* Consistent Header */}
             <header className="flex items-center justify-between px-container h-header shrink-0 glass sticky top-0 z-40 border-b-0 shadow-2xl shadow-black/5">
                 <div className="flex items-center gap-2 overflow-hidden">
@@ -86,6 +89,7 @@ export function PageContainer({
                     {children}
                 </div>
             </main>
+            {overlay}
         </div>
     );
 }

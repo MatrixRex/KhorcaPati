@@ -10,12 +10,47 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import { useFilterStore } from '@/stores/filterStore';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useFilterStore, type Timeframe } from '@/stores/filterStore';
 import { useTranslation } from 'react-i18next';
 
+interface DateRangePickerProps {
+    timeframe: Timeframe;
+    startDate: Date;
+    endDate: Date;
+    onTimeframe: (tf: Timeframe) => void;
+    onRange: (start: Date, end: Date) => void;
+    /** Extra content shown at the top of the popover (e.g. an "All time" switch). */
+    header?: React.ReactNode;
+    /** Replaces the trigger label (e.g. "All time"). */
+    labelOverride?: string;
+    /** Open the popover upwards (for bottom-anchored triggers). */
+    side?: 'top' | 'bottom';
+    triggerClassName?: string;
+    /** Open in the middle of the screen (both axes) instead of beside the trigger. */
+    centered?: boolean;
+    /** Hide the range options (e.g. while "All time" is on). */
+    hideOptions?: boolean;
+}
+
 export function DateRangeFilter() {
-    const { t } = useTranslation();
     const { timeframe, startDate, endDate, setTimeframe, setDateRange } = useFilterStore();
+    return (
+        <DateRangePicker
+            timeframe={timeframe}
+            startDate={startDate}
+            endDate={endDate}
+            onTimeframe={setTimeframe}
+            onRange={setDateRange}
+        />
+    );
+}
+
+export function DateRangePicker({
+    timeframe, startDate, endDate, onTimeframe: setTimeframe, onRange: setDateRange,
+    header, labelOverride, side, triggerClassName, centered, hideOptions,
+}: DateRangePickerProps) {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = React.useState(false);
     const [showCustom, setShowCustom] = React.useState(timeframe === 'custom');
     const [range, setRange] = React.useState<DateRange | undefined>(
@@ -30,29 +65,28 @@ export function DateRangeFilter() {
         }
     }, [isOpen, timeframe, startDate, endDate]);
 
-    const label = React.useMemo(() => {
-        if (timeframe === 'today') return t('today');
-        if (timeframe === 'this-week') return t('thisWeek') || 'This Week';
-        if (timeframe === 'this-month') return format(new Date(), 'MMM');
-        if (timeframe === 'past-month') return t('pastMonth') || 'Past Month';
-        return `${format(startDate, 'MMM dd')} - ${format(endDate, 'MMM dd')}`;
-    }, [timeframe, startDate, endDate, t]);
+    const customRef = React.useRef<HTMLDivElement>(null);
 
-    return (
-        <Popover open={isOpen} onOpenChange={setIsOpen} backdrop>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 gap-1 px-2 text-xs font-medium active:bg-accent/50 group"
-                >
-                    <CalendarIcon className="h-3.5 w-3.5 opacity-60" />
-                    <span>{label}</span>
-                    <ChevronDown className={cn("h-3 w-3 opacity-40 transition-transform duration-200", isOpen && "rotate-180")} />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-2" align="end">
-                <div className="flex flex-col space-y-1">
+    // Keep the calendar reachable when it opens inside a height-limited popover.
+    React.useEffect(() => {
+        if (showCustom && isOpen) {
+            customRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+    }, [showCustom, isOpen]);
+
+    const label = React.useMemo(() => {
+        if (labelOverride) return labelOverride;
+        if (timeframe === 'today') return t('today');
+        if (timeframe === 'this-week') return t('thisWeek') || 'Week';
+        if (timeframe === 'this-month') return format(new Date(), 'MMM');
+        if (timeframe === 'past-month') return t('pastMonth') || 'Month';
+        return `${format(startDate, 'MMM dd')} - ${format(endDate, 'MMM dd')}`;
+    }, [timeframe, startDate, endDate, labelOverride, t]);
+
+    const body = (
+        <>
+                {header}
+                {!hideOptions && <div className="flex flex-col space-y-1">
                     <div className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                         {t('timeRange')}
                     </div>
@@ -76,7 +110,7 @@ export function DateRangeFilter() {
                             setIsOpen(false);
                         }}
                     >
-                        {t('thisWeek') || 'This Week'}
+                        {t('thisWeek') || 'Week'}
                     </Button>
                     <Button
                         variant={timeframe === 'this-month' ? 'secondary' : 'ghost'}
@@ -98,7 +132,7 @@ export function DateRangeFilter() {
                             setIsOpen(false);
                         }}
                     >
-                        {t('pastMonth') || 'Past Month'}
+                        {t('pastMonth') || 'Month'}
                     </Button>
                     <Button
                         variant={(timeframe === 'custom' || showCustom) ? 'secondary' : 'ghost'}
@@ -115,7 +149,7 @@ export function DateRangeFilter() {
                     </Button>
 
                     {showCustom && (
-                        <div className="border-t pt-2 mt-2 px-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                        <div ref={customRef} className="border-t pt-2 mt-2 px-1 animate-in fade-in slide-in-from-top-1 duration-200">
                             <div className="flex items-center justify-between mb-2 px-2">
                                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                                     Pick Range
@@ -159,7 +193,49 @@ export function DateRangeFilter() {
                             )}
                         </div>
                     )}
-                </div>
+                </div>}
+        </>
+    );
+
+    const trigger = (
+        <Button
+            variant="ghost"
+            size="sm"
+            className={cn("h-8 gap-1 px-2 text-xs font-medium active:bg-accent/50 group", triggerClassName)}
+        >
+            <CalendarIcon className="h-3.5 w-3.5 opacity-60" />
+            <span>{label}</span>
+            <ChevronDown className={cn("h-3 w-3 opacity-40 transition-transform duration-200", isOpen && "rotate-180")} />
+        </Button>
+    );
+
+    // Centered: a real dialog, so it sits in the middle of the viewport regardless of
+    // transformed ancestors (anchored popovers drift when the trigger is inside one).
+    if (centered) {
+        return (
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogTrigger asChild>{trigger}</DialogTrigger>
+                <DialogContent
+                    showCloseButton={false}
+                    className="w-80 max-w-[calc(100vw-1rem)] p-2 gap-0 max-h-[85dvh] overflow-y-auto rounded-md"
+                >
+                    <DialogTitle className="sr-only">{t('timeRange')}</DialogTitle>
+                    {body}
+                </DialogContent>
+            </Dialog>
+        );
+    }
+
+    return (
+        <Popover open={isOpen} onOpenChange={setIsOpen} backdrop>
+            <PopoverTrigger asChild>{trigger}</PopoverTrigger>
+            <PopoverContent
+                className="w-80 max-w-[calc(100vw-1rem)] p-2 max-h-[var(--radix-popover-content-available-height)] overflow-y-auto"
+                align="end"
+                side={side}
+                collisionPadding={8}
+            >
+                {body}
             </PopoverContent>
         </Popover>
     );

@@ -3,7 +3,7 @@ import { db, type Item } from '@/db/schema';
 import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { useState } from 'react';
-import { ChevronRight, Package, ExternalLink, Trash2 } from 'lucide-react';
+import { ChevronRight, Package, Search, ExternalLink, Trash2 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useNavigate } from 'react-router-dom';
 import { useCloseWatcher } from '@/hooks/use-close-watcher';
@@ -31,6 +31,8 @@ import {
     SheetTitle,
 } from "@/components/ui/sheet";
 import { formatNumber } from '@/lib/utils';
+import { useSearchStore, useSearchWindow } from '@/stores/searchStore';
+import { hasQuery, searchItems } from '@/utils/search';
 
 
 export function ItemTracker() {
@@ -41,6 +43,11 @@ export function ItemTracker() {
     const [affectedItemNames, setAffectedItemNames] = useState<string[]>([]);
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const query = useSearchStore(s => s.query);
+    const searchWindow = useSearchWindow();
+    const searching = hasQuery(query);
+    const winStart = searchWindow?.start.getTime() ?? null;
+    const winEnd = searchWindow?.end.getTime() ?? null;
 
     const handleDeleteItem = async (item: Item) => {
         if (!item.expenseId) {
@@ -96,25 +103,53 @@ export function ItemTracker() {
             all = await db.items.orderBy('date').reverse().toArray();
         }
 
-        const filtered = all.filter(item => {
-            const date = new Date(item.date);
-            return isWithinInterval(date, { start: startDate, end: endDate });
-        });
+        let filtered: Item[];
+        const relevance = new Map<string, number>();
+        if (searching) {
+            // Search uses its own window (null = all time), not the page's range.
+            const inWindow = all.filter(item => {
+                if (winStart === null || winEnd === null) return true;
+                const t = new Date(item.date).getTime();
+                return t >= winStart && t <= winEnd;
+            });
+            const ranked = searchItems(inWindow, query);
+            filtered = ranked.map(r => r.item);
+            for (const r of ranked) {
+                const key = r.item.name.toLowerCase().trim();
+                relevance.set(key, Math.max(relevance.get(key) ?? 0, r.score));
+            }
+        } else {
+            filtered = all.filter(item => {
+                const date = new Date(item.date);
+                return isWithinInterval(date, { start: startDate, end: endDate });
+            });
+        }
 
         const expenseIds = Array.from(new Set(filtered.map(i => i.expenseId).filter(Boolean))) as number[];
         const expenses = await db.expenses.where('id').anyOf(expenseIds).toArray();
         const eMap = new Map(expenses.map(e => [e.id!, e.category]));
 
-        return { items: filtered, expenseMap: eMap };
-    }, [startDate, endDate, selectedCategory]);
+        return { items: filtered, expenseMap: eMap, relevance };
+    }, [startDate, endDate, selectedCategory, searching, query, winStart, winEnd]);
 
     const items = data?.items;
     const expenseMap = data?.expenseMap || new Map<number, string>();
+    const relevance = data?.relevance;
 
     const { categories } = useCategoryStore();
 
     if (items === undefined) {
         return <div className="p-4 text-center text-muted-foreground">{t('loadingItems')}</div>;
+    }
+
+    if (items.length === 0 && searching) {
+        return (
+            <div className="p-8 text-center flex flex-col items-center justify-center h-[50vh]">
+                <Search className="w-8 h-8 mb-4 opacity-40" />
+                <h3 className="font-semibold text-lg">{t('noSearchResults')}</h3>
+                <p className="text-muted-foreground text-sm">{t('noSearchResultsHint')}</p>
+            </div>
+        );
     }
 
     if (items.length === 0) {
@@ -152,6 +187,10 @@ export function ItemTracker() {
         
         return { ...group, color, category };
     }).sort((a, b) => {
+        if (searching && relevance) {
+            const diff = (relevance.get(b.name.toLowerCase().trim()) ?? 0) - (relevance.get(a.name.toLowerCase().trim()) ?? 0);
+            if (diff !== 0) return diff;
+        }
         if (inventorySortBy === 'alphabet') {
             return a.name.localeCompare(b.name);
         } else {
@@ -210,7 +249,7 @@ export function ItemTracker() {
     const drawerColor = selectedGroup?.color || '#3b82f6';
 
     return (
-        <div className="flex flex-col gap-[var(--item-gap)] pb-24">
+        <div className="flex flex-col gap-[var(--item-gap)] pb-32">
             {groupedList.map((group) => (
                 <Card
                     key={group.name}

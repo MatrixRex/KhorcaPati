@@ -64,7 +64,7 @@ function AppContent() {
   const shouldBlur = isAnyDrawerOpen || isInventoryItemOpen;
 
   return (
-    <div className="flex flex-col h-screen bg-transparent text-foreground overflow-hidden">
+    <div className="flex flex-col h-dvh bg-transparent text-foreground overflow-hidden">
       <div className="flex-1 w-full max-w-[480px] mx-auto relative overflow-hidden flex flex-col bg-background/80 shadow-2xl shadow-black/20 border-x border-foreground/5">
         <main className={cn(
           "flex-1 w-full relative overflow-hidden transition-all duration-300",

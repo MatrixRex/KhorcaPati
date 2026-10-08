@@ -40,6 +40,7 @@ import { isNetworkConnectionError, type ParsedGeminiTransaction } from '@/lib/ge
 import { importParsedTransactions, processNextQueuedNote } from '@/services/smartNoteQueueProcessor';
 import { getSmartNoteAvailability, parseSmartNote } from '@/services/smartNoteParser';
 import { OfflineModelPanel } from '@/components/settings/AISettingsSection';
+import { EditableItemList } from '@/components/items/EditableItemList';
 
 const SAMPLE_NOTES = [
     {
@@ -766,7 +767,7 @@ export function SmartBatchParserDrawer() {
                                                                 type="button"
                                                                 onClick={() => handleUpdateItem(tx.id, { itemAutoTrack: !tx.itemAutoTrack })}
                                                                 className={cn(
-                                                                    "px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 active:scale-95",
+                                                                    "px-2.5 py-0.5 rounded-full whitespace-nowrap shrink-0 text-[10px] font-black uppercase tracking-wider transition-all duration-200 active:scale-95",
                                                                     tx.itemAutoTrack ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25" : "bg-muted text-muted-foreground hover:text-foreground"
                                                                 )}
                                                             >
@@ -784,43 +785,11 @@ export function SmartBatchParserDrawer() {
                                                     </div>
 
                                                     {/* Editable Items List */}
-                                                    <div className="space-y-1.5">
-                                                        {tx.items.map((it, i) => (
-                                                            <div key={i} className="flex items-center gap-1.5 p-1.5 rounded-xl bg-background/70 border border-border/40 shadow-2xs">
-                                                                <Input
-                                                                    type="text"
-                                                                    value={it.name}
-                                                                    onChange={(e) => handleUpdateTrackedItem(tx.id, i, { name: e.target.value })}
-                                                                    placeholder="Item name"
-                                                                    className="h-7 text-xs font-semibold px-2 rounded-lg flex-1 min-w-[90px] bg-background/90"
-                                                                />
-                                                                <Input
-                                                                    type="number"
-                                                                    step="any"
-                                                                    min="0"
-                                                                    value={it.qty}
-                                                                    onChange={(e) => handleUpdateTrackedItem(tx.id, i, { qty: parseFloat(e.target.value) || 0 })}
-                                                                    placeholder="Qty"
-                                                                    className="h-7 text-xs font-bold text-center px-1 rounded-lg w-16 bg-background/90"
-                                                                />
-                                                                <Input
-                                                                    type="text"
-                                                                    value={it.unit}
-                                                                    onChange={(e) => handleUpdateTrackedItem(tx.id, i, { unit: e.target.value })}
-                                                                    placeholder="Unit"
-                                                                    className="h-7 text-xs font-medium text-center px-1 rounded-lg w-16 bg-background/90"
-                                                                />
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleDeleteTrackedItem(tx.id, i)}
-                                                                    className="p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-colors shrink-0"
-                                                                    title="Remove Item"
-                                                                >
-                                                                    <X className="w-3.5 h-3.5" />
-                                                                </button>
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                                    <EditableItemList
+                                                        items={tx.items}
+                                                        onUpdate={(_, i, updates) => handleUpdateTrackedItem(tx.id, i, updates)}
+                                                        onRemove={(_, i) => handleDeleteTrackedItem(tx.id, i)}
+                                                    />
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center justify-between px-1">

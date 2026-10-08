@@ -677,7 +677,7 @@ export function postProcessAIResponse(candidateText: string, ctx: ParseContext):
 
         const rawItems = Array.isArray(tx.items) ? tx.items : [];
         let validItems: ExtractedItem[] = rawItems.map((item: any) => {
-            const rawQty = Number(item.qty) || 1;
+            const rawQty = item.qty === 0 ? 0 : Number(item.qty) || 1; // 0 = listed without a quantity
             const rawUnit = String(item.unit || 'pcs');
             const { qty, unit } = normalizeUnitAndQty(rawQty, rawUnit);
             return {

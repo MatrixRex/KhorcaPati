@@ -25,7 +25,11 @@ import { NumberPad } from '@/components/shared/NumberPad';
 
 import { SuggestionInput } from './SuggestionInput';
 import { NoteItemsList } from './NoteItemsList';
-import { parseNoteItems } from '@/utils/noteItems';
+import {
+    reconcileNoteItems, editableItemsFromSaved, itemsToSave, visibleItems,
+    updateEditableItem, removeEditableItem, addManualItem, type EditableNoteItem,
+} from '@/utils/noteItems';
+import { loadUnitHints } from '@/services/itemUnitHints';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -221,6 +225,33 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
     const isNested = form.watch('isNested');
 
+    // Items of the record: parsed from the note, editable by hand. The ref always holds the latest list
+    // so a save started in the same event sees the change.
+    const [noteItems, setNoteItems] = useState<EditableNoteItem[]>([]);
+    const noteItemsRef = useRef<EditableNoteItem[]>([]);
+    const applyNoteItems = (next: EditableNoteItem[]) => {
+        noteItemsRef.current = next;
+        setNoteItems(next);
+    };
+    const unitHints = useLiveQuery(loadUnitHints, []);
+    const noteValue = form.watch('note') || '';
+
+    useEffect(() => {
+        applyNoteItems(reconcileNoteItems(noteItemsRef.current, noteValue, unitHints));
+    }, [noteValue, unitHints]);
+
+    useEffect(() => {
+        const id = initialData?.id;
+        if (!id) return;
+        db.items.where('expenseId').equals(id).toArray().then(saved => {
+            applyNoteItems(editableItemsFromSaved(saved, form.getValues('note') || '', unitHints));
+        });
+    }, []);
+
+    const commitNoteItems = () => {
+        if (currentId) form.handleSubmit(performSave)();
+    };
+
     useEffect(() => {
         if (isNested && subExpenses && subExpenses.length > 0) {
             const parentType = form.getValues('type');
@@ -291,9 +322,8 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
         }
     };
 
-    const processItems = async (expenseId: number, note: string, date: string) => {
-        if (!note) return;
-        for (const parsed of parseNoteItems(note)) {
+    const processItems = async (expenseId: number, date: string) => {
+        for (const parsed of itemsToSave(noteItemsRef.current)) {
             await addItem({
                 expenseId,
                 name: parsed.name,
@@ -353,14 +383,14 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                 await updateExpense(currentId, payload);
                 await db.items.where('expenseId').equals(currentId).delete();
                 if (data.itemAutoTrack) {
-                    await processItems(currentId, data.note || '', data.date);
+                    await processItems(currentId, data.date);
                 }
             } else {
                 const newId = await addExpense(payload);
                 savedId = newId;
                 setCurrentId(newId);
                 if (data.itemAutoTrack) {
-                    await processItems(newId, data.note || '', data.date);
+                    await processItems(newId, data.date);
                 }
             }
             return savedId;
@@ -862,7 +892,18 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                     />
                                 )}
                             />
-                            {!isNested && form.watch('itemAutoTrack') && <NoteItemsList note={form.watch('note') || ''} />}
+                            {!isNested && form.watch('itemAutoTrack') && (
+                                <NoteItemsList
+                                    items={visibleItems(noteItems)}
+                                    onUpdate={(item, updates) => applyNoteItems(updateEditableItem(noteItemsRef.current, item, updates))}
+                                    onRemove={(item) => {
+                                        applyNoteItems(removeEditableItem(noteItemsRef.current, item));
+                                        commitNoteItems();
+                                    }}
+                                    onAdd={() => applyNoteItems(addManualItem(noteItemsRef.current))}
+                                    onCommit={commitNoteItems}
+                                />
+                            )}
                             {!isNested && form.watch('itemAutoTrack') && <p className="text-[9px] text-muted-foreground font-medium italic">{t('autoTrackDescription')}</p>}
                         </div>
 

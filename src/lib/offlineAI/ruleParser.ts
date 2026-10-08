@@ -1,5 +1,6 @@
 import { addDays, format, parseISO } from 'date-fns';
-import { bengaliToEnglishDigits } from '@/parsers/itemParser';
+import { bengaliToEnglishDigits, parseItemDetailed, type ParsedItem } from '@/parsers/itemParser';
+import { parseItemList, type UnitClass } from '@/parsers/itemListParser';
 import { extractAmountFromText } from '@/lib/geminiParser';
 
 /** A transaction found by the rules; the category is picked later by the on-device categorizer. */
@@ -8,6 +9,8 @@ export interface RuleTransaction {
     amount: number;
     type: 'expense' | 'income';
     date: string; // YYYY-MM-DD
+    /** Only set when one total covers several quantified pieces. */
+    items?: ParsedItem[];
 }
 
 const CONJUNCTION = /\s+(?:and|ar|aar|এবং|আর|&|\+)\s+/i;
@@ -136,39 +139,68 @@ function cleanTitle(text: string): string {
     return title;
 }
 
-/** Turns a free-text note into transactions without any AI model. */
-export function extractTransactionsWithRules(note: string, referenceDate: string): RuleTransaction[] {
+const hasQuantity = (text: string) => parseItemDetailed(text).hasQty;
+
+/**
+ * Turns a free-text note into transactions without any AI model. Priceless pieces in front of a priced
+ * one on the same line ("onion, oil 1l, peyaj 2kg 935") are one shopping trip when any of them names a
+ * quantity: one transaction with each comma-separated piece as an item.
+ */
+export function extractTransactionsWithRules(note: string, referenceDate: string, unitHints?: Record<string, UnitClass>): RuleTransaction[] {
     const reference = parseISO(referenceDate);
     const transactions: RuleTransaction[] = [];
 
-    for (const segment of splitNoteIntoSegments(note)) {
-        let text = ` ${segment} `;
-
-        let offset = 0;
-        for (const rule of DATE_RULES) {
-            const m = text.match(rule.pattern);
-            if (m) {
-                offset = rule.offset(m);
-                text = text.replace(m[0], ' ');
-                break;
+    for (const line of note.split('\n')) {
+        let pending: string[] = [];
+        for (const segment of splitNoteIntoSegments(line)) {
+            const tx = extractSegment(segment, reference);
+            if (!tx) {
+                pending.push(segment);
+                continue;
             }
+            if (pending.length > 0 && [...pending, tx.text].some(hasQuantity)) {
+                const items = parseItemList([...pending, tx.text], unitHints).map(({ name, qty, unit }) => ({ name, qty, unit }));
+                if (items.length > 0) {
+                    tx.transaction.title = items.map(i => i.name).join(', ');
+                    tx.transaction.items = items;
+                }
+            }
+            pending = [];
+            transactions.push(tx.transaction);
         }
+    }
 
-        const type = INCOME_PATTERNS.some(p => p.test(segment)) ? 'income' : 'expense';
+    return transactions;
+}
 
-        text = text.trim();
-        while (TRAILING_VERBS.test(text)) text = text.replace(TRAILING_VERBS, '');
+function extractSegment(segment: string, reference: Date): { transaction: RuleTransaction; text: string } | null {
+    let text = ` ${segment} `;
 
-        const found = findAmount(text);
-        if (!found) continue;
+    let offset = 0;
+    for (const rule of DATE_RULES) {
+        const m = text.match(rule.pattern);
+        if (m) {
+            offset = rule.offset(m);
+            text = text.replace(m[0], ' ');
+            break;
+        }
+    }
 
-        transactions.push({
+    const type = INCOME_PATTERNS.some(p => p.test(segment)) ? 'income' : 'expense';
+
+    text = text.trim();
+    while (TRAILING_VERBS.test(text)) text = text.replace(TRAILING_VERBS, '');
+
+    const found = findAmount(text);
+    if (!found) return null;
+
+    return {
+        text: cleanTitle(found.text),
+        transaction: {
             title: cleanTitle(found.text) || 'Transaction',
             amount: found.amount,
             type,
             date: format(addDays(reference, offset), 'yyyy-MM-dd'),
-        });
-    }
-
-    return transactions;
+        },
+    };
 }

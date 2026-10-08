@@ -23,6 +23,7 @@ const AILab = lazy(() => import('@/pages/AILab'));
 
 import { ReloadPrompt } from '@/components/shared/ReloadPrompt';
 import { WelcomeModal } from '@/components/shared/WelcomeModal';
+import { watchResetDateForBudgets } from '@/services/budgetResetSync';
 
 /** Requests notification permission once on app start, then runs budget alert checks and offline queue processor. */
 function NotificationManager() {
@@ -58,6 +59,9 @@ function AppContent() {
       Notification.requestPermission();
     }
   }, []);
+
+  // Monthly budgets follow the reset date when it changes in Settings.
+  useEffect(() => watchResetDateForBudgets(), []);
 
   const isAnyDrawerOpen = useUIStore((state) => state.isInEditingMode());
   const isInventoryItemOpen = useUIStore((state) => !!state.selectedInventoryItem);

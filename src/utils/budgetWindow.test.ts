@@ -31,6 +31,21 @@ describe('getBudgetWindow custom reset date calculation', () => {
         });
     });
 
+    it('follows the app reset date when a monthly budget has no start date', () => {
+        const budget: Budget = {
+            category: 'Food',
+            limitAmount: 500,
+            alertThreshold: 0.8,
+            timelineType: 'recurring',
+            recurringInterval: 'monthly',
+            startDate: null,
+            endDate: null,
+            createdAt: '2026-06-01T00:00:00.000Z'
+        };
+        expect(getBudgetWindow(budget, 10)).toEqual({ start: '2026-06-10', end: '2026-07-09' });
+        expect(getBudgetWindow(budget, 20)).toEqual({ start: '2026-05-20', end: '2026-06-19' });
+    });
+
     it('calculates monthly budget anchored to a custom date before now (e.g. 10th of June)', () => {
         const budget: Budget = {
             category: 'Food',

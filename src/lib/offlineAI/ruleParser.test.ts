@@ -101,3 +101,40 @@ describe('extractTransactionsWithRules', () => {
         expect(txs[5].type).toBe('income');
     });
 });
+
+describe('grouped shopping lists', () => {
+    const note = 'Soyabin oil 1l, sorisha oil 1l, peyaj 2kg, roshun 1kg, salt 1kg, suger .5kg 3185-2250\nRice 25kg 2250\nAbba medicine 270';
+
+    it('turns priceless quantified pieces plus the priced one into a single transaction with items', () => {
+        const result = parse(note);
+        expect(result.map(t => t.amount)).toEqual([935, 2250, 270]);
+        expect(result[0].items).toEqual([
+            { name: 'soyabin oil', qty: 1, unit: 'L' },
+            { name: 'sorisha oil', qty: 1, unit: 'L' },
+            { name: 'peyaj', qty: 2, unit: 'kg' },
+            { name: 'roshun', qty: 1, unit: 'kg' },
+            { name: 'salt', qty: 1, unit: 'kg' },
+            { name: 'suger', qty: 0.5, unit: 'kg' },
+        ]);
+        expect(result[0].title).toBe('soyabin oil, sorisha oil, peyaj, roshun, salt, suger');
+        expect(result[1].items).toBeUndefined();
+    });
+
+    it('does not group priceless text without a quantity, or across lines', () => {
+        expect(parse('went to market, bazar 500')).toMatchObject([{ title: 'bazar', amount: 500 }]);
+        expect(parse('oil 1l\nrice 500').map(t => t.items)).toEqual([undefined]);
+    });
+});
+
+describe('comma item lists in Smart Notes', () => {
+    it('keeps priceless items without a quantity and repairs a misplaced comma', () => {
+        const [tx] = parse('onion, oil 1l, rice ,5kg bread 1 500');
+        expect(tx.amount).toBe(500);
+        expect(tx.items).toEqual([
+            { name: 'onion', qty: 0, unit: 'pcs' },
+            { name: 'oil', qty: 1, unit: 'L' },
+            { name: 'rice', qty: 5, unit: 'kg' },
+            { name: 'bread', qty: 1, unit: 'pcs' },
+        ]);
+    });
+});

@@ -24,7 +24,7 @@ export async function loadOfflineRulesEngine(onProgress: (p: LoadProgress) => vo
             async generate({ note, referenceDate }) {
                 const found = extractTransactionsWithRules(note, referenceDate);
                 const picked = await categorizer.categorize(found.map(t => t.title), found.map(t => t.type));
-                const transactions = found.map((t, i) => ({ ...t, category: picked[i]?.category ?? 'Unlisted', items: [] }));
+                const transactions = found.map((t, i) => ({ ...t, category: picked[i]?.category ?? 'Unlisted', items: t.items ?? [] }));
                 return { text: JSON.stringify({ transactions }) };
             },
         };

@@ -7,6 +7,7 @@ import type { ParsedGeminiTransaction } from '@/lib/geminiParser';
 import { createUserCategorizer } from './userCategorizer';
 import { loadUserCategoryContext } from './userContext';
 import { parseNoteOffline } from './offlineParser';
+import { loadUnitHints } from '@/services/itemUnitHints';
 
 interface OfflineRuntime {
     embedder: Embedder;
@@ -67,7 +68,7 @@ export async function deleteOfflineModel(): Promise<void> {
 /** Offline counterpart of the online Smart Note parser, using the user's own categories and history. */
 export async function parseSmartNoteOffline({ noteText, referenceDate }: { noteText: string; referenceDate: string }): Promise<ParsedGeminiTransaction[]> {
     const { embedder, seedFile } = await loadOfflineRuntime();
-    const [context, categories] = await Promise.all([loadUserCategoryContext(), db.categories.toArray()]);
+    const [context, categories, unitHints] = await Promise.all([loadUserCategoryContext(), db.categories.toArray(), loadUnitHints()]);
 
     // Building the categorizer (index over ~3,000 seed vectors) is the slow part of a parse. It is a pure
     // function of this context, so reuse it until categories, history or corrections change.
@@ -77,7 +78,7 @@ export async function parseSmartNoteOffline({ noteText, referenceDate }: { noteT
     }
     const { categorizer } = cachedCategorizer;
     const { categoryPreferences, deletedCategories } = useSettingsStore.getState();
-    return parseNoteOffline({ noteText, referenceDate, categories, categoryPreferences, deletedCategories }, categorizer);
+    return parseNoteOffline({ noteText, referenceDate, categories, categoryPreferences, deletedCategories, unitHints }, categorizer);
 }
 
 /** Loads the model in the background after start-up so the first Smart Note is instant. */

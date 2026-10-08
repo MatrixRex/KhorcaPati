@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.2] - 2026-10-08
+
+### Added
+- **Editable items in the record drawer**: The item list is now editable (name, quantity, unit, remove, add). Edits and removals are kept while you keep typing in the note, and reopening a record shows what was saved. It shares one component with the AI Smart Note review.
+- **Smarter item lists**: Every comma starts a new item. Items without a quantity get 0. A quantity put after a misplaced comma (`rice ,5kg bread 1`) moves back to the previous item when its unit fits (rice is bought by weight), and is dropped otherwise. Quantities before the name (`5kg rice`) still work.
+- **Learns from your edits**: Which kind of unit (weight, volume, count) each item uses is learned from your saved items, so corrections change how later notes are read.
+- **Offline Smart Notes** now group priceless pieces in front of a priced one (`oil 1l, peyaj 2kg, suger .5kg 3185-2250`) into one transaction with each piece as an item.
+
+### Fixed
+- **Budgets ignored the reset date**: monthly budgets without their own start date now follow the reset date. When the reset date changes, monthly budgets that started on the old reset day follow the new one (after you stop moving the slider); budgets set to another day keep it.
+- `.5kg` was read as 5 kg; it is now 0.5 kg.
+- "Tracking ON" no longer wraps onto two lines in the AI Smart Note review, and item rows fit narrow phone screens.
+
 ## [1.11.1] - 2026-10-07
 
 ### Added

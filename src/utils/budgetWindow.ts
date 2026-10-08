@@ -2,19 +2,24 @@ import {
     format,
     startOfDay, endOfDay,
     startOfWeek, endOfWeek,
-    startOfMonth, endOfMonth,
     startOfYear, endOfYear,
     isWithinInterval, parseISO,
     subDays, addDays
 } from 'date-fns';
 import { type Budget, type Expense } from '@/db/schema';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { getBillingCycleRange } from './cycle';
 
 export interface SpendingWindow {
     start: string; // yyyy-MM-dd
     end: string;   // yyyy-MM-dd
 }
 
-export function getBudgetWindow(budget: Budget): SpendingWindow | null {
+/**
+ * The period a budget currently counts. Monthly budgets without their own start date follow the app's
+ * reset date (Settings → billing cycle).
+ */
+export function getBudgetWindow(budget: Budget, resetDate: number = useSettingsStore.getState()?.resetDate ?? 1): SpendingWindow | null {
     if (budget.timelineType === 'range') {
         if (!budget.startDate || !budget.endDate) return null;
         return { start: budget.startDate, end: budget.endDate };
@@ -120,11 +125,13 @@ export function getBudgetWindow(budget: Budget): SpendingWindow | null {
                 end: format(endOfYear(now), 'yyyy-MM-dd'),
             };
         case 'monthly':
-        default:
+        default: {
+            const cycle = getBillingCycleRange(now, resetDate);
             return {
-                start: format(startOfMonth(now), 'yyyy-MM-dd'),
-                end: format(endOfMonth(now), 'yyyy-MM-dd'),
+                start: format(cycle.start, 'yyyy-MM-dd'),
+                end: format(cycle.end, 'yyyy-MM-dd'),
             };
+        }
     }
 }
 

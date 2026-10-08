@@ -22,6 +22,8 @@ interface SettingsState {
     language: string;
     hasSeenWelcome: boolean;
     resetDate: number;
+    /** Reset day the monthly budgets were last aligned to; see syncBudgetsToResetDate. */
+    budgetResetDay?: number;
     geminiApiKey: string;
     geminiModel: string;
     aiProviders: AIProviderConfig[];
@@ -36,6 +38,7 @@ interface SettingsState {
     setLanguage: (lang: string) => void;
     markWelcomeSeen: () => void;
     setResetDate: (date: number) => void;
+    setBudgetResetDay: (day: number) => void;
     setGeminiApiKey: (key: string) => void;
     setGeminiModel: (model: string) => void;
     setAIProviders: (providers: AIProviderConfig[]) => void;
@@ -77,6 +80,7 @@ export const useSettingsStore = create<SettingsState>()(
             },
             markWelcomeSeen: () => set({ hasSeenWelcome: true }),
             setResetDate: (date: number) => set({ resetDate: date }),
+            setBudgetResetDay: (day: number) => set({ budgetResetDay: day }),
             setGeminiApiKey: (key: string) => set({ geminiApiKey: key }),
             setGeminiModel: (model: string) => set({ geminiModel: model }),
             setAIProviders: (providers: AIProviderConfig[]) => set({ aiProviders: providers }),

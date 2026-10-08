@@ -98,12 +98,13 @@ const SPECIAL_MULTIPLIERS: Record<string, number> = {
 
 export function normalizeUnitAndQty(qty: number, unit: string): { qty: number; unit: string } {
     const raw = (unit || '').trim();
-    if (!raw) return { qty: Number(qty) || 1, unit: 'pcs' };
+    if (!raw) return { qty: qty === 0 ? 0 : Number(qty) || 1, unit: 'pcs' };
 
     const clean = raw.toLowerCase().replace(/^[^\w\u0980-\u09FF]+|[^\w\u0980-\u09FF]+$/g, '');
     const mapped = KNOWN_UNITS[clean] || KNOWN_UNITS[raw.toLowerCase()] || KNOWN_UNITS[raw] || raw;
 
-    let finalQty = Number(qty) || 1;
+    // 0 means "quantity unknown" (an item listed without one) and is kept as is.
+    let finalQty = qty === 0 ? 0 : Number(qty) || 1;
     let finalUnit = mapped;
 
     // Unit conversions
@@ -130,7 +131,14 @@ export function normalizeUnitAndQty(qty: number, unit: string): { qty: number; u
 }
 
 export function parseItemInput(input: string): ParsedItem {
-    const normalizedInput = bengaliToEnglishDigits((input || '').trim());
+    const { name, qty, unit } = parseItemDetailed(input);
+    return { name, qty, unit };
+}
+
+/** Like parseItemInput, but also says whether the text named a quantity or unit at all ("rice" vs "rice 1"). */
+export function parseItemDetailed(input: string): ParsedItem & { hasQty: boolean } {
+    // ".5kg" -> "0.5kg" so the leading dot is not lost as punctuation
+    const normalizedInput = bengaliToEnglishDigits((input || '').trim()).replace(/(^|\s)\.(?=\d)/g, '$10.');
     const doc = nlp(normalizedInput.toLowerCase());
     doc.numbers().toNumber();
 
@@ -138,7 +146,7 @@ export function parseItemInput(input: string): ParsedItem {
     const tokens = textArray.length > 0 ? textArray[0].split(/\s+/) : [];
 
     if (tokens.length === 0) {
-        return { name: '', qty: 1, unit: 'pcs' };
+        return { name: '', qty: 1, unit: 'pcs', hasQty: false };
     }
 
     let qty = 1;
@@ -300,5 +308,5 @@ export function parseItemInput(input: string): ParsedItem {
     // Auto-convert smaller units to standard ones
     const normalized = normalizeUnitAndQty(qty, unit);
 
-    return { name: rawName, qty: normalized.qty, unit: normalized.unit };
+    return { name: rawName, qty: normalized.qty, unit: normalized.unit, hasQty: foundQty || foundUnit || multiplier !== 1 };
 }

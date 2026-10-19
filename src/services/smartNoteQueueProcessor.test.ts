@@ -3,7 +3,7 @@ import { db } from '@/db/schema';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useSmartNoteQueueStore } from '@/stores/smartNoteQueueStore';
 import { useCategoryStore } from '@/stores/categoryStore';
-import { processNextQueuedNote, importParsedTransactions } from './smartNoteQueueProcessor';
+import { processNextQueuedNote, retryQueuedNote, importParsedTransactions } from './smartNoteQueueProcessor';
 import { NetworkConnectionError, type ParsedGeminiTransaction } from '@/lib/geminiParser';
 
 const parseSmartNoteOffline = vi.fn();
@@ -263,6 +263,141 @@ describe('Smart Note Queue Processor & Offline Import Engine', () => {
         // Verify preference was NOT learned for Fast Food
         const preferences = useSettingsStore.getState().categoryPreferences;
         expect(preferences['burger king']).toBeUndefined();
+    });
+
+    it('retryQueuedNote retries a failed note and marks it ready on success', async () => {
+        useSettingsStore.getState().setGeminiApiKey('test-key');
+        const enqueued = useSmartNoteQueueStore.getState().enqueueNote('dinner 450');
+        // Manually mark as failed with previous error
+        useSmartNoteQueueStore.getState().setNoteStatus(enqueued.id, 'failed', {
+            errorMessage: 'Previous rate limit error',
+            retryCount: 1,
+        });
+
+        const mockApiResponse = {
+            candidates: [
+                {
+                    content: {
+                        parts: [
+                            {
+                                text: JSON.stringify({
+                                    transactions: [
+                                        {
+                                            title: 'Dinner',
+                                            amount: 450,
+                                            type: 'expense',
+                                            category: 'Food',
+                                            date: '2026-09-04',
+                                            note: 'dinner',
+                                            itemAutoTrack: false,
+                                            items: [],
+                                        },
+                                    ],
+                                }),
+                            },
+                        ],
+                    },
+                },
+            ],
+        };
+
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockApiResponse,
+        } as Response);
+
+        const retried = await retryQueuedNote(enqueued.id);
+        expect(retried).toBe(true);
+
+        const note = useSmartNoteQueueStore.getState().queue.find((n) => n.id === enqueued.id);
+        expect(note?.status).toBe('ready');
+        expect(note?.errorMessage).toBeUndefined();
+        expect(note?.parsedTransactions?.length).toBe(1);
+        expect(note?.parsedTransactions?.[0].amount).toBe(450);
+    });
+
+    it('retryQueuedNote updates error message and increments retryCount on subsequent failure', async () => {
+        useSettingsStore.getState().setGeminiApiKey('test-key');
+        const enqueued = useSmartNoteQueueStore.getState().enqueueNote('dinner 450');
+        useSmartNoteQueueStore.getState().setNoteStatus(enqueued.id, 'failed', {
+            errorMessage: 'First error',
+            retryCount: 1,
+        });
+
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+            ok: false,
+            status: 500,
+            statusText: 'Internal Server Error',
+            json: async () => ({ error: { message: 'Gemini server error' } }),
+        } as Response);
+
+        const retried = await retryQueuedNote(enqueued.id);
+        expect(retried).toBe(true);
+
+        const note = useSmartNoteQueueStore.getState().queue.find((n) => n.id === enqueued.id);
+        expect(note?.status).toBe('failed');
+        expect(note?.retryCount).toBe(2);
+        expect(note?.errorMessage).toContain('Gemini server error');
+    });
+
+    it('processNextQueuedNote with targetNoteId retries targeted note even if failed', async () => {
+        useSettingsStore.getState().setGeminiApiKey('test-key');
+        const failedNote = useSmartNoteQueueStore.getState().enqueueNote('failed note 100');
+        useSmartNoteQueueStore.getState().setNoteStatus(failedNote.id, 'failed', {
+            errorMessage: 'Timeout error',
+            retryCount: 1,
+        });
+
+        // Also add another pending note
+        const pendingNote = useSmartNoteQueueStore.getState().enqueueNote('pending note 200');
+
+        const mockApiResponse = {
+            candidates: [
+                {
+                    content: {
+                        parts: [
+                            {
+                                text: JSON.stringify({
+                                    transactions: [
+                                        {
+                                            title: 'Failed Note Resolved',
+                                            amount: 100,
+                                            type: 'expense',
+                                            category: 'General',
+                                            date: '2026-09-04',
+                                            note: 'failed note 100',
+                                            itemAutoTrack: false,
+                                            items: [],
+                                        },
+                                    ],
+                                }),
+                            },
+                        ],
+                    },
+                },
+            ],
+        };
+
+        vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockApiResponse,
+        } as Response);
+
+        // Call processNextQueuedNote targeting the failed note specifically
+        const processed = await processNextQueuedNote(failedNote.id);
+        expect(processed).toBe(true);
+
+        const target = useSmartNoteQueueStore.getState().queue.find((n) => n.id === failedNote.id);
+        expect(target?.status).toBe('ready');
+
+        // Verify the other pending note was left alone as pending
+        const other = useSmartNoteQueueStore.getState().queue.find((n) => n.id === pendingNote.id);
+        expect(other?.status).toBe('pending');
+    });
+
+    it('retryQueuedNote returns false for non-existent note', async () => {
+        const retried = await retryQueuedNote('non-existent-id');
+        expect(retried).toBe(false);
     });
 });
 

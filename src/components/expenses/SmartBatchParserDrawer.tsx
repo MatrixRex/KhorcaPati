@@ -37,7 +37,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useSmartNoteQueueStore, type QueuedSmartNote } from '@/stores/smartNoteQueueStore';
 import { isNetworkConnectionError, type ParsedGeminiTransaction } from '@/lib/geminiParser';
-import { importParsedTransactions, processNextQueuedNote } from '@/services/smartNoteQueueProcessor';
+import { importParsedTransactions, retryQueuedNote } from '@/services/smartNoteQueueProcessor';
 import { getSmartNoteAvailability, parseSmartNote } from '@/services/smartNoteParser';
 import { OfflineModelPanel } from '@/components/settings/AISettingsSection';
 import { EditableItemList } from '@/components/items/EditableItemList';
@@ -81,6 +81,7 @@ export function SmartBatchParserDrawer() {
     const [isSaving, setIsSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [offlineNotice, setOfflineNotice] = useState<string | null>(null);
+    const [retryingId, setRetryingId] = useState<string | null>(null);
 
     // Re-evaluated whenever settings change (mode, downloaded model, keys).
     const availability = useSettingsStore(() => getSmartNoteAvailability());
@@ -168,6 +169,28 @@ export function SmartBatchParserDrawer() {
         setParsedList(item.parsedTransactions);
         removeNote(item.id);
         setOfflineNotice(null);
+    };
+
+    const handleRetryQueuedNote = async (id: string) => {
+        if (!isOfflineMode && typeof navigator !== 'undefined' && navigator.onLine === false) {
+            setOfflineNotice(t('noteSavedOffline', { defaultValue: 'You are currently offline. Your note has been saved offline and will automatically process in the background when connection is restored.' }));
+            return;
+        }
+        if (availability === 'needs-key') {
+            setErrorMessage(t('geminiKeyRequiredDesc', { defaultValue: 'To use the AI Smart Note Parser, please configure your Google Gemini API key in Settings first.' }));
+            return;
+        }
+        if (availability === 'needs-model') {
+            setErrorMessage(t('offlineModelRequiredDesc'));
+            return;
+        }
+
+        setRetryingId(id);
+        try {
+            await retryQueuedNote(id);
+        } finally {
+            setRetryingId(null);
+        }
     };
 
     const handleToggleSelectAll = () => {
@@ -450,21 +473,36 @@ export function SmartBatchParserDrawer() {
                                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                                 <span className="leading-snug">{errorMessage}</span>
                             </div>
-                            {(errorMessage.toLowerCase().includes('api key') || errorMessage.toLowerCase().includes('apikey')) && (
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                        closeSmartBatchParser();
-                                        navigate('/settings');
-                                    }}
-                                    className="h-7 px-2 text-[11px] font-bold border-destructive/30 hover:bg-destructive/10 shrink-0 active:scale-95 transition-all duration-200"
-                                >
-                                    <Settings className="w-3 h-3 mr-1" />
-                                    {t('goToSettings', { defaultValue: 'Settings' })}
-                                </Button>
-                            )}
+                            <div className="flex items-center gap-1.5 shrink-0">
+                                {noteText.trim() && !(errorMessage.toLowerCase().includes('api key') || errorMessage.toLowerCase().includes('apikey')) && (
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={handleParse}
+                                        disabled={isLoading}
+                                        className="h-7 px-2 text-[11px] font-bold border-destructive/30 hover:bg-destructive/10 shrink-0 active:scale-95 transition-all duration-200"
+                                    >
+                                        <RefreshCw className={cn("w-3 h-3 mr-1", isLoading && "animate-spin")} />
+                                        {t('retryNow', { defaultValue: 'Retry' })}
+                                    </Button>
+                                )}
+                                {(errorMessage.toLowerCase().includes('api key') || errorMessage.toLowerCase().includes('apikey')) && (
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => {
+                                            closeSmartBatchParser();
+                                            navigate('/settings');
+                                        }}
+                                        className="h-7 px-2 text-[11px] font-bold border-destructive/30 hover:bg-destructive/10 shrink-0 active:scale-95 transition-all duration-200"
+                                    >
+                                        <Settings className="w-3 h-3 mr-1" />
+                                        {t('goToSettings', { defaultValue: 'Settings' })}
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     )}
 
@@ -599,10 +637,11 @@ export function SmartBatchParserDrawer() {
                                                     type="button"
                                                     size="sm"
                                                     variant="ghost"
-                                                    onClick={() => processNextQueuedNote()}
+                                                    disabled={retryingId === item.id}
+                                                    onClick={() => handleRetryQueuedNote(item.id)}
                                                     className="h-6 px-2 text-[11px] font-bold text-primary hover:bg-primary/10 active:scale-95 transition-all duration-200"
                                                 >
-                                                    <RefreshCw className="w-3 h-3 mr-1" />
+                                                    <RefreshCw className={cn("w-3 h-3 mr-1", retryingId === item.id && "animate-spin")} />
                                                     {t('retryNow', { defaultValue: 'Retry Now' })}
                                                 </Button>
                                             </div>

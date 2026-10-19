@@ -102,11 +102,9 @@ export async function importParsedTransactions(transactions: ParsedGeminiTransac
 }
 
 /**
- * Attempts to parse the next pending note in the queue.
- * Returns true if a note was processed, false if there is none or the engine can't run yet
- * (online mode without network or key; offline mode before the model is downloaded).
+ * Retries a specific note in the queue by its ID, even if its status is 'failed'.
  */
-export async function processNextQueuedNote(): Promise<boolean> {
+export async function retryQueuedNote(noteId: string): Promise<boolean> {
     const isOnlineMode = useSettingsStore.getState().aiMode === 'online';
     if (isOnlineMode && typeof navigator !== 'undefined' && navigator.onLine === false) {
         return false;
@@ -116,18 +114,18 @@ export async function processNextQueuedNote(): Promise<boolean> {
     }
 
     const { queue, setNoteStatus } = useSmartNoteQueueStore.getState();
-    const pendingNote = queue.find((n) => n.status === 'pending');
-    if (!pendingNote) {
+    const note = queue.find((n) => n.id === noteId);
+    if (!note || note.status === 'processing') {
         return false;
     }
 
-    setNoteStatus(pendingNote.id, 'processing');
+    setNoteStatus(note.id, 'processing', { errorMessage: undefined });
 
     try {
-        const results = await parseSmartNote({ noteText: pendingNote.noteText, referenceDate: pendingNote.referenceDate });
+        const results = await parseSmartNote({ noteText: note.noteText, referenceDate: note.referenceDate });
 
         if (results && results.length > 0) {
-            setNoteStatus(pendingNote.id, 'ready', {
+            setNoteStatus(note.id, 'ready', {
                 parsedTransactions: results,
                 errorMessage: undefined,
             });
@@ -137,8 +135,9 @@ export async function processNextQueuedNote(): Promise<boolean> {
                 `Extracted ${results.length} transaction${results.length > 1 ? 's' : ''} from your offline note. Tap to review.`
             );
         } else {
-            setNoteStatus(pendingNote.id, 'failed', {
+            setNoteStatus(note.id, 'failed', {
                 errorMessage: 'No transactions could be detected in this note.',
+                retryCount: note.retryCount + 1,
             });
         }
 
@@ -146,20 +145,47 @@ export async function processNextQueuedNote(): Promise<boolean> {
     } catch (err: unknown) {
         if (isNetworkConnectionError(err)) {
             // Revert to pending so it can be retried when network recovers
-            setNoteStatus(pendingNote.id, 'pending', {
-                retryCount: pendingNote.retryCount + 1,
+            setNoteStatus(note.id, 'pending', {
+                retryCount: note.retryCount + 1,
                 errorMessage: 'Network connection unavailable. Retrying later.',
             });
             return false;
         }
 
         const msg = err instanceof Error ? err.message : String(err);
-        setNoteStatus(pendingNote.id, 'failed', {
+        setNoteStatus(note.id, 'failed', {
             errorMessage: msg,
-            retryCount: pendingNote.retryCount + 1,
+            retryCount: note.retryCount + 1,
         });
         return true;
     }
+}
+
+/**
+ * Attempts to parse the next pending note in the queue, or a specific note by ID.
+ * Returns true if a note was processed, false if there is none or the engine can't run yet
+ * (online mode without network or key; offline mode before the model is downloaded).
+ */
+export async function processNextQueuedNote(targetNoteId?: string): Promise<boolean> {
+    if (targetNoteId) {
+        return retryQueuedNote(targetNoteId);
+    }
+
+    const isOnlineMode = useSettingsStore.getState().aiMode === 'online';
+    if (isOnlineMode && typeof navigator !== 'undefined' && navigator.onLine === false) {
+        return false;
+    }
+    if (getSmartNoteAvailability() !== 'ready') {
+        return false;
+    }
+
+    const { queue } = useSmartNoteQueueStore.getState();
+    const pendingNote = queue.find((n) => n.status === 'pending');
+    if (!pendingNote) {
+        return false;
+    }
+
+    return retryQueuedNote(pendingNote.id);
 }
 
 /**

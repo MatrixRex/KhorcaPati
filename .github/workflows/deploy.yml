@@ -65,7 +65,7 @@ jobs:
         run: |
           SDKMANAGER=$(ls -d $ANDROID_HOME/cmdline-tools/*/bin/sdkmanager | sort -V | tail -n 1)
           yes | "$SDKMANAGER" --licenses > /dev/null || true
-          "$SDKMANAGER" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Configure Bubblewrap & Generate TWA Project 📦
         env:
@@ -78,7 +78,7 @@ jobs:
           npm --prefix /tmp/bw-tools install @bubblewrap/core@1.22.0 lodash
           export NODE_PATH="/tmp/bw-tools/node_modules"
 
-          # Compute versionName & monotonically increasing versionCode from git tag (e.g. v1.11.3 -> 1.11.3, code 11103)
+          # Compute versionName & monotonically increasing versionCode from git tag (e.g. v1.11.4 -> 1.11.4, code 11104)
           node - << 'EOF'
           const fs = require('fs');
           const { TwaManifest, TwaGenerator } = require('@bubblewrap/core');
@@ -92,6 +92,7 @@ jobs:
             const manifestJson = JSON.parse(fs.readFileSync('./twa-manifest.json', 'utf8'));
             manifestJson.appVersionName = cleanVer;
             manifestJson.appVersionCode = versionCode;
+            manifestJson.minSdkVersion = Math.max(manifestJson.minSdkVersion || 24, 24);
             if (process.env.ANDROID_KEY_ALIAS) {
               manifestJson.signingKey.alias = process.env.ANDROID_KEY_ALIAS;
             }
@@ -102,7 +103,16 @@ jobs:
             const generator = new TwaGenerator();
             await generator.createTwaProject('./twa-build', twaManifest);
             fs.copyFileSync('./twa-manifest.json', './twa-build/twa-manifest.json');
-            console.log(`Generated TWA project for v${cleanVer} (versionCode: ${versionCode})`);
+
+            // Ensure minSdkVersion 24 and targetSdkVersion/compileSdkVersion 35 in app/build.gradle
+            let appGradle = fs.readFileSync('./twa-build/app/build.gradle', 'utf8');
+            appGradle = appGradle
+              .replace(/minSdkVersion\s+\d+/g, 'minSdkVersion 24')
+              .replace(/compileSdkVersion\s+\d+/g, 'compileSdkVersion 35')
+              .replace(/targetSdkVersion\s+\d+/g, 'targetSdkVersion 35');
+            fs.writeFileSync('./twa-build/app/build.gradle', appGradle);
+
+            console.log(`Generated TWA project for v${cleanVer} (versionCode: ${versionCode}, minSdk: 24, targetSdk: 35)`);
           })();
           EOF
 

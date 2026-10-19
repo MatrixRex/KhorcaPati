@@ -20,8 +20,8 @@
     "path": "./android.keystore",
     "alias": "khorchapati"
   },
-  "appVersionName": "1.11.4",
-  "appVersionCode": 11104,
+  "appVersionName": "1.11.5",
+  "appVersionCode": 11105,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://matrixrex.github.io/KhorcaPati/manifest.webmanifest",

@@ -61,7 +61,8 @@ export default defineConfig(({ mode }) => {
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
           // AI Lab only (WebLLM, ~6 MB each). The offline Smart Notes worker and seed vectors are precached.
-          globIgnores: ['**/AILab-*.js', '**/webllm.worker-*.js'],
+          globIgnores: ['**/AILab-*.js', '**/webllm.worker-*.js', '**/privacy.html'],
+          navigateFallbackDenylist: [/privacy\.html/, /\.well-known\//],
           cleanupOutdatedCaches: true,
           // Offline model weights and the ONNX runtime are cached by Transformers.js itself ("transformers-cache").
           runtimeCaching: [],

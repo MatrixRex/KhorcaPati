@@ -75,7 +75,7 @@ jobs:
         run: |
           # Install @bubblewrap/core in /tmp/bw-tools so repo package.json is untouched
           mkdir -p /tmp/bw-tools
-          npm --prefix /tmp/bw-tools install @bubblewrap/core@1.22.0
+          npm --prefix /tmp/bw-tools install @bubblewrap/core@1.22.0 lodash
           export NODE_PATH="/tmp/bw-tools/node_modules"
 
           # Compute versionName & monotonically increasing versionCode from git tag (e.g. v1.11.3 -> 1.11.3, code 11103)

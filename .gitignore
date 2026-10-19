@@ -31,5 +31,5 @@ dist-ssr
 *.jks
 *.aab
 *.apk
-.twa-build
+twa-build
 

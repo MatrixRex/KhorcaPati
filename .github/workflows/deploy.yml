@@ -97,20 +97,20 @@ jobs:
             }
             fs.writeFileSync('./twa-manifest.json', JSON.stringify(manifestJson, null, 2));
 
-            fs.mkdirSync('./.twa-build', { recursive: true });
+            fs.mkdirSync('./twa-build', { recursive: true });
             const twaManifest = new TwaManifest(manifestJson);
             const generator = new TwaGenerator();
-            await generator.createTwaProject('./.twa-build', twaManifest);
-            fs.copyFileSync('./twa-manifest.json', './.twa-build/twa-manifest.json');
+            await generator.createTwaProject('./twa-build', twaManifest);
+            fs.copyFileSync('./twa-manifest.json', './twa-build/twa-manifest.json');
             console.log(`Generated TWA project for v${cleanVer} (versionCode: ${versionCode})`);
           })();
           EOF
 
-          # Decode signing keystore into .twa-build/android.keystore
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > ./.twa-build/android.keystore
+          # Decode signing keystore into twa-build/android.keystore
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > ./twa-build/android.keystore
 
       - name: Build Signed AAB & APK 🏗️
-        working-directory: ./.twa-build
+        working-directory: ./twa-build
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}

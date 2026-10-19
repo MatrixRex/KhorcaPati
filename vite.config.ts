@@ -29,16 +29,19 @@ export default defineConfig(({ mode }) => {
         registerType: 'prompt',
         injectRegister: 'auto',
         manifest: {
-          name: 'KhorcaPati | Expense Tracker',
-          short_name: 'KhorcaPati',
+          id: '/KhorcaPati/',
+          name: 'Khorchapati-খরচাপাতি | Expense Tracker',
+          short_name: 'Khorchapati',
           description: 'A modern, privacy-first personal expense and budget tracker.',
+          start_url: '/KhorcaPati/',
+          scope: '/KhorcaPati/',
           theme_color: '#0f172a',
           background_color: '#0f172a',
           display: 'standalone',
           orientation: 'portrait',
           icons: [
             {
-              src: 'icon-512.png',
+              src: 'icon-192.png',
               sizes: '192x192',
               type: 'image/png'
             },

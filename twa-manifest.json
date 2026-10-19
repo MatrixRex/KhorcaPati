@@ -1,0 +1,48 @@
+{
+  "packageId": "com.matrasoft.khorchapati",
+  "host": "matrixrex.github.io",
+  "name": "Khorchapati-খরচাপাতি",
+  "launcherName": "Khorchapati",
+  "display": "standalone",
+  "themeColor": "#0F172A",
+  "themeColorDark": "#0F172A",
+  "navigationColor": "#0F172A",
+  "navigationColorDark": "#0F172A",
+  "navigationDividerColor": "#0F172A",
+  "navigationDividerColorDark": "#0F172A",
+  "backgroundColor": "#0F172A",
+  "enableNotifications": true,
+  "startUrl": "/KhorcaPati/",
+  "iconUrl": "https://matrixrex.github.io/KhorcaPati/icon-512.png",
+  "maskableIconUrl": "https://matrixrex.github.io/KhorcaPati/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "khorchapati"
+  },
+  "appVersionName": "1.11.3",
+  "appVersionCode": 11103,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://matrixrex.github.io/KhorcaPati/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://matrixrex.github.io/KhorcaPati/",
+  "minSdkVersion": 21,
+  "orientation": "portrait",
+  "fingerprints": [
+    {
+      "name": "release",
+      "value": "08:72:C8:10:C3:7A:59:8D:28:F1:A2:3E:91:B1:4C:C0:03:9E:02:0D:60:EE:C9:56:4E:F6:1C:E5:CD:1C:EE:A2"
+    }
+  ],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": []
+}
+

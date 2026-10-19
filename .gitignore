@@ -25,3 +25,11 @@ dist-ssr
 
 # Downloaded ML models (scripts/build-seed-vectors.ts, scripts/eval-categories.ts)
 .cache
+
+# Android TWA build artifacts & signing keys
+*.keystore
+*.jks
+*.aab
+*.apk
+.twa-build
+

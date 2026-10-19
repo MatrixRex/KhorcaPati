@@ -73,18 +73,9 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           TAG_NAME: ${{ github.ref_name }}
         run: |
-          # Write Bubblewrap config pointing to GitHub runner's JDK & Android SDK
-          mkdir -p ~/.bubblewrap
-          cat <<EOF > ~/.bubblewrap/config.json
-          {
-            "jdkPath": "$JAVA_HOME",
-            "androidSdkPath": "$ANDROID_HOME"
-          }
-          EOF
-
-          # Install Bubblewrap packages in /tmp/bw-tools so repo package.json is untouched
+          # Install @bubblewrap/core in /tmp/bw-tools so repo package.json is untouched
           mkdir -p /tmp/bw-tools
-          npm --prefix /tmp/bw-tools install @bubblewrap/core@1.22.0 @bubblewrap/cli@1.22.0
+          npm --prefix /tmp/bw-tools install @bubblewrap/core@1.22.0
           export NODE_PATH="/tmp/bw-tools/node_modules"
 
           # Compute versionName & monotonically increasing versionCode from git tag (e.g. v1.11.3 -> 1.11.3, code 11103)
@@ -121,13 +112,35 @@ jobs:
       - name: Build Signed AAB & APK 🏗️
         working-directory: ./.twa-build
         env:
-          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
-          /tmp/bw-tools/node_modules/.bin/bubblewrap build --skipPwaValidation
+          chmod +x ./gradlew
+          ./gradlew bundleRelease assembleRelease --no-daemon
+
           VERSION="${GITHUB_REF_NAME#v}"
-          cp app-release-bundle.aab "../khorchapati-v${VERSION}.aab"
-          cp app-release-signed.apk "../khorchapati-v${VERSION}.apk"
+
+          # Sign the Play Store App Bundle (.aab) with jarsigner
+          jarsigner -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore android.keystore \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -keypass "$ANDROID_KEY_PASSWORD" \
+            app/build/outputs/bundle/release/app-release.aab "$ANDROID_KEY_ALIAS"
+          cp app/build/outputs/bundle/release/app-release.aab "../khorchapati-v${VERSION}.aab"
+
+          # Align and sign the installable APK (.apk) with zipalign & apksigner
+          BUILD_TOOLS_DIR=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -n 1)
+          "$BUILD_TOOLS_DIR/zipalign" -f -p 4 \
+            app/build/outputs/apk/release/app-release-unsigned.apk \
+            app-release-aligned.apk
+          "$BUILD_TOOLS_DIR/apksigner" sign \
+            --ks android.keystore \
+            --ks-key-alias "$ANDROID_KEY_ALIAS" \
+            --ks-pass "pass:$ANDROID_KEYSTORE_PASSWORD" \
+            --key-pass "pass:$ANDROID_KEY_PASSWORD" \
+            --out "../khorchapati-v${VERSION}.apk" \
+            app-release-aligned.apk
 
       - name: Publish GitHub Release (AAB + APK) 🎉
         uses: softprops/action-gh-release@v2

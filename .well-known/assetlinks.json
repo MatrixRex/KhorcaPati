@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.matrasoft.khorchapati",
+      "sha256_cert_fingerprints": [
+        "08:72:C8:10:C3:7A:59:8D:28:F1:A2:3E:91:B1:4C:C0:03:9E:02:0D:60:EE:C9:56:4E:F6:1C:E5:CD:1C:EE:A2"
+      ]
+    }
+  }
+]
+

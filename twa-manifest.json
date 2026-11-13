@@ -20,8 +20,8 @@
     "path": "./android.keystore",
     "alias": "khorchapati"
   },
-  "appVersionName": "1.11.5",
-  "appVersionCode": 11105,
+  "appVersionName": "1.11.6",
+  "appVersionCode": 11106,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://matrixrex.github.io/KhorcaPati/manifest.webmanifest",
@@ -37,6 +37,10 @@
   "minSdkVersion": 24,
   "orientation": "portrait",
   "fingerprints": [
+    {
+      "name": "play-app-signing",
+      "value": "EA:DC:45:14:EA:F2:65:BA:6C:D7:4F:7F:26:13:64:8F:58:06:B8:C5:83:08:BE:CA:1B:A5:A7:62:29:01:B1:0F"
+    },
     {
       "name": "release",
       "value": "08:72:C8:10:C3:7A:59:8D:28:F1:A2:3E:91:B1:4C:C0:03:9E:02:0D:60:EE:C9:56:4E:F6:1C:E5:CD:1C:EE:A2"

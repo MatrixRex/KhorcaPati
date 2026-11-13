@@ -269,11 +269,19 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
 
     const handleAmountDone = () => {
         setShowNumberPad(false);
-        setTimeout(() => dateRef.current?.click(), 150);
+        if (!initialData) {
+            setTimeout(() => dateRef.current?.click(), 150);
+        } else {
+            form.handleSubmit(performSave)();
+        }
     };
 
     const handleCategoryEnter = () => {
-        setTimeout(() => noteRef.current?.focus(), 50);
+        if (!initialData) {
+            setTimeout(() => noteRef.current?.focus(), 50);
+        } else {
+            categoryRef.current?.blur();
+        }
     };
 
     const handleNoteEnter = () => {
@@ -611,12 +619,12 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                 }
                                             }}
                                             onKeyDown={(e) => {
-                                                if (e.key === 'Enter') {
+                                                if (!initialData && e.key === 'Enter') {
                                                     e.preventDefault();
                                                     noteRef.current?.focus();
                                                 }
                                             }}
-                                            onNext={() => {
+                                            onNext={initialData ? undefined : () => {
                                                 setTimeout(() => noteRef.current?.focus(), 50);
                                             }}
                                             className="input-glass font-medium"
@@ -784,12 +792,12 @@ export function ExpenseForm({ initialData, parentId: propParentId, onSuccess, on
                                                 }
                                             }}
                                             onKeyDown={(e) => {
-                                                if (e.key === 'Enter') {
+                                                if (!initialData && e.key === 'Enter') {
                                                     e.preventDefault();
                                                     categoryRef.current?.focus();
                                                 }
                                             }}
-                                            onNext={() => {
+                                            onNext={initialData ? undefined : () => {
                                                 setTimeout(() => categoryRef.current?.focus(), 50);
                                             }}
                                             className="input-glass font-medium"
